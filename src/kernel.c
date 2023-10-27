@@ -43,9 +43,7 @@ void boot() {
     finddrives();
     printf_dark("kernel: Trying to mount root...\n");
     initfilesystem(&root);
-    // List the contents of the current directory
     ls(&root);
-    // Let's list the contents of the root folder using the 'ls' command.
 
     // Print the structure
     printf("Root: %s\n", root.name);
@@ -57,9 +55,6 @@ void boot() {
     const char* statusNAT = isEthernetPluggedIn();
     printf("eth0: NAT Network Status: %s\n", statusNAT);
 
-    // Now, configure for bridged network
-    // Modify network settings in your virtualization software
-    // Then, check the status again
     const char* statusBridged = isEthernetPluggedIn();
     printf("eth0: Bridged Network Status: %s\n", statusBridged);
 
