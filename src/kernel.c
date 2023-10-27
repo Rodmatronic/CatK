@@ -93,24 +93,6 @@ void wait_seconds(int seconds) {
     }
 }
 
-void awesomepeeps()
-{
-    printf("Some awesome people (in no particular order)\n");
-    printf("Gamer117\n");
-    printf("Shea\n");
-    printf("Smart Dolphin\n");
-    printf("Noodlenoggin\n");
-    printf("The Funny Looney clown\n");
-    printf("Stamps\n");
-    printf("Mati\n");
-    printf("Vincells\n");
-    printf("Gyl\n");
-    printf("Zeo\n");
-    printf("4vul\n");
-    printf("Noelle\n");
-    printf("maddycabin\n");
-}
-
 void PreBoot()
 {
     console_gotoxy(0, 0);
