@@ -3,6 +3,6 @@
 #define ACPI_RESET 0x06
 
 void reboot() {
-    // This inline assembly code sends the ACPI shutdown command.
+    // This inline assembly code sends the restart command.
 __asm__ __volatile__("int $0x19");
 }
