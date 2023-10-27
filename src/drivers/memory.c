@@ -9,6 +9,8 @@
 #define RTC_ADDRESS_PORT 0x70
 #define RTC_DATA_PORT 0x71
 
+int Memoryamount;
+
 void GetMemory() {
     // Read the extended memory size from the BIOS Data Area (BDA)
     unsigned short* bda_memory_size = (unsigned short*)0x413;
@@ -26,4 +28,5 @@ void GetMemory() {
 
     printf("Memory: Conventional memory: %u bytes (%u KB)\n", conventional_memory_bytes, conventional_memory_kb);
     printf("Memory: Extended memory: %u bytes (%u KB)\n", extended_memory_bytes, extended_memory_kb);
+    Memoryamount = extended_memory_bytes;
 }
