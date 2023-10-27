@@ -8,9 +8,8 @@
 #include "help.c"
 #include "whoami.c"
 #include "fs.h"
-
-
 #include "string.h"
+
 int row = 3; // Track the current row
 char* args;
 
