@@ -1,2 +1,2 @@
 # CatK
-a simple Unix-like kernel
+a simple Unix-like kernel, written almost entirely in C.
