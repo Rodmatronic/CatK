@@ -16,6 +16,7 @@
 #include "drivers/fs.c"
 #include "config.catk"
 #include "fs.h"
+#include "PreBoot.c"
 
 void printversion()
 {
@@ -23,6 +24,12 @@ void printversion()
 }
 
 void boot() {
+
+    if (bootargs == "quiet")
+    {
+        console_init(COLOR_BLACK, COLOR_BLACK);
+    }
+
     printf("<--BOOT-->\n");
     printf("Created by Rodmatronics. Thank you for using CatK!\n");
     printf("This is a BSD inspired kernel.\n");
@@ -41,7 +48,7 @@ void boot() {
     bootmessage("Scanning for devices...");
     isCDROMDrivePresent();
     finddrives();
-    printf_dark("kernel: Trying to mount root...\n");
+    printf("kernel: Trying to mount root...\n");
     initfilesystem(&root);
     ls(&root);
 
@@ -61,6 +68,7 @@ void boot() {
     init_keyboard();
     printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
     read();
+    console_init(COLOR_WHITE, COLOR_BLACK);
     sh();
 }
 
@@ -86,65 +94,6 @@ void wait_seconds(int seconds) {
             }
         }
     }
-}
-
-void PreBoot()
-{
-    console_gotoxy(0, 0);
-    printf(" _______   _____   _______  ___   _ \n");
-    printf("|   ____| /  _  \\ |       ||   | | |\n");
-    printf("|  |     |  | |  ||_     _||   |_| |\n");
-    printf("|  |     |  |_|  |  |   |  |      _|\n");
-    printf("|  |     |       |  |   |  |     |_ \n");
-    printf("|  |____ |   _   |  |   |  |    _  |\n");
-    printf("|_______||__| |__|  |___|  |___| |_|\n\n");
-
-    printf("+==================================+\n");
-    printf("|    CatK PreBoot\n");
-    printf("|\n");
-    printf("|\n");
-    printf("|\n");
-    printf("|\n");
-    printf("|\n");
-    printf("|\n");
-    printf("|\n");
-    printf("|\n");
-    printf("+==================================+\n");
-
-    console_gotoxy(45, 10);
-    printf_blue("       _      _");
-        console_gotoxy(45, 9);
-    printf_blue("      / \\    / \\");
-        console_gotoxy(45, 10);
-    printf_blue("     /   \\__/   \\");
-        console_gotoxy(45, 11);
-    printf_blue("    /            \\");
-        console_gotoxy(45, 12);
-    printf_blue("   |    |    |    |");
-        console_gotoxy(45, 13);
-    printf_blue("  =|      -       |=");
-        console_gotoxy(45, 14);
-    printf_blue("  =\\     \\/\\/     /=");
-        console_gotoxy(45, 15);
-    printf_blue("    \\            /");
-        console_gotoxy(45, 16);
-    printf_blue("     =====\\/=====");
-        console_gotoxy(45, 17);
-    printf_blue("        (CatK)");
-        console_gotoxy(45, 18);
-
-    console_gotoxy(4, 12);
-    printf("Booting in 3");
-    wait_seconds(1);
-    console_gotoxy(4, 12);
-    printf("Booting in 2");
-    wait_seconds(1);
-    console_gotoxy(4, 12);
-    printf("Booting in 1");
-    wait_seconds(1);
-    console_gotoxy(0, 15);
-    console_init(COLOR_WHITE, COLOR_BLACK);
-    boot();
 }
 
 void bootmessage(const char* str) { // Use const char* for the string parameter
