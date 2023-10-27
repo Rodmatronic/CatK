@@ -85,8 +85,6 @@ void touch(const char* filename, struct Folder* currentDirectory) {
     // Check if a file with the same name already exists in the current directory
     for (int i = 0; i < currentDirectory->fileCount; i++) {
         if (strcmp(currentDirectory->files[i].name, filename) == 0) {
-            // File with the same name exists, update its timestamp or other attributes
-            // You can add code here to update file attributes if needed.
             return;
         }
     }
