@@ -2,7 +2,6 @@
 a simple Unix-like kernel, written almost entirely in C.
 
 ![PreBoot](https://github.com/Rodmatronic/CatK/assets/105672808/cfc89e6a-e1e2-4ca9-b03f-4bbd60b3fef3)
-![sh](https://github.com/Rodmatronic/CatK/assets/105672808/7992424c-799c-4d82-8fed-60ab8b282ad5)
 
 # To compile from source
 Run `make` at the root of the project, where the Makefile is.
