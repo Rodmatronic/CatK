@@ -2,7 +2,7 @@ void help()
 {
     Application help;
     InitApplication(&help, 1, "help", MyAppClose);
-    printf("\n  CatK SH v0.01, index of pre-installed commands\n");
+    printf(" CatK SH v0.01, index of pre-installed commands\n");
     printf_dark("    These shell commands are defined internally.  Type `help' to see this list.\n");
 
     printf("\n  echo");

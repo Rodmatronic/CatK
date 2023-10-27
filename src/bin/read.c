@@ -1,6 +1,8 @@
 #include "console.h"
 #include "vga.h"
 
+int readnum;
+
 void read() {
     printf("\n");
     while (1) {
@@ -23,6 +25,22 @@ void read() {
                 }
                 if (scancode == 0x48) {
                     console_scroll(1);
+                }
+                if (scancode == 0x02)
+                {
+                    readnum = 1;
+                }
+                if (scancode == 0x03)
+                {
+                    readnum = 2;
+                }
+                if (scancode == 0x04)
+                {
+                    readnum = 3;
+                }
+                if (scancode == 0x05)
+                {
+                    readnum = 4;
                 }
                 printf("%c", key);
             }

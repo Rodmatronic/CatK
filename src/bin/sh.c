@@ -55,17 +55,17 @@ void sh() {
                 if (scancode == ENTER_KEY_SCANCODE) {
                     // Check if the input is not empty before processing
                     if (!empty_input) {
+                        printf("\n\n");
                         // Process the user's input (replace this with your command processing logic)
                         process_user_input(input_buffer);
                     }
 
                     // When Enter key is pressed, scancode 0x1C
                     if (row >= 24) {
-                        printf("\n\n");
+                        printf("\n");
                         row = 24;
-
                     } else {
-                        row += (empty_input ? 1 : 2); // Move down by 1 or 2 rows based on input
+                        row += (empty_input ? 1 : 3); // Move down by 1 or 2 rows based on input
                     }
                     console_gotoxy(0, row); // Move to the next row
 

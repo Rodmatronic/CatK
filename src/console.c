@@ -86,20 +86,12 @@ void console_newline() {
         for (uint32 i = 0; i < VGA_TOTAL_ITEMS - VGA_WIDTH; i++) {
             g_vga_buffer[i] = g_vga_buffer[i + VGA_WIDTH];
         }
-        
-        vga_set_cursor_pos(cursor_pos_x, cursor_pos_y);
         g_vga_index = (cursor_pos_y + 1) * VGA_WIDTH;
-        
         // Update the cursor position
         cursor_pos_x = 0;
         cursor_pos_y = VGA_HEIGHT - 1;
         vga_set_cursor_pos(cursor_pos_x, cursor_pos_y);
     } else {
-        // If the cursor is within the screen's height, save the current screen to the temporary buffer
-        for (uint32 i = 0; i < VGA_TOTAL_ITEMS; i++) {
-            g_temp_pages[g_current_temp_page][i] = g_vga_buffer[i];
-        }
-        
         // Update the cursor position
         g_vga_index = (cursor_pos_y + 1) * VGA_WIDTH;
         cursor_pos_x = 0;

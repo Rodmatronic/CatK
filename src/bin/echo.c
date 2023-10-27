@@ -10,6 +10,6 @@ void echo(char* echotext) {
     //printf("Running %s with PID %d...\n", echo.AppName, echo.Pid);
 
     // When your application is done, close it
-    printf("\n%s", echotext);
+    printf("%s", echotext);
     AppClose(&echo);
 }
