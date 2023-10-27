@@ -1,0 +1,7 @@
+/*
+ *  CatK's "etc/passwd.catk", used for enumerating and storing user accounts. Uses "root" as default.
+ *
+*/
+
+char* rootuser = "root:/bin/sh";
+char* userid = "root";

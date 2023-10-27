@@ -1,0 +1,5 @@
+#include "types.h"
+uint32 versionnumber = 1;
+char* vername = "CatK Version Boppin";
+uint32 prebootversion = 1;
+char* bootargs = "n/a"; // Boot args
