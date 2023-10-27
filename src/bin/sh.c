@@ -45,8 +45,6 @@ void sh() {
             // Check if a valid character was returned
             if (key != 0) {
                 if (scancode == 0x0E) {
-                    console_ungetchar();
-                    cursor_pos_x--;
                     input_index--; // Decrement the input_index
                     input_buffer[input_index] = '\0'; // Remove the character from the buffer
                 }else

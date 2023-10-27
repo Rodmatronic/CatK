@@ -29,10 +29,10 @@ CC_FLAGS = $(INCLUDE) $(DEFINES) -m32 -std=gnu99 -ffreestanding -Wall -Wextra
 LD_FLAGS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib
 
 # target file to create in linking
-TARGET=$(OUT)/Console.bin
+TARGET=$(OUT)/catkernel.bin
 
 # iso file target to create
-TARGET_ISO=$(OUT)/Console.iso
+TARGET_ISO=$(OUT)/catkernel.iso
 ISO_DIR=$(OUT)/isodir
 
 OBJECTS=$(ASM_OBJ)/entry.o\

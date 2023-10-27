@@ -47,6 +47,11 @@ char scancode_to_char(unsigned char scancode) {
         0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
     };
 
+    if (scancode == 0x0E) {
+        console_ungetchar();
+        cursor_pos_x--;
+    }else
+
     if (scancode == 0x48) { // Left Shift pressed
         scroll(1);
     }else

@@ -21,6 +21,9 @@ void PreBoot()
     printf("|\n");
     printf("+==================================+\n");
 
+    console_gotoxy(0, 24);
+    printf_dark("Build num 0.03");
+
     console_gotoxy(45, 10);
     printf_blue("       _      _");
         console_gotoxy(45, 9);
