@@ -26,5 +26,4 @@ void GetMemory() {
 
     printf("Memory: Conventional memory: %u bytes (%u KB)\n", conventional_memory_bytes, conventional_memory_kb);
     printf("Memory: Extended memory: %u bytes (%u KB)\n", extended_memory_bytes, extended_memory_kb);
-    wait_seconds(5);
 }
