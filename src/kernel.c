@@ -101,7 +101,7 @@ void PreBoot()
 
     printf("+==================================+\n");
     printf("|    CatK PreBoot\n");
-    printf("| 1. Continue booting kernel\n");
+    printf("|\n");
     printf("|\n");
     printf("|\n");
     printf("|\n");
