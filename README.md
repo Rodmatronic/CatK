@@ -1,7 +1,7 @@
 # CatK
 a simple Unix-like kernel, written almost entirely in C.
 
-![PreBoot](https://github.com/Rodmatronic/CatK/assets/105672808/cfc89e6a-e1e2-4ca9-b03f-4bbd60b3fef3)
+![Screenshot from 2023-10-27 21-08-58](https://github.com/Rodmatronic/CatK/assets/105672808/5494efbc-5e94-4d19-8368-5b29046a3e9f)
 
 # To compile from source
 Run `make` at the root of the project, where the Makefile is.
