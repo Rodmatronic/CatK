@@ -135,23 +135,23 @@ void process_user_input(const char* input) {
 
             if (strcmp(args, "red") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_BRIGHT_RED, COLOR_BLACK);
-                row = 0;
+                row = -3;
             }
             if (strcmp(args, "green") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_BRIGHT_GREEN, COLOR_BLACK);
-                row = 0;
+                row = -3;
             }
             if (strcmp(args, "blue") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_BRIGHT_BLUE, COLOR_BLACK);
-                row = 0;
+                row = -3;
             }
             if (strcmp(args, "pink") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_BRIGHT_MAGENTA, COLOR_BLACK);
-                row = 0;
+                row = -3;
             }
             if (strcmp(args, "cyan") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_CYAN, COLOR_BLACK);
-                row = 0;
+                row = -3;
             }
         }
     }
