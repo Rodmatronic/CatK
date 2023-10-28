@@ -173,7 +173,8 @@ void process_user_input(const char* input) {
         read();
     }
     else if (string_starts_with(input, "clear")) {
-        printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        row = -3;
+        console_init(COLOR_WHITE, COLOR_BLACK);
     } 
     else if (string_starts_with(input, "cpuid")) {
         printf("\n");
