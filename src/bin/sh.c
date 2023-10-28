@@ -110,7 +110,6 @@ void process_user_input(const char* input) {
         reboot();
     }
     else if (string_starts_with(input, "ls")) {
-        printf("\n");
         ls(&root);
         row += 7;
     }
@@ -177,7 +176,6 @@ void process_user_input(const char* input) {
         console_init(COLOR_WHITE, COLOR_BLACK);
     } 
     else if (string_starts_with(input, "cpuid")) {
-        printf("\n");
         cpusimple(1);
     } 
     else if (string_starts_with(input, "whoami")) {
@@ -190,7 +188,7 @@ void process_user_input(const char* input) {
         GetCurrentTime();
     }
     else {
-        printf("\nUnknown command!\n");
+        printf("Unknown command!");
     }
 }
 
