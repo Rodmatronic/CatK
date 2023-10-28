@@ -20,7 +20,7 @@
 
 void printversion()
 {
-    printf("\n%s\n", vername);
+    printf("%s\n", vername);
 }
 
 void boot() {
