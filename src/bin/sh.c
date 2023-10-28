@@ -184,11 +184,9 @@ void process_user_input(const char* input) {
         whoami();
     } 
     else if (string_starts_with(input, "times")) {
-        printf("\n");
         printPowerOnTime();
     } 
     else if (string_starts_with(input, "time")) {
-        printf("\n");
         GetCurrentTime();
     }
     else {
