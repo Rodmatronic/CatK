@@ -54,7 +54,6 @@ void shell_process() {
     console_init(COLOR_WHITE, COLOR_BLACK);
     next_pid = 1;
     sh();
-    // Once the shell exits, you may want to terminate the process.
 }
 
 void init_processes() {
