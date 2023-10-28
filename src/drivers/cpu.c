@@ -33,8 +33,6 @@ void cpuinfo()
 
 int cpusimple(int print) {
     uint32 brand[12];
-    uint32 eax, ebx, ecx, edx;
-    uint32 type;
 
     memset(brand, 0, sizeof(brand));
     __cpuid(0x80000002, (uint32 *)brand+0x0, (uint32 *)brand+0x1, (uint32 *)brand+0x2, (uint32 *)brand+0x3);
@@ -42,6 +40,6 @@ int cpusimple(int print) {
     __cpuid(0x80000004, (uint32 *)brand+0x8, (uint32 *)brand+0x9, (uint32 *)brand+0xa, (uint32 *)brand+0xb);
 
     if (print) {
-        printf("Brand: %s\n", brand);
+        printf("Brand: %s", brand);
     }
 }
