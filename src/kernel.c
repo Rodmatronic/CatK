@@ -12,6 +12,8 @@
 #include "drivers/keyboard.c"
 #include "drivers/ethernet.c"
 #include "bin/sh.c"
+#include "bin/top.c"
+#include "bin/sleep.c"
 #include "bin/read.c"
 #include "drivers/fs.c"
 #include "config.catk"
@@ -21,6 +23,45 @@
 void printversion()
 {
     printf("%s\n", vername);
+}
+
+// Function to create a new process
+int fork(void (*entry)()) {
+    if (next_pid >= MAX_PROCESSES) {
+        // Max number of processes reached
+        return -1;
+    }
+
+    int pid = next_pid++;
+    processes[pid - 1].id = pid;
+    processes[pid - 1].entry = entry;
+
+    return pid;
+}
+
+void execute_process(int pid) {
+    if (pid > 0 && pid <= next_pid) {
+        // Call the entry function for the process
+        processes[pid - 1].entry();
+        // Mark the process as terminated
+        processes[pid - 1].state = 1;
+        // Return to kernel main loop or scheduler
+    }
+}
+
+void shell_process() {
+    // Your shell process code here
+    console_init(COLOR_WHITE, COLOR_BLACK);
+    next_pid = 1;
+    sh();
+    // Once the shell exits, you may want to terminate the process.
+}
+
+void init_processes() {
+    for (int i = 0; i < MAX_PROCESSES; i++) {
+        processes[i].id = -1;
+        processes[i].state = 0;
+    }
 }
 
 void boot() {
@@ -65,35 +106,30 @@ void boot() {
     const char* statusBridged = isEthernetPluggedIn();
     printf("eth0: Bridged Network Status: %s\n", statusBridged);
 
+    init_processes();
+
+    // Create some sample processes
+    int process1 = fork(process1);
+    int process2 = fork(process2);
+    int process3 = fork(process3);
+
     init_keyboard();
     printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
     read();
     console_init(COLOR_WHITE, COLOR_BLACK);
-    sh();
+    // Create a shell process
+    int shell_pid = fork(shell_process);
+
+    if (shell_pid > 0) {
+        // Execute the shell process
+        execute_process(shell_pid);
+    }
 }
 
 void kmain() {
     console_init(COLOR_GREY, COLOR_BLACK);
 
     PreBoot();
-}
-
-// Function to wait for a specified number of seconds
-void wait_seconds(int seconds) {
-    uint8 start_time = read_RTC_register(RTC_SECONDS);
-
-    while (1) {
-        uint8 current_time = read_RTC_register(RTC_SECONDS);
-        if (current_time != start_time) {
-            if (current_time < start_time) {
-                current_time += 1; // Handle rollover from 59 to 00
-            }
-
-            if (current_time - start_time >= seconds) {
-                break;
-            }
-        }
-    }
 }
 
 void bootmessage(const char* str) { // Use const char* for the string parameter
