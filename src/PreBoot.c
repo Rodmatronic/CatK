@@ -12,7 +12,7 @@ void PreBoot()
     printf("+==================================+\n");
     printf("|    CatK PreBoot\n");
     printf("| Boot normally [Enter]\n");
-    printf("| 1.  Supress boot logs\n");
+    printf("| 1.  Suppress boot logs\n");
     printf("| 2.  Reboot\n");
     printf("|\n");
     printf("|\n");
