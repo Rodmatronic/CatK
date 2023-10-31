@@ -22,7 +22,7 @@ void PreBoot()
     printf("+==================================+\n");
 
     console_gotoxy(0, 24);
-    printf_dark("Build num 0.04");
+    printf_dark("Build num 0.041");
 
     console_gotoxy(40, 5);
     printf_blue("           __           __            Z ");
