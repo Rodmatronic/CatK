@@ -8,7 +8,7 @@
 #include "drivers/panic.c"
 #include "drivers/cdrompresent.c"
 #include "drivers/hdd.c"
-#include "drivers/acpi.c"
+#include "drivers/syspw.c"
 #include "drivers/keyboard.c"
 #include "drivers/ethernet.c"
 #include "bin/sh.c"
@@ -54,6 +54,7 @@ void shell_process() {
     console_init(COLOR_WHITE, COLOR_BLACK);
     next_pid = 1;
     sh();
+    // Once the shell exits, you may want to terminate the process.
 }
 
 void init_processes() {
