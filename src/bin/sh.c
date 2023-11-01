@@ -109,6 +109,23 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "reboot")) {
         syspw(0);
     }
+    else if (string_starts_with(input, "test")) {
+        args = input + strlen("test "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+            int args_length = strlen(args);
+
+            char passwdinput[args_length + 1];  // Create a message array of the same size as args, plus 1 for null-termination
+            strcpy(passwdinput, args);  // Copy the contents of args into message
+
+            char encrypted[args_length + 1];  // Create a separate array for encrypted data, plus 1 for null-termination
+            strcpy(encrypted, args);  // Copy the contents of args into encrypted
+            encrypt(encrypted);
+            encrypted[args_length] = '\0'; // Null-terminate the encrypted string
+            
+            printf("Encrypted message: %s", encrypted);
+        }
+    }
     else if (string_starts_with(input, "shutdown")) {
         syspw(1);
     }

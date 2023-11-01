@@ -19,6 +19,7 @@
 #include "config.catk"
 #include "fs.h"
 #include "PreBoot.c"
+#include "drivers/crypto.c"
 
 void printversion()
 {
@@ -128,7 +129,6 @@ void boot() {
 
 void kmain() {
     console_init(COLOR_GREY, COLOR_BLACK);
-
     PreBoot();
 }
 
