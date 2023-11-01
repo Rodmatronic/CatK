@@ -7,9 +7,9 @@
 #include "io_ports.h"
 #include "vga.h"
 
-void panic(const char* panictext);
+void panic(const char* panictext, ...);
 
-void panic(const char* panictext)
+void panic(const char* panictext, ...)
 {
     console_init(COLOR_WHITE, COLOR_BLACK);
     printf("panic: %s\n", panictext);
@@ -37,7 +37,7 @@ void panic(const char* panictext)
 
     while(1)
     {
-        reboot();
+        syspw(0);
         for(;;);
     }
 }

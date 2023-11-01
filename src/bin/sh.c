@@ -107,7 +107,10 @@ void process_user_input(const char* input) {
         }
     } 
     else if (string_starts_with(input, "reboot")) {
-        reboot();
+        syspw(0);
+    }
+    else if (string_starts_with(input, "shutdown")) {
+        syspw(1);
     }
     else if (string_starts_with(input, "ls")) {
         ls(&root);
@@ -183,9 +186,21 @@ void process_user_input(const char* input) {
     } 
     else if (string_starts_with(input, "times")) {
         printPowerOnTime();
-    } 
+    }
     else if (string_starts_with(input, "time")) {
         GetCurrentTime();
+    }
+    else if (string_starts_with(input, "sleep")) {
+        args = input + strlen("sleep "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+            args[strlen(args) - 1] = '\0'; // Null-terminate the arguments
+            printf("%s", args);
+            sleep(args);
+            sh();
+        }else{
+
+        }
     }
     else {
         printf("Unknown command!");

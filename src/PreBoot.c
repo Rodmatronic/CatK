@@ -93,7 +93,7 @@ void PreBoot()
     }
     if (readnum == 2)
     {
-        reboot();
+        syspw(0);
     }
     console_init(COLOR_WHITE, COLOR_BLACK);
     boot();
