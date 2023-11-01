@@ -30,6 +30,6 @@ void syspw(int type) {
         printf("Powering off is currently not supported, sorry!");
     }
 
-    panic("syspw Failed to exectute the command! Possibly invalid number.", type);
+    panic("syspw Failed to read the command! Possibly invalid number.", type);
 
 }
