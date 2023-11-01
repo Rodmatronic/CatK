@@ -50,3 +50,8 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+out/
+out/isodir
+out/catkernel.iso
+out/isodir/boot/catkernel.bin
+out/isodir/boot/grub/grub.cfg
