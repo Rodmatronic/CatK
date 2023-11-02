@@ -61,11 +61,9 @@ char scancode_to_char(unsigned char scancode) {
 
     if (scancode == 0x2A) { // Left Shift pressed
         shift_pressed = 1;
-        printf("shift");
         return uppercase_keymap[scancode];
     } else if (scancode == 0xAA) { // Left Shift released
         shift_pressed = 0;
-        printf("notpressedshift");
     }else
 
     // Check if the scancode is within the array bounds
