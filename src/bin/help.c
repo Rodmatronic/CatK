@@ -33,6 +33,8 @@ void help()
     printf_dark(" - Command interpreter (shell)\n");
     printf("  times");
     printf_dark(" - Times stores important time-related info, and prints it to the screen\n");
+    printf("  passwd");
+    printf_dark(" - Stores an encrypted value, then decrypts\n");
     printf("  panic");
     printf_dark(" - WARNING!!! This is for debugging purposes, halts the system\n");
     AppClose(&help);

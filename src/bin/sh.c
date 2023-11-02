@@ -109,8 +109,8 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "reboot")) {
         syspw(0);
     }
-    else if (string_starts_with(input, "test")) {
-        args = input + strlen("test "); // Extract arguments
+    else if (string_starts_with(input, "passwd")) {
+        args = input + strlen("passwd "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
             int args_length = strlen(args);
