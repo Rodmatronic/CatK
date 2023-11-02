@@ -156,6 +156,7 @@ void PreBoot()
             art = 3;
         }
         console_init(COLOR_GREY, COLOR_BLACK);
+        readnum = 0;
         PreBoot();
     }
     if (readnum == 3)
