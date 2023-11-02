@@ -24,7 +24,7 @@ void PreBoot()
     printf("+==================================+\n");
 
     console_gotoxy(0, 24);
-    printf_dark("Build num 0.04.3");
+    printf_dark("Build num 0.04.4");
 
     if (art == 1)
     {
