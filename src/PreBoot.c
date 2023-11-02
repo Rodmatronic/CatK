@@ -64,9 +64,49 @@ void PreBoot()
         printf_blue("               |catk|              ");
         console_gotoxy(40, 22);
         printf_blue("                \\__/               ");
-    }
+    }else
 
     if (art == 2)
+    {
+        console_gotoxy(40, 5);
+        printf_blue("           __           __             ");
+        console_gotoxy(40, 6);
+        printf_blue("          /  \\         /  \\        ");
+        console_gotoxy(40, 7);
+        printf_blue("         / /\\ \\       / /\\ \\       ");
+        console_gotoxy(40, 8);
+        printf_blue("        / /  \\ \\     / /  \\ \\      ");
+        console_gotoxy(40, 9);
+        printf_blue("       / /      \\___/      \\ \\     ");
+        console_gotoxy(40, 10);
+        printf_blue("      /                       \\    ");
+        console_gotoxy(40, 11);
+        printf_blue("     |        |       |        |   ");
+        console_gotoxy(40, 12);
+        printf_blue("   ---        |       |        --- ");
+        console_gotoxy(40, 13);
+        printf_blue("     |                         |   ");
+        console_gotoxy(40, 14);
+        printf_blue("   ---  //       ^       //    --- ");
+        console_gotoxy(40, 15);
+        printf_blue("      \\         \\/\\/          /    ");
+        console_gotoxy(40, 16);
+        printf_blue("       \\                     /     ");
+        console_gotoxy(40, 17);
+        printf_blue("        \\___________________/      ");
+        console_gotoxy(40, 18);
+        printf_blue("        =====================      ");
+        console_gotoxy(40, 19);
+        printf_blue("        =========\\/==========      ");
+        console_gotoxy(40, 20);
+        printf_blue("                /  \\               ");
+        console_gotoxy(40, 21);
+        printf_blue("               |catk|              ");
+        console_gotoxy(40, 22);
+        printf_blue("                \\__/               ");
+    }else
+
+    if (art == 3)
     {
             printf_blue("       _      _");
             console_gotoxy(45, 9);
@@ -101,7 +141,7 @@ void PreBoot()
     if (readnum == 2)
     {
         console_init(COLOR_BRIGHT_CYAN, COLOR_BLACK);
-        printf("1: Big kitty \n2: Small kitty \n\n");
+        printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n\n");
         read();
         if (readnum == 1)
         {
@@ -111,7 +151,7 @@ void PreBoot()
         {
             art = 2;
         }
-        console_init(COLOR_WHITE, COLOR_BLACK);
+        console_init(COLOR_GREY, COLOR_BLACK);
         PreBoot();
     }
     if (readnum == 3)
