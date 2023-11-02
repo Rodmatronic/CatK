@@ -26,6 +26,10 @@ void read() {
                 if (scancode == 0x48) {
                     console_scroll(1);
                 }
+                if (scancode == 0x01)
+                {
+                    readnum = 0;
+                }
                 if (scancode == 0x02)
                 {
                     readnum = 1;
