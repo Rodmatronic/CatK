@@ -146,10 +146,14 @@ void PreBoot()
         if (readnum == 1)
         {
             art = 1;
-        }
+        }else
         if (readnum == 2)
         {
             art = 2;
+        }else
+        if (readnum == 3)
+        {
+            art = 3;
         }
         console_init(COLOR_GREY, COLOR_BLACK);
         PreBoot();
