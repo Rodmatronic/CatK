@@ -13,10 +13,10 @@ void PreBoot()
 
     printf("+==================================+\n");
     printf("|    CatK PreBoot\n");
-    printf("| Boot normally [Enter]\n");
+    printf_blue("| Boot normally [Enter]\n");
     printf("| 1.  Suppress boot logs\n");
     printf("| 2.  Kitty artwork\n");
-    printf_blue("| 3.  Reboot\n");
+    printf("| 3.  Reboot\n");
     printf("|\n");
     printf("|\n");
     printf("|\n");
@@ -24,7 +24,7 @@ void PreBoot()
     printf("+==================================+\n");
 
     console_gotoxy(0, 24);
-    printf_dark("Build num 0.04.2");
+    printf_dark("Build num 0.04.3");
 
     if (art == 1)
     {
