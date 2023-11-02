@@ -123,7 +123,10 @@ void process_user_input(const char* input) {
             encrypt(encrypted);
             encrypted[args_length] = '\0'; // Null-terminate the encrypted string
             
-            printf("Encrypted message: %s", encrypted);
+            printf("Encrypted message: %s\n", encrypted);
+            decrypt(encrypted);
+            printf("decrypted message: %s", encrypted);
+            row += 2;
         }
     }
     else if (string_starts_with(input, "shutdown")) {

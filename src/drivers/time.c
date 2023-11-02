@@ -1,5 +1,3 @@
-
-
 #include "string.h"
 #include "io_ports.h"
 // I/O Ports for RTC
