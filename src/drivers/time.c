@@ -16,6 +16,8 @@
 
 uint8 seconds, minutes, hours, day, month, year;
 
+uint8 seed;
+
 // Function to write to RTC register
 void write_RTC_register(uint8 reg, uint8 value) {
     outportb(RTC_ADDRESS_PORT, reg);
@@ -37,6 +39,8 @@ void powerontimes() {
         powerontime[0] = hours;
         powerontime[1] = minutes;
         powerontime[2] = seconds;
+
+        seed = seconds;
     }
 }
 
