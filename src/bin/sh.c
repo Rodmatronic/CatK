@@ -11,8 +11,6 @@
 #include "fs.h"
 #include "string.h"
 
-int cursorpos;
-
 int row = 3; // Track the current row
 char* args;
 uint8 startingrow;
@@ -54,6 +52,7 @@ void sh() {
         int input_index = 0; // Index for the input buffer
         int empty_input = 1; // Flag to track empty input
         int can_backspace = 0; // Flag to allow or disallow backspacing
+        int cursorpos;
 
         while (1) {
             unsigned char scancode = read_key();
@@ -85,6 +84,7 @@ void sh() {
                     if (!empty_input) {
                         printf("\n\n");
                         process_user_input(input_buffer);
+                        row = 24;
                     }
 
                     if (row >= 24) {
@@ -215,13 +215,14 @@ void process_user_input(const char* input) {
     }
     else if (string_starts_with(input, "uname")) {
         uname();
+        printf("\n");
     }
     else if (string_starts_with(input, "panic")) {
         panic("Manually triggered via SH");
     }
     else if (string_starts_with(input, "help")) {
         help();
-        row += 18;
+        row += 20;
     }
     else if (string_starts_with(input, "sh")) {
         sh();
@@ -256,10 +257,11 @@ void process_user_input(const char* input) {
         }else{
 
         }
-    }
+    }    
     else {
         printf("Unknown command!");
     }
+
 }
 
 int string_starts_with(const char* str, const char* prefix) {

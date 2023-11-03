@@ -23,7 +23,7 @@
 
 void printversion()
 {
-    printf("%s\n", vername);
+    printf("%s", vername);
 }
 
 // Function to create a new process
