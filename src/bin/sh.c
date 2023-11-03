@@ -11,7 +11,9 @@
 #include "fs.h"
 #include "string.h"
 
+int isclearing = 0;
 int row = 3; // Track the current row
+int stopglitchyhideingprompt = 0;
 char* args;
 uint8 startingrow;
 
@@ -43,6 +45,7 @@ void sh() {
     printf_dark(" for some helpful commands");
 
     while (1) {
+        isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
         printf("%s", username);
         printf("@");
@@ -83,8 +86,21 @@ void sh() {
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
+                        if (row == 3)
+                        {
+                           stopglitchyhideingprompt = 1;
+                        }
                         process_user_input(input_buffer);
-                        row = 24;
+                        if (stopglitchyhideingprompt == 1 && isclearing == 0)
+                        {
+                            row = 24;
+                            stopglitchyhideingprompt = 0;
+                        }
+                        if (isclearing == 0)
+                        {
+                            row = 24;
+                        }
+                        //donothing
                     }
 
                     if (row >= 24) {
@@ -171,6 +187,9 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "exit")) {
         login();
     }
+    else if (string_starts_with(input, "login")) {
+        login();
+    }
     else if (string_starts_with(input, "mkdir")) {
         args = input + strlen("mkdir "); // Extract arguments
         // Check if there are arguments (non-empty)
@@ -231,6 +250,7 @@ void process_user_input(const char* input) {
         read();
     }
     else if (string_starts_with(input, "clear")) {
+        isclearing = 1;
         row = -3;
         console_init(COLOR_WHITE, COLOR_BLACK);
     } 
