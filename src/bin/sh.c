@@ -183,36 +183,6 @@ void process_user_input(const char* input) {
         ls(&root);
         row += 7;
     }
-    else if (string_starts_with(input, "theme")) {
-        args = input + strlen("theme "); // Extract arguments
-        // Check if there are arguments (non-empty)
-        if (args[0] != '\0') {
-            printf("\nNo such theme %s\n", args);
-
-            if (strcmp(args, "ibm") == 0) {  // Compare strings using strcmp
-                isclearing = 1;
-                row = -3;
-                console_init(COLOR_BRIGHT_GREEN, COLOR_BLACK);
-            }
-            if (strcmp(args, "solaris") == 0) {  // Compare strings using strcmp
-                isclearing = 1;
-                row = -3;
-                console_init(COLOR_WHITE, COLOR_CYAN);
-            }
-            if (strcmp(args, "ubuntu") == 0) {  // Compare strings using strcmp
-                console_init(COLOR_YELLOW, COLOR_MAGENTA);
-                row = -3;
-            }
-            if (strcmp(args, "pink") == 0) {  // Compare strings using strcmp
-                console_init(COLOR_BRIGHT_MAGENTA, COLOR_BLACK);
-                row = -3;
-            }
-            if (strcmp(args, "cyan") == 0) {  // Compare strings using strcmp
-                console_init(COLOR_CYAN, COLOR_BLACK);
-                row = -3;
-            }
-        }
-    } 
     else if (string_starts_with(input, "exit")) {
         login();
     }
