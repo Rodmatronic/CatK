@@ -84,7 +84,6 @@ void sh() {
                     if (!empty_input) {
                         printf("\n\n");
                         process_user_input(input_buffer);
-                        row = 24;
                     }
 
                     if (row >= 24) {

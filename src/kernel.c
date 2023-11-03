@@ -133,8 +133,12 @@ void boot() {
     }
 
     init_keyboard();
-    printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
-    read();
+    if (bootargs != "quiet")
+    {
+        printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
+        read();
+    }
+
     console_init(COLOR_WHITE, COLOR_BLACK);
     // Create a shell process
     int shell_pid = fork(shell_process);

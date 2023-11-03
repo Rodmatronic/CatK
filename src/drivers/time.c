@@ -32,11 +32,15 @@ uint8 read_RTC_register(uint8 reg) {
 uint8 powerontime[3] = {0}; // Initialize to 0, representing hours, minutes, seconds
 
 void powerontimes() {
+    printf("time: Checking if powerontimes has been set previously...\n");
     if (powerontime[0] == 0 && powerontime[1] == 0 && powerontime[2] == 0) {
         // Only store the time if it hasn't been set previously
         powerontime[0] = hours;
+        printf("time: Got boot hours!\n");
         powerontime[1] = minutes;
+        printf("time: Got boot minutes!\n");
         powerontime[2] = seconds;
+        printf("time: Got boot seconds!!\n");
 
         seed = seconds;
     }
