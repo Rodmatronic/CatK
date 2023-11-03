@@ -5,3 +5,9 @@
 
 char* rootuser = "root:/bin/sh";
 char* userid = "root";
+
+// Structure to represent a user entry
+struct User {
+    char username[50];
+    char shell[50];
+};

@@ -47,16 +47,18 @@ char scancode_to_char(unsigned char scancode) {
         0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'
     };
 
-    if (scancode == 0x0E) {
-        console_ungetchar();
-        cursor_pos_x--;
+    if (scancode == 0x2A) { // Left Shift pressed
+        shift_pressed = 1;
+        return uppercase_keymap[scancode];
+    } else if (scancode == 0xAA) { // Left Shift released
+        shift_pressed = 0;
     }else
 
-    if (scancode == 0x48) { // Left Shift pressed
-        scroll(1);
+    if (scancode == 0x2A) { //Up
+        printf(" ");
     }else
-    if (scancode == 0xE0) { // Left Shift pressed
-        scroll(0);
+    if (scancode == 0xE0) { //Down
+        printf(" ");
     }else
 
     if (scancode == 0x2A) { // Left Shift pressed

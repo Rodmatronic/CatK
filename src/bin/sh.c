@@ -7,16 +7,35 @@
 #include "ls.c"
 #include "help.c"
 #include "whoami.c"
+#include "login.c"
 #include "fs.h"
 #include "string.h"
 
+int cursorpos;
+
 int row = 3; // Track the current row
 char* args;
+uint8 startingrow;
+
+// Function to set the cursor position
+void set_cursor_position(int x, int y) {
+    // The VGA hardware cursor position can be set through I/O ports 0x3D4 and 0x3D5
+    // 0x3D4 is used to set the index (high byte or low byte) and 0x3D5 is used to set the data
+    
+    unsigned short position = (y * VGA_WIDTH) + x; // Calculate the position
+
+    // Set the index to 0x0E (high byte) and write the high byte
+    outportb(0x0E, 0x3D4);
+    outportb((unsigned char)((position >> 8) & 0xFF), 0x3D5);
+
+    // Set the index to 0x0F (low byte) and write the low byte
+    outportb(0x0F, 0x3D4);
+    outportb((unsigned char)(position & 0xFF), 0x3D5);
+}
 
 void sh() {
-
+    startingrow = 0;
     row = 3;
-
     char input_buffer[80]; // Buffer to store user input
 
     console_clear(COLOR_WHITE, COLOR_BLACK);
@@ -34,52 +53,65 @@ void sh() {
 
         int input_index = 0; // Index for the input buffer
         int empty_input = 1; // Flag to track empty input
+        int can_backspace = 0; // Flag to allow or disallow backspacing
 
         while (1) {
-            // Read a key scancode
             unsigned char scancode = read_key();
-
-            // Convert the scancode to a character
             char key = scancode_to_char(scancode);
 
-            // Check if a valid character was returned
-            if (key != 0) {
-                if (scancode == 0x0E) {
-                    input_index--; // Decrement the input_index
-                    input_buffer[input_index] = '\0'; // Remove the character from the buffer
-                }else
+            if (cursorpos <= 0) {
+                can_backspace = 0;
+            }
 
-                // Print the character to the console
+            if (key != 0) {
+
+                cursorpos++;
+
+                if(cursorpos < 0)
+                {
+                    can_backspace = 0;
+                }
+
+                    if (scancode == 0x0E && can_backspace && input_index > 0) {
+                        cursorpos--;
+                        console_ungetchar();
+                        input_index--;
+                        
+                        // Update the cursor position
+                        set_cursor_position(cursorpos, row);
+                    }
+                
                 if (scancode == ENTER_KEY_SCANCODE) {
-                    // Check if the input is not empty before processing
                     if (!empty_input) {
                         printf("\n\n");
-                        // Process the user's input (replace this with your command processing logic)
                         process_user_input(input_buffer);
                     }
 
-                    // When Enter key is pressed, scancode 0x1C
                     if (row >= 24) {
                         printf("\n");
                         row = 24;
                     } else {
-                        row += (empty_input ? 1 : 3); // Move down by 1 or 2 rows based on input
+                        row += (empty_input ? 1 : 3);
                     }
-                    console_gotoxy(0, row); // Move to the next row
 
-                    input_buffer[input_index] = '\0'; // Null-terminate the input
-                    input_index = 0; // Reset the input index
-                    empty_input = 1; // Reset the empty input flag
+                    console_gotoxy(0, row);
+
+                    input_buffer[input_index] = '\0';
+                    input_index = 0;
+                    empty_input = 1;
+                    can_backspace = 0; // Reset the backspace flag
 
                     for (int i = 0; i < 80; i++) {
                         input_buffer[i] = '\0';
                     }
-                    break; // Exit the inner loop
+                    break;
                 } else {
-                    // Store the character in the input buffer
-                    input_buffer[input_index++] = key;
-                    printf("%c", key); // Print the character to the console
-                    empty_input = 0; // Mark input as non-empty
+                    if (scancode != 0x0E) {
+                        input_buffer[input_index++] = key;
+                        printf("%c", key);
+                        empty_input = 0;
+                        can_backspace = 1; // Allow backspacing when there's input
+                    }
                 }
             }
         }
@@ -135,6 +167,9 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "ls")) {
         ls(&root);
         row += 7;
+    }
+    else if (string_starts_with(input, "exit")) {
+        login();
     }
     else if (string_starts_with(input, "mkdir")) {
         args = input + strlen("mkdir "); // Extract arguments

@@ -93,7 +93,6 @@ void boot() {
     printf("kernel: Trying to mount root...\n");
     initfilesystem(&root);
     ls(&root);
-
     // Print the structure
     printf("Root: %s\n", root.name);
     for (int i = 0; i < root.subfolderCount; i++) {
@@ -113,6 +112,25 @@ void boot() {
     int process1 = fork(process1);
     int process2 = fork(process2);
     int process3 = fork(process3);
+
+    // Your existing user
+    struct User rootuser;
+    strcpy(rootuser.username, "root");
+    strcpy(rootuser.shell, "/bin/sh");
+
+    // New user entry
+    struct User newUser;
+    strcpy(newUser.username, "CatK");
+    strcpy(newUser.shell, "/bin/bash");
+
+    // Check if the user already exists
+    if (strcmp(rootuser.username, newUser.username) == 0) {
+        printf("User already exists. Please choose a different username.\n");
+    } else {
+        // If the user doesn't exist, you can replace the existing user with the new one.
+        rootuser = newUser;
+        printf("New user has been added.\n");
+    }
 
     init_keyboard();
     printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
