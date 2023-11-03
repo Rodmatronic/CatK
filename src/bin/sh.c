@@ -86,7 +86,7 @@ void sh() {
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
-                        if (row == 3)
+                        if (row == 3 && isclearing == 1)
                         {
                            stopglitchyhideingprompt = 1;
                         }
@@ -278,7 +278,7 @@ void process_user_input(const char* input) {
         }
     }    
     else {
-        printf("Unknown command!");
+        printf("%s: Command not found", input);
     }
 
 }
