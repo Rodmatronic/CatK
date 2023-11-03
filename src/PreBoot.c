@@ -81,9 +81,9 @@ void PreBoot()
         console_gotoxy(40, 10);
         printf_blue("      /                       \\    ");
         console_gotoxy(40, 11);
-        printf_blue("     |        |       |        |   ");
+        printf_blue("     |        |      |         |   ");
         console_gotoxy(40, 12);
-        printf_blue("   ---        |       |        --- ");
+        printf_blue("   ---        |      |         --- ");
         console_gotoxy(40, 13);
         printf_blue("     |                         |   ");
         console_gotoxy(40, 14);
