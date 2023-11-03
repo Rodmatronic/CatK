@@ -86,7 +86,7 @@ void sh() {
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
-                        if (row == 3 && isclearing == 1)
+                        if (row == 3 && isclearing == 0 || row == 3 && isclearing == 1)
                         {
                            stopglitchyhideingprompt = 1;
                         }
