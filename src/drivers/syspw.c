@@ -5,7 +5,6 @@
  *
 */
 
-
 #include "types.h"
 #include "io_ports.h"
 #define ACPI_RESET 0x06
@@ -25,9 +24,23 @@ void syspw(int type) {
     if (type == 1)
     {
         printf("syspw Created by Rodmatronics\n");
-        printf("Sending REBOOT (0) to kernel\n");
+        printf("Sending POWEROFF (1) to kernel\n");
 
-        printf("Powering off is currently not supported, sorry!");
+        __asm__ __volatile__("int $0x80");
+    }
+
+    if (type == 2)
+    {
+        printf("syspw Created by Rodmatronics\n");
+        printf("Sending HALT (2) to kernel\n\n");
+
+        printf("The operating system has halted.\n");
+        printf("Please switch off your machine now, or press the reset switch.\n");
+
+        while(1){
+            for (;;);
+        }
+
     }
 
     panic("syspw Failed to read the command! Possibly invalid number.", type);

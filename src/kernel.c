@@ -82,8 +82,8 @@ void boot() {
     bootmessage("Getting memory...");
     GetMemory();
     bootmessage("Using config.catk for kernel configuration & args");
-    printf("Kernel version: %d\n", versionnumber);
-    printf("PreBoot version: %d\n", prebootversion);
+    printf("Kernel version: %s\n", versionnumber);
+    printf("PreBoot version: %s\n", prebootversion);
     printf("Kernel args: %s\n\n", bootargs); // Print the string
     bootmessage("Getting CPU info...");
     cpuinfo();

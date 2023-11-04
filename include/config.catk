@@ -1,5 +1,13 @@
+#ifndef CONFIG_CATK_H
+#define CONFIG_CATK_H
 #include "types.h"
-uint32 versionnumber = 1;
+extern uint32 prebootversion;
+extern char* bootargs;
+
+
+uint32 versionnumber = "0.04.4";
 char* vername = "CatK Version Boppin";
-uint32 prebootversion = 1;
+uint32 prebootversion = "0.04.4";
 char* bootargs = "n/a"; // Boot args
+
+#endif

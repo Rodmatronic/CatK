@@ -3,7 +3,6 @@
 #include "hostname.c"
 #include "echo.c"
 #include "gettime.c"
-#include "uname.c"
 #include "ls.c"
 #include "help.c"
 #include "whoami.c"
@@ -11,6 +10,7 @@
 #include "man.c"
 #include "fs.h"
 #include "string.h"
+#include "config.catk"
 
 int isclearing = 0;
 int row = 3; // Track the current row
@@ -153,6 +153,9 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "reboot")) {
         syspw(0);
     }
+    else if (string_starts_with(input, "halt")) {
+        syspw(2);
+    }
     else if (string_starts_with(input, "passwd")) {
         args = input + strlen("passwd "); // Extract arguments
         // Check if there are arguments (non-empty)
@@ -174,6 +177,9 @@ void process_user_input(const char* input) {
         }
     }
     else if (string_starts_with(input, "shutdown")) {
+        syspw(1);
+    }
+    else if (string_starts_with(input, "poweroff")) {
         syspw(1);
     }
     else if (string_starts_with(input, "ls")) {
@@ -198,6 +204,7 @@ void process_user_input(const char* input) {
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
                 man(args);
+                row =+ 25;
         }
     }
     else if (string_starts_with(input, "touch")) {
@@ -236,9 +243,24 @@ void process_user_input(const char* input) {
         }
     }
     else if (string_starts_with(input, "uname")) {
-        uname();
-        printf("\n");
-    }
+        args = input + strlen("uname "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+            if (strcmp(args, "-s") == 0)
+            {
+                printversion();
+            }
+
+            if (strcmp(args, "-a") == 0)
+            {
+                printversion();
+                printf(" %s", prebootversion);
+                printf(" %s", bootargs);
+            }
+        }else{
+            printversion();
+        }
+    }   
     else if (string_starts_with(input, "panic")) {
         panic("Manually triggered via SH");
     }
