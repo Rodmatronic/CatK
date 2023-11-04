@@ -87,15 +87,10 @@ void sh() {
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
-                        if (row == 3 && isclearing == 1)
-                        {
-                            printf("this");
-                           stopglitchyhideingprompt = 1;
-                        }
+                        stopglitchyhideingprompt = 1;
                         process_user_input(input_buffer);
-                        if (stopglitchyhideingprompt == 1 && isclearing == 0)
+                        if (stopglitchyhideingprompt == 1 && isclearing == 1)
                         {
-                            row = 24;
                             stopglitchyhideingprompt = 0;
                         }
                         if (isclearing == 0 && row >= 24)
