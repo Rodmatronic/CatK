@@ -20,6 +20,17 @@ void man(char* command)
         printf("DESCRIPTION");
         console_gotoxy(6, 9);
         printf("Echo the STRING(s) to standard output.");
+        console_gotoxy(0, 11);
+        printf("AUTHOR");
+        console_gotoxy(6, 12);
+        printf("Written by Brian Fox and Chet Ramey.");
+        console_gotoxy(6, 13);
+        printf("Ported to CatK by Rodmatronic");
+        console_gotoxy(0, 15);
+        printf("REPORTING BUGS");
+        console_gotoxy(6, 16);
+        printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+
 
         read();
 
