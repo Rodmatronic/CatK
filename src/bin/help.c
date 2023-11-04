@@ -38,6 +38,6 @@ void help()
     printf("  exit");
     printf_dark(" - Terminates the current user session\n");
     printf("  panic");
-    printf_dark(" - WARNING!!! This is for debugging purposes, halts the system\n");
+    printf_dark(" - WARNING!!! This is for debugging purposes, halts the system");
     AppClose(&help);
 }

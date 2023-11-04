@@ -244,7 +244,8 @@ void process_user_input(const char* input) {
     }
     else if (string_starts_with(input, "help")) {
         help();
-        row += 20;
+        row =+ 25;
+        printf("\n");
     }
     else if (string_starts_with(input, "sh")) {
         sh();
