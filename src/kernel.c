@@ -121,7 +121,7 @@ void boot() {
     // New user entry
     struct User newUser;
     strcpy(newUser.username, "CatK");
-    strcpy(newUser.shell, "/bin/bash");
+    strcpy(newUser.shell, "/bin/sh");
 
     // Check if the user already exists
     if (strcmp(rootuser.username, newUser.username) == 0) {

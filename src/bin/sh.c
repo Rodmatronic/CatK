@@ -8,6 +8,7 @@
 #include "help.c"
 #include "whoami.c"
 #include "login.c"
+#include "man.c"
 #include "fs.h"
 #include "string.h"
 
@@ -65,7 +66,7 @@ void sh() {
                 can_backspace = 0;
             }
 
-            if (key != 0) {
+            if (key != 0) {isclearing = 0;
 
                 cursorpos++;
 
@@ -74,20 +75,21 @@ void sh() {
                     can_backspace = 0;
                 }
 
-                    if (scancode == 0x0E && can_backspace && input_index > 0) {
-                        cursorpos--;
-                        console_ungetchar();
-                        input_index--;
-                        
-                        // Update the cursor position
-                        set_cursor_position(cursorpos, row);
-                    }
+                if (scancode == 0x0E && can_backspace && input_index > 0) {
+                    cursorpos--;
+                    console_ungetchar();
+                    input_index--;
+                    
+                    // Update the cursor position
+                    set_cursor_position(cursorpos, row);
+                }
                 
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
-                        if (row == 3 && isclearing == 0 || row == 3 && isclearing == 1)
+                        if (row == 3 && isclearing == 1)
                         {
+                            printf("this");
                            stopglitchyhideingprompt = 1;
                         }
                         process_user_input(input_buffer);
@@ -196,6 +198,13 @@ void process_user_input(const char* input) {
                 mkdir(args);
         }
     }
+    else if (string_starts_with(input, "man")) {
+        args = input + strlen("man "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+                man(args);
+        }
+    }
     else if (string_starts_with(input, "touch")) {
         args = input + strlen("touch "); // Extract arguments
         // Check if there are arguments (non-empty)
@@ -221,7 +230,7 @@ void process_user_input(const char* input) {
                 console_init(COLOR_BRIGHT_BLUE, COLOR_BLACK);
                 row = -3;
             }
-            if (strcmp(args, "pink") == 0) {  // Compare strings using strcmp
+            if (strcmp(args, "pink") == 0) {  // Compare strings usSubscribeing strcmp
                 console_init(COLOR_BRIGHT_MAGENTA, COLOR_BLACK);
                 row = -3;
             }
