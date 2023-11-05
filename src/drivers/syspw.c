@@ -15,7 +15,7 @@ void syspw(int type) {
 
     if (type == 0)
     {
-        printf("syspw Created by Rodmatronics\n");
+        printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending REBOOT (0) to kernel\n");
         // This inline assembly code sends the restart command.
         __asm__ __volatile__("int $0x19");
@@ -23,7 +23,7 @@ void syspw(int type) {
 
     if (type == 1)
     {
-        printf("syspw Created by Rodmatronics\n");
+        printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending POWEROFF (1) to kernel\n");
 
         __asm__ __volatile__("int $0x80");
@@ -31,7 +31,7 @@ void syspw(int type) {
 
     if (type == 2)
     {
-        printf("syspw Created by Rodmatronics\n");
+        printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending HALT (2) to kernel\n\n");
 
         printf("The operating system has halted.\n");
