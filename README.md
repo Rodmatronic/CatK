@@ -1,4 +1,4 @@
-# CatK
+# CatK https://catk.neocities.org/
 a simple Unix-like kernel, written almost entirely in C. Using a cute kitty mascot named CatK!
 
 ![Screenshot from 2023-11-02 09-36-40](https://github.com/Rodmatronic/CatK/assets/105672808/fe792fa5-8eec-4692-ba75-926b0bb3e0c0)
