@@ -56,7 +56,7 @@ void sh() {
         int input_index = 0; // Index for the input buffer
         int empty_input = 1; // Flag to track empty input
         int can_backspace = 0; // Flag to allow or disallow backspacing
-        int cursorpos;
+        int cursorpos = 0;
 
         while (1) {
             unsigned char scancode = read_key();
@@ -66,36 +66,54 @@ void sh() {
                 can_backspace = 0;
             }
 
-            if (key != 0) {isclearing = 0;
+            if (key != 0) {
+                isclearing = 0;
 
                 cursorpos++;
 
-                if(cursorpos < 0)
-                {
+                if (cursorpos < 0) {
                     can_backspace = 0;
                 }
 
                 if (scancode == 0x0E && can_backspace && input_index > 0) {
                     cursorpos--;
-                    console_ungetchar();
                     input_index--;
-                    
+
+                    // Remove the last character from the input buffer
+                    input_buffer[input_index] = '\0';
+
                     // Update the cursor position
                     set_cursor_position(cursorpos, row);
+                    
+                    // Clear the character on the display
+                    console_ungetchar();
                 }
-                
+
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
                         stopglitchyhideingprompt = 1;
-                        process_user_input(input_buffer);
-                        if (stopglitchyhideingprompt == 1 && isclearing == 1)
-                        {
-                            stopglitchyhideingprompt = 0;
+
+                        // Ensure the input buffer is null-terminated before processing
+                        input_buffer[input_index] = '\0';
+
+                        // Process user input and separate command from arguments
+                        char* cmd = input_buffer;
+                        while (*cmd == ' ') {
+                            cmd++;
                         }
-                        if (isclearing == 0 && row >= 24)
-                        {
-                            row = 24;
+
+                        // Check for empty input
+                        if (*cmd == '\0') {
+                            stopglitchyhideingprompt = 0;
+                        } else {
+                            process_user_input(cmd);
+                            if (stopglitchyhideingprompt == 1 && isclearing == 1) {
+                                stopglitchyhideingprompt = 0;
+                            }
+                            if (isclearing == 0 && row >= 24) {
+                                row = 24;
+                            }
                         }
                     }
 
@@ -108,7 +126,9 @@ void sh() {
 
                     console_gotoxy(0, row);
 
+                    // Null-terminate the input buffer
                     input_buffer[input_index] = '\0';
+
                     input_index = 0;
                     empty_input = 1;
                     can_backspace = 0; // Reset the backspace flag
@@ -129,6 +149,9 @@ void sh() {
         }
     }
 }
+
+
+
 
 void process_user_input(const char* input) {
     args = NULL; // Reset the arguments
