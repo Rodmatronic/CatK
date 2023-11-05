@@ -25,6 +25,7 @@ void PreBoot()
 
     console_gotoxy(0, 24);
     printf_dark("Build num %s", versionnumber);
+    printf_dark("  https://catk.neocities.org/");
 
     if (art == 1)
     {

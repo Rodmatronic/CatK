@@ -1,46 +1,60 @@
-#include "io_ports.h"
+#define REG_CYL_LO 4
+#define REG_CYL_HI 5
+#define REG_DEVSEL 6
 
-// I/O Ports for ATA/ATAPI
-#define ATA_REG_DATA 0x1F0 // Data Register
-#define ATA_REG_FEATURES 0x1F1 // Features Register
-#define ATA_REG_ERROR 0x1F1 // Error Register (write)
-#define ATA_REG_SECCOUNT0 0x1F2 // Sector Count Register (LBA)
-#define ATA_REG_LBA0 0x1F3 // LBA Low Register (LBA)
-#define ATA_REG_LBA1 0x1F4 // LBA Mid Register (LBA)
-#define ATA_REG_LBA2 0x1F5 // LBA High Register (LBA)
-#define ATA_REG_DRIVE 0x1F6 // Drive/Head Register
-#define ATA_REG_COMMAND 0x1F7 // Command Register
-#define ATA_REG_STATUS 0x1F7 // Status Register (read)
+#define ATADEV_UNKNOWN 0
+#define ATADEV_PATA 1
+#define ATADEV_PATAPI 2
+#define ATADEV_SATA 3
+#define ATADEV_SATAPI 4
 
-// ATA/ATAPI commands
-#define ATA_IDENTIFY 0xEC // Identify Drive
-#define ATA_DEVICE_SELECT 0xA0 // Select Device
+struct DEVICE {
+    unsigned short base;
+    unsigned short dev_ctl;
+};
 
-// Function to check for the presence of an ATA drive
-int isATADrivePresent(int driveNumber) {
-    // Select the ATA drive (e.g., ada0, ada1, ...)
-    outportb(ATA_REG_DRIVE, ATA_DEVICE_SELECT | driveNumber);
+void listdrivebits()
+{
+    struct DEVICE ctrl;
+    ctrl.base = 0x1F0;
+    ctrl.dev_ctl = 0x3F6;
 
-    // Check the status
-    unsigned char status = inportb(ATA_REG_STATUS);
-
-    // Bit 4 (BSY) should be clear, and bit 7 (DRDY) should be set
-    if (!(status & 0x80) && (status & 0x40)) {
-        return 1; // ATA drive is present
-    } else {
-        return 0; // No ATA drive detected
-    }
+    for (int slavebit = 0; slavebit < 2; slavebit++) {
+        int devtype = detect_devtype(slavebit, &ctrl);
+        if (devtype != ATADEV_UNKNOWN) {
+            printf("Drive %d is available, type: %d\n", slavebit, devtype);
+        }
+    }   
 }
 
-void finddrives() {
-    int maxDriveNumber = 5; // Check for drives ada0 to ada5
+void ata_soft_reset(unsigned short dev_ctl) {
+    outportb(dev_ctl, 4);
+    inportb(dev_ctl);
+    outportb(dev_ctl, 0);
+    inportb(dev_ctl);
+}
 
-    for (int driveNumber = 0; driveNumber <= maxDriveNumber; driveNumber++) {
-        if (isATADrivePresent(driveNumber)) {
-            printf("hdd%d: Drive ada%d is attached.\n", driveNumber);
-        } else {
-            printf("hdd%d: No drive ada%d detected.\n", driveNumber);
-        }
+int detect_devtype(int slavebit, struct DEVICE *ctrl) {
+    ata_soft_reset(ctrl->dev_ctl);
+    outportb(ctrl->base + REG_DEVSEL, 0xA0 | (slavebit << 4));
+    inportb(ctrl->dev_ctl);
+
+    // Wait 400ns for drive select to work
+    for (int i = 0; i < 4; i++) {
+        inportb(ctrl->dev_ctl);
     }
 
+    unsigned cl = inportb(ctrl->base + REG_CYL_LO);
+    unsigned ch = inportb(ctrl->base + REG_CYL_HI);
+
+    if (cl == 0x14 && ch == 0xEB) {
+        return ATADEV_PATAPI;
+    } else if (cl == 0x69 && ch == 0x96) {
+        return ATADEV_SATAPI;
+    } else if (cl == 0 && ch == 0) {
+        return ATADEV_PATA;
+    } else if (cl == 0x3c && ch == 0xc3) {
+        return ATADEV_SATA;
+    }
+    return ATADEV_UNKNOWN;
 }

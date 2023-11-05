@@ -88,8 +88,8 @@ void boot() {
     bootmessage("Getting CPU info...");
     cpuinfo();
     bootmessage("Scanning for devices...");
-    isCDROMDrivePresent();
-    finddrives();
+    isCDROMDrivePresent(); 
+    listdrivebits();
     printf("kernel: Trying to mount root...\n");
     initfilesystem(&root);
     ls(&root);

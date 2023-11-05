@@ -179,6 +179,10 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "halt")) {
         syspw(2);
     }
+    else if (string_starts_with(input, "mount")) {
+        listdrivebits();
+        row += 6;
+    }
     else if (string_starts_with(input, "passwd")) {
         args = input + strlen("passwd "); // Extract arguments
         // Check if there are arguments (non-empty)
