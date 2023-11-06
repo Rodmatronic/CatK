@@ -219,7 +219,6 @@ else if (string_starts_with(input, "man")) {
             args_len--;
         }
 
-        printf("debug %s", args);
         man(args);
         row += 25;
     }
