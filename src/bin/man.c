@@ -94,5 +94,34 @@ void man(char* command)
         console_gotoxy(6, 18);
         printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
     }
+
+    if (strcmp(command, "sh") == 0)
+    {
+        console_clear(COLOR_WHITE, COLOR_BLACK);
+        printf("SH(1)");
+        console_gotoxy(VGA_WIDTH / 2 - 8, 0);
+        printf("CatK user manual");
+        console_gotoxy(VGA_WIDTH -10, 0);
+        printf("SH(1)");
+        console_gotoxy(0, 2);
+        printf("NAME");
+        console_gotoxy(6, 3);
+        printf("sh — command interpreter (shell)");
+        console_gotoxy(0, 5);
+        printf("SYNOPSIS");
+        console_gotoxy(6, 6);
+        printf("sh [-aCefnuvxIimqVEbp] [+aCefnuvxIimqVEbp] [-o option_name]");
+        console_gotoxy(6, 7);
+        printf("[+o option_name] [command_file [argument ...]]");
+        console_gotoxy(0, 9);
+        printf("DESCRIPTION");
+        console_gotoxy(6, 10);
+        printf("sh is the standard command interpreter for the system.");
+        console_gotoxy(0, 12);
+        printf("REPORTING BUGS");
+        console_gotoxy(6, 13);
+        printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+    }
+
     read();
 }

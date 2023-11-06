@@ -15,7 +15,7 @@
 int isclearing = 0;
 int row = 3; // Track the current row
 int stopglitchyhideingprompt = 0;
-char* args;
+char* args = NULL; // Initialize args to NULL
 uint8 startingrow;
 
 // Function to set the cursor position
@@ -37,7 +37,7 @@ void set_cursor_position(int x, int y) {
 void sh() {
     startingrow = 0;
     row = 3;
-    char input_buffer[80]; // Buffer to store user input
+    char input_buffer[80] = {0}; // Initialize with null characters to create an empty string
 
     console_clear(COLOR_WHITE, COLOR_BLACK);
 
@@ -201,17 +201,30 @@ void process_user_input(const char* input) {
         args = input + strlen("mkdir "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
+            printf("debug %s", args);
                 mkdir(args);
         }
     }
-    else if (string_starts_with(input, "man")) {
-        args = input + strlen("man "); // Extract arguments
-        // Check if there are arguments (non-empty)
-        if (args[0] != '\0') {
-                man(args);
-                row =+ 25;
+else if (string_starts_with(input, "man")) {
+    const char* man_command = input + strlen("man "); // Extract arguments
+    // Check if there are arguments (non-empty)
+    if (man_command[0] != '\0') {
+        // Assign the extracted arguments to args without clearing
+        args = man_command;
+
+        // Remove any trailing whitespace or newline characters from args
+        size args_len = strlen(args);
+        while (args_len > 0 && (args[args_len - 1] == ' ' || args[args_len - 1] == '\n' || args[args_len - 1] == '\r')) {
+            args[args_len - 1] = '\0';
+            args_len--;
         }
+
+        printf("debug %s", args);
+        man(args);
+        row += 25;
     }
+}
+
     else if (string_starts_with(input, "touch")) {
         args = input + strlen("touch "); // Extract arguments
         // Check if there are arguments (non-empty)
