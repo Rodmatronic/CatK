@@ -180,7 +180,8 @@ void process_user_input(const char* input) {
             decrypt(encrypted);
             printf("decrypted message: %s", encrypted);
             row += 2;
-        }
+        }else
+        printf("No string to encrypt!");
     }
     else if (string_starts_with(input, "shutdown")) {
         syspw(1);
@@ -203,7 +204,8 @@ void process_user_input(const char* input) {
         if (args[0] != '\0') {
                 catsay(args);
                 row = 12;
-        }
+        }else
+        printf("No string for CatK to say...");
     }
     else if (string_starts_with(input, "mkdir")) {
         args = input + strlen("mkdir "); // Extract arguments
@@ -228,7 +230,8 @@ else if (string_starts_with(input, "man")) {
 
         man(args);
         row += 25;
-    }
+    }else
+    printf("No such manual entry");
 }
 
     else if (string_starts_with(input, "touch")) {
@@ -281,12 +284,17 @@ else if (string_starts_with(input, "man")) {
                 printf(" %s", prebootversion);
                 printf(" %s", bootargs);
             }
-        }else{
+        }else
             printversion();
-        }
+        
     }   
     else if (string_starts_with(input, "panic")) {
-        panic("Manually triggered via SH");
+        args = input + strlen("panic "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+                panic(args);
+        }else
+            printf("No string for PANIC to display");
     }
     else if (string_starts_with(input, "help")) {
         help();
@@ -324,9 +332,10 @@ else if (string_starts_with(input, "man")) {
             printf("%s", args);
             sleep(args);
             sh();
-        }else{
+        }else
 
-        }
+            printf("Invalid sleep time");
+
     }    
     else {
         printf("%s: Command not found", input);

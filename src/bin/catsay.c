@@ -11,7 +11,7 @@ void catsay(input)
     printf_blue("          /            \\\n");
     printf_blue("         |    |    |    |\n");
     printf_blue("        =|      -       |=\n");
-    printf_blue("        =\\       U      /=\n");
+    printf_blue("        =\\       O      /=\n");
     printf_blue("          \\            /\n");
     printf_blue("           =====\\/=====\n");
     printf_blue("              (CatK)\n");
