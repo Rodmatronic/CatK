@@ -11,8 +11,8 @@ void help()
     printf_dark(" - Turns the computer off then back on\n");
     printf("  time");
     printf_dark(" - Prints the current time in the terminal\n");
-    printf("  uname");
-    printf_dark(" - Prints the kernel version string to the terminal\n");
+    printf("  catsay");
+    printf_dark(" - Display CatK saying your text\n");
     printf("  hostname");
     printf_dark(" - Sets the kernel's hostname\n");
     printf("  clear");

@@ -91,13 +91,6 @@ void boot() {
     isCDROMDrivePresent(); 
     listdrivebits();
     printf("kernel: Trying to mount root...\n");
-    initfilesystem(&root);
-    ls(&root);
-    // Print the structure
-    printf("Root: %s\n", root.name);
-    for (int i = 0; i < root.subfolderCount; i++) {
-        printf("  - %s\n", root.subfolders[i]->name);
-    }
 
     // Assuming NAT configuration
     const char* statusNAT = isEthernetPluggedIn();
@@ -113,7 +106,7 @@ void boot() {
     int process2 = fork(process2);
     int process3 = fork(process3);
 
-    // Your existing user
+    //  THe existing user
     struct User rootuser;
     strcpy(rootuser.username, "root");
     strcpy(rootuser.shell, "/bin/sh");
@@ -131,6 +124,7 @@ void boot() {
         rootuser = newUser;
         printf("New user has been added.\n");
     }
+
 
     init_keyboard();
     if (bootargs != "quiet")

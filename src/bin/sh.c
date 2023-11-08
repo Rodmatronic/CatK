@@ -8,6 +8,7 @@
 #include "whoami.c"
 #include "login.c"
 #include "man.c"
+#include "catsay.c"
 #include "fs.h"
 #include "string.h"
 #include "config.catk"
@@ -188,7 +189,6 @@ void process_user_input(const char* input) {
         syspw(1);
     }
     else if (string_starts_with(input, "ls")) {
-        ls(&root);
         row += 7;
     }
     else if (string_starts_with(input, "exit")) {
@@ -197,11 +197,18 @@ void process_user_input(const char* input) {
     else if (string_starts_with(input, "login")) {
         login();
     }
+    else if (string_starts_with(input, "catsay")) {
+        args = input + strlen("catsay "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+                catsay(args);
+                row = 12;
+        }
+    }
     else if (string_starts_with(input, "mkdir")) {
         args = input + strlen("mkdir "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-            printf("debug %s", args);
                 mkdir(args);
         }
     }
