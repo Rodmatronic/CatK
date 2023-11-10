@@ -10,8 +10,9 @@ void shell_process() {
     // Once the shell exits, you may want to terminate the process.
 }
 
-void startdaemons()
+void init()
 {
+    console_init(COLOR_WHITE, COLOR_BLACK);;
     printf("Setting hostname...");
     strcpy(host_name, defaulthost);
 

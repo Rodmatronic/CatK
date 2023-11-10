@@ -20,7 +20,7 @@
 #include "fs.h"
 #include "PreBoot.c"
 #include "drivers/crypto.c"
-#include "sbin/startdaemons.c"
+#include "sbin/init.c"
 
 void printversion()
 {
@@ -83,7 +83,7 @@ void boot() {
 
     init_processes();
 
-    startdaemons();
+    init();
 }
 
 void kmain() {
@@ -94,7 +94,6 @@ void kmain() {
 void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
 }
-
 
 void catkmessage(int NUM, ...) { // Use const char* for the string parameter
     if (NUM == 1)
