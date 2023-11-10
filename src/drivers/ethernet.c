@@ -23,7 +23,7 @@ const char* isEthernetPluggedIn() {
         return "1";
     } else {
         printf("Did not detect Ethernet");
-        catkmessage(3);
+        catkmessage(2);
         return "0";
     }
 }

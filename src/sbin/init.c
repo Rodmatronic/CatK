@@ -12,7 +12,22 @@ void shell_process() {
 
 void init()
 {
-    console_init(COLOR_WHITE, COLOR_BLACK);;
+    console_init(COLOR_WHITE, COLOR_BLACK);
+
+    bootmessage("Getting CPU info...");
+    int result = cpuid_info(0);
+
+    if (result) {
+        // The function returned something
+        printf("%s\n", result);
+        printf("Got CPU info!");
+        catkmessage(1);
+    } else {
+        // The function did not return anything, indicating an error
+        printf("cpuid_info did not return anything.\n");
+        catkmessage(3);
+    }
+
     printf("Setting hostname...");
     strcpy(host_name, defaulthost);
 

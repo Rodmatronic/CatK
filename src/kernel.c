@@ -21,6 +21,7 @@
 #include "PreBoot.c"
 #include "drivers/crypto.c"
 #include "sbin/init.c"
+#include "sbin/termcolors.c"
 
 void printversion()
 {
@@ -78,8 +79,6 @@ void boot() {
     printf("Kernel version: %s\n", versionnumber);
     printf("PreBoot version: %s\n", prebootversion);
     printf("Kernel args: %s\n\n", bootargs); // Print the string
-    bootmessage("Getting CPU info...");
-    cpuinfo();
 
     init_processes();
 
@@ -98,16 +97,20 @@ void bootmessage(const char* str) { // Use const char* for the string parameter
 void catkmessage(int NUM, ...) { // Use const char* for the string parameter
     if (NUM == 1)
     {
-        printf("       [  "); // Print the message and the string
+        printf("       [ "); // Print the message and the string
         printf_green("OK"); // Print the message and the string
-        printf("  ]\n"); // Print the message and the string
+        printf(" ]\n"); // Print the message and the string
     }else
     if (NUM == 2)
     {
-        printf("       [ WARN ]\n"); // Print the message and the string
+        printf("       [ "); // Print the message and the string
+        printf_yellow("WARN");
+        printf(" ]\n");
     }else
     if (NUM == 3)
     {
-        printf("       [ ERR ]\n"); // Print the message and the string
+        printf("       [ "); // Print the message and the string
+        printf_red("ERR!");
+        printf(" ]\n");
     }
 }

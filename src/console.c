@@ -270,175 +270,7 @@ void printf(const char *format, ...) {
     }
 }
 
-void printf_dark(const char *format, ...) {
-    char **arg = (char **)&format;
-    int c;
-    char buf[32];
 
-    arg++;
-
-    memset(buf, 0, sizeof(buf));
-    while ((c = *format++) != 0) {
-        if (c != '%')
-            console_putchar_dark(c);
-        else {
-            char *p, *p2;
-            int pad0 = 0, pad = 0;
-
-            c = *format++;
-            if (c == '0') {
-                pad0 = 1;
-                c = *format++;
-            }
-
-            if (c >= '0' && c <= '9') {
-                pad = c - '0';
-                c = *format++;
-            }
-
-            switch (c) {
-                case 'd':
-                case 'u':
-                case 'x':
-                    itoa(buf, c, *((int *)arg++));
-                    p = buf;
-                    goto string;
-                    break;
-
-                case 's':
-                    p = *arg++;
-                    if (!p)
-                        p = "(null)";
-
-                string:
-                    for (p2 = p; *p2; p2++)
-                        ;
-                    for (; p2 < p + pad; p2++)
-                        console_putchar_dark(pad0 ? '0' : ' ');
-                    while (*p)
-                        console_putchar_dark(*p++);
-                    break;
-
-                default:
-                    console_putchar_dark(*((int *)arg++));
-                    break;
-            }
-        }
-    }
-}
-
-void printf_blue(const char *format, ...) {
-    char **arg = (char **)&format;
-    int c;
-    char buf[32];
-
-    arg++;
-
-    memset(buf, 0, sizeof(buf));
-    while ((c = *format++) != 0) {
-        if (c != '%')
-            console_putchar_blue(c);
-        else {
-            char *p, *p2;
-            int pad0 = 0, pad = 0;
-
-            c = *format++;
-            if (c == '0') {
-                pad0 = 1;
-                c = *format++;
-            }
-
-            if (c >= '0' && c <= '9') {
-                pad = c - '0';
-                c = *format++;
-            }
-
-            switch (c) {
-                case 'd':
-                case 'u':
-                case 'x':
-                    itoa(buf, c, *((int *)arg++));
-                    p = buf;
-                    goto string;
-                    break;
-
-                case 's':
-                    p = *arg++;
-                    if (!p)
-                        p = "(null)";
-
-                string:
-                    for (p2 = p; *p2; p2++)
-                        ;
-                    for (; p2 < p + pad; p2++)
-                        console_putchar_blue(pad0 ? '0' : ' ');
-                    while (*p)
-                        console_putchar_blue(*p++);
-                    break;
-
-                default:
-                    console_putchar_blue(*((int *)arg++));
-                    break;
-            }
-        }
-    }
-}
-void printf_green(const char *format, ...) {
-    char **arg = (char **)&format;
-    int c;
-    char buf[32];
-
-    arg++;
-
-    memset(buf, 0, sizeof(buf));
-    while ((c = *format++) != 0) {
-        if (c != '%')
-            console_putchar_green(c);
-        else {
-            char *p, *p2;
-            int pad0 = 0, pad = 0;
-
-            c = *format++;
-            if (c == '0') {
-                pad0 = 1;
-                c = *format++;
-            }
-
-            if (c >= '0' && c <= '9') {
-                pad = c - '0';
-                c = *format++;
-            }
-
-            switch (c) {
-                case 'd':
-                case 'u':
-                case 'x':
-                    itoa(buf, c, *((int *)arg++));
-                    p = buf;
-                    goto string;
-                    break;
-
-                case 's':
-                    p = *arg++;
-                    if (!p)
-                        p = "(null)";
-
-                string:
-                    for (p2 = p; *p2; p2++)
-                        ;
-                    for (; p2 < p + pad; p2++)
-                        console_putchar_green(pad0 ? '0' : ' ');
-                    while (*p)
-                        console_putchar_green(*p++);
-                    break;
-
-                default:
-                    console_putchar_green(*((int *)arg++));
-                    break;
-            }
-        }
-    }
-}
 
 void console_putchar_green(char ch) {
     if (ch == '\t') {
@@ -451,6 +283,38 @@ void console_putchar_green(char ch) {
     } else {
         if (ch > 0) {
             g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_BRIGHT_GREEN, COLOR_BLACK);
+            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
+        }
+    }
+}
+
+void console_putchar_yellow(char ch) {
+    if (ch == '\t') {
+        for(int i = 0; i < 4; i++) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_YELLOW, COLOR_BLACK);
+            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
+        }
+    } else if (ch == '\n') {
+        console_newline();
+    } else {
+        if (ch > 0) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_YELLOW, COLOR_BLACK);
+            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
+        }
+    }
+}
+
+void console_putchar_red(char ch) {
+    if (ch == '\t') {
+        for(int i = 0; i < 4; i++) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_RED, COLOR_BLACK);
+            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
+        }
+    } else if (ch == '\n') {
+        console_newline();
+    } else {
+        if (ch > 0) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_RED, COLOR_BLACK);
             vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
         }
     }
