@@ -1,4 +1,4 @@
-
+void sleep(int seconds);
 
 // Function to wait for a specified number of seconds
 void sleep(int seconds) {

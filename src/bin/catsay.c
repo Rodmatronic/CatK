@@ -1,7 +1,7 @@
 void catsay(input)
 {
     console_init(COLOR_WHITE, COLOR_BLACK);
-    printf("_______________________________________________\n");
+    printf(" ______________________________________________\n");
     printf("| %s\n", input);
     printf("|______________________________________________\n");
     printf("                \\/\n");

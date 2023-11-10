@@ -20,10 +20,11 @@ int listdrivebits() {
         // Check if the drive is active
         if (status != 0x00 && status != 0xFF) {
             // Drive is active, do something here
-            printf("Drive ATA %d is active\n", drive + 1);
+            rows++;
+            printf("\nDrive ATA %d is active", drive + 1);
         }
     }
     
     // If no active drives were found
-    printf("DUMMY\n");
+    printf("\nDUMMY");
 }

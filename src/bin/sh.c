@@ -13,6 +13,10 @@
 #include "string.h"
 #include "config.h"
 
+void set_cursor_position(int x, int y);
+void sh();
+void process_user_input(const char* input);
+
 int isclearing = 0;
 int row = 3; // Track the current row
 int stopglitchyhideingprompt = 0;

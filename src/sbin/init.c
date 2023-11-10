@@ -16,34 +16,32 @@ void init()
 
     bootmessage("Getting CPU info...");
     int result = cpuid_info(0);
-
     if (result) {
         // The function returned something
-        printf("%s\n", result);
-        printf("Got CPU info!");
-        catkmessage(1);
+        catkmessagefixed(1, 0);
     } else {
         // The function did not return anything, indicating an error
-        printf("cpuid_info did not return anything.\n");
-        catkmessage(3);
+        catkmessagefixed(3, 0);
     }
 
-    printf("Setting hostname...");
+    printf("\nSetting hostname...");
     strcpy(host_name, defaulthost);
 
     // Check if host_name has been modified
     if (strlen(host_name) > 0) {
-        catkmessage(1);
+        catkmessagefixed(1, 1);
     } else {
-        catkmessage(3);
+        catkmessagefixed(3, 1);
     }
 
-    printf("Detecting drives....\n");
+    printf("\nDetecting drives....");
     listdrivebits();
-    printf("Detected drives!");
-    catkmessage(1);
+    rows++;
+    rows++;
+    printf("\nDetected drives!");
+    catkmessagefixed(1, 2);
 
-    printf("Creating rootuser...");
+    printf("\nCreating rootuser...");
     // root user
     struct User rootUser;
     strcpy(rootUser.username, "root");
@@ -52,35 +50,33 @@ void init()
 
     // Check if user has been modified
     if (strlen(username) > 0) {
-        catkmessage(1);
+        catkmessagefixed(1, 3);
     } else {
-        catkmessage(3);
+        catkmessagefixed(3, 3);
     }
 
-    printf("Setting random seed...");
+    printf("\nSetting random seed...");
     int errorinseed = 0;
     seed = errorinseed;
     seed+=seconds;
     // Check if seed has been modified
     if (strlen(errorinseed) > 0) {
-        catkmessage(1);
+        catkmessagefixed(1, 4);
     } else {
-        catkmessage(3);
+        catkmessagefixed(3, 4);
     }
 
-    printf("Starting ethernet...\n");
+    printf("\nStarting ethernet...");
 
     // Assuming NAT configuration
     const char* statusNAT = isEthernetPluggedIn();
 
     const char* statusBridged = isEthernetPluggedIn();
 
-    printf("Starting sh process...\n");
-
     init_keyboard();
     if (bootargs != "quiet")
     {
-        printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
+        printf_dark("\nEnter full pathname for shell or RETURN for /bin/sh: \n");
         read();
     }
 

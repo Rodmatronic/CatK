@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+int rows = 0;
+
 /**
  * read a byte from given port number
  */

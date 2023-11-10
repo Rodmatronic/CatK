@@ -18,12 +18,12 @@ const char* isEthernetPluggedIn() {
 
     // Check the link status bit (bit 2)
     if (status & (1 << 2)) {
-        printf("Detected Ethernet!");
-        catkmessage(1);
+        printf("\nDetected Ethernet!");
+        catkmessagefixed(1);
         return "1";
     } else {
-        printf("Did not detect Ethernet");
-        catkmessage(2);
+        printf("\nDid not detect Ethernet");
+        catkmessagefixed(2);
         return "0";
     }
 }

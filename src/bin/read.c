@@ -3,6 +3,8 @@
 
 int readnum;
 
+void read();
+
 void read() {
     printf("\n");
     while (1) {

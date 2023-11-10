@@ -1,3 +1,5 @@
+void top();
+
 // Define a structure to represent a process
 typedef struct {
     int id; // Unique process ID
