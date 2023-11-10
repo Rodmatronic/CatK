@@ -16,10 +16,11 @@
 #include "bin/sleep.c"
 #include "bin/read.c"
 #include "drivers/fs.c"
-#include "config.catk"
+#include "config.h"
 #include "fs.h"
 #include "PreBoot.c"
 #include "drivers/crypto.c"
+#include "sbin/startdaemons.c"
 
 void printversion()
 {
@@ -48,14 +49,6 @@ void execute_process(int pid) {
         processes[pid - 1].state = 1;
         // Return to kernel main loop or scheduler
     }
-}
-
-void shell_process() {
-    // Your shell process code here
-    console_init(COLOR_WHITE, COLOR_BLACK);
-    next_pid = 1;
-    sh();
-    // Once the shell exits, you may want to terminate the process.
 }
 
 void init_processes() {
@@ -87,60 +80,10 @@ void boot() {
     printf("Kernel args: %s\n\n", bootargs); // Print the string
     bootmessage("Getting CPU info...");
     cpuinfo();
-    bootmessage("Scanning for devices...");
-    isCDROMDrivePresent(); 
-    listdrivebits();
-    printf("kernel: Trying to mount root...\n");
-
-    // Assuming NAT configuration
-    const char* statusNAT = isEthernetPluggedIn();
-    printf("eth0: NAT Network Status: %s\n", statusNAT);
-
-    const char* statusBridged = isEthernetPluggedIn();
-    printf("eth0: Bridged Network Status: %s\n", statusBridged);
 
     init_processes();
 
-    // Create some sample processes
-    int process1 = fork(process1);
-    int process2 = fork(process2);
-    int process3 = fork(process3);
-
-    //  THe existing user
-    struct User rootuser;
-    strcpy(rootuser.username, "root");
-    strcpy(rootuser.shell, "/bin/sh");
-
-    // New user entry
-    struct User newUser;
-    strcpy(newUser.username, "CatK");
-    strcpy(newUser.shell, "/bin/sh");
-
-    // Check if the user already exists
-    if (strcmp(rootuser.username, newUser.username) == 0) {
-        printf("User already exists. Please choose a different username.\n");
-    } else {
-        // If the user doesn't exist, you can replace the existing user with the new one.
-        rootuser = newUser;
-        printf("New user has been added.\n");
-    }
-
-
-    init_keyboard();
-    if (bootargs != "quiet")
-    {
-        printf_dark("Enter full pathname for shell or RETURN for /bin/sh: \n");
-        read();
-    }
-
-    console_init(COLOR_WHITE, COLOR_BLACK);
-    // Create a shell process
-    int shell_pid = fork(shell_process);
-
-    if (shell_pid > 0) {
-        // Execute the shell process
-        execute_process(shell_pid);
-    }
+    startdaemons();
 }
 
 void kmain() {
@@ -150,4 +93,22 @@ void kmain() {
 
 void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
+}
+
+
+void catkmessage(int NUM, ...) { // Use const char* for the string parameter
+    if (NUM == 1)
+    {
+        printf("       [  "); // Print the message and the string
+        printf_green("OK"); // Print the message and the string
+        printf("  ]\n"); // Print the message and the string
+    }else
+    if (NUM == 2)
+    {
+        printf("       [ WARN ]\n"); // Print the message and the string
+    }else
+    if (NUM == 3)
+    {
+        printf("       [ ERR ]\n"); // Print the message and the string
+    }
 }

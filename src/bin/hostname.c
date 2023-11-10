@@ -1,5 +1,4 @@
-char host_name[30] = ""; // hostname with a maximum length of 63 characters
-char username[] = "root"; // username
+#include "config.h"
 
 void hostname(char* input) {
     if (strlen(input) < sizeof(host_name)) {

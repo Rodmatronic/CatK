@@ -11,7 +11,7 @@
 #include "catsay.c"
 #include "fs.h"
 #include "string.h"
-#include "config.catk"
+#include "config.h"
 
 int isclearing = 0;
 int row = 3; // Track the current row

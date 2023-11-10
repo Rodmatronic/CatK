@@ -30,8 +30,9 @@ void man(char* command)
         printf("REPORTING BUGS");
         console_gotoxy(6, 16);
         printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+read();
 
-    }
+    }else
 
     if (strcmp(command, "halt") == 0 || strcmp(command, "poweroff") == 0 || strcmp(command, "reboot") == 0)
     {
@@ -59,7 +60,8 @@ void man(char* command)
         printf("REPORTING BUGS");
         console_gotoxy(6, 13);
         printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
-    }
+read();
+    }else
 
     if (strcmp(command, "uname") == 0)
     {
@@ -93,7 +95,8 @@ void man(char* command)
         printf("REPORTING BUGS");
         console_gotoxy(6, 18);
         printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
-    }
+read();
+    }else
 
     if (strcmp(command, "sh") == 0)
     {
@@ -121,7 +124,119 @@ void man(char* command)
         printf("REPORTING BUGS");
         console_gotoxy(6, 13);
         printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
-    }
+read();
+    }else
 
-    read();
+    if (strcmp(command, "whoami") == 0)
+    {
+        console_clear(COLOR_WHITE, COLOR_BLACK);
+        printf("WHOAMI(1)");
+        console_gotoxy(VGA_WIDTH / 2 - 8, 0);
+        printf("CatK user manual");
+        console_gotoxy(VGA_WIDTH -10, 0);
+        printf("WHOAMI(1)");
+        console_gotoxy(0, 2);
+        printf("NAME");
+        console_gotoxy(6, 3);
+        printf("whoami - print effective userid");
+        console_gotoxy(0, 5);
+        printf("SYNOPSIS");
+        console_gotoxy(6, 6);
+        printf("whoami [OPTION]...");
+        console_gotoxy(0, 8);
+        printf("DESCRIPTION");
+        console_gotoxy(6, 9);
+        printf("Print the user name associated with the current effective user ID. ");
+        console_gotoxy(0, 11);
+        printf("REPORTING BUGS");
+        console_gotoxy(6, 12);
+        printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+read();
+    }else
+
+    if (strcmp(command, "time") == 0)
+    {
+        console_clear(COLOR_WHITE, COLOR_BLACK);
+        printf("TIME(1)");
+        console_gotoxy(VGA_WIDTH / 2 - 7, 0);
+        printf("CatK user manual");
+        console_gotoxy(VGA_WIDTH -10, 0);
+        printf("TIME(1)");
+        console_gotoxy(0, 2);
+        printf("NAME");
+        console_gotoxy(6, 3);
+        printf("time - Display the current system time.");
+        console_gotoxy(0, 5);
+        printf("SYNOPSIS");
+        console_gotoxy(6, 6);
+        printf("time [OPTION]...");
+        console_gotoxy(0, 8);
+        printf("DESCRIPTION");
+        console_gotoxy(6, 9);
+        printf("Print the current system time out to the terminal");
+        console_gotoxy(0, 11);
+        printf("REPORTING BUGS");
+        console_gotoxy(6, 12);
+        printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+read();
+    }else
+    if (strcmp(command, "hostname") == 0)
+    {
+        console_clear(COLOR_WHITE, COLOR_BLACK);
+        printf("HOSTNAME(1)");
+        console_gotoxy(VGA_WIDTH / 2 - 8, 0);
+        printf("CatK user manual");
+        console_gotoxy(VGA_WIDTH -12, 0);
+        printf("HOSTNAME(1)");
+        console_gotoxy(0, 2);
+        printf("NAME");
+        console_gotoxy(6, 3);
+        printf("hostname - Set the system's host name");
+        console_gotoxy(0, 5);
+        printf("SYNOPSIS");
+        console_gotoxy(6, 6);
+        printf("time [OPTION]...");
+        console_gotoxy(0, 8);
+        printf("DESCRIPTION");
+        console_gotoxy(6, 9);
+        printf("hostname [hostname]");
+        console_gotoxy(0, 11);
+        printf("REPORTING BUGS");
+        console_gotoxy(6, 12);
+        printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+read();
+    }else
+    if (strcmp(command, "clear") == 0)
+    {
+        console_clear(COLOR_WHITE, COLOR_BLACK);
+        printf("CLEAR(1)");
+        console_gotoxy(VGA_WIDTH / 2 - 8, 0);
+        printf("CatK user manual");
+        console_gotoxy(VGA_WIDTH -8, 0);
+        printf("CLEAR(1)");
+        console_gotoxy(0, 2);
+        printf("NAME");
+        console_gotoxy(6, 3);
+        printf("clear - clear the terminal screen");
+        console_gotoxy(0, 5);
+        printf("SYNOPSIS");
+        console_gotoxy(6, 6);
+        printf("clear [-Ttype]");
+        console_gotoxy(0, 8);
+        printf("DESCRIPTION");
+        console_gotoxy(6, 9);
+        printf("clear  clears your screen if this is possible, including its scrollback buffer");
+        console_gotoxy(0, 12);
+        printf("HISTORY");
+        console_gotoxy(6, 13);
+        printf("A clear command appeared in 2.79BSD dated February 24, 1979.");
+        console_gotoxy(6, 14);
+        printf("Later that was provided in Unix 8th edition (1985).");
+        console_gotoxy(0, 16);
+        printf("REPORTING BUGS");
+        console_gotoxy(6, 17);
+        printf("You can report issues at https://github.com/Rodmatronic/CatK/issues");
+        read();
+    }else
+    printf("No such manual page");
 }
