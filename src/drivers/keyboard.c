@@ -49,10 +49,23 @@ char scancode_to_char(unsigned char scancode) {
 
     if (scancode == 0x2A) { // Left Shift pressed
         shift_pressed = 1;
-        return uppercase_keymap[scancode];
+        return 0; // Return 0 to indicate a special case
     } else if (scancode == 0xAA) { // Left Shift released
         shift_pressed = 0;
-    }else
+        return 0; // Return 0 to indicate a special case
+    }
+
+    if (shift_pressed) {
+        // If Shift key is pressed, use the uppercase keymap
+        if (scancode < sizeof(uppercase_keymap)) {
+            return uppercase_keymap[scancode];
+        }
+    } else {
+        // If Shift key is not pressed, use the lowercase keymap
+        if (scancode < sizeof(keymap)) {
+            return keymap[scancode];
+        }
+    }
 
     if (scancode == 0x2A) { //Up
         printf(" ");
