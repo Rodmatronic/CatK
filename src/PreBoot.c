@@ -2,8 +2,16 @@ int art = 2;
 int initdebug = 0;
 int skipinit = 0;
 
+void vga_enable_cursor() {
+    outportb(0x3D4, 0x0A);
+    outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
+    outportb(0x3D4, 0x0B);
+    outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 0x0E);  // Set the end scanline to 14 and disable blink
+}
+
 void PreBoot()
 {
+    vga_enable_cursor();
     console_gotoxy(0, 0);
     printf(" _______   _____   _______  ___   _\n");
     printf("|   ____| /  _  \\ |       ||   | | |\n");
@@ -224,7 +232,7 @@ void PreBoot()
         read();
         if (readnum == 1)
         {
-            console_init(COLOR_WHITE, COLOR_BLACK);
+            console_init(COLOR_GREY, COLOR_BLACK);
             PreBoot();
         }
 

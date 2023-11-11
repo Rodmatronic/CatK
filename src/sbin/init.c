@@ -25,8 +25,18 @@ int init(int debug)
     sleep(1);
     rows++;
 
-    printf("Getting clock..");
+    printf("Getting clock... ");
     GetCurrentTime();
+    catkmessagefixed(1, 0);
+
+    printf("\nAllocating memory...");
+    initialize_memory();
+
+    void* allocated_memory = allocate_memory(10 * 1024 * 1024);
+
+    if (allocated_memory == NULL) {
+        catkmessagefixed(3, 0);
+    }else
     catkmessagefixed(1, 0);
 
     printf("\nGetting CPU info...");

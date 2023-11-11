@@ -30,3 +30,48 @@ void GetMemory() {
     printf("Memory: Extended memory: %u bytes (%u KB)\n", extended_memory_bytes, extended_memory_kb);
     Memoryamount = extended_memory_bytes;
 }
+
+// A simple structure to represent a block of memory
+typedef struct {
+    size size;
+    int free; // 1 if the block is free, 0 if it's allocated
+} Block;
+
+// Assuming you have a large memory buffer for your kernel
+#define MEMORY_SIZE 1024 * 1024 * 15 // 15 MB
+char memory[MEMORY_SIZE];
+
+// A function to initialize your memory allocator
+void initialize_memory() {
+    // Create an initial free block that spans the entire memory
+    Block* initial_block = (Block*)memory;
+    initial_block->size = MEMORY_SIZE - sizeof(Block);
+    initial_block->free = 1;
+}
+
+// A function to allocate memory
+void* allocate_memory(size size) {
+    // Find the first free block that is large enough
+    Block* current_block = (Block*)memory;
+    while (current_block->size < size || !current_block->free) {
+        current_block = (Block*)((char*)current_block + current_block->size + sizeof(Block));
+    }
+
+    // Split the block if it's larger than needed
+    if (current_block->size > size + sizeof(Block)) {
+        Block* new_block = (Block*)((char*)current_block + size + sizeof(Block));
+        new_block->size = current_block->size - size - sizeof(Block);
+        new_block->free = 1;
+        current_block->size = size;
+    }
+
+    current_block->free = 0; // Mark the block as allocated
+    return (char*)current_block + sizeof(Block);
+}
+
+// A function to free memory
+void free_memory(void* ptr) {
+    // Mark the corresponding block as free
+    Block* block_to_free = (Block*)((char*)ptr - sizeof(Block));
+    block_to_free->free = 1;
+}

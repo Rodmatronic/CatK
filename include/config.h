@@ -2,6 +2,8 @@
 #define CONFIG_CATK_H
 #include "types.h"
 
+int rows = 0;
+
 extern uint32 prebootversion;
 extern char* bootargs;
 

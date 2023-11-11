@@ -1,5 +1,6 @@
 #include "types.h"
 #include "io_ports.h"
+#include "config.h"
 
 
 #define ATA_IDENTIFY_PORT   0x1F7   // Command port for ATA identify
