@@ -103,7 +103,7 @@ int init(int debug)
     if (bootargs != "quiet")
     {
         printf_dark("\nEnter full pathname for shell or RETURN for /bin/sh: \n");
-        read();
+        read(0);
     }
 
     console_init(COLOR_WHITE, COLOR_BLACK);

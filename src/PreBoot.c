@@ -157,7 +157,12 @@ void PreBoot()
     }
 
 
-    read();
+    read(1);
+    if (readnum == -1)
+    {
+        console_init(COLOR_GREY, COLOR_BLACK);
+        PreBoot();
+    }
     if (readnum == 1)
     {
         printf("quiet");
@@ -168,7 +173,7 @@ void PreBoot()
     {
         console_init(COLOR_BRIGHT_CYAN, COLOR_BLACK);
         printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n\n");
-        read();
+        read(1);
         if (readnum == 1)
         {
             art = 1;
@@ -229,7 +234,12 @@ void PreBoot()
         printf("2) Force broke init\n");
         printf("3) Skip init entireley (Leads to problems!)\n");
 
-        read();
+        read(1);
+        if (readnum == -1)
+        {
+            console_init(COLOR_GREY, COLOR_BLACK);
+            PreBoot();
+        }
         if (readnum == 1)
         {
             console_init(COLOR_GREY, COLOR_BLACK);

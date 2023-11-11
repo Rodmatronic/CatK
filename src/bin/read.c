@@ -3,9 +3,7 @@
 
 int readnum;
 
-void read();
-
-void read() {
+void read(int Boot) {
     printf("\n");
     while (1) {
             // Read a key scancode
@@ -14,6 +12,12 @@ void read() {
             if (scancode == 0x48)
             {
                 return 0;
+            }
+
+            if (scancode == 0x0E && Boot == 1)
+            {
+                readnum = -1;
+                break; // Exit the inner loop
             }
 
             // Convert the scancode to a character

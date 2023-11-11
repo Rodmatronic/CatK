@@ -309,7 +309,7 @@ else if (string_starts_with(input, "man")) {
         sh();
     }
     else if (string_starts_with(input, "read")) {
-        read();
+        read(0);
     }
     else if (string_starts_with(input, "clear")) {
         isclearing = 1;

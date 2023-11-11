@@ -116,40 +116,19 @@ void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
 }
 
-void catkmessage(int NUM, ...) { // Use const char* for the string parameter
-    if (NUM == 1)
-    {
-        printf("       [ "); // Print the message and the string
-        printf_green("OK"); // Print the message and the string
-        printf(" ]\n"); // Print the message and the string
-    }else
-    if (NUM == 2)
-    {
-        printf("       [ "); // Print the message and the string
-        printf_yellow("WARN");
-        printf(" ]\n");
-    }else
-    if (NUM == 3)
-    {
-        printf("       [ "); // Print the message and the string
-        printf_red("ERR!");
-        printf(" ]\n");
-    }
-}
-
 void catkmessagefixed(int NUM) { // Use const char* for the string parameter
     if (NUM == 1)
     {
         console_gotoxy(50, rows);
         printf_darkblue("[ "); // Print the message and the string
-        printf_green("OK"); // Print the message and the string
+        printf_blue("OK"); // Print the message and the string
         printf_darkblue(" ]"); // Print the message and the string
     }else
     if (NUM == 2)
     {
         console_gotoxy(50, rows);
         printf_darkblue("["); // Print the message and the string
-        printf_yellow("WARN");
+        printf_darkblue("WARN");
         printf_darkblue("]");
     }else
     if (NUM == 3)
