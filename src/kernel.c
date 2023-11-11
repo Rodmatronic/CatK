@@ -70,9 +70,6 @@ void boot() {
     printf("Created by Rodmatronics. Thank you for using CatK!\n");
     printf("This is a BSD inspired kernel.\n");
     printf("    It does NOT use any BSD source code\n");
-    bootmessage("Getting system clock...");
-    printf("time:");
-    GetCurrentTime();
     bootmessage("Getting memory...");
     GetMemory();
     bootmessage("Using config.catk for kernel configuration & args");
@@ -82,7 +79,32 @@ void boot() {
 
     init_processes();
 
-    init();
+    if (skipinit == 0)
+    {
+        printf_green("Starting INIT...\n");
+
+        init(initdebug);
+
+        //If this happens, someting is monumentally fucked up!
+        if (init != 0) {
+            
+            for (int i = 5; i > 0;)
+            {
+                printf("INIT failed! Retrying...\n");
+                sleep(1);
+                init(initdebug);
+                i--;
+            }
+
+            panic("Something is very wrong with INIT! Failed to boot!");
+
+        }
+    }
+
+    if (skipinit == 1)
+    {
+        sh();
+    }
 }
 
 void kmain() {

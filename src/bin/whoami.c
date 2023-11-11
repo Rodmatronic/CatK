@@ -4,5 +4,5 @@ void whoami();
 
 void whoami()
 {
-    printf("%s", userid);
+    printf("%s", username);
 }

@@ -10,16 +10,26 @@ void shell_process() {
     // Once the shell exits, you may want to terminate the process.
 }
 
-void init()
+int init(int debug)
 {
+    if (debug == 1)
+    {
+        return 0;
+    }
+    
     console_init(COLOR_WHITE, COLOR_BLACK);
     rows++;
-    printf("Welcome to CatK %s!\n", versionnumber);
+    printf("Welcome to ");
+    printf_blue("CatK %s!\n", versionnumber);
     printf_dark("----------------------------------------\n");
     sleep(1);
     rows++;
 
-    printf("Getting CPU info...");
+    printf("Getting clock..");
+    GetCurrentTime();
+    catkmessagefixed(1, 0);
+
+    printf("\nGetting CPU info...");
     int result = cpuid_info(0);
     if (result) {
         // The function returned something

@@ -1,4 +1,6 @@
 int art = 2;
+int initdebug = 0;
+int skipinit = 0;
 
 void PreBoot()
 {
@@ -17,8 +19,8 @@ void PreBoot()
     printf("| 1.  Suppress boot logs\n");
     printf("| 2.  Kitty artwork\n");
     printf("| 3.  Reboot\n");
-    printf("|\n");
-    printf("|\n");
+    printf("|------------------------\n");
+    printf("| 4.  Advanced (careful!)\n");
     printf("|\n");
     printf("|\n");
     printf("+==================================+\n");
@@ -63,7 +65,7 @@ void PreBoot()
         console_gotoxy(40, 17);
         printf_darkblue("        \\___________________/      ");
         console_gotoxy(40, 18);
-        printf_red("        =====================      ");
+        printf_red("         ===================       ");
         console_gotoxy(40, 19);
         printf_red("        =========");
         printf_yellow("\\/");
@@ -109,7 +111,7 @@ void PreBoot()
         console_gotoxy(40, 17);
         printf_darkblue("        \\___________________/      ");
         console_gotoxy(40, 18);
-        printf_red("        =====================      ");
+        printf_red("         ===================       ");
         console_gotoxy(40, 19);
         printf_red("        =========");
         printf_yellow("\\/");
@@ -178,6 +180,63 @@ void PreBoot()
     if (readnum == 3)
     {
         syspw(0);
+    }
+
+    if (readnum == 4)
+    {
+        console_init(COLOR_WHITE, COLOR_BLACK);
+
+        console_gotoxy(45, 12);
+        printf_blue("        /--        --\\");
+        console_gotoxy(45, 13);
+        printf_blue("      /   |        |   \\");
+        console_gotoxy(45, 14);
+        printf_blue("    /     |        |     \\");
+        console_gotoxy(45, 15);
+        printf_blue("   /      |        |      \\");
+        console_gotoxy(45, 16);
+        printf_blue("  /       |        |       \\");
+        console_gotoxy(45, 17);
+        printf_blue(" |        |________|        |");
+        console_gotoxy(45, 18);
+        printf_blue(" |                          |");
+        console_gotoxy(45, 19);
+        printf_blue(" |                          |");
+        console_gotoxy(45, 20);
+        printf_blue("  \\       CATK DEBUG       / ");
+        console_gotoxy(45, 21);
+        printf_blue("   \\                      /  ");
+        console_gotoxy(45, 22);
+        printf_blue("     \\                  /    ");
+        console_gotoxy(45, 23);
+        printf_blue("        \\             /    ");
+        console_gotoxy(45, 24);
+        printf_blue("         |           |    ");
+        console_gotoxy(45, 25);
+        printf_blue("         |           |    ");
+
+        console_gotoxy(0, 0);
+        printf("Advanced debugging stuffs. CAREFUL!\n");
+        printf("1) Back\n");
+        printf("2) Force broke init\n");
+        printf("3) Skip init entireley (Leads to problems!)\n");
+
+        read();
+        if (readnum == 1)
+        {
+            console_init(COLOR_WHITE, COLOR_BLACK);
+            PreBoot();
+        }
+
+        if (readnum == 2)
+        {
+            initdebug = 1;
+        }
+
+        if (readnum == 3)
+        {
+            skipinit = 1;
+        }
     }
     console_init(COLOR_WHITE, COLOR_BLACK);
     boot();
