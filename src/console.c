@@ -319,3 +319,35 @@ void console_putchar_red(char ch) {
         }
     }
 }
+
+void console_putchar_darkblue(char ch) {
+    if (ch == '\t') {
+        for(int i = 0; i < 4; i++) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_CYAN, COLOR_BLACK);
+            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
+        }
+    } else if (ch == '\n') {
+        console_newline();
+    } else {
+        if (ch > 0) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_CYAN, COLOR_BLACK);
+            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
+        }
+    }
+}
+
+void console_putchar_white(char ch) {
+    if (ch == '\t') {
+        for(int i = 0; i < 4; i++) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_WHITE, COLOR_BLACK);
+            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
+        }
+    } else if (ch == '\n') {
+        console_newline();
+    } else {
+        if (ch > 0) {
+            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_WHITE, COLOR_BLACK);
+            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
+        }
+    }
+}

@@ -13,6 +13,7 @@ static inline uint8 ethplugged(uint16 port) {
 
 // Function to check Ethernet port status
 const char* isEthernetPluggedIn() {
+    
     // Read the status register of the NIC
     uint8 status = ethplugged(ETH_STATUS_PORT + ETH_STATUS_REGISTER);
 

@@ -30,13 +30,16 @@ void PreBoot()
     if (art == 1)
     {
         console_gotoxy(40, 5);
-        printf_blue("           __           __            Z ");
+        printf_white("           __           __");
+        printf_darkblue("          Z    ");
         console_gotoxy(40, 6);
-        printf_blue("          /  \\         /  \\        Z");
+        printf_white("          /  \\         /  \\");
+        printf_darkblue("      Z    ");
         console_gotoxy(40, 7);
-        printf_blue("         / /\\ \\       / /\\ \\   Z    ");
+        printf_blue("         / /\\ \\       / /\\ \\");
+        printf_darkblue("  Z    ");
         console_gotoxy(40, 8);
-        printf_blue("        / /  \\ \\     / /  \\ \\      ");
+        printf_blue("        / /  \\ \\     / /  \\ \\");
         console_gotoxy(40, 9);
         printf_blue("       / /      \\___/      \\ \\     ");
         console_gotoxy(40, 10);
@@ -48,31 +51,37 @@ void PreBoot()
         console_gotoxy(40, 13);
         printf_blue("     |                         |   ");
         console_gotoxy(40, 14);
-        printf_blue("   ---  //       ^       //    --- ");
+        printf_blue("   ---  ");
+        printf_darkblue("//");
+        printf_blue("       ^       ");
+        printf_darkblue("//");
+        printf_blue("    --- ");
         console_gotoxy(40, 15);
         printf_blue("      \\         \\\\            /    ");
         console_gotoxy(40, 16);
         printf_blue("       \\                     /     ");
         console_gotoxy(40, 17);
-        printf_blue("        \\___________________/      ");
+        printf_darkblue("        \\___________________/      ");
         console_gotoxy(40, 18);
-        printf_blue("        =====================      ");
+        printf_red("        =====================      ");
         console_gotoxy(40, 19);
-        printf_blue("        =========\\/==========      ");
+        printf_red("        =========");
+        printf_yellow("\\/");
+        printf_red("==========      ");
         console_gotoxy(40, 20);
-        printf_blue("                /  \\               ");
+        printf_yellow("                /  \\               ");
         console_gotoxy(40, 21);
-        printf_blue("               |catk|              ");
+        printf_yellow("               |catk|              ");
         console_gotoxy(40, 22);
-        printf_blue("                \\__/               ");
+        printf_yellow("                \\__/               ");
     }else
 
     if (art == 2)
     {
         console_gotoxy(40, 5);
-        printf_blue("           __           __             ");
+        printf_white("           __           __             ");
         console_gotoxy(40, 6);
-        printf_blue("          /  \\         /  \\        ");
+        printf_white("          /  \\         /  \\        ");
         console_gotoxy(40, 7);
         printf_blue("         / /\\ \\       / /\\ \\       ");
         console_gotoxy(40, 8);
@@ -88,23 +97,29 @@ void PreBoot()
         console_gotoxy(40, 13);
         printf_blue("     |                         |   ");
         console_gotoxy(40, 14);
-        printf_blue("   ---  //       ^       //    --- ");
+        printf_blue("   ---  ");
+        printf_darkblue("//");
+        printf_blue("       ^       ");
+        printf_darkblue("//");
+        printf_blue("    --- ");
         console_gotoxy(40, 15);
         printf_blue("      \\         \\/\\/          /    ");
         console_gotoxy(40, 16);
         printf_blue("       \\                     /     ");
         console_gotoxy(40, 17);
-        printf_blue("        \\___________________/      ");
+        printf_darkblue("        \\___________________/      ");
         console_gotoxy(40, 18);
-        printf_blue("        =====================      ");
+        printf_red("        =====================      ");
         console_gotoxy(40, 19);
-        printf_blue("        =========\\/==========      ");
+        printf_red("        =========");
+        printf_yellow("\\/");
+        printf_red("==========      ");
         console_gotoxy(40, 20);
-        printf_blue("                /  \\               ");
+        printf_yellow("                /  \\               ");
         console_gotoxy(40, 21);
-        printf_blue("               |catk|              ");
+        printf_yellow("               |catk|              ");
         console_gotoxy(40, 22);
-        printf_blue("                \\__/               ");
+        printf_yellow("                \\__/               ");
     }else
 
     if (art == 3)

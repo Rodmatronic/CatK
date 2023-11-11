@@ -13,8 +13,13 @@ void shell_process() {
 void init()
 {
     console_init(COLOR_WHITE, COLOR_BLACK);
+    rows++;
+    printf("Welcome to CatK %s!\n", versionnumber);
+    printf_dark("----------------------------------------\n");
+    sleep(1);
+    rows++;
 
-    bootmessage("Getting CPU info...");
+    printf("Getting CPU info...");
     int result = cpuid_info(0);
     if (result) {
         // The function returned something
@@ -69,8 +74,9 @@ void init()
     printf("\nStarting ethernet...");
 
     // Assuming NAT configuration
+    rows++;
     const char* statusNAT = isEthernetPluggedIn();
-
+    
     const char* statusBridged = isEthernetPluggedIn();
 
     init_keyboard();
