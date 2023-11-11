@@ -22,15 +22,15 @@ void PreBoot()
     printf("|_______||__| |__|  |___|  |___| |_|\n\n");
 
     printf("+==================================+\n");
-    printf("|    CatK PreBoot\n");
-    printf_blue("| Boot normally [Enter]\n");
-    printf("| 1.  Suppress boot logs\n");
-    printf("| 2.  Kitty artwork\n");
-    printf("| 3.  Reboot\n");
-    printf("|------------------------\n");
-    printf("| 4.  Advanced (careful!)\n");
-    printf("|\n");
-    printf("|\n");
+    printf("|    CatK PreBoot                  |\n");
+    printf_blue("| Boot normally [Enter]            |\n");
+    printf("| 1.  Suppress boot logs           |\n");
+    printf("| 2.  Kitty artwork                |\n");
+    printf("| 3.  Reboot                       |\n");
+    printf("|------------------------          |\n");
+    printf("| 4.  Advanced (careful!)          |\n");
+    printf("|                                  |\n");
+    printf("|                                  |\n");
     printf("+==================================+\n");
 
     console_gotoxy(0, 24);
