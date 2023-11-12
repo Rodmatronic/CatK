@@ -328,19 +328,29 @@ else if (string_starts_with(input, "man")) {
     else if (string_starts_with(input, "time")) {
         GetCurrentTime();
     }
-    else if (string_starts_with(input, "sleep")) {
-        args = input + strlen("sleep "); // Extract arguments
-        // Check if there are arguments (non-empty)
-        if (args[0] != '\0') {
-            args[strlen(args) - 1] = '\0'; // Null-terminate the arguments
-            printf("%s", args);
-            sleep(args);
-            sh();
-        }else
+else if (string_starts_with(input, "sleep")) {
+    args = input + strlen("sleep "); // Extract arguments
+    size args_len = strlen(args);
 
-            printf("Invalid sleep time");
+    // Check if there are arguments (non-empty)
+    if (args[0] != '\0') {// Make sure there is at least one character in args (besides the newline)
 
-    }    
+        // Remove newline character from the end
+        if (args[args_len - 1] == '\n') {
+            args[args_len - 1] = '\0';
+        }
+
+        // Remove any trailing whitespace
+        while (args_len > 0 && (args[args_len - 1] == '\r')) {
+            args[args_len - 1] = '\0';
+        }
+
+        printf("Sleeping for %s seconds\n", args);
+        sleep(atoi(args)); // Convert args to an integer and pass it to sleep
+    } else {
+        printf("Invalid sleep time\n");
+    }
+}
     else {
         printf("%s: Command not found", input);
     }

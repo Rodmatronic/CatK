@@ -105,3 +105,24 @@ void itoa(char *buf, int base, int d) {
         p2--;
     }
 }
+
+// Simple atoi function
+int atoi(const char *str) {
+    int result = 0;
+    int sign = 1;
+    int i = 0;
+
+    // Handle optional sign
+    if (str[0] == '-') {
+        sign = -1;
+        i++;
+    }
+
+    // Process each digit in the string
+    while (str[i] != '\0') {
+        result = result * 10 + (str[i] - '0');
+        i++;
+    }
+
+    return sign * result;
+}

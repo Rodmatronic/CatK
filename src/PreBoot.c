@@ -134,9 +134,10 @@ void PreBoot()
 
     if (art == 3)
     {
-            printf_blue("       _      _");
+            console_gotoxy(45, 8);
+            printf_white("       _      _");
             console_gotoxy(45, 9);
-            printf_blue("      / \\    / \\");
+            printf_white("      / \\    / \\");
             console_gotoxy(45, 10);
             printf_blue("     /   \\__/   \\");
             console_gotoxy(45, 11);
@@ -150,9 +151,9 @@ void PreBoot()
             console_gotoxy(45, 15);
             printf_blue("    \\            /");
             console_gotoxy(45, 16);
-            printf_blue("     =====\\/=====");
+            printf_red("     =====\\/=====");
             console_gotoxy(45, 17);
-            printf_blue("        (CatK)");
+            printf_yellow("        (CatK)");
             console_gotoxy(45, 18);
     }
 
