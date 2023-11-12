@@ -20,7 +20,7 @@ int init(int debug)
     console_init(COLOR_WHITE, COLOR_BLACK);
     rows++;
     printf("Welcome to ");
-    printf_blue("CatK %s!\n", versionnumber);
+    printf_brightcyan("CatK %s!\n", versionnumber);
     printf_dark("----------------------------------------\n");
     sleep(1);
     rows++;

@@ -12,7 +12,7 @@ void panic(const char* panictext, ...);
 void panic(const char* panictext, ...)
 {
     console_init(COLOR_WHITE, COLOR_BLACK);
-    printf_blue("panic: %s\n", panictext);
+    printf("panic: %s\n", panictext);
     cpuinfo();
     GetCurrentTime();
     printf("CatK has been halted.\n");

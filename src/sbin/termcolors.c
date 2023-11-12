@@ -55,7 +55,7 @@ void printf_dark(const char *format, ...) {
     }
 }
 
-void printf_blue(const char *format, ...) {
+void printf_brightcyan(const char *format, ...) {
     char **arg = (char **)&format;
     int c;
     char buf[32];
@@ -65,7 +65,7 @@ void printf_blue(const char *format, ...) {
     memset(buf, 0, sizeof(buf));
     while ((c = *format++) != 0) {
         if (c != '%')
-            console_putchar_blue(c);
+            console_putchar_cyan(c);
         else {
             char *p, *p2;
             int pad0 = 0, pad = 0;
@@ -99,13 +99,13 @@ void printf_blue(const char *format, ...) {
                     for (p2 = p; *p2; p2++)
                         ;
                     for (; p2 < p + pad; p2++)
-                        console_putchar_blue(pad0 ? '0' : ' ');
+                        console_putchar_cyan(pad0 ? '0' : ' ');
                     while (*p)
-                        console_putchar_blue(*p++);
+                        console_putchar_cyan(*p++);
                     break;
 
                 default:
-                    console_putchar_blue(*((int *)arg++));
+                    console_putchar_cyan(*((int *)arg++));
                     break;
             }
         }
@@ -282,7 +282,7 @@ void printf_red(const char *format, ...) {
     }
 }
 
-void printf_darkblue(const char *format, ...) {
+void printf_darkcyan(const char *format, ...) {
     char **arg = (char **)&format;
     int c;
     char buf[32];
@@ -292,7 +292,7 @@ void printf_darkblue(const char *format, ...) {
     memset(buf, 0, sizeof(buf));
     while ((c = *format++) != 0) {
         if (c != '%')
-            console_putchar_darkblue(c);
+            console_putchar_darkcyan(c);
         else {
             char *p, *p2;
             int pad0 = 0, pad = 0;
@@ -326,13 +326,13 @@ void printf_darkblue(const char *format, ...) {
                     for (p2 = p; *p2; p2++)
                         ;
                     for (; p2 < p + pad; p2++)
-                        console_putchar_darkblue(pad0 ? '0' : ' ');
+                        console_putchar_darkcyan(pad0 ? '0' : ' ');
                     while (*p)
-                        console_putchar_darkblue(*p++);
+                        console_putchar_darkcyan(*p++);
                     break;
 
                 default:
-                    console_putchar_darkblue(*((int *)arg++));
+                    console_putchar_darkcyan(*((int *)arg++));
                     break;
             }
         }
@@ -390,6 +390,120 @@ void printf_white(const char *format, ...) {
 
                 default:
                     console_putchar_white(*((int *)arg++));
+                    break;
+            }
+        }
+    }
+}
+
+void printf_blue(const char *format, ...) {
+    char **arg = (char **)&format;
+    int c;
+    char buf[32];
+
+    arg++;
+
+    memset(buf, 0, sizeof(buf));
+    while ((c = *format++) != 0) {
+        if (c != '%')
+            console_putchar_blue(c);
+        else {
+            char *p, *p2;
+            int pad0 = 0, pad = 0;
+
+            c = *format++;
+            if (c == '0') {
+                pad0 = 1;
+                c = *format++;
+            }
+
+            if (c >= '0' && c <= '9') {
+                pad = c - '0';
+                c = *format++;
+            }
+
+            switch (c) {
+                case 'd':
+                case 'u':
+                case 'x':
+                    itoa(buf, c, *((int *)arg++));
+                    p = buf;
+                    goto string;
+                    break;
+
+                case 's':
+                    p = *arg++;
+                    if (!p)
+                        p = "(null)";
+
+                string:
+                    for (p2 = p; *p2; p2++)
+                        ;
+                    for (; p2 < p + pad; p2++)
+                        console_putchar_blue(pad0 ? '0' : ' ');
+                    while (*p)
+                        console_putchar_blue(*p++);
+                    break;
+
+                default:
+                    console_putchar_blue(*((int *)arg++));
+                    break;
+            }
+        }
+    }
+}
+
+void printf_brightblue(const char *format, ...) {
+    char **arg = (char **)&format;
+    int c;
+    char buf[32];
+
+    arg++;
+
+    memset(buf, 0, sizeof(buf));
+    while ((c = *format++) != 0) {
+        if (c != '%')
+            console_putchar_brightblue(c);
+        else {
+            char *p, *p2;
+            int pad0 = 0, pad = 0;
+
+            c = *format++;
+            if (c == '0') {
+                pad0 = 1;
+                c = *format++;
+            }
+
+            if (c >= '0' && c <= '9') {
+                pad = c - '0';
+                c = *format++;
+            }
+
+            switch (c) {
+                case 'd':
+                case 'u':
+                case 'x':
+                    itoa(buf, c, *((int *)arg++));
+                    p = buf;
+                    goto string;
+                    break;
+
+                case 's':
+                    p = *arg++;
+                    if (!p)
+                        p = "(null)";
+
+                string:
+                    for (p2 = p; *p2; p2++)
+                        ;
+                    for (; p2 < p + pad; p2++)
+                        console_putchar_brightblue(pad0 ? '0' : ' ');
+                    while (*p)
+                        console_putchar_brightblue(*p++);
+                    break;
+
+                default:
+                    console_putchar_brightblue(*((int *)arg++));
                     break;
             }
         }

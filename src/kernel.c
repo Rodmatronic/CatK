@@ -120,23 +120,23 @@ void catkmessagefixed(int NUM) { // Use const char* for the string parameter
     if (NUM == 1)
     {
         console_gotoxy(50, rows);
-        printf_darkblue("[ "); // Print the message and the string
-        printf_blue("OK"); // Print the message and the string
-        printf_darkblue(" ]"); // Print the message and the string
+        printf_darkcyan("[ "); // Print the message and the string
+        printf_brightcyan("OK"); // Print the message and the string
+        printf_darkcyan(" ]"); // Print the message and the string
     }else
     if (NUM == 2)
     {
         console_gotoxy(50, rows);
-        printf_darkblue("["); // Print the message and the string
-        printf_darkblue("WARN");
-        printf_darkblue("]");
+        printf_darkcyan("["); // Print the message and the string
+        printf_darkcyan("WARN");
+        printf_darkcyan("]");
     }else
     if (NUM == 3)
     {
         console_gotoxy(50, rows);
-        printf_darkblue("["); // Print the message and the string
+        printf_darkcyan("["); // Print the message and the string
         printf_red("ERR!");
-        printf_darkblue("]");
+        printf_darkcyan("]");
     }
     rows++;
 }

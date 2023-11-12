@@ -53,10 +53,10 @@ void sh() {
     while (1) {
         isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
-        printf("%s", username);
-        printf("@");
-        printf("%s", host_name);
-        printf(":/ # ");
+        printf_green("%s", username);
+        printf_green("@");
+        printf_green("%s", host_name);
+        printf_brightblue(":/ # ");
 
         int input_index = 0; // Index for the input buffer
         int empty_input = 1; // Flag to track empty input
