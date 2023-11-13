@@ -37,6 +37,10 @@ void help()
     printf_dark(" - Stores an encrypted value, then decrypts\n");
     printf("  exit");
     printf_dark(" - Terminates the current user session\n");
+    printf("  cat");
+    printf_dark(" - Lists contents of a file\n");
+    printf("  ls");
+    printf_dark(" - Lists all files and directories\n");
     printf("  panic");
     printf_dark(" - WARNING!!! This is for debugging purposes, halts the system");
     AppClose(&help);
