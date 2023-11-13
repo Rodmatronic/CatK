@@ -7,6 +7,8 @@ int rows = 0;
 extern uint32 prebootversion;
 extern char* bootargs;
 
+char defaulthostname[30] = "catk";
+
 char host_name[30] = ""; // hostname with a maximum length of 63 characters
 char username[30] = ""; // username
 

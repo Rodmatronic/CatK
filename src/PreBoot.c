@@ -1,6 +1,7 @@
 int art = 2;
 int initdebug = 0;
 int skipinit = 0;
+int fillfs = 0;
 
 void vga_enable_cursor() {
     outportb(0x3D4, 0x0A);
@@ -234,6 +235,7 @@ void PreBoot()
         printf("1) Back\n");
         printf("2) Force broke init\n");
         printf("3) Skip init entireley (Leads to problems!)\n");
+        printf("4) Fill filesystem (ruh roh!)\n");
 
         read(1);
         if (readnum == -1)
@@ -255,6 +257,11 @@ void PreBoot()
         if (readnum == 3)
         {
             skipinit = 1;
+        }
+
+        if (readnum == 4)
+        {
+            fillfs = 1;
         }
     }
     console_init(COLOR_WHITE, COLOR_BLACK);

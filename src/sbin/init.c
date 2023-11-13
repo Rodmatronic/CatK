@@ -27,7 +27,28 @@ int init(int debug)
 
     printf("Getting clock... ");
     GetCurrentTime();
+    powerontimes();
     catkmessagefixed(1, 0);
+
+
+    printf("\nCreating FS...");
+
+    // Initialize the file table
+    for (size i = 0; i < MAX_FILES; ++i) {
+        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
+    }
+
+    write_to_file(&rootfs, "init.catk", "Filesystem started successfully");
+
+    catkmessagefixed(1, 0);
+    
+    int dummy = 0;
+    if (fillfs == 1) {
+        for (int i = 0; i < 1024; i++) {
+            write_to_file(&rootfs, dummy, "root");
+            dummy++;
+        }
+    }
 
     printf("\nAllocating memory...");
     initialize_memory();
@@ -40,6 +61,7 @@ int init(int debug)
     catkmessagefixed(1, 0);
 
     printf("\nGetting CPU info...");
+
     int result = cpuid_info(0);
     if (result) {
         // The function returned something
@@ -50,7 +72,11 @@ int init(int debug)
     }
 
     printf("\nSetting hostname...");
-    strcpy(host_name, defaulthost);
+
+    write_to_file(&rootfs, "hostname", defaulthostname);
+    read_from_file(&rootfs, "hostname", buffer, sizeof(buffer));
+
+    strcpy(host_name, buffer);
 
     // Check if host_name has been modified
     if (strlen(host_name) > 0) {
@@ -98,20 +124,6 @@ int init(int debug)
     const char* statusNAT = isEthernetPluggedIn();
     
     const char* statusBridged = isEthernetPluggedIn();
-
-    
-
-    printf("\nCreating FS...");
-
-    // Initialize the file table
-    for (size i = 0; i < MAX_FILES; ++i) {
-        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
-    }
-
-    write_to_file(&rootfs, "CatK", "Welcome to CatK!");
-    write_to_file(&rootfs, "users", "root");
-
-    list_files(&rootfs);
 
     init_keyboard();
     if (bootargs != "quiet")

@@ -75,6 +75,7 @@ void sh() {
                 cursorpos = 0; // Ensure cursor position is non-negative
             }
 
+
             if (key != 0) {isclearing = 0;
 
                 cursorpos++;
@@ -101,6 +102,12 @@ void sh() {
                 if (scancode == ENTER_KEY_SCANCODE) {
                     if (!empty_input) {
                         printf("\n\n");
+                        // Check if input length exceeds 20 characters
+                        if (input_index >= 55) {
+                            printf("\nInput too long. Please keep it under 55 characters.\n");
+                            row+=5;
+                            break;
+                        }
                         stopglitchyhideingprompt = 1;
                         process_user_input(input_buffer);
                         if (stopglitchyhideingprompt == 1 && isclearing == 1)
@@ -145,6 +152,7 @@ void sh() {
 }
 
 void process_user_input(const char* input) {
+
     args = NULL; // Reset the arguments
 
     // Check for specific commands in the input
@@ -221,7 +229,6 @@ void process_user_input(const char* input) {
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
                             // Read and display the content of the specified file
-                char buffer[BLOCK_SIZE];
                 read_from_file(&rootfs, args, buffer, sizeof(buffer));
 
                 // Display the content
@@ -250,19 +257,49 @@ else if (string_starts_with(input, "man")) {
     printf("No such manual entry");
 }
 
-    else if (string_starts_with(input, "touch")) {
-        args = input + strlen("touch "); // Extract arguments
-        // Check if there are arguments (non-empty)
-        if (args[0] != '\0') {
-            // NOT DONE YET!
-            write_to_file(&rootfs, args, args);
+else if (string_starts_with(input, "touch")) {
+    args = input + strlen("touch "); // Extract arguments
+    
+    // Check if there are arguments (non-empty)
+    if (args[0] != '\0') {
+        char filename[25]; // Assuming MAX_FILENAME_LENGTH is defined
+        char contents[1024]; // Assuming MAX_CONTENTS_LENGTH is defined
+        int argIndex = 0;
+        
+        // Skip leading spaces
+        while (args[argIndex] == ' ') {
+            argIndex++;
         }
+        
+        // Extract the filename
+        int filenameIndex = 0;
+        while (args[argIndex] != ' ' && args[argIndex] != '\0') {
+            filename[filenameIndex++] = args[argIndex++];
+        }
+        filename[filenameIndex] = '\0';
+        
+        // Skip spaces between filename and contents
+        while (args[argIndex] == ' ') {
+            argIndex++;
+        }
+        
+        // Extract the contents
+        int contentsIndex = 0;
+        while (args[argIndex] != '\0') {
+            contents[contentsIndex++] = args[argIndex++];
+        }
+        contents[contentsIndex] = '\0';
+        
+        // Now, you can use filename and contents as needed
+        write_to_file(&rootfs, filename, contents);
     }
+}
+
     else if (string_starts_with(input, "color")) {
         args = input + strlen("color "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-            printf("\nNo such color %s\n", args);
+            printf("No such color %s\n", args);
 
             if (strcmp(args, "red") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_BRIGHT_RED, COLOR_BLACK);
@@ -367,6 +404,7 @@ else if (string_starts_with(input, "sleep")) {
     else {
         printf("%s: Command not found", input);
     }
+    
 
 }
 

@@ -1,5 +1,7 @@
 #include "string.h"
 #include "io_ports.h"
+#include "fs.h"
+
 // I/O Ports for RTC
 #define RTC_ADDRESS_PORT 0x70
 #define RTC_DATA_PORT 0x71
@@ -32,7 +34,7 @@ uint8 read_RTC_register(uint8 reg) {
 uint8 powerontime[3] = {0}; // Initialize to 0, representing hours, minutes, seconds
 
 void powerontimes() {
-
+    // Assuming powerontime is an array of integers with size 3
     if (powerontime[0] == 0 && powerontime[1] == 0 && powerontime[2] == 0) {
         // Only store the time if it hasn't been set previously
         powerontime[0] = hours;
@@ -40,6 +42,30 @@ void powerontimes() {
         powerontime[2] = seconds;
 
         seed = seconds;
+
+        // Convert integers to ASCII characters
+        char poweronTimeString[10]; // Adjust the size according to your needs
+        int index = 0;
+
+        // Append hours
+        poweronTimeString[index++] = ((hours / 10) % 10) + '0';
+        poweronTimeString[index++] = (hours % 10) + '0';
+        poweronTimeString[index++] = ':';
+
+        // Append minutes
+        poweronTimeString[index++] = ((minutes / 10) % 10) + '0';
+        poweronTimeString[index++] = (minutes % 10) + '0';
+        poweronTimeString[index++] = ':';
+
+        // Append seconds
+        poweronTimeString[index++] = ((seconds / 10) % 10) + '0';
+        poweronTimeString[index++] = (seconds % 10) + '0';
+
+        // Null-terminate the string
+        poweronTimeString[index] = '\0';
+
+        // Write the power-on time string to the file
+        write_to_file(&rootfs, "powerontime", poweronTimeString);
     }
 }
 
@@ -64,6 +90,41 @@ void GetCurrentTime() {
     write_RTC_register(0x0B, read_RTC_register(0x0B) & 0x7F);
 
     printf("%02x:%02x:%02x %02x/%02x/%02x\n", hours, minutes, seconds, month, day, year);
+
+    // Convert integers to ASCII characters
+    char timeString[20]; // Adjust the size according to your needs
+    int index = 0;
+
+    // Append hours
+    timeString[index++] = ((hours / 10) % 10) + '0';
+    timeString[index++] = (hours % 10) + '0';
+    timeString[index++] = ':';
+
+    // Append minutes
+    timeString[index++] = ((minutes / 10) % 10) + '0';
+    timeString[index++] = (minutes % 10) + '0';
+    timeString[index++] = ':';
+
+    // Append seconds
+    timeString[index++] = ((seconds / 10) % 10) + '0';
+    timeString[index++] = (seconds % 10) + '0';
+
+    // Append date
+    timeString[index++] = ' ';
+    timeString[index++] = ((month / 10) % 10) + '0';
+    timeString[index++] = (month % 10) + '0';
+    timeString[index++] = '/';
+    timeString[index++] = ((day / 10) % 10) + '0';
+    timeString[index++] = (day % 10) + '0';
+    timeString[index++] = '/';
+    timeString[index++] = ((year / 10) % 10) + '0';
+    timeString[index++] = (year % 10) + '0';
+
+    // Null-terminate the string
+    timeString[index] = '\0';
+
+    // Write the time string to the file
+    write_to_file(&rootfs, "time", timeString);
 
     // Call the function to store power-on time
     powerontimes();

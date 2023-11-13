@@ -16,6 +16,9 @@ void write_to_file(struct FileSystem* fs, const char* filename, const char* data
         if (strcmp(fs->file_table[i].filename, filename) == 0) {
             // File found, write data to the corresponding data block
             strncpy(fs->data_blocks[fs->file_table[i].start_block], data, BLOCK_SIZE);
+            
+            // Update the file size
+            fs->file_table[i].size = strlen(data);
             return;
         }
     }
@@ -33,6 +36,16 @@ void write_to_file(struct FileSystem* fs, const char* filename, const char* data
     }
 }
 
+void list_files(const struct FileSystem* fs) {
+    printf("Files in the filesystem:\n");
+
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (fs->file_table[i].filename[0] != '\0') {
+            printf("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
+        }
+    }
+}
+
 void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size) {
     for (size i = 0; i < MAX_FILES; ++i) {
         if (strcmp(fs->file_table[i].filename, filename) == 0) {
@@ -44,14 +57,4 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
 
     // File not found
     strncpy(buffer, "File not found", buffer_size);
-}
-
-void list_files(const struct FileSystem* fs) {
-    printf("Files in the filesystem:\n");
-
-    for (size i = 0; i < MAX_FILES; ++i) {
-        if (fs->file_table[i].filename[0] != '\0') {
-            printf("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
-        }
-    }
 }
