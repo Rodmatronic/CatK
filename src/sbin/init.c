@@ -99,6 +99,20 @@ int init(int debug)
     
     const char* statusBridged = isEthernetPluggedIn();
 
+    
+
+    printf("\nCreating FS...");
+
+    // Initialize the file table
+    for (size i = 0; i < MAX_FILES; ++i) {
+        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
+    }
+
+    write_to_file(&rootfs, "CatK", "Welcome to CatK!");
+    write_to_file(&rootfs, "users", "root");
+
+    list_files(&rootfs);
+
     init_keyboard();
     if (bootargs != "quiet")
     {

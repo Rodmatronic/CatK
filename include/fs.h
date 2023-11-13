@@ -1,19 +1,6 @@
-// fs.h
+#define BLOCK_SIZE 512
+#define FILENAME_SIZE 32
+#define MAX_FILES 16
 
-#ifndef FS_H
-#define FS_H
-
-#include <stdint.h>
-
-// Define a simple structure for a RAM file system entry (file or directory)
-struct FileEntry {
-    const char *name;
-    const uint8_t *data;
-    uint32_t size;
-};
-
-int addFile(struct RAMFileSystem *fs, const char *name, const uint8_t *data, uint32_t size);
-
-struct Folder root;
-
-#endif
+// Create an instance of the filesystem
+struct FileSystem rootfs;

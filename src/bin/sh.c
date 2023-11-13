@@ -198,6 +198,7 @@ void process_user_input(const char* input) {
         syspw(1);
     }
     else if (string_starts_with(input, "ls")) {
+        list_files(&rootfs);
         row += 7;
     }
     else if (string_starts_with(input, "exit")) {
@@ -215,11 +216,18 @@ void process_user_input(const char* input) {
         }else
         printf("No string for CatK to say...");
     }
-    else if (string_starts_with(input, "mkdir")) {
-        args = input + strlen("mkdir "); // Extract arguments
+    else if (string_starts_with(input, "cat")) {
+        args = input + strlen("cat "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-                mkdir(args);
+                            // Read and display the content of the specified file
+                char buffer[BLOCK_SIZE];
+                read_from_file(&rootfs, args, buffer, sizeof(buffer));
+
+                // Display the content
+                printf("Contents of %s:\n%s\n", args, buffer);
+
+                row+=5;
         }
     }
 else if (string_starts_with(input, "man")) {
@@ -246,7 +254,8 @@ else if (string_starts_with(input, "man")) {
         args = input + strlen("touch "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-                touch(args);
+            // NOT DONE YET!
+            write_to_file(&rootfs, args, args);
         }
     }
     else if (string_starts_with(input, "color")) {
