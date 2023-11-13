@@ -37,11 +37,10 @@ void write_to_file(struct FileSystem* fs, const char* filename, const char* data
 }
 
 void list_files(const struct FileSystem* fs) {
-    printf("Files in the filesystem:\n");
-
     for (size i = 0; i < MAX_FILES; ++i) {
         if (fs->file_table[i].filename[0] != '\0') {
             printf("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
+            row+=1;
         }
     }
 }
@@ -57,4 +56,39 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
 
     // File not found
     strncpy(buffer, "File not found", buffer_size);
+}
+
+void add_data_to_file(struct FileSystem* fs, const char* filename, const char* additional_data) {
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (strcmp(fs->file_table[i].filename, filename) == 0) {
+            // File found, append additional data to the corresponding data block
+
+            // Calculate the remaining space in the block
+            size remaining_space = BLOCK_SIZE - strlen(fs->data_blocks[fs->file_table[i].start_block]);
+
+            // Check if there is enough space to add more data
+            if (remaining_space > 0) {
+                // Copy additional data, limited by the remaining space
+                size len_to_copy = strnlen(additional_data, remaining_space);
+                strncpy(fs->data_blocks[fs->file_table[i].start_block] + strlen(fs->data_blocks[fs->file_table[i].start_block]), additional_data, len_to_copy);
+
+                // Update the file size
+                fs->file_table[i].size += len_to_copy;
+            } else {
+                printf("Error: Not enough space to add more data to the file %s\n", filename);
+            }
+            
+            return;
+        }
+    }
+
+    // File not found
+    printf("Error: File %s not found\n", filename);
+}
+
+// Custom function to calculate the length of a string with a limit
+size strnlen(const char* str, size max_len) {
+    size len;
+    for (len = 0; len < max_len && str[len] != '\0'; ++len);
+    return len;
 }

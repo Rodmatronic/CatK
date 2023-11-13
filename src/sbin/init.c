@@ -38,7 +38,7 @@ int init(int debug)
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
 
-    write_to_file(&rootfs, "init.catk", "Filesystem started successfully");
+    write_to_file(&rootfs, "logs.catk", "Filesystem started successfully\n");
 
     catkmessagefixed(1, 0);
     
@@ -71,6 +71,8 @@ int init(int debug)
         catkmessagefixed(3, 0);
     }
 
+    add_data_to_file(&rootfs, "logs.catk", "Added CPU file\n");
+
     printf("\nSetting hostname...");
 
     write_to_file(&rootfs, "hostname", defaulthostname);
@@ -101,6 +103,7 @@ int init(int debug)
 
     // Check if user has been modified
     if (strlen(username) > 0) {
+        add_data_to_file(&rootfs, "logs.catk", "Added root user\n");
         catkmessagefixed(1, 3);
     } else {
         catkmessagefixed(3, 3);
@@ -112,12 +115,14 @@ int init(int debug)
     seed+=seconds;
     // Check if seed has been modified
     if (strlen(errorinseed) > 0) {
+        add_data_to_file(&rootfs, "logs.catk", "Set random seed\n");
         catkmessagefixed(1, 4);
     } else {
         catkmessagefixed(3, 4);
     }
 
-    printf("\nStarting ethernet...");
+    printf("\nStarting Ethernet...");
+    add_data_to_file(&rootfs, "logs.catk", "Starting Ethernet...\n");
 
     // Assuming NAT configuration
     rows++;
@@ -128,6 +133,7 @@ int init(int debug)
     init_keyboard();
     if (bootargs != "quiet")
     {
+        add_data_to_file(&rootfs, "logs.catk", "Not quiet, showing popup\n");
         printf_dark("\nEnter full pathname for shell or RETURN for /bin/sh: \n");
         read(0);
     }
@@ -135,6 +141,8 @@ int init(int debug)
     console_init(COLOR_WHITE, COLOR_BLACK);
     // Create a shell process
     int shell_pid = fork(shell_process);
+    
+    add_data_to_file(&rootfs, "logs.catk", "Starting SH\n");
 
     if (shell_pid > 0) {
         // Execute the shell process

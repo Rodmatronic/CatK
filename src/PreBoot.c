@@ -158,6 +158,10 @@ void PreBoot()
             console_gotoxy(45, 18);
     }
 
+    if (art == 4)
+    {
+            console_gotoxy(45, 18);
+    }
 
     read(1);
     if (readnum == -1)
@@ -174,7 +178,7 @@ void PreBoot()
     if (readnum == 2)
     {
         console_init(COLOR_BRIGHT_CYAN, COLOR_BLACK);
-        printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n\n");
+        printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n4: Hide kitty :( \n\n");
         read(1);
         if (readnum == 1)
         {
@@ -187,6 +191,10 @@ void PreBoot()
         if (readnum == 3)
         {
             art = 3;
+        }
+        if (readnum == 4)
+        {
+            art = 4;
         }
         console_init(COLOR_GREY, COLOR_BLACK);
         readnum = 0;

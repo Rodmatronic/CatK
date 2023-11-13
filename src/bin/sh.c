@@ -207,7 +207,11 @@ void process_user_input(const char* input) {
     }
     else if (string_starts_with(input, "ls")) {
         list_files(&rootfs);
-        row+=25;
+        if (row >= 25)
+        {
+            printf("\n");
+            row = 26;
+        }
     }
     else if (string_starts_with(input, "exit")) {
         login();
@@ -301,6 +305,14 @@ else if (string_starts_with(input, "touch")) {
         if (args[0] != '\0') {
             printf("No such color %s\n", args);
 
+            if (strcmp(args, "white") == 0) {  // Compare strings using strcmp
+                console_init(COLOR_WHITE, COLOR_BLACK);
+                row = -3;
+            }
+            if (strcmp(args, "black") == 0 || strcmp(args, "grey") == 0) {  // Compare strings using strcmp
+                console_init(COLOR_DARK_GREY, COLOR_BLACK);
+                row = -3;
+            }
             if (strcmp(args, "red") == 0) {  // Compare strings using strcmp
                 console_init(COLOR_BRIGHT_RED, COLOR_BLACK);
                 row = -3;
