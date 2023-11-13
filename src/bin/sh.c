@@ -199,7 +199,7 @@ void process_user_input(const char* input) {
     }
     else if (string_starts_with(input, "ls")) {
         list_files(&rootfs);
-        row += 7;
+        row+=25;
     }
     else if (string_starts_with(input, "exit")) {
         login();
@@ -227,7 +227,7 @@ void process_user_input(const char* input) {
                 // Display the content
                 printf("Contents of %s:\n%s\n", args, buffer);
 
-                row+=5;
+                row+=25;
         }
     }
 else if (string_starts_with(input, "man")) {
