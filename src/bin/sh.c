@@ -56,19 +56,23 @@ void sh() {
         printf_green("%s", username);
         printf_green("@");
         printf_green("%s", host_name);
-        printf_brightblue(":/ # ");
+        printf_brightblue(":/ ");
+        printf("# ");
 
-        int input_index = 0; // Index for the input buffer
-        int empty_input = 1; // Flag to track empty input
-        int can_backspace = 0; // Flag to allow or disallow backspacing
-        int cursorpos;
+        uint32 input_index = 0; // Index for the input buffer
+        uint32 empty_input = 1; // Flag to track empty input
+        uint32 can_backspace = 0; // Flag to allow or disallow backspacing
+        uint32 cursorpos = 0; // Initialize cursor position
+
 
         while (1) {
+
             unsigned char scancode = read_key();
             char key = scancode_to_char(scancode);
 
-            if (cursorpos <= 0) {
+            if (cursorpos < 0) {
                 can_backspace = 0;
+                cursorpos = 0; // Ensure cursor position is non-negative
             }
 
             if (key != 0) {isclearing = 0;
@@ -80,7 +84,7 @@ void sh() {
                     can_backspace = 0;
                 }
 
-                if (scancode == 0x0E && can_backspace && input_index > 0) {
+                if (scancode == 0x0E && can_backspace == 1 && input_index > 0) {
                     cursorpos--;
                     input_index--;
 
