@@ -1,5 +1,6 @@
 void man(char* command)
 {
+    add_data_to_file(&rootfs, "logs.catk", "man: [ ok ] Started\n");
     if (strcmp(command, "echo") == 0)
     {
         console_clear(COLOR_WHITE, COLOR_BLACK);

@@ -2,6 +2,7 @@ uint8 seedpasswd;
 
 void encrypt(char* input)
 {
+    add_data_to_file(&rootfs, "logs.catk", "crypto: [ .. ] encrypting...\n");
     seedpasswd = seconds;
     if (input == NULL)
     {
@@ -19,6 +20,7 @@ void encrypt(char* input)
 
 void decrypt(char* input)
 {
+    add_data_to_file(&rootfs, "logs.catk", "crypto: [ .. ] decrypting...\n");
     if (input == NULL)
     {
         printf("Error: Input is NULL\n");

@@ -1,4 +1,4 @@
-#define BLOCK_SIZE 512
+#define BLOCK_SIZE 10000
 #define FILENAME_SIZE 2048
 #define MAX_FILES 1024
 

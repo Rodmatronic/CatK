@@ -40,6 +40,7 @@ void set_cursor_position(int x, int y) {
 }
 
 void sh() {
+    add_data_to_file(&rootfs, "logs.catk", "sh: [ ok ] Started\n");
     startingrow = 0;
     row = 3;
     char input_buffer[80] = {0}; // Initialize with null characters to create an empty string
@@ -53,9 +54,9 @@ void sh() {
     while (1) {
         isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
-        printf_green("%s", username);
-        printf_green("@");
-        printf_green("%s", host_name);
+        printf_brightcyan("%s", username);
+        printf_darkcyan("@");
+        printf_brightcyan("%s", host_name);
         printf_brightblue(":/ ");
         printf("# ");
 
@@ -104,8 +105,13 @@ void sh() {
                         printf("\n\n");
                         // Check if input length exceeds 20 characters
                         if (input_index >= 55) {
-                            printf("\nInput too long. Please keep it under 55 characters.\n");
+                            printf("Input too long. Please keep it under 55 characters.");
                             row+=5;
+                            if (row > 25)
+                            {
+                                row = 24;
+                                printf("\n\n");
+                            }
                             break;
                         }
                         stopglitchyhideingprompt = 1;
@@ -153,6 +159,7 @@ void sh() {
 
 void process_user_input(const char* input) {
 
+    add_data_to_file(&rootfs, "logs.catk", "sh: [ ok ] Processing user input...\n");
     args = NULL; // Reset the arguments
 
     // Check for specific commands in the input
@@ -236,9 +243,16 @@ void process_user_input(const char* input) {
                 read_from_file(&rootfs, args, buffer, sizeof(buffer));
 
                 // Display the content
-                printf("Contents of %s:\n%s\n", args, buffer);
+                printf("%s\n", buffer);
 
                 row+=25;
+        }
+    }
+    else if (string_starts_with(input, "rm")) {
+        args = input + strlen("rm "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+                rm_file(&rootfs, args);
         }
     }
 else if (string_starts_with(input, "man")) {

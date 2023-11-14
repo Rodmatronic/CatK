@@ -1,5 +1,6 @@
 void catsay(input)
 {
+    add_data_to_file(&rootfs, "logs.catk", "catsay: [ ok ] Started\n");
     console_init(COLOR_WHITE, COLOR_BLACK);
     printf(" ______________________________________________\n");
     printf("< %s\n", input);

@@ -92,3 +92,19 @@ size strnlen(const char* str, size max_len) {
     for (len = 0; len < max_len && str[len] != '\0'; ++len);
     return len;
 }
+
+void rm_file(struct FileSystem* fs, const char* filename) {
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (strcmp(fs->file_table[i].filename, filename) == 0) {
+            // File found, remove it by marking the entry as empty
+            fs->file_table[i].filename[0] = '\0';
+            fs->file_table[i].start_block = 0;
+            fs->file_table[i].size = 0;
+            memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
+            return;
+        }
+    }
+
+    // File not found
+    printf("Error: File %s not found\n", filename);
+}
