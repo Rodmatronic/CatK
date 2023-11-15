@@ -230,9 +230,11 @@ void process_user_input(const char* input) {
             if (strcmp(args, "") == 0)
             {
                 list_files(&rootfs, 0);
+                row++;
             }
         }else
             list_files(&rootfs, 0);
+            row++;
     }
     else if (string_starts_with(input, "exit")) {
         login();
