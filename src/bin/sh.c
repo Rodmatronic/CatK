@@ -213,12 +213,26 @@ void process_user_input(const char* input) {
         syspw(1);
     }
     else if (string_starts_with(input, "ls")) {
-        list_files(&rootfs);
-        if (row >= 25)
-        {
-            printf("\n");
-            row = 26;
-        }
+        args = input + strlen("ls "); // Extract arguments
+
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+            if (strcmp(args, "-f") == 0)
+            {
+                list_files(&rootfs, 1);
+                if (row >= 25)
+                {
+                    printf("\n");
+                    row = 26;
+                }
+            }
+
+            if (strcmp(args, "") == 0)
+            {
+                list_files(&rootfs, 0);
+            }
+        }else
+            list_files(&rootfs, 0);
     }
     else if (string_starts_with(input, "exit")) {
         login();
@@ -376,6 +390,14 @@ else if (string_starts_with(input, "touch")) {
         }else
             printf("No string for PANIC to display");
     }
+    else if (string_starts_with(input, "exec")) {
+        args = input + strlen("exec "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+                execute_file(&rootfs, args);
+        }else
+            printf("Please specify a file");
+    }
     else if (string_starts_with(input, "help")) {
         help();
         row =+ 25;
@@ -428,6 +450,7 @@ else if (string_starts_with(input, "sleep")) {
     }
 }
     else {
+        add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Command not found!\n");
         printf("%s: Command not found", input);
     }
     

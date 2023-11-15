@@ -148,6 +148,12 @@ int init(int debug)
         add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Quiet, hiding popup...\n");
     }
 
+    add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Creating test application\n");
+    
+    // Create a file with the first line "type:App"
+    const char* appContent = "type:App\nMore test app";
+    write_to_file(&rootfs, "test.app", appContent);
+
     console_init(COLOR_WHITE, COLOR_BLACK);
     // Create a shell process
     int shell_pid = fork(shell_process);
