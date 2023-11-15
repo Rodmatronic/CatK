@@ -1,3 +1,7 @@
+/*
+ * This code is hot garbage. Please fix this by 0.065
+*/
+
 #include "types.h"
 #include "io_ports.h"
 #include "config.h"
