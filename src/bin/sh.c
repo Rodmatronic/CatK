@@ -40,7 +40,7 @@ void set_cursor_position(int x, int y) {
 }
 
 void sh() {
-    add_data_to_file(&rootfs, "logs.catk", "sh: [ ok ] Started\n");
+    add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Started\n");
     startingrow = 0;
     row = 3;
     char input_buffer[80] = {0}; // Initialize with null characters to create an empty string
@@ -161,7 +161,7 @@ void sh() {
 
 void process_user_input(const char* input) {
 
-    add_data_to_file(&rootfs, "logs.catk", "sh: [ ok ] Processing user input...\n");
+    add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Processing user input...\n");
     args = NULL; // Reset the arguments
 
     // Check for specific commands in the input
@@ -278,6 +278,12 @@ void process_user_input(const char* input) {
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
                 rm_file(&rootfs, args);
+                row++;
+                if (row >= 25)
+                {
+                    printf("\n");
+                    row = 26;
+                }
         }
     }
 else if (string_starts_with(input, "man")) {
@@ -334,7 +340,7 @@ else if (string_starts_with(input, "touch")) {
         contents[contentsIndex] = '\0';
         
         // Now, you can use filename and contents as needed
-        write_to_file(&rootfs, filename, contents);
+        write_to_file(&rootfs, filename, contents, current_directory);
     }
 }
 
@@ -375,28 +381,21 @@ else if (string_starts_with(input, "touch")) {
         }
     }
     else if (string_starts_with(input, "uname")) {
-        args = input + strlen("uname "); // Extract arguments
-        // Check if there are arguments (non-empty)
-        if (args[0] != '\0') {
-            if (strcmp(args, "-s") == 0)
-            {
-                printversion();
-            }
-
-            if (strcmp(args, "-a") == 0)
-            {
-                printversion();
-                printf(" %s", prebootversion);
-                printf(" %s", bootargs);
-            }
-        }else
-            printversion();
+            read_from_file(&rootfs, "version", buffer, sizeof(buffer));
+            printf("%s", buffer);
+        
     }   
     else if (string_starts_with(input, "mkdir")) {
         args = input + strlen("mkdir "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
                 create_folder(&rootfs, args, "/");
+                row++;
+                if (row >= 25)
+                {
+                    printf("\n");
+                    row = 26;
+                }
         }
     }   
     else if (string_starts_with(input, "cd")) {
@@ -406,8 +405,20 @@ else if (string_starts_with(input, "touch")) {
             if (strcmp(args, "..") == 0)
             {
                 current_directory = "/";
+                row++;
+                if (row >= 25)
+                {
+                    printf("\n");
+                    row = 26;
+                }
             }else
             change_directory(&rootfs, args);
+            row++;
+            if (row >= 25)
+            {
+                printf("\n");
+                row = 26;
+            }
         }
     }   
     else if (string_starts_with(input, "panic")) {
@@ -479,11 +490,9 @@ else if (string_starts_with(input, "sleep")) {
     }
 }
     else {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Command not found!\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Command not found!\n");
         printf("%s: Command not found", input);
     }
-    
-
 }
 
 int string_starts_with(const char* str, const char* prefix) {

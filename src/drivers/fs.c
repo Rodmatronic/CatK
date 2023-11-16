@@ -18,7 +18,8 @@ struct FileSystem {
 void create_folder(struct FileSystem* fs, const char* foldername, const char* parent_folder) {
     // Check if the folder already exists
     for (size i = 0; i < MAX_FOLDERS; ++i) {
-        if (strcmp(fs->folder_table[i], foldername) == 0) {
+        if (strcmp(fs->folder_table[i], foldername) == 0 &&
+            strcmp(fs->file_table[i].parent_folder, parent_folder) == 0) {
             printf("Error: Folder %s already exists\n", foldername);
             return;
         }
@@ -32,7 +33,7 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
 
             // Find an empty slot in the file table
             for (size j = 0; j < MAX_FILES; ++j) {
-                if (fs->file_table[j].filename[0] == '\0') {
+                if (fs->file_table[j].filename[0] == '\0' && fs->file_table[j].parent_folder[0] == '\0') {
                     // Empty slot found, create a new file entry for the folder
                     strncpy(fs->file_table[j].filename, foldername, FILENAME_SIZE);
                     fs->file_table[j].is_folder = 1;
@@ -52,14 +53,14 @@ void change_directory(struct FileSystem* fs, const char* foldername) {
         if (strcmp(fs->folder_table[i], foldername) == 0) {
             // Change the current working directory
             current_directory = fs->folder_table[i];
-            printf("Changed directory to %s\n", foldername);
+            printf("Changed directory to %s", foldername);
             return;
         }
     }
-    printf("Error: Folder %s not found\n", foldername);
+    printf("Error: Folder %s not found", foldername);
 }
 
-void write_to_file(struct FileSystem* fs, const char* filename, const char* data) {
+void write_to_file(struct FileSystem* fs, const char* filename, const char* data, ...) {
     const char* current_folder = current_directory; // Get the current folder
 
     // File not found or not in the current folder, find an empty slot in the file table
@@ -105,6 +106,7 @@ void list_files(const struct FileSystem* fs, int type) {
                 } else {
                     printf_brightblue("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
                 }
+                row++;
             }
         }
     }

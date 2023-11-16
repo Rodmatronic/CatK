@@ -45,8 +45,17 @@ int init(int debug)
     create_folder(&rootfs, "kernel", "/");
     create_folder(&rootfs, "dev", "/");
 
-    write_to_file(&rootfs, "logs.catk", "init: Logfile created!\n");
-    add_data_to_file(&rootfs, "logs.catk", "init: [ ok ] Filesystem started successfully\n");
+    current_directory = "etc";
+    write_to_file(&rootfs, "logs.d", "init: Logfile created!\n");
+    add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Filesystem started successfully\n");
+
+    write_to_file(&rootfs, "version", "");
+
+    add_data_to_file(&rootfs, "version", vername);
+    add_data_to_file(&rootfs, "version", " ");
+    add_data_to_file(&rootfs, "version", versionnumber);
+    add_data_to_file(&rootfs, "version", " ");
+    add_data_to_file(&rootfs, "version", prebootversion);
 
     catkmessagefixed(1, 0);
     
@@ -64,10 +73,10 @@ int init(int debug)
     void* allocated_memory = allocate_memory(10 * 1024 * 1024);
 
     if (allocated_memory == NULL) {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ERR!] Could not allocate memory!\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ERR!] Could not allocate memory!\n");
         catkmessagefixed(3, 0);
     }else
-    add_data_to_file(&rootfs, "logs.catk", "init: [ ok ] Successfully Allocated memory!\n");
+    add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Successfully Allocated memory!\n");
     catkmessagefixed(1, 0);
 
     printf("\nGetting CPU info...");
@@ -75,11 +84,11 @@ int init(int debug)
     int result = cpuid_info(0);
     if (result) {
         // The function returned something
-        add_data_to_file(&rootfs, "logs.catk", "init: [ ok ] Added CPU file\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Added CPU file\n");
         catkmessagefixed(1, 0);
     } else {
         // The function did not return anything, indicating an error
-        add_data_to_file(&rootfs, "logs.catk", "init: [ERR!] Couldn't get CPU info!\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ERR!] Couldn't get CPU info!\n");
         catkmessagefixed(3, 0);
     }
 
@@ -114,10 +123,10 @@ int init(int debug)
 
     // Check if user has been modified
     if (strlen(username) > 0) {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ ok ] Added root user\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Added root user\n");
         catkmessagefixed(1, 3);
     } else {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ERR!] Could not add root user!\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ERR!] Could not add root user!\n");
         catkmessagefixed(3, 3);
     }
 
@@ -127,15 +136,15 @@ int init(int debug)
     seed+=seconds;
     // Check if seed has been modified
     if (strlen(errorinseed) > 0) {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ ok ] Set random seed\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Set random seed\n");
         catkmessagefixed(1, 4);
     } else {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ERR!] Could not set random seed\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ERR!] Could not set random seed\n");
         catkmessagefixed(3, 4);
     }
 
     printf("\nStarting Ethernet...");
-    add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Starting Ethernet...\n");
+    add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Starting Ethernet...\n");
 
     // Assuming NAT configuration
     rows++;
@@ -146,30 +155,33 @@ int init(int debug)
     init_keyboard();
     if (bootargs != "quiet")
     {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Not quiet, showing popup\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Not quiet, showing popup\n");
         printf_dark("\nEnter full pathname for shell or RETURN for /bin/sh: \n");
         read(0);
     }
 
     if (bootargs == "quiet")
     {
-        add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Quiet, hiding popup...\n");
+        add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Quiet, hiding popup...\n");
     }
 
-    add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Creating test application\n");
+    add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Creating test application\n");
     
     // Create a file with the first line "type:App"
     const char* appContent = "type:App\nMore test app";
+
+    current_directory = "bin";
     write_to_file(&rootfs, "test.app", appContent);
 
     console_init(COLOR_WHITE, COLOR_BLACK);
     // Create a shell process
     int shell_pid = fork(shell_process);
     
-    add_data_to_file(&rootfs, "logs.catk", "init: [ .. ] Starting SH\n");
+    add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Starting SH\n");
 
     if (shell_pid > 0) {
         // Execute the shell process
+        current_directory = "/";
         execute_process(shell_pid);
     }
     

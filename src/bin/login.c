@@ -18,7 +18,7 @@ int strstr(const char *haystack, const char *needle) {
 }
 
 void login() {
-    add_data_to_file(&rootfs, "logs.catk", "login: [ ok ] Started\n");
+    add_data_to_file(&rootfs, "logs.d", "login: [ ok ] Started\n");
     console_clear(COLOR_WHITE, COLOR_BLACK);
     char input_buffer[80]; // Buffer to store user input
 
@@ -66,7 +66,7 @@ void login() {
             printf("\n");
 
             if (found_root) {
-                add_data_to_file(&rootfs, "logs.catk", "login: [ ok ] Logging in as root\n");
+                add_data_to_file(&rootfs, "logs.d", "login: [ ok ] Logging in as root\n");
                 strcpy(userid, "root");
                 strcpy(username, "root");
                 sh();
