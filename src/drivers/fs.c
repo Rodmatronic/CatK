@@ -21,6 +21,7 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
         if (strcmp(fs->folder_table[i], foldername) == 0 &&
             strcmp(fs->file_table[i].parent_folder, parent_folder) == 0) {
             printf("Error: Folder %s already exists\n", foldername);
+            total_files++;
             return;
         }
     }
@@ -72,6 +73,7 @@ void write_to_file(struct FileSystem* fs, const char* filename, const char* data
             fs->file_table[i].start_block = i;
             fs->file_table[i].size = strlen(data);
             strncpy(fs->file_table[i].parent_folder, current_folder, FOLDERNAME_SIZE); // Set the parent folder
+            total_files++;
             return;
         }
     }
@@ -193,6 +195,7 @@ void rm_file(struct FileSystem* fs, const char* filename) {
             fs->file_table[i].start_block = 0;
             fs->file_table[i].size = 0;
             memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
+            total_files--;            
             return;
         }
     }
