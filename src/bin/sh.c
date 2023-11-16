@@ -405,20 +405,8 @@ else if (string_starts_with(input, "touch")) {
             if (strcmp(args, "..") == 0)
             {
                 current_directory = "/";
-                row++;
-                if (row >= 25)
-                {
-                    printf("\n");
-                    row = 26;
-                }
             }else
             change_directory(&rootfs, args);
-            row++;
-            if (row >= 25)
-            {
-                printf("\n");
-                row = 26;
-            }
         }
     }   
     else if (string_starts_with(input, "panic")) {
