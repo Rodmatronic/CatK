@@ -136,8 +136,11 @@ int init(int debug)
     seed+=seconds;
 
     current_directory = "proc";
-    write_to_file(&rootfs, "tty", "1");
     write_to_file(&rootfs, "args", bootargs);
+    current_directory = "etc";
+
+    current_directory = "dev";
+    write_to_file(&rootfs, "tty", "1");
     current_directory = "etc";
 
     // Check if seed has been modified
