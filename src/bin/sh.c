@@ -459,7 +459,7 @@ else if (string_starts_with(input, "touch")) {
         console_init(COLOR_WHITE, COLOR_BLACK);
     } 
     else if (string_starts_with(input, "cpuid")) {
-        read_from_file(&rootfs, "cpu.catk", buffer, sizeof(buffer));
+        read_from_file(&rootfs, "cpu", buffer, sizeof(buffer));
         printf("%s", buffer);
     } 
     else if (string_starts_with(input, "whoami")) {

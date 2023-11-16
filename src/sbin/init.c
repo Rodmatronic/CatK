@@ -134,6 +134,12 @@ int init(int debug)
     int errorinseed = 0;
     seed = errorinseed;
     seed+=seconds;
+
+    current_directory = "proc";
+    write_to_file(&rootfs, "tty", "1");
+    write_to_file(&rootfs, "args", bootargs);
+    current_directory = "etc";
+
     // Check if seed has been modified
     if (strlen(errorinseed) > 0) {
         add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Set random seed\n");
@@ -151,6 +157,11 @@ int init(int debug)
     const char* statusNAT = isEthernetPluggedIn();
     
     const char* statusBridged = isEthernetPluggedIn();
+
+    current_directory = "proc";
+    write_to_file(&rootfs, "net", "eth");
+    current_directory = "etc";
+
 
     init_keyboard();
     if (bootargs != "quiet")

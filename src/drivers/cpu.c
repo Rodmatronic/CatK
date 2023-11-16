@@ -1,5 +1,6 @@
 #include "string.h"
 #include "io_ports.h"
+#include "config.h"
 
 void __cpuid(uint32 type, uint32 *eax, uint32 *ebx, uint32 *ecx, uint32 *edx) {
     asm volatile("cpuid"
@@ -25,9 +26,11 @@ int cpuid_info(int print) {
         }
     }
     if (print == 0) {
-        write_to_file(&rootfs, "cpu.catk", brand);
+        current_directory = "proc";
+        write_to_file(&rootfs, "cpu", brand);
         for(type = 0; type < 4; type++) {
             __cpuid(type, &eax, &ebx, &ecx, &edx);
+            current_directory = "etc";
             return brand;
         }
     }
