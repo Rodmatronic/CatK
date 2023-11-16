@@ -38,6 +38,13 @@ int init(int debug)
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
 
+    create_folder(&rootfs, "bin", "/");
+    create_folder(&rootfs, "sys", "/");
+    create_folder(&rootfs, "proc", "/");
+    create_folder(&rootfs, "etc", "/");
+    create_folder(&rootfs, "kernel", "/");
+    create_folder(&rootfs, "dev", "/");
+
     write_to_file(&rootfs, "logs.catk", "init: Logfile created!\n");
     add_data_to_file(&rootfs, "logs.catk", "init: [ ok ] Filesystem started successfully\n");
 
@@ -45,7 +52,7 @@ int init(int debug)
     
     int dummy = 0;
     if (fillfs == 1) {
-        for (int i = 0; i < 1024; i++) {
+        for (int i = 0; i < 1000; i++) {
             write_to_file(&rootfs, dummy, "root");
             dummy++;
         }
@@ -103,6 +110,7 @@ int init(int debug)
     strcpy(rootUser.username, "root");
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
+    write_to_file(&rootfs, "session.catk", rootUser.username);
 
     // Check if user has been modified
     if (strlen(username) > 0) {

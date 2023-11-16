@@ -54,10 +54,12 @@ void sh() {
     while (1) {
         isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
-        printf_brightcyan("%s", username);
+        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer));
+        printf_brightcyan("%s", buffer);
         printf_darkcyan("@");
-        printf_brightcyan("%s", host_name);
-        printf_brightblue(":/ ");
+        read_from_file(&rootfs, "hostname", buffer, sizeof(buffer));
+        printf_brightcyan("%s", buffer);
+        printf_brightblue(":%s ", current_directory);
         printf("# ");
 
         uint32 input_index = 0; // Index for the input buffer
@@ -104,8 +106,8 @@ void sh() {
                     if (!empty_input) {
                         printf("\n\n");
                         // Check if input length exceeds 20 characters
-                        if (input_index >= 55) {
-                            printf("Input too long. Please keep it under 55 characters.");
+                        if (input_index >= 60) {
+                            printf("Input too long. Please keep it under 60 characters.");
                             row+=5;
                             if (row > 25)
                             {
@@ -231,10 +233,17 @@ void process_user_input(const char* input) {
             {
                 list_files(&rootfs, 0);
                 row++;
+                if (row >= 25)
+                {
+                    printf("\n");
+                    row = 26;
+                }
             }
         }else
             list_files(&rootfs, 0);
             row++;
+            row++;
+            printf("\n\n");
     }
     else if (string_starts_with(input, "exit")) {
         login();
@@ -382,7 +391,24 @@ else if (string_starts_with(input, "touch")) {
             }
         }else
             printversion();
-        
+    }   
+    else if (string_starts_with(input, "mkdir")) {
+        args = input + strlen("mkdir "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+                create_folder(&rootfs, args, "/");
+        }
+    }   
+    else if (string_starts_with(input, "cd")) {
+        args = input + strlen("cd "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+            if (strcmp(args, "..") == 0)
+            {
+                current_directory = "/";
+            }else
+            change_directory(&rootfs, args);
+        }
     }   
     else if (string_starts_with(input, "panic")) {
         args = input + strlen("panic "); // Extract arguments
@@ -417,11 +443,12 @@ else if (string_starts_with(input, "touch")) {
         console_init(COLOR_WHITE, COLOR_BLACK);
     } 
     else if (string_starts_with(input, "cpuid")) {
-        cpusimple(1);
+        read_from_file(&rootfs, "cpu.catk", buffer, sizeof(buffer));
+        printf("%s", buffer);
     } 
     else if (string_starts_with(input, "whoami")) {
-        whoami();
-    } 
+        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer));
+    }
     else if (string_starts_with(input, "times")) {
         printPowerOnTime();
     }

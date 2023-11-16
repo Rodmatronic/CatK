@@ -2,6 +2,9 @@
 #define CONFIG_CATK_H
 #include "types.h"
 
+char* current_directory = "/";  // Set it initially to the root directory
+
+
 int rows = 0;
 
 extern uint32 prebootversion;

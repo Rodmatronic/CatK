@@ -1,5 +1,5 @@
-#define BLOCK_SIZE 100000
-#define FILENAME_SIZE 10
+#define BLOCK_SIZE 10000
+#define FILENAME_SIZE 25
 #define MAX_FILES 1024
 
 // Create an instance of the filesystem

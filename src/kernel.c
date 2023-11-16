@@ -85,7 +85,7 @@ void boot() {
 
         init(initdebug);
 
-        //If this happens, someting is monumentally fucked up!
+        //If this happens, something is monumentally fucked up!
         if (init != 0) {
             
             for (int i = 5; i > 0;)

@@ -25,7 +25,7 @@ int cpuid_info(int print) {
         }
     }
     if (print == 0) {
-        write_to_file(&rootfs, "cpu", brand);
+        write_to_file(&rootfs, "cpu.catk", brand);
         for(type = 0; type < 4; type++) {
             __cpuid(type, &eax, &ebx, &ecx, &edx);
             return brand;

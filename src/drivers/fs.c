@@ -1,58 +1,125 @@
-
+#define MAX_FOLDERS 50
+#define FOLDERNAME_SIZE 30
 
 struct FileEntry {
     char filename[FILENAME_SIZE];
     uint32 start_block;
     uint32 size;
+    uint8 is_folder;
+    char parent_folder[FOLDERNAME_SIZE];
 };
 
 struct FileSystem {
     struct FileEntry file_table[MAX_FILES];
     char data_blocks[MAX_FILES][BLOCK_SIZE];
+    char folder_table[MAX_FOLDERS][FOLDERNAME_SIZE];
 };
 
-void write_to_file(struct FileSystem* fs, const char* filename, const char* data) {
-    for (size i = 0; i < MAX_FILES; ++i) {
-        if (strcmp(fs->file_table[i].filename, filename) == 0) {
-            // File found, write data to the corresponding data block
-            strncpy(fs->data_blocks[fs->file_table[i].start_block], data, BLOCK_SIZE);
-            
-            // Update the file size
-            fs->file_table[i].size = strlen(data);
+void create_folder(struct FileSystem* fs, const char* foldername, const char* parent_folder) {
+    // Check if the folder already exists
+    for (size i = 0; i < MAX_FOLDERS; ++i) {
+        if (strcmp(fs->folder_table[i], foldername) == 0) {
+            printf("Error: Folder %s already exists\n", foldername);
             return;
         }
     }
 
-    // File not found, find an empty slot in the file table
+    // Find an empty slot in the folder table
+    for (size i = 0; i < MAX_FOLDERS; ++i) {
+        if (fs->folder_table[i][0] == '\0') {
+            // Empty slot found, create a new folder entry
+            strncpy(fs->folder_table[i], foldername, FOLDERNAME_SIZE);
+
+            // Find an empty slot in the file table
+            for (size j = 0; j < MAX_FILES; ++j) {
+                if (fs->file_table[j].filename[0] == '\0') {
+                    // Empty slot found, create a new file entry for the folder
+                    strncpy(fs->file_table[j].filename, foldername, FILENAME_SIZE);
+                    fs->file_table[j].is_folder = 1;
+                    strncpy(fs->file_table[j].parent_folder, parent_folder, FOLDERNAME_SIZE); // Set the parent folder
+                    return;
+                }
+            }
+            printf("Error: File table is full\n");
+            return;
+        }
+    }
+    printf("Error: Folder table is full\n");
+}
+
+void change_directory(struct FileSystem* fs, const char* foldername) {
+    for (size i = 0; i < MAX_FOLDERS; ++i) {
+        if (strcmp(fs->folder_table[i], foldername) == 0) {
+            // Change the current working directory
+            current_directory = fs->folder_table[i];
+            printf("Changed directory to %s\n", foldername);
+            return;
+        }
+    }
+    printf("Error: Folder %s not found\n", foldername);
+}
+
+void write_to_file(struct FileSystem* fs, const char* filename, const char* data) {
+    const char* current_folder = current_directory; // Get the current folder
+
+    // File not found or not in the current folder, find an empty slot in the file table
     for (size i = 0; i < MAX_FILES; ++i) {
-        if (fs->file_table[i].filename[0] == '\0') {
-            // Empty slot found, create a new entry
+        if (fs->file_table[i].filename[0] == '\0' && fs->file_table[i].parent_folder[0] == '\0') {
+            // Empty slot found, create a new entry in the current folder
             strncpy(fs->file_table[i].filename, filename, FILENAME_SIZE);
             strncpy(fs->data_blocks[i], data, BLOCK_SIZE);
             fs->file_table[i].start_block = i;
             fs->file_table[i].size = strlen(data);
+            strncpy(fs->file_table[i].parent_folder, current_folder, FOLDERNAME_SIZE); // Set the parent folder
             return;
         }
     }
+
+// File not found or not in the current folder, find an empty slot in the file table
+for (size i = 0; i < MAX_FILES; ++i) {
+    if (fs->file_table[i].filename[0] == '\0' && fs->file_table[i].parent_folder[0] == '\0') {
+        // Empty slot found, create a new entry in the current folder
+        strncpy(fs->file_table[i].filename, filename, FILENAME_SIZE);
+        strncpy(fs->data_blocks[i], data, BLOCK_SIZE);
+        fs->file_table[i].start_block = i;
+        fs->file_table[i].size = strlen(data);
+        strncpy(fs->file_table[i].parent_folder, current_folder, FOLDERNAME_SIZE); // Set the parent folder
+        return;
+    }
+}
+
+    printf("Error: File table is full\n");
 }
 
 void list_files(const struct FileSystem* fs, int type) {
+    const char* current_folder = current_directory; // Get the current folder
 
-    if (type == 1)
-    {
-            for (size i = 0; i < MAX_FILES; ++i) {
-            if (fs->file_table[i].filename[0] != '\0') {
-                printf("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
-                row+=1;
+    if (type == 1) {
+        for (size i = 0; i < MAX_FILES; ++i) {
+            if (fs->file_table[i].filename[0] != '\0' &&
+            
+                (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
+                // Print in green if it's a folder, and in blue otherwise
+                if (fs->file_table[i].is_folder) {
+                    printf_green("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
+                } else {
+                    printf_brightblue("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
+                }
             }
         }
     }
 
-    if (type == 0)
-    {
-            for (size i = 0; i < MAX_FILES; ++i) {
-            if (fs->file_table[i].filename[0] != '\0') {
-                printf("%s  ", fs->file_table[i].filename);
+    if (type == 0) {
+        for (size i = 0; i < MAX_FILES; ++i) {
+            if (fs->file_table[i].filename[0] != '\0' &&
+
+                (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
+                // Print in green if it's a folder, and in blue otherwise
+                if (fs->file_table[i].is_folder) {
+                    printf_green("%s  ", fs->file_table[i].filename);
+                } else {
+                    printf_brightblue("%s  ", fs->file_table[i].filename);
+                }
             }
         }
     }
@@ -61,6 +128,13 @@ void list_files(const struct FileSystem* fs, int type) {
 void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size) {
     for (size i = 0; i < MAX_FILES; ++i) {
         if (strcmp(fs->file_table[i].filename, filename) == 0) {
+            // Check if the file is a folder
+            if (fs->file_table[i].is_folder) {
+                printf("%s is a folder and cannot be read as a file.\n", filename);
+                strncpy(buffer, "", buffer_size); // Clear the buffer
+                return;
+            }
+
             // File found, read data from the corresponding data block
             strncpy(buffer, fs->data_blocks[fs->file_table[i].start_block], buffer_size);
             return;
@@ -107,9 +181,12 @@ size strnlen(const char* str, size max_len) {
 }
 
 void rm_file(struct FileSystem* fs, const char* filename) {
+    const char* current_folder = current_directory; // Get the current folder
+
     for (size i = 0; i < MAX_FILES; ++i) {
-        if (strcmp(fs->file_table[i].filename, filename) == 0) {
-            // File found, remove it by marking the entry as empty
+        if (strcmp(fs->file_table[i].filename, filename) == 0 &&
+            strcmp(fs->file_table[i].parent_folder, current_folder) == 0) {
+            // File found in the current folder, remove it by marking the entry as empty
             fs->file_table[i].filename[0] = '\0';
             fs->file_table[i].start_block = 0;
             fs->file_table[i].size = 0;
@@ -118,8 +195,8 @@ void rm_file(struct FileSystem* fs, const char* filename) {
         }
     }
 
-    // File not found
-    printf("Error: File %s not found\n", filename);
+    // File not found or not in the current folder
+    printf("Error: File %s not found in the current folder\n", filename);
 }
 
 void execute_file(struct FileSystem* fs, const char* filename) {

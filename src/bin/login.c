@@ -71,7 +71,6 @@ void login() {
                 strcpy(username, "root");
                 sh();
             } else {
-                add_data_to_file(&rootfs, "logs.catk", "login: [ .. ] Failed login attempt\n");
                 login();
             }
         }
