@@ -1,9 +1,12 @@
-uint8 seedpasswd;
+uint8 seedpasswd = 7;
 
 void encrypt(char* input)
 {
-    add_data_to_file(&rootfs, "logs.catk", "crypto: [ .. ] encrypting...\n");
-    seedpasswd = seconds;
+    add_data_to_file(&rootfs, "logs.d", "crypto: [ .. ] encrypting...\n");
+
+    char* working_dir = current_directory;
+    current_directory = "etc";
+
     if (input == NULL)
     {
         printf("Error: Input is NULL\n");
@@ -14,13 +17,20 @@ void encrypt(char* input)
 
     for (size i = 0; i < len; i++)
     {
-        input[i] ^= seedpasswd;
+        // Use a more complex transformation based on the seed
+        input[i] = (input[i] + seedpasswd) % 256;
     }
+
+    write_to_file(&rootfs, "passwd", input);
+
+    current_directory = working_dir;
+
 }
 
 void decrypt(char* input)
 {
-    add_data_to_file(&rootfs, "logs.catk", "crypto: [ .. ] decrypting...\n");
+    add_data_to_file(&rootfs, "logs.d", "crypto: [ .. ] decrypting...\n");
+
     if (input == NULL)
     {
         printf("Error: Input is NULL\n");
@@ -31,6 +41,7 @@ void decrypt(char* input)
 
     for (size i = 0; i < len; i++)
     {
-        input[i] ^= seedpasswd; // XOR with the same key to decrypt
+        // Reverse the substitution cipher to decrypt
+        input[i] = (input[i] - seedpasswd + 256) % 256;
     }
 }

@@ -187,6 +187,11 @@ void process_user_input(const char* input) {
         if (args[0] != '\0') {
             // Execute the "hostname" command with the arguments
             hostname(args);
+            if (row >= 25)
+            {
+                printf("\n");
+                row = 26;
+            }
         }
     } 
     else if (string_starts_with(input, "reboot")) {
@@ -250,8 +255,12 @@ void process_user_input(const char* input) {
         }else
             list_files(&rootfs, 0);
             row++;
-            row++;
             printf("\n\n");
+            if (row >= 25)
+            {
+                printf("\n");
+                row = 26;
+            }
     }
     else if (string_starts_with(input, "exit")) {
         login();
