@@ -2,6 +2,8 @@
 #define CONFIG_CATK_H
 #include "types.h"
 
+int total_files = 0;
+
 char* current_directory = "/";  // Set it initially to the root directory
 
 int rows = 0;
