@@ -108,6 +108,14 @@ void sh() {
                         // Check if input length exceeds 20 characters
                         if (input_index >= 60) {
                             printf("Input too long. Please keep it under 60 characters.");
+                            input_buffer[input_index] = '\0';
+                            input_index = 0;
+                            empty_input = 1;
+                            can_backspace = 0; // Reset the backspace flag
+        
+                            for (int i = 0; i < 80; i++) {
+                                input_buffer[i] = '\0';
+                            }
                             row+=5;
                             if (row > 25)
                             {
