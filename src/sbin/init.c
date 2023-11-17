@@ -39,14 +39,14 @@ int init(int debug)
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
 
-    create_folder(&rootfs, "bin", "/");
-    create_folder(&rootfs, "dev", "/");
-    create_folder(&rootfs, "etc", "/");
-    create_folder(&rootfs, "proc", "/");
-    create_folder(&rootfs, "sys", "/");
-    create_folder(&rootfs, "kernel", "/");
+    create_folder(&rootfs, "/bin", "/");
+    create_folder(&rootfs, "/dev", "/");
+    create_folder(&rootfs, "/etc", "/");
+    create_folder(&rootfs, "/proc", "/");
+    create_folder(&rootfs, "/sys", "/");
+    create_folder(&rootfs, "/kernel", "/");
 
-    current_directory = "etc";
+    current_directory = "/etc";
     write_to_file(&rootfs, "logs.d", "init: Logfile created!\n");
     add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Filesystem started successfully\n");
 
@@ -110,7 +110,7 @@ int init(int debug)
     }
 
     printf("\nCreating tempfs...");
-    create_folder(&rootfs, "tmp", "/");
+    create_folder(&rootfs, "/tmp", "/");
 
     printf("\nDetecting drives....");
     listdrivebits();
@@ -125,8 +125,8 @@ int init(int debug)
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
     write_to_file(&rootfs, "session.catk", rootUser.username);
-    create_folder(&rootfs, "home", "/");
-    create_folder(&rootfs, rootUser.username, "home");
+    create_folder(&rootfs, "/home", "/");
+    create_folder(&rootfs, rootUser.username, "/home");
     current_directory = rootUser.username;
     write_to_file(&rootfs, "history.ksh", "");
     current_directory = "etc";
@@ -156,18 +156,18 @@ int init(int debug)
 
     printf("\nMaking dev nodes...");
 
-    current_directory = "dev";
+    current_directory = "/dev";
     write_to_file(&rootfs, "tty", "1");
     write_to_file(&rootfs, "null", NULL);
     write_to_file(&rootfs, "zero", "0");
     write_to_file(&rootfs, "random", seed);
     write_to_file(&rootfs, "fs", "rootfs");
     write_to_file(&rootfs, "mem", "1025");
-    current_directory = "etc";
+    current_directory = "/etc";
 
-    current_directory = "proc";
+    current_directory = "/proc";
     write_to_file(&rootfs, "args", bootargs);
-    current_directory = "etc";
+    current_directory = "/etc";
 
     printf("\nStarting Ethernet...");
     add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Starting Ethernet...\n");
@@ -178,9 +178,9 @@ int init(int debug)
     
     const char* statusBridged = isEthernetPluggedIn();
 
-    current_directory = "dev";
+    current_directory = "/dev";
     write_to_file(&rootfs, "net", "eth");
-    current_directory = "etc";
+    current_directory = "/etc";
 
 
     init_keyboard();
@@ -201,7 +201,7 @@ int init(int debug)
     // Create a file with the first line "type:App"
     const char* appContent = "type:App\nMore test app";
 
-    current_directory = "bin";
+    current_directory = "/bin";
     write_to_file(&rootfs, "test.app", appContent);
 
     console_init(COLOR_WHITE, COLOR_BLACK);
