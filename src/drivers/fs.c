@@ -49,19 +49,83 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
     printf("Error: Folder table is full\n");
 }
 
+char* strncat(char* dest, const char* src, size n) {
+    char* dest_end = dest;
+    while (*dest_end != '\0') {
+        dest_end++;
+    }
+
+    while (*src != '\0' && n > 0) {
+        *dest_end++ = *src++;
+        n--;
+    }
+
+    *dest_end = '\0';
+
+    return dest;
+}
+
+void cd_parent_directory() {
+    // Find the last occurrence of '/' in the current directory
+    size last_slash = 0;
+    for (size i = 0; i < FOLDERNAME_SIZE && current_directory[i] != '\0'; ++i) {
+        if (current_directory[i] == '/') {
+            last_slash = i;
+        }
+    }
+
+    // Handle the case where we are in a subdirectory
+    if (last_slash == 0) {
+        current_directory[1] = '\0';  // Move back to root
+    } else {
+        current_directory[last_slash] = '\0';
+    }
+
+    printf("Changed directory to %s\n", current_directory);
+}
 
 
-void change_directory(struct FileSystem* fs, const char* foldername) {
+void change_directory(struct FileSystem* fs, const char* path) {
+    char new_path[FOLDERNAME_SIZE];
+
+if (path[0] == '/') {
+    // Absolute path
+    strncpy(new_path, path, FOLDERNAME_SIZE - 1);
+    new_path[FOLDERNAME_SIZE - 1] = '\0';
+} else {
+    // Relative path
+    strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
+    new_path[FOLDERNAME_SIZE - 1] = '\0';
+
+    // Ensure there is a '/' between the current directory and the relative path
+    if (new_path[strlen(new_path) - 1] != '/' && strlen(new_path) < FOLDERNAME_SIZE - 1) {
+        strncat(new_path, "/", 1);
+    }
+
+    strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
+    new_path[FOLDERNAME_SIZE - 1] = '\0';
+}
+
+    // Check if the folder exists
     for (size i = 0; i < MAX_FOLDERS; ++i) {
-        if (strcmp(fs->folder_table[i], foldername) == 0) {
+        if (strstr(fs->folder_table[i], new_path) != NULL) {
             // Change the current working directory
-            current_directory = fs->folder_table[i];
-            printf("Changed directory to %s\n", foldername);
+            strncpy(current_directory, new_path, FOLDERNAME_SIZE);
+            printf("Changed directory to %s\n", current_directory);
             return;
         }
     }
-    printf("Error: Folder %s not found\n", foldername);
+    printf("Error: Folder %s not found\n", new_path);
     // Reset the current directory to a safe default or handle it based on your design.
+}
+
+int strncmp(const char* str1, const char* str2, size n) {
+    for (size i = 0; i < n; ++i) {
+        if (str1[i] != str2[i] || str1[i] == '\0' || str2[i] == '\0') {
+            return (unsigned char)str1[i] - (unsigned char)str2[i];
+        }
+    }
+    return 0;
 }
 
 
