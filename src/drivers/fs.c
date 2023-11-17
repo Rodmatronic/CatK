@@ -49,17 +49,22 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
     printf("Error: Folder table is full\n");
 }
 
+
+
 void change_directory(struct FileSystem* fs, const char* foldername) {
     for (size i = 0; i < MAX_FOLDERS; ++i) {
         if (strcmp(fs->folder_table[i], foldername) == 0) {
             // Change the current working directory
             current_directory = fs->folder_table[i];
-            printf("Changed directory to %s", foldername);
+            printf("Changed directory to %s\n", foldername);
             return;
         }
     }
-    printf("Error: Folder %s not found", foldername);
+    printf("Error: Folder %s not found\n", foldername);
+    // Reset the current directory to a safe default or handle it based on your design.
 }
+
+
 void write_to_file(struct FileSystem* fs, const char* filename, const char* data, ...) {
     const char* current_folder = current_directory; // Get the current folder
 
@@ -189,12 +194,20 @@ void rm_file(struct FileSystem* fs, const char* filename) {
     for (size i = 0; i < MAX_FILES; ++i) {
         if (strcmp(fs->file_table[i].filename, filename) == 0 &&
             strcmp(fs->file_table[i].parent_folder, current_folder) == 0) {
-            // File found in the current folder, remove it by marking the entry as empty
+            
+            // Check if the file entry is a folder
+            if (fs->file_table[i].is_folder) {
+                // Recursively remove contents of the folder
+                remove_folder_contents(fs, fs->file_table[i].filename);
+            }
+
+            // Remove the file or folder entry
             fs->file_table[i].filename[0] = '\0';
             fs->file_table[i].start_block = 0;
             fs->file_table[i].size = 0;
             memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
-            total_files--;            
+            total_files--;
+
             return;
         }
     }
@@ -202,6 +215,38 @@ void rm_file(struct FileSystem* fs, const char* filename) {
     // File not found or not in the current folder
     printf("Error: File %s not found in the current folder\n", filename);
 }
+
+// Recursive function to remove contents of a folder
+void remove_folder_contents(struct FileSystem* fs, const char* foldername) {
+    const char* current_folder = current_directory; // Get the current folder
+
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (fs->file_table[i].filename[0] != '\0' &&
+            fs->file_table[i].is_folder &&
+            strcmp(fs->file_table[i].parent_folder, foldername) == 0) {
+            
+            // Recursively remove contents of subfolders
+            remove_folder_contents(fs, fs->file_table[i].filename);
+
+            // Remove the file or folder entry
+            fs->file_table[i].filename[0] = '\0';
+            fs->file_table[i].start_block = 0;
+            fs->file_table[i].size = 0;
+            memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
+            total_files--;
+        }
+    }
+
+    // Clear the folder entry itself
+    for (size i = 0; i < MAX_FOLDERS; ++i) {
+        if (strcmp(fs->folder_table[i], foldername) == 0) {
+            fs->folder_table[i][0] = '\0';
+            return;
+        }
+    }
+}
+
+
 
 void execute_file(struct FileSystem* fs, const char* filename) {
     char buffer[BLOCK_SIZE];

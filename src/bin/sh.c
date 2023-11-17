@@ -412,7 +412,7 @@ else if (string_starts_with(input, "touch")) {
         args = input + strlen("mkdir "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-                create_folder(&rootfs, args, "/");
+                create_folder(&rootfs, args, current_directory);
                 row++;
                 if (row >= 25)
                 {

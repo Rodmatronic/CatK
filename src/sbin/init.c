@@ -40,11 +40,11 @@ int init(int debug)
     }
 
     create_folder(&rootfs, "bin", "/");
-    create_folder(&rootfs, "sys", "/");
-    create_folder(&rootfs, "proc", "/");
-    create_folder(&rootfs, "etc", "/");
-    create_folder(&rootfs, "kernel", "/");
     create_folder(&rootfs, "dev", "/");
+    create_folder(&rootfs, "etc", "/");
+    create_folder(&rootfs, "proc", "/");
+    create_folder(&rootfs, "sys", "/");
+    create_folder(&rootfs, "kernel", "/");
 
     current_directory = "etc";
     write_to_file(&rootfs, "logs.d", "init: Logfile created!\n");
@@ -126,6 +126,7 @@ int init(int debug)
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
     write_to_file(&rootfs, "session.catk", rootUser.username);
+    create_folder(&rootfs, "home", "/");
 
     // Check if user has been modified
     if (strlen(username) > 0) {
