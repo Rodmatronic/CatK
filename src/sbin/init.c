@@ -135,14 +135,6 @@ int init(int debug)
     seed = errorinseed;
     seed+=seconds;
 
-    current_directory = "proc";
-    write_to_file(&rootfs, "args", bootargs);
-    current_directory = "etc";
-
-    current_directory = "dev";
-    write_to_file(&rootfs, "tty", "1");
-    current_directory = "etc";
-
     // Check if seed has been modified
     if (strlen(errorinseed) > 0) {
         add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Set random seed\n");
@@ -151,6 +143,21 @@ int init(int debug)
         add_data_to_file(&rootfs, "logs.d", "init: [ERR!] Could not set random seed\n");
         catkmessagefixed(3, 4);
     }
+
+    printf("\nMaking dev nodes...");
+
+    current_directory = "dev";
+    write_to_file(&rootfs, "tty", "1");
+    write_to_file(&rootfs, "null", NULL);
+    write_to_file(&rootfs, "zero", "0");
+    write_to_file(&rootfs, "random", seed);
+    write_to_file(&rootfs, "fs", "rootfs");
+    write_to_file(&rootfs, "mem", "1025");
+    current_directory = "etc";
+
+    current_directory = "proc";
+    write_to_file(&rootfs, "args", bootargs);
+    current_directory = "etc";
 
     printf("\nStarting Ethernet...");
     add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Starting Ethernet...\n");
