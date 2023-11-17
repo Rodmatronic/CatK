@@ -178,6 +178,13 @@ void process_user_input(const char* input) {
     add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Processing user input...\n");
     args = NULL; // Reset the arguments
 
+    char* working_dir = current_directory;
+    current_directory = "home";
+    current_directory = rootUser.username;
+    current_directory = working_dir;
+    add_data_to_file(&rootfs, "history.ksh", input);
+    add_data_to_file(&rootfs, "history.ksh", "\n");
+
     // Check for specific commands in the input
     if (string_starts_with(input, "echo")) {
         // If "echo" command is detected, process it

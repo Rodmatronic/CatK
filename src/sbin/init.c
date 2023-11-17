@@ -121,12 +121,15 @@ int init(int debug)
 
     printf("\nCreating rootuser...");
     // root user
-    struct User rootUser;
     strcpy(rootUser.username, "root");
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
     write_to_file(&rootfs, "session.catk", rootUser.username);
     create_folder(&rootfs, "home", "/");
+    create_folder(&rootfs, rootUser.username, "home");
+    current_directory = rootUser.username;
+    write_to_file(&rootfs, "history.ksh", "");
+    current_directory = "etc";
 
     // Check if user has been modified
     if (strlen(username) > 0) {
