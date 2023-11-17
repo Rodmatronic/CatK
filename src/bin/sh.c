@@ -184,6 +184,7 @@ void process_user_input(const char* input) {
     current_directory = working_dir;
     add_data_to_file(&rootfs, "history.ksh", input);
     add_data_to_file(&rootfs, "history.ksh", "\n");
+    current_directory = current_directory;
 
     // Check for specific commands in the input
     if (string_starts_with(input, "echo")) {
@@ -434,7 +435,7 @@ else if (string_starts_with(input, "touch")) {
         if (args[0] != '\0') {
             if (strcmp(args, "..") == 0)
             {
-                current_directory = "/";
+                cd_parent_directory();
             }else
             change_directory(&rootfs, args);
         }
