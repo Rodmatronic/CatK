@@ -32,13 +32,21 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
             // Empty slot found, create a new folder entry
             strncpy(fs->folder_table[i], foldername, FOLDERNAME_SIZE);
 
+            // Adjust the parent folder path for absolute paths
+            char adjusted_parent[FOLDERNAME_SIZE];
+            if (foldername[0] == '/') {
+                strncpy(adjusted_parent, "/", FOLDERNAME_SIZE);
+            } else {
+                strncpy(adjusted_parent, parent_folder, FOLDERNAME_SIZE);
+            }
+
             // Find an empty slot in the file table
             for (size j = 0; j < MAX_FILES; ++j) {
                 if (fs->file_table[j].filename[0] == '\0' && fs->file_table[j].parent_folder[0] == '\0') {
                     // Empty slot found, create a new file entry for the folder
                     strncpy(fs->file_table[j].filename, foldername, FILENAME_SIZE);
                     fs->file_table[j].is_folder = 1;
-                    strncpy(fs->file_table[j].parent_folder, parent_folder, FOLDERNAME_SIZE); // Set the parent folder
+                    strncpy(fs->file_table[j].parent_folder, adjusted_parent, FOLDERNAME_SIZE); // Set the parent folder
                     return;
                 }
             }

@@ -70,7 +70,7 @@ int init(int debug)
         }
     }
 
-    printf("\nAllocating memory...");
+    /*printf("\nAllocating memory...");
     initialize_memory();
 
     void* allocated_memory = allocate_memory(10 * 1024 * 1024);
@@ -80,7 +80,7 @@ int init(int debug)
         catkmessagefixed(3, 0);
     }else
     add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Successfully Allocated memory!\n");
-    catkmessagefixed(1, 0);
+    catkmessagefixed(1, 0);*/
 
     printf("\nGetting CPU info...");
 
@@ -126,8 +126,8 @@ int init(int debug)
     strcpy(username, rootUser.username);
     write_to_file(&rootfs, "session.catk", rootUser.username);
     create_folder(&rootfs, "/home", "/");
-    create_folder(&rootfs, rootUser.username, "/home");
-    current_directory = rootUser.username;
+    create_folder(&rootfs, "/root", "/home");
+    current_directory = "/root";
     write_to_file(&rootfs, "history.ksh", "");
     current_directory = "etc";
 
