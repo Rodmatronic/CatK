@@ -47,9 +47,15 @@ void sh() {
 
     console_clear(COLOR_WHITE, COLOR_BLACK);
 
-    printf_dark("You have been dropped into SH, type ");
-    printf("help");
-    printf_dark(" for some helpful commands");
+    // Read and display the content of the specified file
+    read_from_file(&rootfs, "motd", buffer, sizeof(buffer));
+
+    // Display the content
+    printf("%s", buffer);
+
+    //printf_dark("You have been dropped into SH, type ");
+    //printf("help");
+    //printf_dark(" for some helpful commands");
 
     while (1) {
         isclearing = 0;

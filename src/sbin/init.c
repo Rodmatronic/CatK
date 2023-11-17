@@ -1,6 +1,7 @@
 #include "config.h"
 
 char* defaulthost = "catk";
+char* motd = "Welcome to Catk! Type 'help', or just mess with the command line.\nYou can thange this message by editing /etc/motd";
 
 void shell_process() {
     // Your shell process code here
@@ -48,6 +49,8 @@ int init(int debug)
     current_directory = "etc";
     write_to_file(&rootfs, "logs.d", "init: Logfile created!\n");
     add_data_to_file(&rootfs, "logs.d", "init: [ ok ] Filesystem started successfully\n");
+
+    write_to_file(&rootfs, "motd", motd);
 
     write_to_file(&rootfs, "version", "");
 
@@ -105,6 +108,9 @@ int init(int debug)
     } else {
         catkmessagefixed(3, 1);
     }
+
+    printf("\nCreating tempfs...");
+    create_folder(&rootfs, "tmp", "/");
 
     printf("\nDetecting drives....");
     listdrivebits();
@@ -168,7 +174,7 @@ int init(int debug)
     
     const char* statusBridged = isEthernetPluggedIn();
 
-    current_directory = "proc";
+    current_directory = "dev";
     write_to_file(&rootfs, "net", "eth");
     current_directory = "etc";
 
