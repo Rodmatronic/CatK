@@ -225,6 +225,44 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
     strncpy(buffer, "File not found", buffer_size);
 }
 
+void read_last_line_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size) {
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (strcmp(fs->file_table[i].filename, filename) == 0) {
+            // Check if the file is a folder
+            if (fs->file_table[i].is_folder) {
+                printf("%s is a folder and cannot be read as a file.\n", filename);
+                strncpy(buffer, "", buffer_size); // Clear the buffer
+                return;
+            }
+
+            // File found, read data from the corresponding data block
+            const char* file_data = fs->data_blocks[fs->file_table[i].start_block];
+
+            // Find the last newline character in reverse
+            size last_newline = -1;
+            for (size j = strlen(file_data) - 1; j >= 0; --j) {
+                if (file_data[j] == '\n') {
+                    last_newline = j;
+                    break;
+                }
+            }
+
+            // Copy the last line into the buffer
+            if (last_newline >= 0) {
+                size last_line_length = strlen(&file_data[last_newline + 1]);
+                strncpy(buffer, &file_data[last_newline + 1], last_line_length);
+            } else {
+                // No newline found, copy the entire file content
+                strncpy(buffer, file_data, buffer_size);
+            }
+            return;
+        }
+    }
+
+    // File not found
+    strncpy(buffer, "File not found", buffer_size);
+}
+
 void add_data_to_file(struct FileSystem* fs, const char* filename, const char* additional_data) {
     for (size i = 0; i < MAX_FILES; ++i) {
         if (strcmp(fs->file_table[i].filename, filename) == 0) {

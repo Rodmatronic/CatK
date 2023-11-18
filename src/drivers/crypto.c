@@ -5,7 +5,7 @@ void encrypt(char* input)
     add_data_to_file(&rootfs, "logs.d", "crypto: [ .. ] encrypting...\n");
 
     char* working_dir = current_directory;
-    current_directory = "etc";
+    current_directory = "/etc";
 
     if (input == NULL)
     {

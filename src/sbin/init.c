@@ -1,4 +1,5 @@
 #include "config.h"
+#include "packages.c"
 
 char* defaulthost = "catk";
 char* motd = "Welcome to Catk! Type 'help', or just mess with the command line.\nYou can thange this message by editing /etc/motd";
@@ -44,7 +45,7 @@ int init(int debug)
     create_folder(&rootfs, "/etc", "/");
     create_folder(&rootfs, "/proc", "/");
     create_folder(&rootfs, "/sys", "/");
-    create_folder(&rootfs, "/kernel", "/");
+    create_folder(&rootfs, "/mount", "/");
 
     current_directory = "/etc";
     write_to_file(&rootfs, "logs.d", "init: Logfile created!\n");
@@ -127,9 +128,9 @@ int init(int debug)
     write_to_file(&rootfs, "session.catk", rootUser.username);
     create_folder(&rootfs, "/home", "/");
     create_folder(&rootfs, "/root", "/home");
-    current_directory = "/root";
+    current_directory = "/home";
     write_to_file(&rootfs, "history.ksh", "");
-    current_directory = "etc";
+    current_directory = "/etc";
 
     // Check if user has been modified
     if (strlen(username) > 0) {
@@ -203,6 +204,10 @@ int init(int debug)
 
     current_directory = "/bin";
     write_to_file(&rootfs, "test.app", appContent);
+
+    current_directory = "/etc";
+    write_to_file(&rootfs, "packagelist", "");
+    startuppkg();
 
     console_init(COLOR_WHITE, COLOR_BLACK);
     // Create a shell process

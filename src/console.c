@@ -59,12 +59,6 @@ void scroll(int direction)
 {
     if (direction == 0) // Scroll down
     {
-        // Clear the first row
-        uint16 clear_item = vga_item_entry(' ', g_fore_color, g_back_color);
-        for (uint32 i = 0; i < VGA_WIDTH; i++) {
-            g_vga_buffer[i] = clear_item;
-        }
-
         for (uint32 i = VGA_WIDTH; i < VGA_TOTAL_ITEMS; i++) {
             g_vga_buffer[i - VGA_WIDTH] = g_vga_buffer[i];
         }

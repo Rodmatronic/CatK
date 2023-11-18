@@ -9,6 +9,7 @@
 #include "login.c"
 #include "man.c"
 #include "catsay.c"
+#include "pkg.c"
 #include "fs.h"
 #include "string.h"
 #include "config.h"
@@ -93,6 +94,20 @@ void sh() {
                 {
                     can_backspace = 0;
                 }
+
+                /*if (scancode == 0x2A){
+                    // Assuming you have a FileSystem instance named rootfs
+                    char last_entry[256]; // Adjust the buffer size as needed
+
+                    // Read the last line from "history.ksh"
+                    char* working_dir = current_directory;
+                    current_directory = "/home";
+                    read_last_line_from_file(&rootfs, "history.ksh", last_entry, sizeof(last_entry));
+                    current_directory = working_dir;
+
+                    // Print the last entry
+                    printf("Last entry in history.ksh: %s\n", last_entry);
+                }*/
 
                 if (scancode == 0x0E && can_backspace == 1 && input_index > 0) {
                     cursorpos--;
@@ -179,7 +194,7 @@ void process_user_input(const char* input) {
     args = NULL; // Reset the arguments
 
     char* working_dir = current_directory;
-    current_directory = "home";
+    current_directory = "/home";
     current_directory = rootUser.username;
     current_directory = working_dir;
     add_data_to_file(&rootfs, "history.ksh", input);
@@ -187,6 +202,13 @@ void process_user_input(const char* input) {
     current_directory = current_directory;
 
     // Check for specific commands in the input
+    if (string_starts_with(input, "pkg")) {
+        args = input + strlen("pkg "); // Extract arguments
+        // Check if there are arguments (non-empty)
+        if (args[0] != '\0') {
+            pkg(args);
+        }
+    }else
     if (string_starts_with(input, "echo")) {
         // If "echo" command is detected, process it
         args = input + strlen("echo "); // Extract arguments
