@@ -99,7 +99,7 @@ int init(int debug)
     printf("\nSetting hostname...");
 
     write_to_file(&rootfs, "hostname", defaulthostname);
-    read_from_file(&rootfs, "hostname", buffer, sizeof(buffer));
+    read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
 
     strcpy(host_name, buffer);
 
@@ -200,7 +200,7 @@ int init(int debug)
     add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Creating test application\n");
     
     // Create a file with the first line "type:App"
-    const char* appContent = "type:App\nMore test app";
+    const char* appContent = "type:App\nprint new";
 
     current_directory = "/bin";
     write_to_file(&rootfs, "test.app", appContent);

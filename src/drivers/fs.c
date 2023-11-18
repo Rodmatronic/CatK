@@ -205,9 +205,20 @@ void list_files(const struct FileSystem* fs, int type) {
     }
 }
 
-void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size) {
-    for (size i = 0; i < MAX_FILES; ++i) {
+void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size, int allow_anywhere) {
+    const char* current_folder = current_directory;
+
+    size i;
+
+    for (i = 0; i < MAX_FILES; ++i) {
         if (strcmp(fs->file_table[i].filename, filename) == 0) {
+            // Check if the current folder matches the parent folder, unless explicitly allowed
+            if (!allow_anywhere && strcmp(fs->file_table[i].parent_folder, current_folder) != 0) {
+                printf("No such file in the current folder\n");
+                strncpy(buffer, "", buffer_size); // Clear the buffer
+                return;
+            }
+
             // Check if the file is a folder
             if (fs->file_table[i].is_folder) {
                 printf("%s is a folder and cannot be read as a file.\n", filename);
@@ -360,15 +371,24 @@ void remove_folder_contents(struct FileSystem* fs, const char* foldername) {
 
 void execute_file(struct FileSystem* fs, const char* filename) {
     char buffer[BLOCK_SIZE];
-    read_from_file(fs, filename, buffer, BLOCK_SIZE);
+    read_from_file(fs, filename, buffer, BLOCK_SIZE, 0);
 
     // Tokenize and execute each line
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
         // Run each line as a command
-        // Note: You might need to implement your own command execution logic here
-        printf("Executing: %s\n", token);
+        printf("%s\n", token);
 
+        // Check if the line contains "print"
+        char* printToken = strstr(token, "print");
+        if (printToken != NULL) {
+            // Extract anything after "print"
+            char* argument = printToken + strlen("print") + 1; // +1 to skip the space after "print"
+        }
+        if (strcmp(args, "clear") == 0)
+        {
+            console_init(COLOR_WHITE, COLOR_BLACK);
+        }
         // Move to the next line
         token = k_strtok(NULL, "\n");
     }

@@ -49,7 +49,7 @@ void sh() {
     console_clear(COLOR_WHITE, COLOR_BLACK);
 
     // Read and display the content of the specified file
-    read_from_file(&rootfs, "motd", buffer, sizeof(buffer));
+    read_from_file(&rootfs, "motd", buffer, sizeof(buffer), 1);
 
     // Display the content
     printf("%s", buffer);
@@ -61,10 +61,10 @@ void sh() {
     while (1) {
         isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
-        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer));
+        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
         printf_brightcyan("%s", buffer);
         printf_darkcyan("@");
-        read_from_file(&rootfs, "hostname", buffer, sizeof(buffer));
+        read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
         printf_brightcyan("%s", buffer);
         printf_brightblue(":%s ", current_directory);
         printf("# ");
@@ -318,7 +318,7 @@ void process_user_input(const char* input) {
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
                             // Read and display the content of the specified file
-                read_from_file(&rootfs, args, buffer, sizeof(buffer));
+                read_from_file(&rootfs, args, buffer, sizeof(buffer), 0);
 
                 // Display the content
                 printf("%s\n", buffer);
@@ -434,7 +434,7 @@ else if (string_starts_with(input, "touch")) {
         }
     }
     else if (string_starts_with(input, "uname")) {
-            read_from_file(&rootfs, "version", buffer, sizeof(buffer));
+            read_from_file(&rootfs, "version", buffer, sizeof(buffer), 1);
             printf("%s", buffer);
         
     }   
@@ -475,6 +475,7 @@ else if (string_starts_with(input, "touch")) {
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
                 execute_file(&rootfs, args);
+                row = 25;
         }else
             printf("Please specify a file");
     }
@@ -495,11 +496,11 @@ else if (string_starts_with(input, "touch")) {
         console_init(COLOR_WHITE, COLOR_BLACK);
     } 
     else if (string_starts_with(input, "cpuid")) {
-        read_from_file(&rootfs, "cpu", buffer, sizeof(buffer));
+        read_from_file(&rootfs, "cpu", buffer, sizeof(buffer), 1);
         printf("%s", buffer);
     } 
     else if (string_starts_with(input, "whoami")) {
-        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer));
+        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
     }
     else if (string_starts_with(input, "times")) {
         printPowerOnTime();
