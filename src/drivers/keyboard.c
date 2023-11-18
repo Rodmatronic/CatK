@@ -43,9 +43,7 @@ char scancode_to_char(unsigned char scancode) {
         0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', '\t',
         'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n', 0, 'a', 's',
         'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x', 'c', 'v',
-        'b', 'n', 'm', ',', '.', '/', '.', '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //                                      ^ alt
-        '.', '6', '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '2'
+        'b', 'n', 'm', ',', '.', '/', '.', '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
     if (scancode == 0x2A) { // Left Shift pressed
@@ -68,12 +66,12 @@ char scancode_to_char(unsigned char scancode) {
         }
     }
 
-    if (scancode == 0x2A) { //Up
+    /*if (scancode == 0x2A) { //Up
         printf(" ");
     }else
     if (scancode == 0xE0) { //Down
         printf(" ");
-    }else
+    }else*/
 
     if (scancode == 0x2A) { // Left Shift pressed
         shift_pressed = 1;
