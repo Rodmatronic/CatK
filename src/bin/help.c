@@ -43,9 +43,13 @@ void help()
     printf_dark(" - Lists all files and directories\n");
     load_more_entries();
     printf("  mkdir");
-    printf_dark(" - Create a new folder\n");
+    printf_dark(" - Create a new folder\n\n");
     printf("  touch");
     printf_dark(" - Creates a new file, by: touch 'filename' 'contents'\n");
+    printf("  exec");
+    printf_dark(" - Executes the specified file\n");
+    printf("  cd");
+    printf_dark(" - Changes to the specified directory\n");
     printf("  panic");
     printf_dark(" - WARNING!!! This is for debugging purposes, halts the system\n");
     AppClose(&help);
