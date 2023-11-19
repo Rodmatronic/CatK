@@ -6,9 +6,9 @@ void hostname(char* input) {
         char* working_dir = current_directory;
         rm_file(&rootfs, "/hostname");
         write_to_file(&rootfs, "/hostname", defaulthostname);
-        read_from_file(&rootfs, "/hostname", buffer, sizeof(buffer), 1);
+        read_from_file(&rootfs, "/hostname", buffer, sizeof(hostnamebuffer), 1);
 
-        strcpy(host_name, buffer);
+        strcpy(host_name, hostnamebuffer);
 
         current_directory = current_directory;
         

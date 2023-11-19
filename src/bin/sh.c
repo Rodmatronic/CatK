@@ -14,6 +14,8 @@
 #include "string.h"
 #include "config.h"
 
+char* sessionbuffer[128];
+
 void set_cursor_position(int x, int y);
 void sh();
 void process_user_input(const char* input);
@@ -40,31 +42,22 @@ void set_cursor_position(int x, int y) {
     outportb((unsigned char)(position & 0xFF), 0x3D5);
 }
 
-char* usersh;
-char* hostnamesh;
-char usersh_buffer[80];
-char hostnamesh_buffer[80];
-char motdbuffer[80];
-
 void sh() {
-    current_directory = "/home";
     add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Started\n");
     startingrow = 0;
     row = 3;
     char input_buffer[80] = {0}; // Initialize with null characters to create an empty string
 
-    read_from_file(&rootfs, "session.catk", usersh_buffer, sizeof(usersh_buffer), 1);
-    usersh = usersh_buffer;
-    read_from_file(&rootfs, "hostname", hostnamesh_buffer, sizeof(hostnamesh_buffer), 1);
-    hostnamesh = hostnamesh_buffer;
-
     console_clear(COLOR_WHITE, COLOR_BLACK);
 
+    current_directory = "/etc";
     // Read and display the content of the specified file
     read_from_file(&rootfs, "motd", motdbuffer, sizeof(motdbuffer), 1);
 
     // Display the content
     printf("%s", motdbuffer);
+
+    current_directory = "/";
 
     //printf_dark("You have been dropped into SH, type ");
     //printf("help");
@@ -494,6 +487,7 @@ else if (string_starts_with(input, "touch")) {
                 cd_parent_directory();
             }else
             change_directory(&rootfs, args);
+            return;
         }
     }   
     else if (string_starts_with(input, "panic")) {
@@ -537,7 +531,7 @@ else if (string_starts_with(input, "touch")) {
         printf("%s", buffer);
     } 
     else if (string_starts_with(input, "whoami")) {
-        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
+        read_from_file(&rootfs, "session.catk", buffer, sizeof(sessionbuffer), 1);
     }
     else if (string_starts_with(input, "times")) {
         printPowerOnTime();

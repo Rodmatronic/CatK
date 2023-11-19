@@ -4,6 +4,14 @@
 
 struct User rootUser;
 
+char* usersh;
+char* hostnamesh;
+char usersh_buffer[80];
+char hostnamesh_buffer[80];
+char motdbuffer[80];
+char* hostnamebuffer[128];
+char defaulthostname[30] = "catk";
+
 int total_files = 0;
 
 char* current_directory = "/";  // Set it initially to the root directory
@@ -12,8 +20,6 @@ int rows = 0;
 
 extern uint32 prebootversion;
 extern char* bootargs;
-
-char defaulthostname[30] = "catk";
 
 char host_name[30] = ""; // hostname with a maximum length of 63 characters
 char username[30] = ""; // username

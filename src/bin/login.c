@@ -22,8 +22,8 @@ void login() {
     console_clear(COLOR_WHITE, COLOR_BLACK);
     char input_buffer[80]; // Buffer to store user input
 
-    read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
-    printf("%s (Terminal 1)\n\n", buffer);
+    read_from_file(&rootfs, "hostname", hostnamesh_buffer, sizeof(hostnamesh_buffer), 1);
+    printf("%s (Terminal 1)\n\n", hostnamesh_buffer);
     printf("Login: ");
     
     int input_index = 0;

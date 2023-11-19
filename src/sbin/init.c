@@ -149,6 +149,10 @@ int init(int debug)
     current_directory = "/bin";
     write_to_file(&rootfs, "sh.app", shapp);
 
+    const char* loginapp = "type:App\nlogin";
+    current_directory = "/bin";
+    write_to_file(&rootfs, "login.app", loginapp);
+
     current_directory = "/sbin";
     write_to_file(&rootfs, "startup", "");
     startup();
@@ -164,6 +168,11 @@ int init(int debug)
     current_directory = "/home";
     write_to_file(&rootfs, "history.ksh", "");
     current_directory = "/etc";
+
+    read_from_file(&rootfs, "session.catk", usersh_buffer, sizeof(usersh_buffer), 1);
+    usersh = usersh_buffer;
+    read_from_file(&rootfs, "hostname", hostnamesh_buffer, sizeof(hostnamesh_buffer), 1);
+    hostnamesh = hostnamesh_buffer;
 
     // Check if user has been modified
     if (strlen(username) > 0) {

@@ -1,5 +1,7 @@
 uint8 seedpasswd = 7;
 
+char* cryptobuffer[128];
+
 void encrypt(char* input)
 {
     add_data_to_file(&rootfs, "logs.d", "crypto: [ .. ] encrypting...\n");
@@ -21,10 +23,10 @@ void encrypt(char* input)
         input[i] = (input[i] + seedpasswd) % 256;
     }
 
-    read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
+    read_from_file(&rootfs, "session.catk", cryptobuffer, sizeof(cryptobuffer), 1);
 
     write_to_file(&rootfs, "passwd", "");
-    add_data_to_file(&rootfs, "passwd", buffer);
+    add_data_to_file(&rootfs, "passwd", cryptobuffer);
     add_data_to_file(&rootfs, "passwd", ":*:");
     add_data_to_file(&rootfs, "passwd", input);
     add_data_to_file(&rootfs, "passwd", ":*:");
