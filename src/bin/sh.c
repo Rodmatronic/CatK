@@ -59,6 +59,7 @@ void sh() {
     //printf_dark(" for some helpful commands");
 
     while (1) {
+        current_directory = "/home";
         isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
         read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
@@ -216,15 +217,16 @@ void process_user_input(const char* input) {
         if (args[0] != '\0') {
             pkg(args);
         }
-    }else
-    if (string_starts_with(input, "echo")) {
-        // If "echo" command is detected, process it
+    }
+    else if (string_starts_with(input, "echo")) {
         args = input + strlen("echo "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-            // Execute the "echo" command with the arguments
-            echo(args);
-        }
+                printf("%s", args);
+                row++;
+                return;
+        }else
+        printf("No string for CatK to say...");
     }
     
     if (string_starts_with(input, "init")) {
@@ -260,6 +262,8 @@ void process_user_input(const char* input) {
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
             int args_length = strlen(args);
+
+
 
             char passwdinput[args_length + 1];  // Create a message array of the same size as args, plus 1 for null-termination
             strcpy(passwdinput, args);  // Copy the contents of args into message

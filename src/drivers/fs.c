@@ -377,22 +377,91 @@ void execute_file(struct FileSystem* fs, const char* filename) {
     // Tokenize and execute each line
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
-        // Run each line as a command
-        printf("%s\n", token);
-
-        // Check if the line contains "print"
-        char* printToken = strstr(token, "print");
+        // Check if the line contains "print "
+        char* printToken = k_strstr(token, "print ");
         if (printToken != NULL) {
-            // Extract anything after "print"
-            char* argument = printToken + strlen("print") + 1; // +1 to skip the space after "print"
+            // Print the text following "print "
+            printf("%s\n", printToken + strlen("print "));
         }
-        if (strcmp(args, "clear") == 0)
-        {
+        char* clearToken = k_strstr(token, "clear");
+        if (clearToken != NULL) {
+            // Print the text following "clear"
             console_init(COLOR_WHITE, COLOR_BLACK);
+        }
+        char* Time = k_strstr(token, "time");
+        if (Time != NULL) {
+            // Print the text following "clear"
+            GetCurrentTime();
+        }
+        char* Reboot = k_strstr(token, "reboot");
+        if (Reboot != NULL) {
+            // Print the text following "clear"
+            syspw(0);
+        }
+        char* shutdown = k_strstr(token, "shutdown");
+        if (shutdown != NULL) {
+            // Print the text following "clear"
+            syspw(1);
+        }
+        char* initcommand = k_strstr(token, "init");
+        if (initcommand != NULL) {
+            // Print the text following "clear"
+            init();
+        }
+        char* shcommand = k_strstr(token, "sh");
+        if (shcommand != NULL) {
+            // Print the text following "clear"
+            sh();
         }
         // Move to the next line
         token = k_strtok(NULL, "\n");
     }
+}
+
+int k_strncmp(const char* str1, const char* str2, size n) {
+    for (size i = 0; i < n; ++i) {
+        if (str1[i] != str2[i]) {
+            return (str1[i] < str2[i]) ? -1 : 1;
+        }
+
+        if (str1[i] == '\0') {
+            return 0;  // Strings are equal up to null terminator
+        }
+    }
+
+    return 0;  // The first n characters are equal
+}
+
+int k_strstr(const char* haystack, const char* needle) {
+    while (*haystack) {
+        const char* h = haystack;
+        const char* n = needle;
+
+        while (*haystack && *n && *haystack == *n) {
+            haystack++;
+            n++;
+        }
+
+        if (!*n) {
+            // Found the needle in the haystack
+            return (char*)h;
+        }
+
+        haystack = h + 1; // Move to the next character in the haystack
+    }
+
+    return NULL; // Needle not found
+}
+
+int k_strchr(const char* str, int c) {
+    while (*str != '\0') {
+        if (*str == c) {
+            return str;
+        }
+        ++str;
+    }
+
+    return NULL;  // Character not found
 }
 
 int k_strcmp(const char* s1, const char* s2) {

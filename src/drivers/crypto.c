@@ -21,7 +21,14 @@ void encrypt(char* input)
         input[i] = (input[i] + seedpasswd) % 256;
     }
 
-    write_to_file(&rootfs, "passwd", input);
+    read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
+
+    write_to_file(&rootfs, "passwd", "");
+    add_data_to_file(&rootfs, "passwd", buffer);
+    add_data_to_file(&rootfs, "passwd", ":*:");
+    add_data_to_file(&rootfs, "passwd", input);
+    add_data_to_file(&rootfs, "passwd", ":*:");
+    add_data_to_file(&rootfs, "passwd", rootUser.shell);
 
     current_directory = working_dir;
 

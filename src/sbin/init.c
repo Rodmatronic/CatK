@@ -126,8 +126,28 @@ int init(int debug)
     printf("\nDetected drives!");
     catkmessagefixed(1, 2);
 
-    printf("\nCreating misc UNIX related files....");
+    printf("\nCreating essential UNIX related files....");
     rows++;
+
+    const char* rebootapp = "type:App\nreboot";
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "reboot.app", rebootapp);
+
+    const char* shutdownapp = "type:App\nshutdown";
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "shutdown.app", shutdownapp);
+
+    const char* timeapp = "type:App\ntime";
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "time.app", timeapp);
+
+    const char* initapp = "type:App\ninit";
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "init.app", initapp);
+
+    const char* shapp = "type:App\nsh";
+    current_directory = "/bin";
+    write_to_file(&rootfs, "sh.app", shapp);
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "startup", "");
@@ -213,10 +233,13 @@ int init(int debug)
     add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Creating test application\n");
     
     // Create a file with the first line "type:App"
-    const char* appContent = "type:App\nprint new";
-
+    const char* appContent = "type:App\nclear\nprint Test for Print\ntime\nHey, this is working!";
     current_directory = "/bin";
     write_to_file(&rootfs, "test.app", appContent);
+
+    const char* matiapp = "type:App\nclear\nprint Hey Mati!\nprint Ive added apps to my kernel\nprint This is the second app EVER in CatK Unix!\nprint Hope you find it cool! :P";
+    current_directory = "/bin";
+    write_to_file(&rootfs, "mati.app", matiapp);
 
     current_directory = "/etc";
     write_to_file(&rootfs, "packagelist", "");
