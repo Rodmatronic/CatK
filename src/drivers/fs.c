@@ -96,27 +96,28 @@ void cd_parent_directory() {
 void change_directory(struct FileSystem* fs, const char* path) {
     char new_path[FOLDERNAME_SIZE];
 
-if (path[0] == '/') {
-    // Absolute path
-    strncpy(new_path, path, FOLDERNAME_SIZE - 1);
-    new_path[FOLDERNAME_SIZE - 1] = '\0';
-} else {
-    // Relative path
-    strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
-    new_path[FOLDERNAME_SIZE - 1] = '\0';
+    if (path[0] == '/') {
+        // Absolute path
+        strncpy(new_path, path, FOLDERNAME_SIZE - 1);
+        new_path[FOLDERNAME_SIZE - 1] = '\0';
+    } else {
+        // Relative path
+        strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
+        new_path[FOLDERNAME_SIZE - 1] = '\0';
 
-    // Ensure there is a '/' between the current directory and the relative path
-    if (new_path[strlen(new_path) - 1] != '/' && strlen(new_path) < FOLDERNAME_SIZE - 1) {
-        strncat(new_path, "/", 1);
+        // Ensure there is a '/' between the current directory and the relative path
+        if (new_path[strlen(new_path) - 1] != '/' && strlen(new_path) < FOLDERNAME_SIZE - 1) {
+            strncat(new_path, "/", 1);
+        }
+
+        strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
+        new_path[FOLDERNAME_SIZE - 1] = '\0';
     }
-
-    strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
-    new_path[FOLDERNAME_SIZE - 1] = '\0';
-}
 
     // Check if the folder exists
     for (size i = 0; i < MAX_FOLDERS; ++i) {
-        if (strstr(fs->folder_table[i], new_path) != NULL) {
+        // Ensure the folder is an exact match and not just a substring
+        if (strcmp(fs->folder_table[i], new_path) == 0) {
             // Change the current working directory
             strncpy(current_directory, new_path, FOLDERNAME_SIZE);
             printf("Changed directory to %s\n", current_directory);
@@ -374,6 +375,13 @@ void execute_file(struct FileSystem* fs, const char* filename) {
     char buffer[BLOCK_SIZE];
     read_from_file(fs, filename, buffer, BLOCK_SIZE, 0);
 
+    // Check if the file is of type "app"
+    char* typeToken = k_strstr(buffer, "type:App");
+    if (typeToken == NULL) {
+        // File is not of type "app", do not execute
+        printf("Error: File is not of type 'app'.\n");
+        return;
+    }
     // Tokenize and execute each line
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {

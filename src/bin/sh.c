@@ -40,33 +40,44 @@ void set_cursor_position(int x, int y) {
     outportb((unsigned char)(position & 0xFF), 0x3D5);
 }
 
+char* usersh;
+char* hostnamesh;
+char usersh_buffer[80];
+char hostnamesh_buffer[80];
+char motdbuffer[80];
+
 void sh() {
+    current_directory = "/home";
     add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Started\n");
     startingrow = 0;
     row = 3;
     char input_buffer[80] = {0}; // Initialize with null characters to create an empty string
 
+    read_from_file(&rootfs, "session.catk", usersh_buffer, sizeof(usersh_buffer), 1);
+    usersh = usersh_buffer;
+    read_from_file(&rootfs, "hostname", hostnamesh_buffer, sizeof(hostnamesh_buffer), 1);
+    hostnamesh = hostnamesh_buffer;
+
     console_clear(COLOR_WHITE, COLOR_BLACK);
 
     // Read and display the content of the specified file
-    read_from_file(&rootfs, "motd", buffer, sizeof(buffer), 1);
+    read_from_file(&rootfs, "motd", motdbuffer, sizeof(motdbuffer), 1);
 
     // Display the content
-    printf("%s", buffer);
+    printf("%s", motdbuffer);
 
     //printf_dark("You have been dropped into SH, type ");
     //printf("help");
     //printf_dark(" for some helpful commands");
 
     while (1) {
-        current_directory = "/home";
         isclearing = 0;
         console_gotoxy(0, row); // Set the cursor to the current row
-        read_from_file(&rootfs, "session.catk", buffer, sizeof(buffer), 1);
-        printf_brightcyan("%s", buffer);
+
+        // Print the prompt with user, hostname, and current directory
+        printf_brightcyan("%s", usersh);
         printf_darkcyan("@");
-        read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
-        printf_brightcyan("%s", buffer);
+        printf_brightcyan("%s", hostnamesh);
         printf_brightblue(":%s ", current_directory);
         printf("# ");
 
@@ -497,8 +508,14 @@ else if (string_starts_with(input, "touch")) {
         args = input + strlen("exec "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-                execute_file(&rootfs, args);
-                row = 25;
+            if (strcmp(args, "sh.app") == 0)
+            {
+                printf("Cannot start SH from SH");
+            }else
+            if (args[0] != 'sh.app') {
+                    execute_file(&rootfs, args);
+                    row = 25;
+            }
         }else
             printf("Please specify a file");
     }
@@ -506,9 +523,6 @@ else if (string_starts_with(input, "touch")) {
         help();
         row =+ 25;
         printf("\n");
-    }
-    else if (string_starts_with(input, "sh")) {
-        sh();
     }
     else if (string_starts_with(input, "read")) {
         read(0);

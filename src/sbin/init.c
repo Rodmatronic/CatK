@@ -250,11 +250,9 @@ int init(int debug)
     int shell_pid = fork(shell_process);
     
     add_data_to_file(&rootfs, "logs.d", "init: [ .. ] Starting SH\n");
-
-    if (shell_pid > 0) {
+    
         // Execute the shell process
-        current_directory = "/";
-        execute_process(shell_pid);
-    }
+        current_directory = "/bin";
+        execute_file(&rootfs, "sh.app");
     
 }
