@@ -8,7 +8,7 @@ char* usersh;
 char* hostnamesh;
 char usersh_buffer[80];
 char hostnamesh_buffer[80];
-char motdbuffer[80];
+char motdbuffer[1024];
 char* hostnamebuffer[128];
 char defaulthostname[30] = "catk";
 
