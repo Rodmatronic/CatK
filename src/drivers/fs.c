@@ -205,7 +205,7 @@ void list_files(const struct FileSystem* fs, int type) {
     }
 }
 
-void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size, int allow_anywhere) {
+int read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size, int allow_anywhere) {
     const char* current_folder = current_directory;
 
     size i;
@@ -216,7 +216,7 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
             if (!allow_anywhere && strcmp(fs->file_table[i].parent_folder, current_folder) != 0) {
                 printf("No such file in the current folder\n");
                 strncpy(buffer, "", buffer_size); // Clear the buffer
-                return;
+                break;
             }
 
             // Check if the file is a folder
@@ -234,6 +234,7 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
 
     // File not found
     strncpy(buffer, "File not found", buffer_size);
+    return 2;
 }
 
 void read_last_line_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size) {

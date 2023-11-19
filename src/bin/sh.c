@@ -74,6 +74,14 @@ void sh() {
         uint32 can_backspace = 0; // Flag to allow or disallow backspacing
         uint32 cursorpos = 0; // Initialize cursor position
 
+        int result = read_from_file(&rootfs, "tty", buffer, sizeof(buffer), 1);
+
+        read_from_file(&rootfs, "tty", buffer, sizeof(buffer), 1);
+
+        if (result == 2) {
+            // Do something specific when the function returns 5
+            panic("No TTY found!");
+        }
 
         while (1) {
 
@@ -217,12 +225,23 @@ void process_user_input(const char* input) {
             // Execute the "echo" command with the arguments
             echo(args);
         }
-    } else if (string_starts_with(input, "hostname")) {
+    }
+    
+    if (string_starts_with(input, "init")) {
+        init();
+    }
+
+     else if (string_starts_with(input, "hostname")) {
         args = input + strlen("hostname "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-            // Execute the "hostname" command with the arguments
-            hostname(args);
+            rm_file(&rootfs, "hostname");
+            write_to_file(&rootfs, "hostname", args);
+            read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
+
+            strcpy(host_name, buffer);
+
+            current_directory = current_directory;
             if (row >= 25)
             {
                 printf("\n");

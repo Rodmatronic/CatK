@@ -1,5 +1,6 @@
 #include "config.h"
 #include "packages.c"
+#include "startup.c"
 
 char* defaulthost = "catk";
 char* motd = "Welcome to Catk! Type 'help', or just mess with the command line.\nYou can thange this message by editing /etc/motd";
@@ -41,10 +42,13 @@ int init(int debug)
     }
 
     create_folder(&rootfs, "/bin", "/");
+    create_folder(&rootfs, "/sbin", "/");
     create_folder(&rootfs, "/dev", "/");
     create_folder(&rootfs, "/etc", "/");
     create_folder(&rootfs, "/proc", "/");
+    create_folder(&rootfs, "/usr", "/");
     create_folder(&rootfs, "/sys", "/");
+    create_folder(&rootfs, "/run", "/");
     create_folder(&rootfs, "/mount", "/");
 
     current_directory = "/etc";
@@ -117,8 +121,17 @@ int init(int debug)
     listdrivebits();
     rows++;
     rows++;
+    current_directory = "/etc";
+    write_to_file(&rootfs, "rootdisk", "root:disk0");
     printf("\nDetected drives!");
     catkmessagefixed(1, 2);
+
+    printf("\nCreating misc UNIX related files....");
+    rows++;
+
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "startup", "");
+    startup();
 
     printf("\nCreating rootuser...");
     // root user

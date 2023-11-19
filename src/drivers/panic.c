@@ -18,11 +18,9 @@ void panic(const char* panictext, ...)
     printf("CatK has been halted.\n");
     printf("Please switch off the system now\n");
     vga_disable_cursor();
-
-        console_gotoxy(0, 24);
-        printf_dark("The system will reboot in 5 seconds");
-        sleep(5);
-
+    console_gotoxy(0, 24);
+    printf_dark("The system will reboot in 5 seconds");
+    sleep(5);
     while(1)
     {
         syspw(0);
