@@ -89,7 +89,7 @@ void cd_parent_directory() {
         current_directory[last_slash] = '\0';
     }
 
-    printf("Changed directory to %s\n", current_directory);
+    //printf("Changed directory to %s\n", current_directory);
 }
 
 int snprintf(char *str, size size, const char *format, const char *arg, ...) {
@@ -155,7 +155,7 @@ void change_directory(struct FileSystem* fs, const char* path) {
     // Update the current working directory only if the folder is found
     if (folder_found) {
         strncpy(current_directory, new_path, FOLDERNAME_SIZE);
-        printf("Changed directory to %s\n", current_directory);
+        //printf("Changed directory to %s\n", current_directory);
     } else {
         printf("Error: Folder %s not found\n", new_path);
         // Reset the current directory to a safe default or handle it based on your design.
@@ -211,7 +211,6 @@ void list_files(const struct FileSystem* fs, int type) {
     if (type == 1) {
         for (size i = 0; i < MAX_FILES; ++i) {
             if (fs->file_table[i].filename[0] != '\0' &&
-            
                 (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
                 // Print in green if it's a folder, and in blue otherwise
                 if (fs->file_table[i].is_folder) {
@@ -225,15 +224,24 @@ void list_files(const struct FileSystem* fs, int type) {
     }
 
     if (type == 0) {
+        int line_length = 0;
+
         for (size i = 0; i < MAX_FILES; ++i) {
             if (fs->file_table[i].filename[0] != '\0' &&
-
                 (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
                 // Print in green if it's a folder, and in blue otherwise
                 if (fs->file_table[i].is_folder) {
                     printf_brightblue("%s  ", fs->file_table[i].filename);
                 } else {
                     printf_green("%s  ", fs->file_table[i].filename);
+                }
+
+                line_length += strlen(fs->file_table[i].filename) + 2; // Account for filename and spaces
+
+                if (line_length > VGA_WIDTH) {
+                    printf("\n");
+                    row++;
+                    line_length = 0;
                 }
             }
         }
@@ -413,7 +421,7 @@ void execute_file(struct FileSystem* fs, const char* filename) {
     char* typeToken = k_strstr(buffer, "type:App");
     if (typeToken == NULL) {
         // File is not of type "app", do not execute
-        printf("Error: File is not of type 'app'.\n");
+        printf("Error: File is not of type 'app', or does not exist.\n");
         return;
     }
     // Tokenize and execute each line
@@ -432,33 +440,40 @@ void execute_file(struct FileSystem* fs, const char* filename) {
         }
         char* Time = k_strstr(token, "time");
         if (Time != NULL) {
-            // Print the text following "clear"
             GetCurrentTime();
         }
         char* Reboot = k_strstr(token, "reboot");
         if (Reboot != NULL) {
-            // Print the text following "clear"
             syspw(0);
         }
         char* shutdown = k_strstr(token, "shutdown");
         if (shutdown != NULL) {
-            // Print the text following "clear"
             syspw(1);
         }
         char* initcommand = k_strstr(token, "init");
         if (initcommand != NULL) {
-            // Print the text following "clear"
             init();
         }
         char* shcommand = k_strstr(token, "sh");
         if (shcommand != NULL) {
-            // Print the text following "clear"
             sh();
         }
         char* logincommand = k_strstr(token, "login");
         if (logincommand != NULL) {
-            // Print the text following "clear"
             login();
+        }
+        char* version = k_strstr(token, "version");
+        if (version != NULL) {
+            read_from_file(&rootfs, "version", buffer, sizeof(buffer), 1);
+            printf("%s", buffer);
+        }
+        char* readcommand = k_strstr(token, "read");
+        if (readcommand != NULL) {
+            read(0);
+        }
+        char* haltcommand = k_strstr(token, "halt");
+        if (haltcommand != NULL) {
+            syspw(2);
         }
         // Move to the next line
         token = k_strtok(NULL, "\n");

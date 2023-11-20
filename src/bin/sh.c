@@ -256,10 +256,12 @@ void process_user_input(const char* input) {
         }
     } 
     else if (string_starts_with(input, "reboot")) {
-        syspw(0);
+        current_directory = "/sbin";
+        execute_file(&rootfs, "reboot");
     }
     else if (string_starts_with(input, "halt")) {
-        syspw(2);
+        current_directory = "/sbin";
+        execute_file(&rootfs, "halt");
     }
     else if (string_starts_with(input, "passwd")) {
         args = input + strlen("passwd "); // Extract arguments
@@ -285,10 +287,12 @@ void process_user_input(const char* input) {
         printf("No string to encrypt!");
     }
     else if (string_starts_with(input, "shutdown")) {
-        syspw(1);
+        current_directory = "/sbin";
+        execute_file(&rootfs, "shutdown");
     }
     else if (string_starts_with(input, "poweroff")) {
-        syspw(1);
+        current_directory = "/sbin";
+        execute_file(&rootfs, "shutdown");
     }
     else if (string_starts_with(input, "ls")) {
         args = input + strlen("ls "); // Extract arguments
@@ -326,10 +330,12 @@ void process_user_input(const char* input) {
             }
     }
     else if (string_starts_with(input, "exit")) {
-        login();
+        current_directory = "/bin";
+        execute_file(&rootfs, "login");
     }
     else if (string_starts_with(input, "login")) {
-        login();
+        current_directory = "/bin";
+        execute_file(&rootfs, "login");
     }
     else if (string_starts_with(input, "catsay")) {
         args = input + strlen("catsay "); // Extract arguments
@@ -461,8 +467,8 @@ else if (string_starts_with(input, "touch")) {
         }
     }
     else if (string_starts_with(input, "uname")) {
-            read_from_file(&rootfs, "version", buffer, sizeof(buffer), 1);
-            printf("%s", buffer);
+            current_directory = "/bin";
+            execute_file(&rootfs, "uname");
         
     }   
     else if (string_starts_with(input, "mkdir")) {
@@ -502,11 +508,11 @@ else if (string_starts_with(input, "touch")) {
         args = input + strlen("exec "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
-            if (strcmp(args, "sh.app") == 0)
+            if (strcmp(args, "sh") == 0)
             {
                 printf("Cannot start SH from SH");
             }else
-            if (args[0] != 'sh.app') {
+            if (args[0] != 'sh') {
                     execute_file(&rootfs, args);
                     row = 25;
             }
@@ -519,12 +525,16 @@ else if (string_starts_with(input, "touch")) {
         printf("\n");
     }
     else if (string_starts_with(input, "read")) {
-        read(0);
+        current_directory = "/bin";
+        execute_file(&rootfs, "read");
     }
     else if (string_starts_with(input, "clear")) {
         isclearing = 1;
         row = -3;
-        console_init(COLOR_WHITE, COLOR_BLACK);
+        working_dir = current_directory;
+        current_directory = "/bin";
+        execute_file(&rootfs, "clear");
+        current_directory = working_dir;
     } 
     else if (string_starts_with(input, "cpuid")) {
         read_from_file(&rootfs, "cpu", buffer, sizeof(buffer), 1);
@@ -537,7 +547,10 @@ else if (string_starts_with(input, "touch")) {
         printPowerOnTime();
     }
     else if (string_starts_with(input, "time")) {
-        GetCurrentTime();
+        working_dir = current_directory;
+        current_directory = "/sbin";
+        execute_file(&rootfs, "time");
+        current_directory = working_dir;
     }
 else if (string_starts_with(input, "sleep")) {
     args = input + strlen("sleep "); // Extract arguments

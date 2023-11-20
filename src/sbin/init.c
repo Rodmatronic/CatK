@@ -129,29 +129,48 @@ int init(int debug)
     printf("\nCreating essential UNIX related files....");
     rows++;
 
-    const char* rebootapp = "type:App\nreboot";
-    current_directory = "/sbin";
-    write_to_file(&rootfs, "reboot.app", rebootapp);
+//---- System binaries ----
 
-    const char* shutdownapp = "type:App\nshutdown";
     current_directory = "/sbin";
-    write_to_file(&rootfs, "shutdown.app", shutdownapp);
+    write_to_file(&rootfs, "reboot", "type:App\nreboot");
 
-    const char* timeapp = "type:App\ntime";
     current_directory = "/sbin";
-    write_to_file(&rootfs, "time.app", timeapp);
+    write_to_file(&rootfs, "shutdown", "type:App\nshutdown");
 
-    const char* initapp = "type:App\ninit";
     current_directory = "/sbin";
-    write_to_file(&rootfs, "init.app", initapp);
+    write_to_file(&rootfs, "time", "type:App\ntime");
 
-    const char* shapp = "type:App\nsh";
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "init", "type:App\ninit");
+
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "halt", "type:App\nhalt");
+
+//---- Normal/user binaries ----
+
     current_directory = "/bin";
-    write_to_file(&rootfs, "sh.app", shapp);
+    write_to_file(&rootfs, "sh", "type:App\nsh");
 
-    const char* loginapp = "type:App\nlogin";
     current_directory = "/bin";
-    write_to_file(&rootfs, "login.app", loginapp);
+    write_to_file(&rootfs, "login", "type:App\nlogin");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "ls", "type:App\nls");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "rm", "type:App\nrm");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "uname", "type:App\nversion");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "read", "type:App\nread");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "read", "type:App\nread");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "clear", "type:App\nclear");
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "startup", "");
@@ -244,11 +263,7 @@ int init(int debug)
     // Create a file with the first line "type:App"
     const char* appContent = "type:App\nclear\nprint Test for Print\ntime\nHey, this is working!";
     current_directory = "/bin";
-    write_to_file(&rootfs, "test.app", appContent);
-
-    const char* matiapp = "type:App\nclear\nprint Hey Mati!\nprint Ive added apps to my kernel\nprint This is the second app EVER in CatK Unix!\nprint Hope you find it cool! :P";
-    current_directory = "/bin";
-    write_to_file(&rootfs, "mati.app", matiapp);
+    write_to_file(&rootfs, "test", appContent);
 
     current_directory = "/etc";
     write_to_file(&rootfs, "packagelist", "");
@@ -262,6 +277,6 @@ int init(int debug)
     
         // Execute the shell process
         current_directory = "/bin";
-        execute_file(&rootfs, "sh.app");
+        execute_file(&rootfs, "sh");
     
 }
