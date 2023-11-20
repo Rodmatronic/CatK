@@ -1,8 +1,8 @@
 # CatK https://catk.neocities.org/
 a simple Unix-like kernel, written almost entirely in C. Using a cute kitty mascot named CatK!
 
-![Screenshot from 2023-11-11 17-34-55](https://github.com/Rodmatronic/CatK/assets/105672808/3b54d12a-9199-4b8e-9f01-336d34c927aa)
-![Screenshot from 2023-11-02 21-39-49](https://github.com/Rodmatronic/CatK/assets/105672808/498231ad-fd9b-4306-80c5-548d0d8023d9)
+![Screenshot from 2023-11-19 21-36-50](https://github.com/Rodmatronic/CatK/assets/105672808/a9d59246-a663-4215-bf24-0b12030b0529)
+![Screenshot from 2023-11-19 21-38-11](https://github.com/Rodmatronic/CatK/assets/105672808/3931c30a-88f2-4ffd-bb77-c921b78ad141)
 
 # To compile from source
 Run `make` at the root of the project, where the Makefile is.
