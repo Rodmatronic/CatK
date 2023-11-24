@@ -36,13 +36,7 @@ int init(int debug)
 
     printf("\nCreating FS...");
 
-    // Initialize the file table
-    for (size i = 0; i < MAX_FILES; ++i) {
-        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
-    }
-
     create_folder(&rootfs, "/bin", "/");
-    create_folder(&rootfs, "/sbin", "/");
     create_folder(&rootfs, "/dev", "/");
     create_folder(&rootfs, "/etc", "/");
     create_folder(&rootfs, "/proc", "/");
@@ -139,9 +133,6 @@ int init(int debug)
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "time", "type:App\ntime");
-
-    current_directory = "/sbin";
-    write_to_file(&rootfs, "init", "type:App\ninit");
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "halt", "type:App\nhalt");

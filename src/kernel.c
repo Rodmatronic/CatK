@@ -77,19 +77,33 @@ void boot() {
     printf("PreBoot version: %s\n", prebootversion);
     printf("Kernel args: %s\n\n", bootargs); // Print the string
 
+    // Initialize the file table
+    for (size i = 0; i < MAX_FILES; ++i) {
+        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
+    }
+    create_folder(&rootfs, "/sbin", "/");
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "init", "type:App\ninit");
+    write_to_file(&rootfs, "kernel.logs", "kernel: kernlink to default init has been created!\n");
+
     init_processes();
 
     if (skipinit == 0)
     {
         printf_green("Starting INIT...\n");
 
-        init(initdebug);
+        current_directory = "/sbin";
+
+        int found = execute_file;
+        add_data_to_file(&rootfs, "kernel.logs", "kernel: init is being started\n");
+        execute_file(&rootfs, "init");
 
         //If this happens, something is monumentally fucked up!
-        if (init != 0) {
+        if (found != 0) {
             
             for (int i = 5; i > 0;)
             {
+                add_data_to_file(&rootfs, "kernel.logs", "kernel: init is being started\n");
                 printf("INIT failed! Retrying...\n");
                 sleep(1);
                 init(initdebug);

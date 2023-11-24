@@ -11,6 +11,7 @@ void panic(const char* panictext, ...);
 
 void panic(const char* panictext, ...)
 {
+    add_data_to_file(&rootfs, "kernel.logs", "kernel: Kernel has panicked! Has been logged at /sbin/kernel.logs\n");
     console_init(COLOR_WHITE, COLOR_BLACK);
     printf("panic: %s\n", panictext);
     cpuinfo();
