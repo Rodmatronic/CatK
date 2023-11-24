@@ -39,8 +39,6 @@ void help()
     printf_dark(" - Terminates the current user session\n");
     printf("  cat");
     printf_dark(" - Lists contents of a file\n");
-    printf("  ls");
-    printf_dark(" - Lists all files and directories\n");
     load_more_entries();
     printf("  mkdir");
     printf_dark(" - Create a new folder\n\n");
