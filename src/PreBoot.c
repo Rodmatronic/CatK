@@ -161,23 +161,23 @@ void PreBoot()
     if (art == 4)
     {
             console_gotoxy(45, 8);
-            printf_yellow("      /\\-\\___/--/\\");
+            printf_brown("      /\\-\\___/--/\\");
             console_gotoxy(45, 9);
-            printf_yellow("     /__/     \\___\\");
+            printf_brown("     /__/     \\___\\");
             console_gotoxy(45, 10);
-            printf_yellow("      |          \\");
+            printf_brown("      |          \\");
             console_gotoxy(45, 11);
-            printf_yellow("   ___| |  |     \\");
+            printf_brown("   ___| |  |     \\");
             console_gotoxy(45, 12);
-            printf_yellow("  /##             |");
+            printf_brown("  /##             |");
             console_gotoxy(45, 13);
-            printf_yellow(" | #      //      |");
+            printf_brown(" | #      //      |");
             console_gotoxy(45, 14);
-            printf_yellow(" |_|__/           |");
+            printf_brown(" |_|__/           |");
             console_gotoxy(45, 15);
-            printf_yellow("  \\______        /");
+            printf_brown("  \\______        /");
             console_gotoxy(45, 16);
-            printf_yellow("         /       \\ ");
+            printf_brown("         /       \\ ");
             console_gotoxy(45, 18);
     }
 
@@ -185,7 +185,8 @@ void PreBoot()
     if (art == 5)
     {
             console_gotoxy(43, 6);
-            printf_red("  '''                       '");
+            printf_red("  '''");
+            printf_red("                       '");
             console_gotoxy(43, 7);
             printf_brightred(" s' '.....---....--.'''     -/");
             console_gotoxy(43, 8);
@@ -232,7 +233,7 @@ void PreBoot()
     {
         console_init(COLOR_BRIGHT_CYAN, COLOR_BLACK);
         printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n");
-        printf_yellow("4: Doggy \n");
+        printf_brown("4: Doggy \n");
         printf_brightred("5: BSD sphere \n\n");
         read(1);
         if (readnum == 1)
@@ -331,6 +332,5 @@ void PreBoot()
             fillfs = 1;
         }
     }
-    console_init(COLOR_WHITE, COLOR_BLACK);
     boot();
 }

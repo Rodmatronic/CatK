@@ -25,7 +25,6 @@ int init(int debug)
     printf("Welcome to ");
     printf_brightcyan("CatK %s!\n", versionnumber);
     printf_dark("----------------------------------------\n");
-    sleep(1);
     rows++;
 
     printf("Getting clock... ");
@@ -123,7 +122,7 @@ int init(int debug)
     printf("\nCreating essential UNIX related files....");
     rows++;
 
-//---- System binaries ----
+    //---- System binaries ----
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "reboot", "type:App\nreboot");
@@ -137,7 +136,7 @@ int init(int debug)
     current_directory = "/sbin";
     write_to_file(&rootfs, "halt", "type:App\nhalt");
 
-//---- Normal/user binaries ----
+    //---- Normal/userspace binaries ----
 
     current_directory = "/bin";
     write_to_file(&rootfs, "sh", "type:App\nsh");
@@ -162,6 +161,9 @@ int init(int debug)
 
     current_directory = "/bin";
     write_to_file(&rootfs, "clear", "type:App\nclear");
+
+    current_directory = "/bin";
+    write_to_file(&rootfs, "neofetch", "type:App\ncatascii");
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "startup", "");
@@ -211,11 +213,13 @@ int init(int debug)
 
     current_directory = "/dev";
     write_to_file(&rootfs, "tty", "1");
-    write_to_file(&rootfs, "null", NULL);
+    write_to_file(&rootfs, "keyboardsh", "1");
+    write_to_file(&rootfs, "null", "0");
     write_to_file(&rootfs, "zero", "0");
     write_to_file(&rootfs, "random", seed);
     write_to_file(&rootfs, "fs", "rootfs");
     write_to_file(&rootfs, "mem", "1025");
+    write_to_file(&rootfs, "sysmouse", "");
     current_directory = "/etc";
 
     current_directory = "/proc";

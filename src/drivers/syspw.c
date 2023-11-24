@@ -33,6 +33,7 @@ void syspw(int type) {
 
         //for Vbox
         outports(0x4004, 0x3400);
+        outports(0x604, 0x2000);
         __asm__ __volatile__("int $0x80");
     }
 

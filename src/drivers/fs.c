@@ -475,6 +475,21 @@ void execute_file(struct FileSystem* fs, const char* filename) {
         if (haltcommand != NULL) {
             syspw(2);
         }
+        char* catasciicommand = k_strstr(token, "catascii");
+        if (catasciicommand != NULL) {
+            console_init(COLOR_WHITE, COLOR_BLACK);
+            printf("                \\/\n");
+            printf_white("             _      _\n");
+            printf_white("            / \\    / \\\n");
+            printf_brightcyan("           /   \\__/   \\\n");
+            printf_brightcyan("          /            \\\n");
+            printf_brightcyan("         |    |    |    |\n");
+            printf_brightcyan("        =|      -       |=\n");
+            printf_brightcyan("        =\\      v      /=\n");
+            printf_brightcyan("          \\            /\n");
+            printf_red("           =====\\/=====\n");
+            printf_yellow("              (CatK)\n");
+        }
         // Move to the next line
         token = k_strtok(NULL, "\n");
     }

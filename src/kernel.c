@@ -70,6 +70,13 @@ void boot() {
     printf("Created by Rodmatronics. Thank you for using CatK!\n");
     printf("This is a BSD inspired kernel.\n");
     printf("    It does NOT use any BSD source code\n");
+    // Initialize the file table
+    for (size i = 0; i < MAX_FILES; ++i) {
+        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
+    }
+    current_directory = "/dev";
+
+    write_to_file(&rootfs, "console", "");
     bootmessage("Getting memory...");
     GetMemory();
     bootmessage("Using config.catk for kernel configuration & args");
@@ -77,13 +84,10 @@ void boot() {
     printf("PreBoot version: %s\n", prebootversion);
     printf("Kernel args: %s\n\n", bootargs); // Print the string
 
-    // Initialize the file table
-    for (size i = 0; i < MAX_FILES; ++i) {
-        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
-    }
     create_folder(&rootfs, "/sbin", "/");
     current_directory = "/sbin";
     write_to_file(&rootfs, "init", "type:App\ninit");
+    current_directory = "/proc";
     write_to_file(&rootfs, "kernel.logs", "kernel: kernlink to default init has been created!\n");
 
     init_processes();
@@ -92,10 +96,10 @@ void boot() {
     {
         printf_green("Starting INIT...\n");
 
-        current_directory = "/sbin";
-
         int found = execute_file;
+        current_directory = "/proc";
         add_data_to_file(&rootfs, "kernel.logs", "kernel: init is being started\n");
+        current_directory = "/sbin";
         execute_file(&rootfs, "init");
 
         //If this happens, something is monumentally fucked up!
@@ -106,7 +110,8 @@ void boot() {
                 add_data_to_file(&rootfs, "kernel.logs", "kernel: init is being started\n");
                 printf("INIT failed! Retrying...\n");
                 sleep(1);
-                init(initdebug);
+                current_directory = "/sbin";
+                execute_file(&rootfs, "init");
                 i--;
             }
 
