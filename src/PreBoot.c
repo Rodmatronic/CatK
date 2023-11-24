@@ -22,14 +22,14 @@ void PreBoot()
     printf("|  |____ |   _   |  |   |  |    _  |\n");
     printf("|_______||__| |__|  |___|  |___| |_|\n\n");
 
-    printf("+==================================+\n");
-    printf("|    CatK PreBoot                  |\n");
+    printf("+========== CatK PreBoot ==========+\n");
     printf_brightcyan("| Boot normally [Enter]            |\n");
     printf("| 1.  Suppress boot logs           |\n");
     printf("| 2.  Kitty artwork                |\n");
     printf("| 3.  Reboot                       |\n");
     printf("|------------------------          |\n");
     printf("| 4.  Advanced (careful!)          |\n");
+    printf("|                                  |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");
     printf("+==================================+\n");
@@ -160,9 +160,62 @@ void PreBoot()
 
     if (art == 4)
     {
+            console_gotoxy(45, 8);
+            printf_yellow("      /\\-\\___/--/\\");
+            console_gotoxy(45, 9);
+            printf_yellow("     /__/     \\___\\");
+            console_gotoxy(45, 10);
+            printf_yellow("      |          \\");
+            console_gotoxy(45, 11);
+            printf_yellow("   ___| |  |     \\");
+            console_gotoxy(45, 12);
+            printf_yellow("  /##             |");
+            console_gotoxy(45, 13);
+            printf_yellow(" | #      //      |");
+            console_gotoxy(45, 14);
+            printf_yellow(" |_|__/           |");
+            console_gotoxy(45, 15);
+            printf_yellow("  \\______        /");
+            console_gotoxy(45, 16);
+            printf_yellow("         /       \\ ");
             console_gotoxy(45, 18);
     }
 
+
+    if (art == 5)
+    {
+            console_gotoxy(43, 6);
+            printf_red("  '''                       '");
+            console_gotoxy(43, 7);
+            printf_brightred(" s' '.....---....--.'''     -/");
+            console_gotoxy(43, 8);
+            printf_brightred(" +o   .--'        /y:'      +.");
+            console_gotoxy(43, 9);
+            printf_brightred("  yo':.           :o      '+-");
+            console_gotoxy(43, 10);
+            printf_brightred("  y/               -/'   -o/");
+            console_gotoxy(43, 11);
+            printf_brightred(" .-                  ::/sy+:.");
+            console_gotoxy(43, 12);
+            printf_brightred(" /                     '--  /");
+            console_gotoxy(43, 13);
+            printf_brightred("':                          :'");
+            console_gotoxy(43, 14);
+            printf_brightred("':                          :'");
+            console_gotoxy(43, 15);
+            printf_brightred(" /                          /");
+            console_gotoxy(43, 16);
+            printf_brightred(" .-                        -.");
+            console_gotoxy(43, 17);
+            printf_brightred("  --                      -.");
+            console_gotoxy(43, 18);
+            printf_brightred("   ':'                  ':' ");
+            console_gotoxy(43, 19);
+            printf_brightred("     .--             '--.");
+            console_gotoxy(43, 20);
+            printf_brightred("        .---.....----.");
+            console_gotoxy(43, 21);
+    }
     read(1);
     if (readnum == -1)
     {
@@ -178,7 +231,9 @@ void PreBoot()
     if (readnum == 2)
     {
         console_init(COLOR_BRIGHT_CYAN, COLOR_BLACK);
-        printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n4: Hide kitty :( \n\n");
+        printf("1: Big sleepy kitty \n2: Big kitty \n3: Small kitty \n");
+        printf_yellow("4: Doggy \n");
+        printf_brightred("5: BSD sphere \n\n");
         read(1);
         if (readnum == 1)
         {
@@ -195,6 +250,10 @@ void PreBoot()
         if (readnum == 4)
         {
             art = 4;
+        }
+        if (readnum == 5)
+        {
+            art = 5;
         }
         console_init(COLOR_GREY, COLOR_BLACK);
         readnum = 0;

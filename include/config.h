@@ -24,9 +24,10 @@ extern char* bootargs;
 char host_name[30] = ""; // hostname with a maximum length of 63 characters
 char username[30] = ""; // username
 
-uint32 versionnumber = "0.057";
+uint32 versionnumber = "0.058";
 char* vername = "CatK Version Bittin'";
-uint32 prebootversion = "0.057";
+uint32 prebootversion = "0.058";
 char* bootargs = "n/a"; // Boot args
+
 
 #endif

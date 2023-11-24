@@ -508,6 +508,21 @@ else if (string_starts_with(input, "touch")) {
         args = input + strlen("exec "); // Extract arguments
         // Check if there are arguments (non-empty)
         if (args[0] != '\0') {
+            if (strcmp(args, "--help") == 0)
+            {
+                row += 8;
+                printf("exec: [filename]\n");
+                printf("    Temporarily replace the shell with the given command.\n\n");
+                printf("    Execute COMMAND, replacing this shell with the specified program.\n");
+                printf("    ARGUMENTS become the arguments to COMMAND.\n\n");
+                printf("    Options:\n");
+                printf("      n\\a\n");
+                if (row >= 25)
+                {
+                    printf("\n");
+                    row = 26;
+                }
+            }else
             if (strcmp(args, "sh") == 0)
             {
                 printf("Cannot start SH from SH");

@@ -52,6 +52,10 @@ void read(int Boot) {
                 {
                     readnum = 4;
                 }
+                if (scancode == 0x06)
+                {
+                    readnum = 5;
+                }
                 printf("%c", key);
             }
         
