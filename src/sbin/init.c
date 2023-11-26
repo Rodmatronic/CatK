@@ -15,6 +15,8 @@ void shell_process() {
 
 int init(int debug)
 {
+    current_directory = "/proc";
+    add_data_to_file(&rootfs, "kernel.logs", "init: Welcome to CatKernel");
     if (debug == 1)
     {
         return 0;
@@ -119,7 +121,7 @@ int init(int debug)
     printf("\nDetected drives!");
     catkmessagefixed(1, 2);
 
-    printf("\nCreating essential UNIX related files....");
+    printf("\nCreating binaries at /bin /sbin");
     rows++;
 
     //---- System binaries ----
@@ -163,7 +165,7 @@ int init(int debug)
     write_to_file(&rootfs, "clear", "type:App\nclear");
 
     current_directory = "/bin";
-    write_to_file(&rootfs, "neofetch", "type:App\ncatascii");
+    write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "startup", "");
@@ -222,8 +224,12 @@ int init(int debug)
     write_to_file(&rootfs, "sysmouse", "");
     current_directory = "/etc";
 
+    printf("\nSetting up /proc ...");
+    rows++;
+
     current_directory = "/proc";
     write_to_file(&rootfs, "args", bootargs);
+    write_to_file(&rootfs, "arch", arch);
     current_directory = "/etc";
 
     printf("\nStarting Ethernet...");

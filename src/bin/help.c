@@ -39,11 +39,11 @@ void help()
     printf_dark(" - Terminates the current user session\n");
     printf("  cat");
     printf_dark(" - Lists contents of a file\n");
-    load_more_entries();
     printf("  mkdir");
-    printf_dark(" - Create a new folder\n\n");
+    printf_dark(" - Create a new folder\n");
     printf("  touch");
     printf_dark(" - Creates a new file, by: touch 'filename' 'contents'\n");
+    load_more_entries();
     printf("  exec");
     printf_dark(" - Executes the specified file\n");
     printf("  cd");

@@ -12,7 +12,7 @@ void catsay(input)
     printf_brightcyan("          /            \\\n");
     printf_brightcyan("         |    |    |    |\n");
     printf_brightcyan("        =|      -       |=\n");
-    printf_brightcyan("        =\\      v      /=\n");
+    printf_brightcyan("        =\\      v       /=\n");
     printf_brightcyan("          \\            /\n");
     printf_red("           =====\\/=====\n");
     printf_yellow("              (CatK)\n");

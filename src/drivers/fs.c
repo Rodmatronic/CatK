@@ -433,6 +433,17 @@ void execute_file(struct FileSystem* fs, const char* filename) {
             // Print the text following "print "
             printf("%s\n", printToken + strlen("print "));
         }
+        char* printTokendark = k_strstr(token, "print_dark ");
+        if (printTokendark != NULL) {
+            // Print the text following "print "
+            printf_dark("%s\n", printTokendark + strlen("print_dark "));
+        }
+        char* delaycommand = k_strstr(token, "delay");
+        if (delaycommand != NULL) {
+
+            sleep(1);
+
+        }
         char* clearToken = k_strstr(token, "clear");
         if (clearToken != NULL) {
             // Print the text following "clear"
@@ -471,24 +482,78 @@ void execute_file(struct FileSystem* fs, const char* filename) {
         if (readcommand != NULL) {
             read(0);
         }
+        char* paniccommand = k_strstr(token, "panic");
+        if (paniccommand != NULL) {
+            panic("Triggered by Executable");
+        }
         char* haltcommand = k_strstr(token, "halt");
         if (haltcommand != NULL) {
             syspw(2);
         }
-        char* catasciicommand = k_strstr(token, "catascii");
-        if (catasciicommand != NULL) {
-            console_init(COLOR_WHITE, COLOR_BLACK);
-            printf("                \\/\n");
-            printf_white("             _      _\n");
-            printf_white("            / \\    / \\\n");
-            printf_brightcyan("           /   \\__/   \\\n");
-            printf_brightcyan("          /            \\\n");
-            printf_brightcyan("         |    |    |    |\n");
-            printf_brightcyan("        =|      -       |=\n");
-            printf_brightcyan("        =\\      v      /=\n");
-            printf_brightcyan("          \\            /\n");
-            printf_red("           =====\\/=====\n");
-            printf_yellow("              (CatK)\n");
+        char* catasciilookupcommand = k_strstr(token, "catascii-lookup");
+        if (catasciilookupcommand != NULL) {
+            printf_white("                   _      _\n");
+            printf_white("                  / \\    / \\\n");
+            printf_brightcyan("                 /   \\__/   \\\n");
+            printf_brightcyan("                /   |    |   \\\n");
+            printf_brightcyan("               |      -       |\n");
+            printf_brightcyan("              =|       o      |=\n");
+            printf_brightcyan("              =\\              /=\n");
+            printf_brightcyan("                \\            /\n");
+            printf_red("                 =====\\/=====\n");
+            printf_yellow("                    (CatK)\n");
+        }
+        char* catasciihappycommand = k_strstr(token, "catascii-happy");
+        if (catasciihappycommand != NULL) {
+            printf_white("                   _      _\n");
+            printf_white("                  / \\    / \\\n");
+            printf_brightcyan("                 /   \\__/   \\\n");
+            printf_brightcyan("                /            \\\n");
+            printf_brightcyan("               |    |    |    |\n");
+            printf_brightcyan("              =|      -       |=\n");
+            printf_brightcyan("              =\\      v       /=\n");
+            printf_brightcyan("                \\            /\n");
+            printf_red("                 =====\\/=====\n");
+            printf_yellow("                    (CatK)\n");
+        }
+        char* catasciithinkcommand = k_strstr(token, "catascii-eh");
+        if (catasciithinkcommand != NULL) {
+            printf_white("                   _      _\n");
+            printf_white("                  / \\    / \\\n");
+            printf_brightcyan("                 /   \\__/   \\\n");
+            printf_brightcyan("                /            \\\n");
+            printf_brightcyan("               |     |    |   |\n");
+            printf_brightcyan("              =|      -       |=\n");
+            printf_brightcyan("              =\\      _       /=\n");
+            printf_brightcyan("                \\            /\n");
+            printf_red("                 =====\\/=====\n");
+            printf_yellow("                    (CatK)\n");
+        }
+        char* catasciisleepcommand = k_strstr(token, "catascii-sleep");
+        if (catasciisleepcommand != NULL) {
+            printf_white("                   _      _\n");
+            printf_white("                  / \\    / \\         z\n");
+            printf_brightcyan("                 /   \\__/   \\     z\n");
+            printf_brightcyan("                /            \\   z\n");
+            printf_brightcyan("               |    _    _    |\n");
+            printf_brightcyan("              =|      -       |=\n");
+            printf_brightcyan("              =\\      o       /=\n");
+            printf_brightcyan("                \\            /\n");
+            printf_red("                 =====\\/=====\n");
+            printf_yellow("                    (CatK)\n");
+        }
+        char* catasciisleepycommand = k_strstr(token, "catascii-tired");
+        if (catasciisleepycommand != NULL) {
+            printf_white("                   _      _\n");
+            printf_white("                  / \\    / \\         z\n");
+            printf_brightcyan("                 /   \\__/   \\     z\n");
+            printf_brightcyan("                /            \\   z\n");
+            printf_brightcyan("               |    _    _    |\n");
+            printf_brightcyan("              =|      -       |=\n");
+            printf_brightcyan("              =\\      w       /=\n");
+            printf_brightcyan("                \\            /\n");
+            printf_red("                 =====\\/=====\n");
+            printf_yellow("                    (CatK)\n");
         }
         // Move to the next line
         token = k_strtok(NULL, "\n");
@@ -509,25 +574,27 @@ int k_strncmp(const char* str1, const char* str2, size n) {
     return 0;  // The first n characters are equal
 }
 
+int sync() {
+    
+}
+
 int k_strstr(const char* haystack, const char* needle) {
     while (*haystack) {
         const char* h = haystack;
         const char* n = needle;
-
-        while (*haystack && *n && *haystack == *n) {
-            haystack++;
+        
+        while (*h && *n && (*h == *n || (*h >= 'A' && *h <= 'Z' && *h - 'A' + 'a' == *n))) {
+            h++;
             n++;
         }
 
-        if (!*n) {
-            // Found the needle in the haystack
-            return (char*)h;
-        }
+        if (!*n)
+            return (char*)haystack;
 
-        haystack = h + 1; // Move to the next character in the haystack
+        haystack++;
     }
 
-    return NULL; // Needle not found
+    return NULL;
 }
 
 int k_strchr(const char* str, int c) {
@@ -548,27 +615,26 @@ int k_strcmp(const char* s1, const char* s2) {
     }
     return *(unsigned char*)s1 - *(unsigned char*)s2;
 }
+
+// Custom implementation of strtok for case-sensitive comparison
 int k_strtok(char* str, const char* delim) {
-    static char* saved_ptr = NULL;
+    static char* token = NULL;
 
-    if (str != NULL) {
-        saved_ptr = str;
-    } else if (saved_ptr == NULL) {
-        return NULL; // No more tokens
-    }
+    if (str != NULL)
+        token = str;
 
-    // Find the start of the token
-    char* token_start = saved_ptr;
-    while (*saved_ptr != '\0' && *saved_ptr != *delim) {
-        ++saved_ptr;
-    }
+    if (token == NULL)
+        return NULL;
 
-    if (*saved_ptr == '\0') {
-        saved_ptr = NULL; // No more tokens
-    } else {
-        *saved_ptr = '\0'; // Null-terminate the token
-        ++saved_ptr; // Move to the next character after the delimiter
-    }
+    char* start = token;
 
-    return token_start;
+    while (*token && !k_strchr(delim, *token))
+        token++;
+
+    if (*token)
+        *token++ = '\0';
+    else
+        token = NULL;
+
+    return start;
 }

@@ -15,10 +15,13 @@ void syspw(int type) {
 
     if (type == 0)
     {
+        sync();
+        sync();
+        sync();
+
         add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending REBOOT (0) to kernel\n");
         printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending REBOOT (0) to kernel\n");
-        // This inline assembly code sends the restart command.
 
         //for Vbox
         outports(0x4004, 0x3400);
@@ -27,6 +30,10 @@ void syspw(int type) {
 
     if (type == 1)
     {
+        sync();
+        sync();
+        sync();
+
         add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending POWEROFF (1) to kernel\n");
         printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending POWEROFF (1) to kernel\n");

@@ -11,22 +11,19 @@ char hostnamesh_buffer[80];
 char motdbuffer[1024];
 char* hostnamebuffer[128];
 char defaulthostname[30] = "catk";
-
 int total_files = 0;
-
-char* current_directory = "/";  // Set it initially to the root directory
-
 int rows = 0;
-
-extern uint32 prebootversion;
 extern char* bootargs;
 
 char host_name[30] = ""; // hostname with a maximum length of 63 characters
 char username[30] = ""; // username
 
-uint32 versionnumber = "0.058";
+char* current_directory = "/";  // Set it initially to the root directory
+
+char* versionnumber = "0.058";
 char* vername = "CatK Version Bittin'";
-uint32 prebootversion = "0.058";
+char* arch = "x86_64";
+char* prebootversion = "0.058";
 char* bootargs = "n/a"; // Boot args
 
 

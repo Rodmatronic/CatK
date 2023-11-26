@@ -1,7 +1,7 @@
 # assembler
 ASM = /usr/bin/nasm
 # compiler
-CC = /usr/bin/gcc
+CC = /usr/bin/cc
 # linker
 LD = /usr/bin/ld
 # grub iso creator
@@ -25,6 +25,7 @@ DEFINES=
 ASM_FLAGS = -f elf32
 # compiler flags
 CC_FLAGS = $(INCLUDE) $(DEFINES) -m32 -std=gnu99 -ffreestanding -Wall -Wextra
+
 # linker flags, for linker add linker.ld file too
 LD_FLAGS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib
 

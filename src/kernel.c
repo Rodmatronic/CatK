@@ -94,16 +94,31 @@ void boot() {
 
     if (skipinit == 0)
     {
-        printf_green("Starting INIT...\n");
+        printf_brightcyan("Run /init as init process...\n");
+        current_directory = "/proc";
+        add_data_to_file(&rootfs, "kernel.logs", "kernel: Run /init as init process...\n");
+        int found1 = execute_file;
+        current_directory = "/";
+        execute_file(&rootfs, "init");
 
-        int found = execute_file;
+        printf_brightcyan("Run /bin/init as init process...\n");
+        current_directory = "/proc";
+        add_data_to_file(&rootfs, "kernel.logs", "kernel: Run /bin/init as init process...\n");
+        int found2 = execute_file;
+        current_directory = "/bin";
+        execute_file(&rootfs, "init");
+
         current_directory = "/proc";
         add_data_to_file(&rootfs, "kernel.logs", "kernel: init is being started\n");
+        printf_brightcyan("Run /sbin/init as init process...\n");
+        current_directory = "/proc";
+        add_data_to_file(&rootfs, "kernel.logs", "kernel: Run /sbin/init as init process...\n");
         current_directory = "/sbin";
+        int found3 = execute_file;
         execute_file(&rootfs, "init");
 
         //If this happens, something is monumentally fucked up!
-        if (found != 0) {
+        if (found3 != 0) {
             
             for (int i = 5; i > 0;)
             {

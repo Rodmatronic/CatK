@@ -55,23 +55,6 @@ void console_scroll(int type) {
     }
 }
 
-void scroll(int direction)
-{
-    if (direction == 0) // Scroll down
-    {
-        for (uint32 i = VGA_WIDTH; i < VGA_TOTAL_ITEMS; i++) {
-            g_vga_buffer[i - VGA_WIDTH] = g_vga_buffer[i];
-        }
-    }
-    if (direction == 1) // Scroll up
-    {
-        // Scroll up
-        for (uint32 i = 0; i > VGA_TOTAL_ITEMS + VGA_WIDTH; i--) {
-            g_vga_buffer[i] = g_vga_buffer[i + VGA_WIDTH];
-        }
-    }
-}
-
 
 void console_newline() {
     // Check for newline character before rendering
