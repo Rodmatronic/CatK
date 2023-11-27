@@ -1,6 +1,17 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
+// Keyboard I/O ports
+#define KEYBOARD_DATA_PORT 0x60
+#define KEYBOARD_STATUS_PORT 0x64
+// enter scancode
+#define ENTER_KEY_SCANCODE 0x1C
+
+#include "../src/drivers/keyboard.c"
+
+char scancode_to_char(unsigned char scancode);
+unsigned char read_key();
+
 #define KEYBOARD_DATA_PORT      0x60
 #define KEYBOARD_STATUS_PORT    0x64
 #define KEYBOARD_COMMAND_PORT   0x64

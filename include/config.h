@@ -2,9 +2,9 @@
 #define CONFIG_CATK_H
 #include "types.h"
 
-struct User rootUser;
+//struct User rootUser;
 
-char* usersh;
+/*char* usersh;
 char* hostnamesh;
 char usersh_buffer[80];
 char hostnamesh_buffer[80];
@@ -14,16 +14,17 @@ char defaulthostname[30] = "catk";
 int total_files = 0;
 int rows = 0;
 extern char* bootargs;
+*/
 
 char host_name[30] = ""; // hostname with a maximum length of 63 characters
 char username[30] = ""; // username
 
-char* current_directory = "/";  // Set it initially to the root directory
+//char* current_directory = "/";  // Set it initially to the root directory
 
-char* versionnumber = "0.058";
+char* versionnumber = "0.059re";
 char* vername = "CatK Version Bittin'";
 char* arch = "x86_64";
-char* prebootversion = "0.058";
+char* prebootversion = "0.059re";
 char* bootargs = "n/a"; // Boot args
 
 

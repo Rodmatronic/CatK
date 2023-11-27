@@ -7,20 +7,18 @@
 
 #include "types.h"
 #include "io_ports.h"
+#include "panic.h"
+#include "syspw.h"
+#include "panic.h"
 #define ACPI_RESET 0x06
-
-void syspw();
 
 void syspw(int type) {
 
     if (type == 0)
     {
-        sync();
-        sync();
-        sync();
 
-        add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending REBOOT (0) to kernel\n");
-        printf_dark("syspw Created by Rodmatronics\n");
+        //add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending REBOOT (0) to kernel\n");
+        //printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending REBOOT (0) to kernel\n");
 
         //for Vbox
@@ -30,12 +28,9 @@ void syspw(int type) {
 
     if (type == 1)
     {
-        sync();
-        sync();
-        sync();
 
-        add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending POWEROFF (1) to kernel\n");
-        printf_dark("syspw Created by Rodmatronics\n");
+        //add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending POWEROFF (1) to kernel\n");
+        //printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending POWEROFF (1) to kernel\n");
 
         //for Vbox
@@ -46,8 +41,8 @@ void syspw(int type) {
 
     if (type == 2)
     {
-        add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending HALT (2) to kernel\n");
-        printf_dark("syspw Created by Rodmatronics\n");
+        //add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending HALT (2) to kernel\n");
+        //printf_dark("syspw Created by Rodmatronics\n");
         printf("Sending HALT (2) to kernel\n\n");
 
         printf("The operating system has halted.\n");
@@ -58,7 +53,5 @@ void syspw(int type) {
         }
 
     }
-
-    panic("syspw Failed to read the command! Possibly invalid number.", type);
 
 }

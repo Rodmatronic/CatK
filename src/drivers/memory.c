@@ -5,9 +5,7 @@
 
 #include "string.h"
 #include "io_ports.h"
-// I/O Ports for RTC
-#define RTC_ADDRESS_PORT 0x70
-#define RTC_DATA_PORT 0x71
+#include "memory.h"
 
 int Memoryamount;
 

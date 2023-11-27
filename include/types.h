@@ -14,7 +14,7 @@ typedef signed int sint32;
 typedef uint8 byte;
 typedef uint16 word;
 typedef uint32 dword;
-typedef size;
+typedef unsigned int size;
 
 typedef enum {
     FALSE,

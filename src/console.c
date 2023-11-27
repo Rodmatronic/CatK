@@ -8,7 +8,7 @@ static uint16 *g_vga_buffer;
 static uint32 g_vga_index;
 //fore & back color values
 uint8 g_fore_color = COLOR_WHITE, g_back_color = COLOR_BLACK;
-static uint16 g_temp_pages[MAXIMUM_PAGES][VGA_TOTAL_ITEMS];
+//static uint16 g_temp_pages[MAXIMUM_PAGES][VGA_TOTAL_ITEMS];
 uint32 g_current_temp_page = 0;
 
 // clear video buffer array
@@ -35,7 +35,6 @@ void console_init(VGA_COLOR_TYPE fore_color, VGA_COLOR_TYPE back_color) {
 }
 
 void console_scroll(int type) {
-    uint32 i;
     if (type == SCROLL_UP) {
         // Check for newline character before rendering
         if (cursor_pos_y >= VGA_HEIGHT-1) {
@@ -78,17 +77,17 @@ void console_newline() {
 }
 
 //assign ascii character to video buffer
-void console_putchar(char ch) {
+void console_putchar(char ch, unsigned char fore_color, unsigned char back_color) {
     if (ch == '\t') {
         for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', g_fore_color, g_back_color);
+            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', fore_color, back_color);
             vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
         }
     } else if (ch == '\n') {
         console_newline();
     } else {
         if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, g_fore_color, g_back_color);
+            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, fore_color, back_color);
             vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
         }
     }
@@ -173,7 +172,6 @@ void console_gotoxy(uint16 x, uint16 y) {
 }
 
 void console_gotox(uint16 x) {
-    g_vga_index + x;
     cursor_pos_x = x;
     vga_set_cursor_pos(cursor_pos_x, cursor_pos_y);
 }
@@ -185,7 +183,7 @@ void console_putstr(const char *str) {
         if (str[index] == '\n')
             console_newline();
         else
-            console_putchar(str[index]);
+            console_putchar(str[index], COLOR_WHITE, COLOR_BLACK);
         index++;
     }
 }
@@ -197,11 +195,14 @@ void printf(const char *format, ...) {
 
     arg++;
 
+    unsigned char fore_color = COLOR_GREY;
+    unsigned char back_color = COLOR_BLACK;
+
     memset(buf, 0, sizeof(buf));
     while ((c = *format++) != 0) {
-        if (c != '%')
-            console_putchar(c);
-        else {
+        if (c != '%') {
+            console_putchar(c, fore_color, back_color);
+        } else {
             char *p, *p2;
             int pad0 = 0, pad = 0;
 
@@ -213,6 +214,14 @@ void printf(const char *format, ...) {
 
             if (c >= '0' && c <= '9') {
                 pad = c - '0';
+                c = *format++;
+            }
+
+            // Check for color specifier
+            if (c == 'C') {
+                // Update the colors based on the arguments
+                fore_color = *((unsigned char *)arg++);
+                back_color = *((unsigned char *)arg++);
                 c = *format++;
             }
 
@@ -234,18 +243,21 @@ void printf(const char *format, ...) {
                     for (p2 = p; *p2; p2++)
                         ;
                     for (; p2 < p + pad; p2++)
-                        console_putchar(pad0 ? '0' : ' ');
+                        console_putchar(pad0 ? '0' : ' ', fore_color, back_color);
                     while (*p)
-                        console_putchar(*p++);
+                        console_putchar(*p++, fore_color, back_color);
                     break;
 
                 default:
-                    console_putchar(*((int *)arg++));
+                    // Print the character without formatting
+                    console_putchar(c, fore_color, back_color);
                     break;
             }
         }
     }
 }
+
+
 
 void console_putchar_green(char ch) {
     if (ch == '\t') {

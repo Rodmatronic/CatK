@@ -1,5 +1,9 @@
 #include "console.h"
 #include "vga.h"
+#include "read.h"
+#include "panic.h"
+#include "read.h"
+#include "keyboard.h"
 
 int readnum;
 
@@ -11,7 +15,7 @@ void read(int Boot) {
 
             if (scancode == 0x48)
             {
-                return 0;
+                return;
             }
 
             if (scancode == 0x0E && Boot == 1)
@@ -71,7 +75,7 @@ void load_more_entries() {
 
             if (scancode == 0x48)
             {
-                return 0;
+                return;
             }
 
             // Convert the scancode to a character
@@ -82,7 +86,6 @@ void load_more_entries() {
                 // Print the character to the console
                 if (scancode == ENTER_KEY_SCANCODE) {
                     int x = 0;
-                    int i;
                     for (uint32 i = 0; i < VGA_WIDTH; i++) {
                         console_gotoxy(x, 24);
                         printf(" ");

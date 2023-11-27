@@ -13,6 +13,7 @@
 #include "fs.h"
 #include "string.h"
 #include "config.h"
+#include "keyboard.h"
 
 char* sessionbuffer[128];
 
@@ -50,14 +51,14 @@ void sh() {
 
     console_clear(COLOR_WHITE, COLOR_BLACK);
 
-    current_directory = "/etc";
+    //current_directory = "/etc";
     // Read and display the content of the specified file
-    read_from_file(&rootfs, "motd", motdbuffer, sizeof(motdbuffer), 1);
+    //read_from_file(&rootfs, "motd", motdbuffer, sizeof(motdbuffer), 1);
 
     // Display the content
-    printf("%s", motdbuffer);
+    //printf("%s", motdbuffer);
 
-    current_directory = "/";
+    //current_directory = "/";
 
     //printf_dark("You have been dropped into SH, type ");
     //printf("help");
@@ -203,16 +204,16 @@ void sh() {
 
 void process_user_input(const char* input) {
 
-    add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Processing user input...\n");
+    //add_data_to_file(&rootfs, "logs.d", "sh: [ ok ] Processing user input...\n");
     args = NULL; // Reset the arguments
 
-    char* working_dir = current_directory;
-    current_directory = "/home";
-    current_directory = rootUser.username;
-    current_directory = working_dir;
-    add_data_to_file(&rootfs, "history.ksh", input);
-    add_data_to_file(&rootfs, "history.ksh", "\n");
-    current_directory = current_directory;
+    //char* working_dir = current_directory;
+    //current_directory = "/home";
+    //current_directory = rootUser.username;
+    //current_directory = working_dir;
+    //add_data_to_file(&rootfs, "history.ksh", input);
+    //add_data_to_file(&rootfs, "history.ksh", "\n");
+    //current_directory = current_directory;
 
     // Check for specific commands in the input
     if (string_starts_with(input, "pkg")) {

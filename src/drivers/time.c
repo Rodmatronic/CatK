@@ -1,18 +1,6 @@
 #include "string.h"
 #include "io_ports.h"
-#include "fs.h"
-
-// I/O Ports for RTC
-#define RTC_ADDRESS_PORT 0x70
-#define RTC_DATA_PORT 0x71
-
-// RTC Register Addresses
-#define RTC_SECONDS 0x00
-#define RTC_MINUTES 0x02
-#define RTC_HOURS 0x04
-#define RTC_DAY_OF_MONTH 0x07
-#define RTC_MONTH 0x08
-#define RTC_YEAR 0x09
+#include "time.h"
 
 uint8 seconds, minutes, hours, day, month, year;
 
@@ -65,7 +53,7 @@ void powerontimes() {
         poweronTimeString[index] = '\0';
 
         // Write the power-on time string to the file
-        write_to_file(&rootfs, "powerontime", poweronTimeString);
+        //write_to_file(&rootfs, "powerontime", poweronTimeString);
     }
 }
 
@@ -124,7 +112,7 @@ void GetCurrentTime() {
     timeString[index] = '\0';
 
     // Write the time string to the file
-    write_to_file(&rootfs, "time", timeString);
+    //write_to_file(&rootfs, "time", timeString);
 
     // Call the function to store power-on time
     powerontimes();

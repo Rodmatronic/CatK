@@ -1,19 +1,7 @@
+#include "libc.h"
+
 #define MAX_FOLDERS 50
 #define FOLDERNAME_SIZE 30
-
-struct FileEntry {
-    char filename[FILENAME_SIZE];
-    uint32 start_block;
-    uint32 size;
-    uint8 is_folder;
-    char parent_folder[FOLDERNAME_SIZE];
-};
-
-struct FileSystem {
-    struct FileEntry file_table[MAX_FILES];
-    char data_blocks[MAX_FILES][BLOCK_SIZE];
-    char folder_table[MAX_FOLDERS][FOLDERNAME_SIZE];
-};
 
 void create_folder(struct FileSystem* fs, const char* foldername, const char* parent_folder) {
     // Check if the folder already exists
