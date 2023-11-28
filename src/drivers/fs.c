@@ -1,7 +1,35 @@
+#include "fs.h"
 #include "libc.h"
+#include "time.h"
+#include "string.h"
+#include "sleep.h"
+#include "config.h"
 
+#define BLOCK_SIZE 10000
+#define FILENAME_SIZE 25
+#define MAX_FILES 1024
 #define MAX_FOLDERS 50
 #define FOLDERNAME_SIZE 30
+
+extern struct FileEntry {
+    char filename[FILENAME_SIZE];
+    uint32 start_block;
+    uint32 size;
+    uint8 is_folder;
+    char parent_folder[FOLDERNAME_SIZE];
+};
+
+
+extern struct FileSystem {
+    struct FileEntry file_table[MAX_FILES];
+    char data_blocks[MAX_FILES][BLOCK_SIZE];
+    char folder_table[MAX_FOLDERS][FOLDERNAME_SIZE];
+};
+
+// Create an instance of the filesystem
+struct FileSystem rootfs;
+
+void rm_file(struct FileSystem* fs, const char* filename);
 
 void create_folder(struct FileSystem* fs, const char* foldername, const char* parent_folder) {
     // Check if the folder already exists
@@ -43,22 +71,6 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
         }
     }
     printf("Error: Folder table is full\n");
-}
-
-char* strncat(char* dest, const char* src, size n) {
-    char* dest_end = dest;
-    while (*dest_end != '\0') {
-        dest_end++;
-    }
-
-    while (*src != '\0' && n > 0) {
-        *dest_end++ = *src++;
-        n--;
-    }
-
-    *dest_end = '\0';
-
-    return dest;
 }
 
 void cd_parent_directory() {
@@ -150,15 +162,6 @@ void change_directory(struct FileSystem* fs, const char* path) {
     }
 }
 
-int strncmp(const char* str1, const char* str2, size n) {
-    for (size i = 0; i < n; ++i) {
-        if (str1[i] != str2[i] || str1[i] == '\0' || str2[i] == '\0') {
-            return (unsigned char)str1[i] - (unsigned char)str2[i];
-        }
-    }
-    return 0;
-}
-
 
 void write_to_file(struct FileSystem* fs, const char* filename, const char* data, ...) {
     const char* current_folder = current_directory; // Get the current folder
@@ -202,11 +205,10 @@ void list_files(const struct FileSystem* fs, int type) {
                 (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
                 // Print in green if it's a folder, and in blue otherwise
                 if (fs->file_table[i].is_folder) {
-                    printf_brightblue("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
+                    printf("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
                 } else {
-                    printf_green("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
+                    printf("%s\tSize: %u bytes\n", fs->file_table[i].filename, fs->file_table[i].size);
                 }
-                row++;
             }
         }
     }
@@ -219,16 +221,15 @@ void list_files(const struct FileSystem* fs, int type) {
                 (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
                 // Print in green if it's a folder, and in blue otherwise
                 if (fs->file_table[i].is_folder) {
-                    printf_brightblue("%s  ", fs->file_table[i].filename);
+                    printf("%s  ", fs->file_table[i].filename);
                 } else {
-                    printf_green("%s  ", fs->file_table[i].filename);
+                    printf("%s  ", fs->file_table[i].filename);
                 }
 
                 line_length += strlen(fs->file_table[i].filename) + 2; // Account for filename and spaces
 
                 if (line_length > VGA_WIDTH) {
                     printf("\n");
-                    row++;
                     line_length = 0;
                 }
             }
@@ -236,7 +237,67 @@ void list_files(const struct FileSystem* fs, int type) {
     }
 }
 
-int read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size, int allow_anywhere) {
+/*
+// Recursive function to remove contents of a folder
+void remove_folder_contents(struct FileSystem* fs, const char* foldername) {
+    const char* current_folder = current_directory; // Get the current folder
+
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (fs->file_table[i].filename[0] != '\0' &&
+            fs->file_table[i].is_folder &&
+            strcmp(fs->file_table[i].parent_folder, foldername) == 0) {
+            
+            // Recursively remove contents of subfolders
+            remove_folder_contents(fs, fs->file_table[i].filename);
+
+            // Remove the file or folder entry
+            fs->file_table[i].filename[0] = '\0';
+            fs->file_table[i].start_block = 0;
+            fs->file_table[i].size = 0;
+            memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
+            total_files--;
+        }
+    }
+
+    // Clear the folder entry itself
+    for (size i = 0; i < MAX_FOLDERS; ++i) {
+        if (strcmp(fs->folder_table[i], foldername) == 0) {
+            fs->folder_table[i][0] = '\0';
+            return;
+        }
+    }
+}*/
+
+
+void rm_file(struct FileSystem* fs, const char* filename) {
+    const char* current_folder = current_directory; // Get the current folder
+
+    for (size i = 0; i < MAX_FILES; ++i) {
+        if (strcmp(fs->file_table[i].filename, filename) == 0 &&
+            strcmp(fs->file_table[i].parent_folder, current_folder) == 0) {
+            
+            // Check if the file entry is a folder
+            if (fs->file_table[i].is_folder) {
+                // Recursively remove contents of the folder
+               // remove_folder_contents(fs, fs->file_table[i].filename);
+            }
+
+            // Remove the file or folder entry
+            fs->file_table[i].filename[0] = '\0';
+            fs->file_table[i].start_block = 0;
+            fs->file_table[i].size = 0;
+            memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
+            total_files--;
+
+            return;
+        }
+    }
+
+    // File not found or not in the current folder
+    printf("Error: File %s not found in the current folder\n", filename);
+}
+
+void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size, int allow_anywhere) {
     const char* current_folder = current_directory;
 
     size i;
@@ -265,8 +326,8 @@ int read_from_file(const struct FileSystem* fs, const char* filename, char* buff
 
     // File not found
     strncpy(buffer, "File not found", buffer_size);
-    return 2;
 }
+
 
 void read_last_line_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size) {
     for (size i = 0; i < MAX_FILES; ++i) {
@@ -334,71 +395,6 @@ void add_data_to_file(struct FileSystem* fs, const char* filename, const char* a
     printf("Error: File %s not found\n", filename);
 }
 
-// Custom function to calculate the length of a string with a limit
-size strnlen(const char* str, size max_len) {
-    size len;
-    for (len = 0; len < max_len && str[len] != '\0'; ++len);
-    return len;
-}
-
-void rm_file(struct FileSystem* fs, const char* filename) {
-    const char* current_folder = current_directory; // Get the current folder
-
-    for (size i = 0; i < MAX_FILES; ++i) {
-        if (strcmp(fs->file_table[i].filename, filename) == 0 &&
-            strcmp(fs->file_table[i].parent_folder, current_folder) == 0) {
-            
-            // Check if the file entry is a folder
-            if (fs->file_table[i].is_folder) {
-                // Recursively remove contents of the folder
-                remove_folder_contents(fs, fs->file_table[i].filename);
-            }
-
-            // Remove the file or folder entry
-            fs->file_table[i].filename[0] = '\0';
-            fs->file_table[i].start_block = 0;
-            fs->file_table[i].size = 0;
-            memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
-            total_files--;
-
-            return;
-        }
-    }
-
-    // File not found or not in the current folder
-    printf("Error: File %s not found in the current folder\n", filename);
-}
-
-// Recursive function to remove contents of a folder
-void remove_folder_contents(struct FileSystem* fs, const char* foldername) {
-    const char* current_folder = current_directory; // Get the current folder
-
-    for (size i = 0; i < MAX_FILES; ++i) {
-        if (fs->file_table[i].filename[0] != '\0' &&
-            fs->file_table[i].is_folder &&
-            strcmp(fs->file_table[i].parent_folder, foldername) == 0) {
-            
-            // Recursively remove contents of subfolders
-            remove_folder_contents(fs, fs->file_table[i].filename);
-
-            // Remove the file or folder entry
-            fs->file_table[i].filename[0] = '\0';
-            fs->file_table[i].start_block = 0;
-            fs->file_table[i].size = 0;
-            memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
-            total_files--;
-        }
-    }
-
-    // Clear the folder entry itself
-    for (size i = 0; i < MAX_FOLDERS; ++i) {
-        if (strcmp(fs->folder_table[i], foldername) == 0) {
-            fs->folder_table[i][0] = '\0';
-            return;
-        }
-    }
-}
-
 
 
 void execute_file(struct FileSystem* fs, const char* filename) {
@@ -416,7 +412,7 @@ void execute_file(struct FileSystem* fs, const char* filename) {
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
         // Check if the line contains "print "
-        char* printToken = k_strstr(token, "print ");
+        /*char* printToken = k_strstr(token, "print ");
         if (printToken != NULL) {
             // Print the text following "print "
             printf("%s\n", printToken + strlen("print "));
@@ -469,7 +465,7 @@ void execute_file(struct FileSystem* fs, const char* filename) {
         char* readcommand = k_strstr(token, "read");
         if (readcommand != NULL) {
             read(0);
-        }
+        }*/
         char* paniccommand = k_strstr(token, "panic");
         if (paniccommand != NULL) {
             panic("Triggered by Executable");
@@ -480,149 +476,74 @@ void execute_file(struct FileSystem* fs, const char* filename) {
         }
         char* catasciilookupcommand = k_strstr(token, "catascii-lookup");
         if (catasciilookupcommand != NULL) {
-            printf_white("                   _      _\n");
-            printf_white("                  / \\    / \\\n");
-            printf_brightcyan("                 /   \\__/   \\\n");
-            printf_brightcyan("                /   |    |   \\\n");
-            printf_brightcyan("               |      -       |\n");
-            printf_brightcyan("              =|       o      |=\n");
-            printf_brightcyan("              =\\              /=\n");
-            printf_brightcyan("                \\            /\n");
-            printf_red("                 =====\\/=====\n");
-            printf_yellow("                    (CatK)\n");
+            printf("                   _      _\n");
+            printf("                  / \\    / \\\n");
+            printf("                 /   \\__/   \\\n");
+            printf("                /   |    |   \\\n");
+            printf("               |      -       |\n");
+            printf("              =|       o      |=\n");
+            printf("              =\\              /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
         }
         char* catasciihappycommand = k_strstr(token, "catascii-happy");
         if (catasciihappycommand != NULL) {
-            printf_white("                   _      _\n");
-            printf_white("                  / \\    / \\\n");
-            printf_brightcyan("                 /   \\__/   \\\n");
-            printf_brightcyan("                /            \\\n");
-            printf_brightcyan("               |    |    |    |\n");
-            printf_brightcyan("              =|      -       |=\n");
-            printf_brightcyan("              =\\      v       /=\n");
-            printf_brightcyan("                \\            /\n");
-            printf_red("                 =====\\/=====\n");
-            printf_yellow("                    (CatK)\n");
+            printf("                   _      _\n");
+            printf("                  / \\    / \\\n");
+            printf("                 /   \\__/   \\\n");
+            printf("                /            \\\n");
+            printf("               |    |    |    |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      v       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
         }
         char* catasciithinkcommand = k_strstr(token, "catascii-eh");
         if (catasciithinkcommand != NULL) {
-            printf_white("                   _      _\n");
-            printf_white("                  / \\    / \\\n");
-            printf_brightcyan("                 /   \\__/   \\\n");
-            printf_brightcyan("                /            \\\n");
-            printf_brightcyan("               |     |    |   |\n");
-            printf_brightcyan("              =|      -       |=\n");
-            printf_brightcyan("              =\\      _       /=\n");
-            printf_brightcyan("                \\            /\n");
-            printf_red("                 =====\\/=====\n");
-            printf_yellow("                    (CatK)\n");
+            printf("                   _      _\n");
+            printf("                  / \\    / \\\n");
+            printf("                 /   \\__/   \\\n");
+            printf("                /            \\\n");
+            printf("               |     |    |   |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      _       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
         }
         char* catasciisleepcommand = k_strstr(token, "catascii-sleep");
         if (catasciisleepcommand != NULL) {
-            printf_white("                   _      _\n");
-            printf_white("                  / \\    / \\         z\n");
-            printf_brightcyan("                 /   \\__/   \\     z\n");
-            printf_brightcyan("                /            \\   z\n");
-            printf_brightcyan("               |    _    _    |\n");
-            printf_brightcyan("              =|      -       |=\n");
-            printf_brightcyan("              =\\      o       /=\n");
-            printf_brightcyan("                \\            /\n");
-            printf_red("                 =====\\/=====\n");
-            printf_yellow("                    (CatK)\n");
+            printf("                   _      _\n");
+            printf("                  / \\    / \\         z\n");
+            printf("                 /   \\__/   \\     z\n");
+            printf("                /            \\   z\n");
+            printf("               |    _    _    |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      o       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
         }
         char* catasciisleepycommand = k_strstr(token, "catascii-tired");
         if (catasciisleepycommand != NULL) {
-            printf_white("                   _      _\n");
-            printf_white("                  / \\    / \\         z\n");
-            printf_brightcyan("                 /   \\__/   \\     z\n");
-            printf_brightcyan("                /            \\   z\n");
-            printf_brightcyan("               |    _    _    |\n");
-            printf_brightcyan("              =|      -       |=\n");
-            printf_brightcyan("              =\\      w       /=\n");
-            printf_brightcyan("                \\            /\n");
-            printf_red("                 =====\\/=====\n");
-            printf_yellow("                    (CatK)\n");
+            printf("                   _      _\n");
+            printf("                  / \\    / \\         z\n");
+            printf("                 /   \\__/   \\     z\n");
+            printf("                /            \\   z\n");
+            printf("               |    _    _    |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      w       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
         }
         // Move to the next line
         token = k_strtok(NULL, "\n");
     }
 }
 
-int k_strncmp(const char* str1, const char* str2, size n) {
-    for (size i = 0; i < n; ++i) {
-        if (str1[i] != str2[i]) {
-            return (str1[i] < str2[i]) ? -1 : 1;
-        }
-
-        if (str1[i] == '\0') {
-            return 0;  // Strings are equal up to null terminator
-        }
-    }
-
-    return 0;  // The first n characters are equal
-}
-
-int sync() {
+void sync() {
     
-}
-
-int k_strstr(const char* haystack, const char* needle) {
-    while (*haystack) {
-        const char* h = haystack;
-        const char* n = needle;
-        
-        while (*h && *n && (*h == *n || (*h >= 'A' && *h <= 'Z' && *h - 'A' + 'a' == *n))) {
-            h++;
-            n++;
-        }
-
-        if (!*n)
-            return (char*)haystack;
-
-        haystack++;
-    }
-
-    return NULL;
-}
-
-int k_strchr(const char* str, int c) {
-    while (*str != '\0') {
-        if (*str == c) {
-            return str;
-        }
-        ++str;
-    }
-
-    return NULL;  // Character not found
-}
-
-int k_strcmp(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) {
-        ++s1;
-        ++s2;
-    }
-    return *(unsigned char*)s1 - *(unsigned char*)s2;
-}
-
-// Custom implementation of strtok for case-sensitive comparison
-int k_strtok(char* str, const char* delim) {
-    static char* token = NULL;
-
-    if (str != NULL)
-        token = str;
-
-    if (token == NULL)
-        return NULL;
-
-    char* start = token;
-
-    while (*token && !k_strchr(delim, *token))
-        token++;
-
-    if (*token)
-        *token++ = '\0';
-    else
-        token = NULL;
-
-    return start;
 }

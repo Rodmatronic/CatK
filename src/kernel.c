@@ -5,7 +5,7 @@
 #include "PreBoot.c"
 #include "memory.h"
 #include "cpu.h"
-//#include "fs.h"
+#include "fs.h"
 #include "time.h"
 #include "sleep.h"
 #include "config.h"
@@ -26,7 +26,7 @@ void boot() {
     printf("   arch: %s\n", arch);
     printf("   prebootver: %s\n", prebootversion);
     printf("   bootargs(default): %s\n", bootargs);
-    //execute_file(&rootfs, "init");
+    execute_file(&rootfs, "init");
     panic("Cannot mount &rootfs!");
 
 }
