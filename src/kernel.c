@@ -26,8 +26,21 @@ void boot() {
     printf("   arch: %s\n", arch);
     printf("   prebootver: %s\n", prebootversion);
     printf("   bootargs(default): %s\n", bootargs);
-    execute_file(&rootfs, "init");
-    panic("Cannot mount &rootfs!");
+
+    bootmessage("Okay! Attempting to start init \\/");
+    printf("   Run /init\n");
+    execute_file(&rootfs, "init", 1);
+    printf("   Run /sbin/init\n");
+    current_directory = "/sbin";
+    execute_file(&rootfs, "init", 1);
+    printf("   Run /bin/init\n");
+    current_directory = "/bin";
+    execute_file(&rootfs, "init", 1);
+    printf("   Run /etc/init\n");
+    current_directory = "/etc";
+    execute_file(&rootfs, "init", 1);
+
+    panic("Failed to start init!");
 
 }
 

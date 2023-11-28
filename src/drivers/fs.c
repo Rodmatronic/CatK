@@ -397,7 +397,7 @@ void add_data_to_file(struct FileSystem* fs, const char* filename, const char* a
 
 
 
-void execute_file(struct FileSystem* fs, const char* filename) {
+void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char buffer[BLOCK_SIZE];
     read_from_file(fs, filename, buffer, BLOCK_SIZE, 0);
 
@@ -405,7 +405,17 @@ void execute_file(struct FileSystem* fs, const char* filename) {
     char* typeToken = k_strstr(buffer, "type:App");
     if (typeToken == NULL) {
         // File is not of type "app", do not execute
+
+        if (quiet == 1)
+        {
+            return;
+        }else
         printf("Error: File is not of type 'app', or does not exist.\n");
+        if (quiet == 0)
+        {
+            printf("Error: File is not of type 'app', or does not exist.\n");
+            return;
+        }
         return;
     }
     // Tokenize and execute each line

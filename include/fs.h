@@ -15,6 +15,6 @@ struct FileSystem rootfs;
 
 char buffer[BLOCK_SIZE];
 
-void execute_file(struct FileSystem* fs, const char* filename);
+void execute_file(struct FileSystem* fs, const char* filename, int quiet);
 
 #endif
