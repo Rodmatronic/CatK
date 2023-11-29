@@ -234,10 +234,23 @@ void printf(const char *format, ...) {
                     goto string;
                     break;
 
-                case 's':
-                    p = *arg++;
-                    if (!p)
-                        p = "(null)";
+case 's':
+    p = *arg++;
+    if (!p)
+        p = "(null)";
+
+    for (p2 = p; *p2; p2++)
+        ;
+    for (; p2 < p + pad; p2++)
+        console_putchar(pad0 ? '0' : ' ', fore_color, back_color);
+    while (*p)
+        console_putchar(*p++, fore_color, back_color);
+    break;
+
+case 'c':
+    console_putchar((char)*arg++, fore_color, back_color);
+    break;
+
 
                 string:
                     for (p2 = p; *p2; p2++)

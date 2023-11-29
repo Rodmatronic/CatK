@@ -107,7 +107,7 @@ unsigned char read_key();
 #define SCAN_CODE_KEY_F12         0x58
 
 
-void keyboard_init();
+void init_keyboard();
 
 // a blocking character read
 char kb_getchar();
