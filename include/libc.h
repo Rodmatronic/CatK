@@ -20,6 +20,7 @@ char* strncat(char* dest, const char* src, size n);
 
 int strncmp(const char* str1, const char* str2, size n);
 
+int k_malloc(size size);
 
 #endif
 

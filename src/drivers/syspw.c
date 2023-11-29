@@ -12,6 +12,22 @@
 #include "panic.h"
 #define ACPI_RESET 0x06
 
+// GDT entry structure
+struct gdt_entry {
+    unsigned short limit_low;
+    unsigned short base_low;
+    unsigned char base_middle;
+    unsigned char access;
+    unsigned char granularity;
+    unsigned char base_high;
+};
+
+// GDT pointer structure
+struct gdt_ptr {
+    unsigned short limit;
+    unsigned int base;
+};
+
 void syspw(int type) {
 
     if (type == 0)
@@ -36,6 +52,7 @@ void syspw(int type) {
         //for Vbox
         outports(0x4004, 0x3400);
         outports(0x604, 0x2000);
+        outports(0x600, 0x34);
         __asm__ __volatile__("int $0x80");
     }
 

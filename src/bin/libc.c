@@ -1,5 +1,11 @@
 #include "string.h"
 #include "types.h"
+#include "panic.h"
+
+#define MEMORY_POOL_SIZE (6 * 1024 * 1024) // 6 MB in bytes
+
+static char memoryPool[MEMORY_POOL_SIZE];
+static char* nextFreeAddress = memoryPool;
 
 char* k_strstr(const char* haystack, const char* needle) {
     while (*haystack) {
@@ -106,4 +112,16 @@ int strncmp(const char* str1, const char* str2, size n) {
         }
     }
     return 0;
+}
+
+int k_malloc(size size) {
+    if ((nextFreeAddress + size) <= (memoryPool + MEMORY_POOL_SIZE)) {
+        void* allocatedMemory = nextFreeAddress;
+        nextFreeAddress += size;
+        return allocatedMemory;
+    } else {
+        // Allocation failed, handle the error
+        // For example, you can print an error message or exit the program
+        panic("Malloc failed to allocate memory!");
+    }
 }

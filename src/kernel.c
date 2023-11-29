@@ -1,5 +1,6 @@
 #include "console.h"
 #include "kernel.h"
+#include "libc.h"
 #include "string.h"
 #include "io_ports.h"
 #include "PreBoot.c"
@@ -12,7 +13,7 @@
 #include "keyboard.h"
 
 void boot() {
-    bootmessage("CatKernel (unfucked) boot() started");
+    bootmessage("CatKernel boot() started");
     printf("Boot arguments: %s\n", args);
     bootmessage("cpuid_info(1): Attempting to get CPU info");
     cpuid_info(1);
@@ -27,20 +28,36 @@ void boot() {
     printf("   prebootver: %s\n", prebootversion);
     printf("   bootargs(default): %s\n", bootargs);
 
-    bootmessage("Okay! Attempting to start init \\/");
-    printf("   Run /init\n");
-    execute_file(&rootfs, "init", 1);
-    printf("   Run /sbin/init\n");
-    current_directory = "/sbin";
-    execute_file(&rootfs, "init", 1);
-    printf("   Run /bin/init\n");
-    current_directory = "/bin";
-    execute_file(&rootfs, "init", 1);
-    printf("   Run /etc/init\n");
-    current_directory = "/etc";
-    execute_file(&rootfs, "init", 1);
+    // Initialize the file table
+    for (size i = 0; i < MAX_FILES; ++i) {
+        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
+    }
 
-    panic("Failed to start init!");
+    bootmessage("Perfect! &rootfs created with max files from MAX_FILES");
+    bootmessage("Creating '/' structure");
+    create_folder(&rootfs, "/bin", "/");
+    create_folder(&rootfs, "/boot", "/");
+    create_folder(&rootfs, "/cdrom", "/");
+    create_folder(&rootfs, "/dev", "/");
+    create_folder(&rootfs, "/etc", "/");
+    create_folder(&rootfs, "/home", "/");
+    create_folder(&rootfs, "/lib", "/");
+    create_folder(&rootfs, "/media", "/");
+    create_folder(&rootfs, "/mnt", "/");
+    create_folder(&rootfs, "/proc", "/");
+    create_folder(&rootfs, "/run", "/");
+    create_folder(&rootfs, "/sbin", "/");
+    create_folder(&rootfs, "/sys", "/");
+    create_folder(&rootfs, "/tmp", "/");
+    create_folder(&rootfs, "/usr", "/");
+    create_folder(&rootfs, "/var", "/");
+    bootmessage("Freeing system memory");
+
+    size size = 6 * 1024 * 1024; // 3 MB in bytes
+    void* memory = k_malloc(size);
+
+    bootmessage("Allocated 6000 KB using k_malloc");
+
 
 }
 
