@@ -1,7 +1,7 @@
+#include "string.h"
 #include "fs.h"
 #include "libc.h"
 #include "time.h"
-#include "string.h"
 #include "sleep.h"
 #include "config.h"
 

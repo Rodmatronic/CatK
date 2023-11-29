@@ -10,23 +10,6 @@
 #include "panic.h"
 #include "syspw.h"
 #include "panic.h"
-#define ACPI_RESET 0x06
-
-// GDT entry structure
-struct gdt_entry {
-    unsigned short limit_low;
-    unsigned short base_low;
-    unsigned char base_middle;
-    unsigned char access;
-    unsigned char granularity;
-    unsigned char base_high;
-};
-
-// GDT pointer structure
-struct gdt_ptr {
-    unsigned short limit;
-    unsigned int base;
-};
 
 void syspw(int type) {
 

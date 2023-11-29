@@ -11,6 +11,7 @@
 #include "sleep.h"
 #include "config.h"
 #include "keyboard.h"
+#include "usb.h"
 
 void boot() {
     bootmessage("CatKernel boot() started");
@@ -53,11 +54,11 @@ void boot() {
     create_folder(&rootfs, "/var", "/");
     bootmessage("Freeing system memory");
 
-    size size = 6 * 1024 * 1024; // 3 MB in bytes
-    void* memory = k_malloc(size);
+    size size = 6 * 1024 * 1024; // 6 MB in bytes
+    //void* memory = k_malloc(size);
+    k_malloc(size);
 
     bootmessage("Allocated 6000 KB using k_malloc");
-
 
 }
 

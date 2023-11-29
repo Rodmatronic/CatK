@@ -1,9 +1,12 @@
 #include "kernel.h"
 #include "console.h"
-#include "string.h"
 #include "io_ports.h"
 
-#include "keyboard.h"
+// Keyboard I/O ports
+#define KEYBOARD_DATA_PORT 0x60
+#define KEYBOARD_STATUS_PORT 0x64
+// enter scancode
+#define ENTER_KEY_SCANCODE 0x1C
 
 // Define a variable to track the Shift key state
 int shift_pressed = 0;
@@ -82,5 +85,4 @@ char scancode_to_char(unsigned char scancode) {
     } else {
         return 0; // Unhandled scancode
     }
-return 0; // Unhandled scancode
 }
