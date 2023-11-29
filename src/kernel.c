@@ -67,6 +67,21 @@ void boot() {
     bootmessage("Keyboard init ");
     init_keyboard();
 
+    bootmessage("Setting hostname to defaults from 'defaulthostname'");
+    write_to_file(&rootfs, "hostname", defaulthostname);
+    read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
+
+    strcpy(host_name, buffer);
+
+    bootmessage("Copying kernel values to proc");
+    current_directory = "/proc";
+    write_to_file(&rootfs, "arch", arch);
+    write_to_file(&rootfs, "args", bootargs);
+    write_to_file(&rootfs, "version", versionnumber);
+    add_data_to_file(&rootfs, "version", versionnumber);
+
+read(1);
+
     console_init(COLOR_WHITE, COLOR_BLACK);
     cursor_pos_y = 25;
     k_sh();
