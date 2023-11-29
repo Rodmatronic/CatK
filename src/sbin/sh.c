@@ -36,7 +36,7 @@ void execute_command(const char* command) {
 void k_sh() {
     rows = 0;
     console_gotoxy(0, rows);
-    printf("# ");
+    printf("[%s (%s)]# ", username, current_directory);
 
     while (1) {
         unsigned char scancode = read_key();
@@ -59,7 +59,7 @@ void k_sh() {
                 } else
                     rows++;
                 console_gotoxy(0, rows);
-                printf("# ");
+                printf("[%s (%s)]# ", username, current_directory);
             } else {
                 if (buffer_index < MAX_BUFFER_SIZE - 1) {
                     input_buffer[buffer_index++] = key;

@@ -3,6 +3,8 @@
 #include "types.h"
 #include "vga.h"
 
+// Note! 0x1: Red 0xA: Green 
+
 static uint16 *g_vga_buffer;
 //index for video buffer array
 static uint32 g_vga_index;

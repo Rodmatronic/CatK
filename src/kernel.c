@@ -13,6 +13,7 @@
 #include "keyboard.h"
 #include "usb.h"
 #include "sh.h"
+#include "sysdiag.h"
 
 void boot() {
     bootmessage("CatKernel boot() started");
@@ -56,6 +57,15 @@ void boot() {
     list_files(&rootfs, 0);
     printf("\n");
 
+    int i;
+
+    for (i = 0; i < 10000000; i++) {
+   
+    }
+
+    bootmessage("Starting sysdiag");
+    sysdiaginit();
+
     bootmessage("Freeing system memory");
 
     size size = 6 * 1024 * 1024; // 6 MB in bytes
@@ -76,14 +86,17 @@ void boot() {
     bootmessage("Copying kernel values to proc");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
+    printf("%CCreated /proc/arch\n", 0x8, 0x0);
     write_to_file(&rootfs, "args", bootargs);
+    printf("%CCreated /proc/args\n", 0x8, 0x0);
     write_to_file(&rootfs, "version", versionnumber);
     add_data_to_file(&rootfs, "version", versionnumber);
-
-read(1);
+    printf("%CCreated /proc/version\n", 0x8, 0x0);
+    write_to_file(&rootfs, "ostype", "Catkernel");
+    printf("%CCreated /proc/ostype\n", 0x8, 0x0);
+    read(1);
 
     console_init(COLOR_WHITE, COLOR_BLACK);
-    cursor_pos_y = 25;
     k_sh();
 
 }
