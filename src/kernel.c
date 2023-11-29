@@ -67,6 +67,8 @@ void boot() {
     bootmessage("Keyboard init ");
     init_keyboard();
 
+    console_init(COLOR_WHITE, COLOR_BLACK);
+    cursor_pos_y = 25;
     k_sh();
 
 }

@@ -234,22 +234,22 @@ void printf(const char *format, ...) {
                     goto string;
                     break;
 
-case 's':
-    p = *arg++;
-    if (!p)
-        p = "(null)";
+            case 's':
+                p = *arg++;
+                if (!p)
+                    p = "(null)";
 
-    for (p2 = p; *p2; p2++)
-        ;
-    for (; p2 < p + pad; p2++)
-        console_putchar(pad0 ? '0' : ' ', fore_color, back_color);
-    while (*p)
-        console_putchar(*p++, fore_color, back_color);
-    break;
+                for (p2 = p; *p2; p2++)
+                    ;
+                for (; p2 < p + pad; p2++)
+                    console_putchar(pad0 ? '0' : ' ', fore_color, back_color);
+                while (*p)
+                    console_putchar(*p++, fore_color, back_color);
+                break;
 
-case 'c':
-    console_putchar((char)*arg++, fore_color, back_color);
-    break;
+            case 'c':
+                console_putchar((char)*arg++, fore_color, back_color);
+                break;
 
 
                 string:
@@ -266,152 +266,6 @@ case 'c':
                     console_putchar(c, fore_color, back_color);
                     break;
             }
-        }
-    }
-}
-
-
-
-void console_putchar_green(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_BRIGHT_GREEN, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_BRIGHT_GREEN, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_yellow(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_YELLOW, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_YELLOW, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_red(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_RED, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_RED, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_darkcyan(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_CYAN, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_CYAN, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_white(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_WHITE, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_WHITE, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_blue(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_BLUE, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_BLUE, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_brightblue(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_BRIGHT_BLUE, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_BRIGHT_BLUE, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_brightred(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_BRIGHT_RED, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_BRIGHT_RED, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
-        }
-    }
-}
-
-void console_putchar_brown(char ch) {
-    if (ch == '\t') {
-        for(int i = 0; i < 4; i++) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(' ', COLOR_BROWN, COLOR_BLACK);
-            vga_set_cursor_pos(cursor_pos_x++, cursor_pos_y);
-        }
-    } else if (ch == '\n') {
-        console_newline();
-    } else {
-        if (ch > 0) {
-            g_vga_buffer[g_vga_index++] = vga_item_entry(ch, COLOR_BROWN, COLOR_BLACK);
-            vga_set_cursor_pos(++cursor_pos_x, cursor_pos_y);
         }
     }
 }
