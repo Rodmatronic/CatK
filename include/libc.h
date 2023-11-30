@@ -22,5 +22,6 @@ int strncmp(const char* str1, const char* str2, size n);
 
 int k_malloc(size size);
 
-#endif
+char* k_strrchr(const char* str, char c);
 
+#endif

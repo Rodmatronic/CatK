@@ -17,7 +17,11 @@
 
 void boot() {
     bootmessage("CatKernel boot() started");
+    printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
     printf("Boot arguments: %s\n", args);
+    sleep(3);
+
+    printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
     bootmessage("cpuid_info(1): Attempting to get CPU info");
     cpuid_info(1);
     bootmessage("GetMemory(): Attempting to get Memory info");
@@ -57,11 +61,7 @@ void boot() {
     list_files(&rootfs, 0);
     printf("\n");
 
-    int i;
-
-    for (i = 0; i < 10000000; i++) {
-   
-    }
+    for (int i; i = 0; i < 100000000, i++) {}
 
     bootmessage("Starting sysdiag");
     sysdiaginit();
@@ -78,6 +78,7 @@ void boot() {
     init_keyboard();
 
     bootmessage("Setting hostname to defaults from 'defaulthostname'");
+    current_directory = "/etc";
     write_to_file(&rootfs, "hostname", defaulthostname);
     read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
 
@@ -87,14 +88,26 @@ void boot() {
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
     printf("%CCreated /proc/arch\n", 0x8, 0x0);
+
     write_to_file(&rootfs, "args", bootargs);
     printf("%CCreated /proc/args\n", 0x8, 0x0);
-    write_to_file(&rootfs, "version", versionnumber);
+
+    write_to_file(&rootfs, "version", vername);
     add_data_to_file(&rootfs, "version", versionnumber);
     printf("%CCreated /proc/version\n", 0x8, 0x0);
+
     write_to_file(&rootfs, "ostype", "Catkernel");
     printf("%CCreated /proc/ostype\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "cpu", brand);
+    printf("%CCreated /proc/ostype\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "ostype", "Catkernel");
+    printf("%CCreated /proc/ostype\n", 0x8, 0x0);
+
     read(1);
+
+    current_directory = "/";
 
     console_init(COLOR_WHITE, COLOR_BLACK);
     k_sh();

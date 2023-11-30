@@ -24,7 +24,7 @@ void PreBoot()
 
     printf("+========== CatK PreBoot ==========+\n");
     printf("%C| Boot normally [Enter]            |\n", 0xB, 0x0);
-    printf("| 1.  Suppress boot logs           |\n");
+    printf("|                                  |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");

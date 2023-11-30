@@ -5,6 +5,7 @@
 #include "panic.h"
 #include "keyboard.h"
 #include "string.h"
+#include "libc.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -14,6 +15,7 @@ int clearint = 0;
 void execute_command(const char* command) {
     // Pre-built commands
     if (strcmp(command, "") == 0) {
+        // Do nothing for an empty command
     } else if (strcmp(command, "clear") == 0) {
         rows = 0;
         rows--;
@@ -27,9 +29,38 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
+    } else if (strncmp(command, "cat ", 4) == 0) {
+        const char* new_directory = command + 4;
+
+        read_from_file(&rootfs, new_directory, buffer, sizeof(buffer), 0);
+        printf("\n%s\n", buffer);
+        rows+=25;
+    } else if (strncmp(command, "uname", 4) == 0) {
+        char* workingdir = current_directory;
+        current_directory = "/proc";
+        read_from_file(&rootfs, "version", buffer, sizeof(buffer), 0);
+        printf("\n%s\n", buffer);
+        rows+=2;
+        current_directory = workingdir;
+    } else if (strcmp(command, "ls") == 0) {
+        printf("\n");
+        printf("\n");
+        list_files(&rootfs, 0);
+        printf("\n");
+        printf("\n");
+        rows+=3;
+    } else if (strncmp(command, "cd ", 3) == 0) {
+        // Check if the command starts with "cd "
+        const char* new_directory = command + 3;  // Get the characters after "cd "
+        if (strcmp(new_directory, "..") == 0) {
+            cd_parent_directory();
+        } else {
+            // Change to the specified directory
+            change_directory(&rootfs, new_directory);
+        }
     } else {
         // Default action for unrecognized commands
-        printf("Unrecognized command.");
+        printf("\nUnrecognized command.\n");
     }
 }
 
@@ -48,7 +79,12 @@ void k_sh() {
         char key = scancode_to_char(scancode);
 
         if (key != 0) {
-            if (scancode == ENTER_KEY_SCANCODE) {
+            if (scancode == SCAN_CODE_KEY_BACKSPACE) {
+                if (buffer_index > 0) {
+                    buffer_index--;
+                    console_ungetchar();
+                }
+            } else if (scancode == ENTER_KEY_SCANCODE) {
                 input_buffer[buffer_index] = '\0';
                 execute_command(input_buffer);
                 buffer_index = 0;

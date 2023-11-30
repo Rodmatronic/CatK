@@ -43,8 +43,6 @@ void cpuinfo()
 }
 
 void cpusimple(int print) {
-    uint32 brand[12];
-
     memset(brand, 0, sizeof(brand));
     __cpuid(0x80000002, (uint32 *)brand+0x0, (uint32 *)brand+0x1, (uint32 *)brand+0x2, (uint32 *)brand+0x3);
     __cpuid(0x80000003, (uint32 *)brand+0x4, (uint32 *)brand+0x5, (uint32 *)brand+0x6, (uint32 *)brand+0x7);

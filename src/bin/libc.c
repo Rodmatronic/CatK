@@ -7,6 +7,18 @@
 static char memoryPool[MEMORY_POOL_SIZE];
 static char* nextFreeAddress = memoryPool;
 
+// Custom implementation of strrchr
+char* k_strrchr(const char* str, char c) {
+    char* last_occurrence = NULL;
+    while (*str) {
+        if (*str == c) {
+            last_occurrence = (char*)str;
+        }
+        str++;
+    }
+    return last_occurrence;
+}
+
 char* k_strstr(const char* haystack, const char* needle) {
     while (*haystack) {
         const char* h = haystack;
