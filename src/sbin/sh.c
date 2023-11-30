@@ -6,6 +6,7 @@
 #include "keyboard.h"
 #include "string.h"
 #include "libc.h"
+#include "fs.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -48,11 +49,9 @@ void execute_command(const char* command) {
         current_directory = workingdir;
     } else if (strcmp(command, "ls") == 0) {
         printf("\n");
-        printf("\n");
         list_files(&rootfs, 0);
         printf("\n");
-        printf("\n");
-        rows+=3;
+        rows+=4;
     } else if (strncmp(command, "cd ", 3) == 0) {
         // Check if the command starts with "cd "
         const char* new_directory = command + 3;  // Get the characters after "cd "
@@ -72,15 +71,13 @@ void execute_command(const char* command) {
 void k_sh() {
     rows = 0;
     console_gotoxy(0, rows);
-    printf("[%s (%s)]# ", username, current_directory);
+    printf("%C[", 0xB, 0x0);
+    printf("%s", 0xE, 0x0, username);
+    printf("%s (%s)# ", username, current_directory);
+    printf("%C]%C# ", 0xB, 0x0, 0xF, 0x0);
 
     while (1) {
         unsigned char scancode = read_key();
-
-        if (scancode == 0x48) {
-            return;
-        }
-
         char key = scancode_to_char(scancode);
 
         if (key != 0) {

@@ -92,34 +92,6 @@ void cd_parent_directory() {
     //printf("Changed directory to %s\n", current_directory);
 }
 
-int snprintf(char *str, size size, const char *format, const char *arg, ...) {
-    int result = 0;
-
-    // Iterate through the format string and copy characters to the buffer
-    while (*format && size > 1) {
-        if (*format == '%' && *(format + 1) == 's') {
-            // Handle %s format specifier
-            while (*arg && size > 1) {
-                *str++ = *arg++;
-                size--;
-                result++;
-            }
-            format += 2;  // Skip %s
-        } else {
-            *str++ = *format++;
-            size--;
-            result++;
-        }
-    }
-
-    // Null-terminate the string
-    if (size > 0) {
-        *str = '\0';
-    }
-
-    return result;
-}
-
 void change_directory(struct FileSystem* fs, const char* path) {
     char new_path[FOLDERNAME_SIZE];
 

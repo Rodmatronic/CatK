@@ -137,3 +137,31 @@ int k_malloc(size size) {
         panic("Malloc failed to allocate memory!");
     }
 }
+
+int snprintf(char *str, size size, const char *format, const char *arg, ...) {
+    int result = 0;
+
+    // Iterate through the format string and copy characters to the buffer
+    while (*format && size > 1) {
+        if (*format == '%' && *(format + 1) == 's') {
+            // Handle %s format specifier
+            while (*arg && size > 1) {
+                *str++ = *arg++;
+                size--;
+                result++;
+            }
+            format += 2;  // Skip %s
+        } else {
+            *str++ = *format++;
+            size--;
+            result++;
+        }
+    }
+
+    // Null-terminate the string
+    if (size > 0) {
+        *str = '\0';
+    }
+
+    return result;
+}

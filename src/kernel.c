@@ -14,12 +14,13 @@
 #include "usb.h"
 #include "sh.h"
 #include "sysdiag.h"
+#include "smbios.h"
 
 void boot() {
     bootmessage("CatKernel boot() started");
     printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
     printf("Boot arguments: %s\n", args);
-    sleep(3);
+    //sleep(3);
 
     printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
     bootmessage("cpuid_info(1): Attempting to get CPU info");
@@ -39,6 +40,9 @@ void boot() {
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
+
+    bootmessage("Getting SMBIOS\\/ ");
+    initsmbiosfind();
 
     bootmessage("Perfect! &rootfs created with max files from MAX_FILES");
     bootmessage("Creating '/' structure");
@@ -60,8 +64,6 @@ void boot() {
     create_folder(&rootfs, "/var", "/");
     list_files(&rootfs, 0);
     printf("\n");
-
-    for (int i; i = 0; i < 100000000, i++) {}
 
     bootmessage("Starting sysdiag");
     sysdiaginit();
@@ -87,25 +89,74 @@ void boot() {
     bootmessage("Copying kernel values to proc");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
-    printf("%CCreated /proc/arch\n", 0x8, 0x0);
+    printf("%C   Created /proc/arch\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "args", bootargs);
-    printf("%CCreated /proc/args\n", 0x8, 0x0);
+    printf("%C   Created /proc/args\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "version", vername);
     add_data_to_file(&rootfs, "version", versionnumber);
-    printf("%CCreated /proc/version\n", 0x8, 0x0);
+    printf("%C   Created /proc/version\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "prebootver", prebootversion);
-    printf("%CCreated /proc/prebootver\n", 0x8, 0x0);
+    printf("%C   Created /proc/prebootver\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "ostype", "Catkernel");
-    printf("%CCreated /proc/ostype\n", 0x8, 0x0);
+    printf("%C   Created /proc/ostype\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "cpu", brand);
-    printf("%CCreated /proc/ostype\n", 0x8, 0x0);
+    printf("%C   Created /proc/cpu\n", 0x8, 0x0);
 
-    read(1);
+    write_to_file(&rootfs, "vga", "80x25");
+    printf("%C   Created /proc/vga\n", 0x8, 0x0);
+
+    bootmessage("Copying kernel values to dev");
+    current_directory = "/dev";
+
+    write_to_file(&rootfs, "console", "1");
+    printf("%C   Created /dev/console\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "null", "0");
+    printf("%C   Created /dev/console\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "random", "1234");
+    printf("%C   Created /dev/console\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty0", "1");
+    printf("%C   Created /dev/tty1\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty1", "0");
+    printf("%C   Created /dev/tty1\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty2", "0");
+    printf("%C   Created /proc/tty2\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty3", "0");
+    printf("%C   Created /proc/tty3\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty4", "0");
+    printf("%C   Created /proc/tty4\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty5", "0");
+    printf("%C   Created /proc/tty5\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty6", "0");
+    printf("%C   Created /proc/tty6\n", 0x8, 0x0);
+
+    write_to_file(&rootfs, "tty7", "0");
+    printf("%C   Created /dev/tty1\n", 0x8, 0x0);
+
+    bootmessage("Setting up default user");
+    // root user
+    strcpy(rootUser.username, "root");
+    strcpy(rootUser.shell, "/bin/sh");
+    strcpy(username, rootUser.username);
+    write_to_file(&rootfs, "session.catk", rootUser.username);
+    create_folder(&rootfs, "/home", "/");
+    create_folder(&rootfs, "/root", "/home");
+
+    bootmessage("Finishing up...");
+    //char* shell = "k_sh";
 
     current_directory = "/";
 
@@ -121,6 +172,17 @@ void kmain() {
 
 void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
+}
+// Function to print DMI information
+void readDMI() {
+    // Assuming DMI port is 0xDMI_PORT, you may need to adjust this
+    unsigned short DMI_PORT = 0x80; 
+
+    // Fetching and printing DMI values
+    for (int i = 0; i < 16; ++i) {
+        unsigned char dmiValue = inportb(DMI_PORT + i);
+        printf("DMI Value %d: %x\n", i, dmiValue);
+    }
 }
 
 /*

@@ -24,4 +24,6 @@ int k_malloc(size size);
 
 char* k_strrchr(const char* str, char c);
 
+int snprintf(char *str, size size, const char *format, const char *arg, ...);
+
 #endif

@@ -17,6 +17,10 @@
 
 #include "../src/drivers/time.c"
 
+uint8 seconds, minutes, hours, day, month, year;
+
+uint8 seed;
+
 void GetCurrentTime(); 
 
 #endif

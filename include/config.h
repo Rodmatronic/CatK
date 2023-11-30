@@ -2,7 +2,13 @@
 #define CONFIG_CATK_H
 #include "types.h"
 
-//struct User rootUser;
+// Structure to represent a user entry
+struct User {
+    char username[50];
+    char shell[50];
+};
+
+struct User rootUser;
 
 char* usersh;
 char* hostnamesh;
