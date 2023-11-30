@@ -29,9 +29,13 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
+    } else if (strncmp(command, "exec ", 5) == 0) {
+        const char* command = command + 5;
+        printf("\n\n");
+        execute_file(&rootfs, command, 1);
+        rows+=2;
     } else if (strncmp(command, "cat ", 4) == 0) {
         const char* new_directory = command + 4;
-
         read_from_file(&rootfs, new_directory, buffer, sizeof(buffer), 0);
         printf("\n%s\n", buffer);
         rows+=25;
@@ -61,6 +65,7 @@ void execute_command(const char* command) {
     } else {
         // Default action for unrecognized commands
         printf("\nUnrecognized command.\n");
+        rows+=3;
     }
 }
 

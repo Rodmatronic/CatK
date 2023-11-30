@@ -96,6 +96,9 @@ void boot() {
     add_data_to_file(&rootfs, "version", versionnumber);
     printf("%CCreated /proc/version\n", 0x8, 0x0);
 
+    write_to_file(&rootfs, "prebootver", prebootversion);
+    printf("%CCreated /proc/prebootver\n", 0x8, 0x0);
+
     write_to_file(&rootfs, "ostype", "Catkernel");
     printf("%CCreated /proc/ostype\n", 0x8, 0x0);
 
