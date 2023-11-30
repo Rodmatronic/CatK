@@ -7,6 +7,7 @@
 #include "string.h"
 #include "libc.h"
 #include "fs.h"
+#include "time.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -30,12 +31,21 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
-    } else if (strncmp(command, "exec ", 5) == 0) {
+    } else if (strncmp(command, "panic ", 6) == 0) {
+        const char* new_directory = command + 6;
+        // Change to the specified directory
+        panic(new_directory);
+    }else if (strncmp(command, "exec ", 5) == 0) {
         const char* command = command + 5;
         printf("\n\n");
         execute_file(&rootfs, command, 1);
         rows+=2;
-    } else if (strncmp(command, "cat ", 4) == 0) {
+    } else if (strncmp(command, "time ", 4) == 0) {
+        printf("\n\n");
+        GetCurrentTime();
+        rows+=2;
+        
+    }else if (strncmp(command, "cat ", 4) == 0) {
         const char* new_directory = command + 4;
         read_from_file(&rootfs, new_directory, buffer, sizeof(buffer), 0);
         printf("\n%s\n", buffer);
@@ -52,6 +62,11 @@ void execute_command(const char* command) {
         list_files(&rootfs, 0);
         printf("\n");
         rows+=4;
+    } else if (strncmp(command, "echo ", 5) == 0) {
+        const char* new_directory = command + 5;
+        // Change to the specified directory
+        printf("\n\n%s", new_directory);
+        rows+=2;
     } else if (strncmp(command, "cd ", 3) == 0) {
         // Check if the command starts with "cd "
         const char* new_directory = command + 3;  // Get the characters after "cd "
@@ -67,15 +82,18 @@ void execute_command(const char* command) {
         rows+=3;
     }
 }
-
-void k_sh() {
-    rows = 0;
+void PS1()
+{
     console_gotoxy(0, rows);
     printf("%C[", 0xB, 0x0);
     printf("%s", 0xE, 0x0, username);
     printf("%s (%s)# ", username, current_directory);
     printf("%C]%C# ", 0xB, 0x0, 0xF, 0x0);
+}
 
+void k_sh() {
+    rows = 0;
+    PS1();
     while (1) {
         unsigned char scancode = read_key();
         char key = scancode_to_char(scancode);
@@ -97,7 +115,7 @@ void k_sh() {
                 } else
                     rows++;
                 console_gotoxy(0, rows);
-                printf("[%s (%s)]# ", username, current_directory);
+                PS1();
             } else {
                 if (buffer_index < MAX_BUFFER_SIZE - 1) {
                     input_buffer[buffer_index++] = key;

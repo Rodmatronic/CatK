@@ -394,7 +394,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
         // Check if the line contains "print "
-        /*char* printToken = k_strstr(token, "print ");
+        char* printToken = k_strstr(token, "print ");
         if (printToken != NULL) {
             // Print the text following "print "
             printf("%s\n", printToken + strlen("print "));
@@ -402,7 +402,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         char* printTokendark = k_strstr(token, "print_dark ");
         if (printTokendark != NULL) {
             // Print the text following "print "
-            printf_dark("%s\n", printTokendark + strlen("print_dark "));
+            printf("%s\n", printTokendark + strlen("print_dark "));
         }
         char* delaycommand = k_strstr(token, "delay");
         if (delaycommand != NULL) {
@@ -410,6 +410,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
             sleep(1);
 
         }
+        /*
         char* clearToken = k_strstr(token, "clear");
         if (clearToken != NULL) {
             // Print the text following "clear"

@@ -158,6 +158,9 @@ void boot() {
     bootmessage("Finishing up...");
     //char* shell = "k_sh";
 
+current_directory = "/bin";
+    write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
+
     current_directory = "/";
 
     console_init(COLOR_WHITE, COLOR_BLACK);
@@ -173,17 +176,7 @@ void kmain() {
 void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
 }
-// Function to print DMI information
-void readDMI() {
-    // Assuming DMI port is 0xDMI_PORT, you may need to adjust this
-    unsigned short DMI_PORT = 0x80; 
 
-    // Fetching and printing DMI values
-    for (int i = 0; i < 16; ++i) {
-        unsigned char dmiValue = inportb(DMI_PORT + i);
-        printf("DMI Value %d: %x\n", i, dmiValue);
-    }
-}
 
 /*
 void catkmessagefixed(int NUM) { // Use const char* for the string parameter

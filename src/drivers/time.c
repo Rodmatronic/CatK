@@ -53,7 +53,10 @@ void powerontimes() {
         poweronTimeString[index] = '\0';
 
         // Write the power-on time string to the file
+        //char* workingdir = current_directory;
+        //current_directory = "/proc";
         //write_to_file(&rootfs, "powerontime", poweronTimeString);
+        //current_directory = workingdir;
     }
 }
 

@@ -14,11 +14,12 @@ void panic(const char* panictext, ...)
 {
     //add_data_to_file(&rootfs, "kernel.logs", "kernel: Kernel has panicked! Has been logged at /sbin/kernel.logs\n");
     //console_init(COLOR_WHITE, COLOR_BLACK);
-    printf("%Cpanic: %s\n", 0x0, 0x7, panictext);
+    printf("\n%C--------------------------------------------------------------------------------", 0xF, 0x0);
+    printf("%C\npanic: %s\n", 0x0, 0xF, panictext);
     cpuinfo();
     GetCurrentTime();
-    printf("CatK has been halted.\n");
-    printf("Please switch off the system now\n");
+    printf("%CCatK has been halted.\n", 0xF, 0x0);
+    printf("%CPlease switch off the system now\n", 0xF, 0x0);
     vga_disable_cursor();
     console_gotoxy(0, 24);
     //printf_dark("The system will reboot in 5 seconds");
