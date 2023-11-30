@@ -102,9 +102,6 @@ void boot() {
     write_to_file(&rootfs, "cpu", brand);
     printf("%CCreated /proc/ostype\n", 0x8, 0x0);
 
-    write_to_file(&rootfs, "ostype", "Catkernel");
-    printf("%CCreated /proc/ostype\n", 0x8, 0x0);
-
     read(1);
 
     current_directory = "/";
