@@ -147,6 +147,11 @@ void kmain() {
 
 void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
+    char* workingdirectory = current_directory;
+    current_directory = "/etc";
+    add_data_to_file(&rootfs, "logs", "\n");
+    add_data_to_file(&rootfs, "logs", str);
+    current_directory = workingdirectory;
 }
 
 

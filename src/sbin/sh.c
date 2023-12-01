@@ -40,11 +40,14 @@ void execute_command(const char* command) {
         // Change to the specified directory
         printf("\n\n%s", new_directory);
         execute_file(&rootfs, new_directory, 0);
+        vga_enable_cursor();
         rows+=25;
     } else if (strncmp(command, "rm ", 3) == 0) {
         const char* new_directory = command + 3;
         // Change to the specified directory
+        printf("\n");
         rm_file(&rootfs, new_directory);
+        rows+=2;
     } else if (strncmp(command, "time ", 4) == 0) {
         printf("\n\n");
         GetCurrentTime();
@@ -98,6 +101,7 @@ void PS1()
 
 void k_sh() {
     rows = 0;
+    vga_enable_cursor();
     PS1();
     while (1) {
         unsigned char scancode = read_key();

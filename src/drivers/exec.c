@@ -12,7 +12,6 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char* typeToken = k_strstr(buffer, "type:App");
     if (typeToken == NULL) {
         // File is not of type "app", do not execute
-
         if (quiet == 1)
         {
             return;
@@ -28,6 +27,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     // Tokenize and execute each line
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
+        vga_disable_cursor();
         // Check if the line contains "print "
         char* printToken = k_strstr(token, "print ");
         if (printToken != NULL) {
@@ -139,7 +139,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
             printf("                /            \\   z\n");
             printf("               |    _    _    |\n");
             printf("              =|      -       |=\n");
-            printf("              =\\      o       /=\n");
+            printf("              =\\      D       /=\n");
             printf("                \\            /\n");
             printf("                 =====\\/=====\n");
             printf("                    (CatK)\n");
@@ -158,6 +158,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
             printf("                    (CatK)\n");
         }
         // Move to the next line
+        vga_enable_cursor();
         token = k_strtok(NULL, "\n");
     }
 }

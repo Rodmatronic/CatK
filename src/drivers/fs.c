@@ -366,7 +366,3 @@ void add_data_to_file(struct FileSystem* fs, const char* filename, const char* a
     // File not found
     printf("Error: File %s not found\n", filename);
 }
-
-void sync() {
-    
-}
