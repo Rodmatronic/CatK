@@ -15,8 +15,8 @@ void panic(const char* panictext, ...)
 {
     //add_data_to_file(&rootfs, "kernel.logs", "kernel: Kernel has panicked! Has been logged at /sbin/kernel.logs\n");
     //console_init(COLOR_WHITE, COLOR_BLACK);
-    printf("\n%C--------------------------------------------------------------------------------", 0xF, 0x0);
-    printf("%C\npanic: %s\n", 0x0, 0xF, panictext);
+    printf("\n%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
+    printf("%Cpanic: %s\n", 0x0, 0xF, panictext);
     cpusimple(1);
     printf("\n");
     GetCurrentTime();

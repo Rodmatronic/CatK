@@ -34,6 +34,8 @@ void syspw(int type) {
 
     if (type == 0)
     {
+        printf("\n%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
+        printf("%CSending REBOOT (0) to the kernel\n", 0xF, 0x0);
         uint8 temp;
         asm volatile ("cli"); /* disable all interrupts */
         /* Clear all keyboard buffers (output and command buffers) */
@@ -44,7 +46,7 @@ void syspw(int type) {
                 inportb(KBRD_IO); /* empty keyboard data */
         } while (check_flag(temp, KBRD_BIT_UDATA) != 0);
         outportb(KBRD_INTRFC, KBRD_RESET); /* pulse CPU reset line */
-    loop:
+        loop:
         asm volatile ("hlt"); /* if that didn't work, halt the CPU */
         goto loop; /* if a NMI is received, halt again */
 
@@ -57,7 +59,8 @@ void syspw(int type) {
 
         //add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending POWEROFF (1) to kernel\n");
         //printf_dark("syspw Created by Rodmatronics\n");
-        printf("Sending POWEROFF (1) to kernel\n");
+        printf("\n%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
+        printf("%CSending POWEROFF (1) to the kernel\n", 0xF, 0x0);
 
         //for Vbox
         outports(0x4004, 0x3400);
@@ -70,7 +73,8 @@ void syspw(int type) {
     {
         //add_data_to_file(&rootfs, "kernel.logs", "kernel: Sending HALT (2) to kernel\n");
         //printf_dark("syspw Created by Rodmatronics\n");
-        printf("Sending HALT (2) to kernel\n\n");
+        printf("\n%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
+        printf("%CSending HALT (2) to the kernel\n\n", 0xF, 0x0);
 
         printf("The operating system has halted.\n");
         printf("Please switch off your machine now, or press the reset switch.\n");

@@ -35,11 +35,16 @@ void execute_command(const char* command) {
         const char* new_directory = command + 6;
         // Change to the specified directory
         panic(new_directory);
-    }else if (strncmp(command, "exec ", 5) == 0) {
-        const char* command = command + 5;
-        printf("\n\n");
-        execute_file(&rootfs, command, 1);
-        rows+=2;
+    } else if (strncmp(command, "exec ", 5) == 0) {
+        const char* new_directory = command + 5;
+        // Change to the specified directory
+        printf("\n\n%s", new_directory);
+        execute_file(&rootfs, new_directory, 0);
+        rows+=25;
+    } else if (strncmp(command, "rm ", 3) == 0) {
+        const char* new_directory = command + 3;
+        // Change to the specified directory
+        rm_file(&rootfs, new_directory);
     } else if (strncmp(command, "time ", 4) == 0) {
         printf("\n\n");
         GetCurrentTime();
@@ -87,7 +92,7 @@ void PS1()
     console_gotoxy(0, rows);
     printf("%C[", 0xB, 0x0);
     printf("%s", 0xE, 0x0, username);
-    printf("%s - %s (%s)", username, host_name, current_directory);
+    printf("%C▓%s - %s (%s)", 0x3, 0x0, username, host_name, current_directory);
     printf("%C]%C# ", 0xB, 0x0, 0xF, 0x0);
 }
 

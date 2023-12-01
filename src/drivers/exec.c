@@ -1,5 +1,8 @@
 #include "fs.h"
 #include "sh.h"
+#include "console.h"
+#include "time.h"
+#include "read.h"
 
 void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char buffer[BLOCK_SIZE];
@@ -45,7 +48,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
             current_directory = "/";
             k_sh();
         }
-        /*
+        
         char* clearToken = k_strstr(token, "clear");
         if (clearToken != NULL) {
             // Print the text following "clear"
@@ -55,6 +58,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         if (Time != NULL) {
             GetCurrentTime();
         }
+        /*
         char* Reboot = k_strstr(token, "reboot");
         if (Reboot != NULL) {
             syspw(0);
@@ -75,11 +79,11 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         if (version != NULL) {
             read_from_file(&rootfs, "version", buffer, sizeof(buffer), 1);
             printf("%s", buffer);
-        }
+        }*/
         char* readcommand = k_strstr(token, "read");
         if (readcommand != NULL) {
             read(0);
-        }*/
+        }
         char* paniccommand = k_strstr(token, "panic");
         if (paniccommand != NULL) {
             panic("Triggered by Executable");
