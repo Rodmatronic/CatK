@@ -16,6 +16,7 @@
 #include "sysdiag.h"
 #include "smbios.h"
 #include "devconfig.h"
+#include "exec.h"
 
 void boot() {
     bootmessage("CatKernel boot() started");
@@ -66,6 +67,10 @@ void boot() {
     list_files(&rootfs, 0);
     printf("\n");
 
+    current_directory = "/sbin";
+    write_to_file(&rootfs, "sh", "type:App\nsh");
+    bootmessage("Created /sbin/sh");
+
     bootmessage("Starting sysdiag");
     sysdiaginit();
 
@@ -76,9 +81,6 @@ void boot() {
     k_malloc(size);
 
     bootmessage("Allocated 6000 KB using k_malloc");
-
-    bootmessage("Keyboard init ");
-    init_keyboard();
 
     bootmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
@@ -133,8 +135,9 @@ void boot() {
     current_directory = "/";
 
     console_init(COLOR_WHITE, COLOR_BLACK);
-    k_sh();
 
+    current_directory = "/sbin";
+    execute_file(&rootfs, "sh", 1);
 }
 
 void kmain() {

@@ -1,0 +1,159 @@
+#include "fs.h"
+#include "sh.h"
+
+void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
+    char buffer[BLOCK_SIZE];
+    read_from_file(fs, filename, buffer, BLOCK_SIZE, 0);
+
+    // Check if the file is of type "app"
+    char* typeToken = k_strstr(buffer, "type:App");
+    if (typeToken == NULL) {
+        // File is not of type "app", do not execute
+
+        if (quiet == 1)
+        {
+            return;
+        }else
+        printf("Error: File is not of type 'app', or does not exist.\n");
+        if (quiet == 0)
+        {
+            printf("Error: File is not of type 'app', or does not exist.\n");
+            return;
+        }
+        return;
+    }
+    // Tokenize and execute each line
+    char* token = k_strtok(buffer, "\n");
+    while (token != NULL) {
+        // Check if the line contains "print "
+        char* printToken = k_strstr(token, "print ");
+        if (printToken != NULL) {
+            // Print the text following "print "
+            printf("%s\n", printToken + strlen("print "));
+        }
+        char* printTokendark = k_strstr(token, "print_dark ");
+        if (printTokendark != NULL) {
+            // Print the text following "print "
+            printf("%s\n", printTokendark + strlen("print_dark "));
+        }
+        char* delaycommand = k_strstr(token, "delay");
+        if (delaycommand != NULL) {
+            sleep(1);
+        }
+        char* shcommand = k_strstr(token, "sh");
+        if (shcommand != NULL) {
+            current_directory = "/";
+            k_sh();
+        }
+        /*
+        char* clearToken = k_strstr(token, "clear");
+        if (clearToken != NULL) {
+            // Print the text following "clear"
+            console_init(COLOR_WHITE, COLOR_BLACK);
+        }
+        char* Time = k_strstr(token, "time");
+        if (Time != NULL) {
+            GetCurrentTime();
+        }
+        char* Reboot = k_strstr(token, "reboot");
+        if (Reboot != NULL) {
+            syspw(0);
+        }
+        char* shutdown = k_strstr(token, "shutdown");
+        if (shutdown != NULL) {
+            syspw(1);
+        }
+        char* initcommand = k_strstr(token, "init");
+        if (initcommand != NULL) {
+            init();
+        }
+        char* logincommand = k_strstr(token, "login");
+        if (logincommand != NULL) {
+            login();
+        }
+        char* version = k_strstr(token, "version");
+        if (version != NULL) {
+            read_from_file(&rootfs, "version", buffer, sizeof(buffer), 1);
+            printf("%s", buffer);
+        }
+        char* readcommand = k_strstr(token, "read");
+        if (readcommand != NULL) {
+            read(0);
+        }*/
+        char* paniccommand = k_strstr(token, "panic");
+        if (paniccommand != NULL) {
+            panic("Triggered by Executable");
+        }
+        char* haltcommand = k_strstr(token, "halt");
+        if (haltcommand != NULL) {
+            syspw(2);
+        }
+        char* catasciilookupcommand = k_strstr(token, "catascii-lookup");
+        if (catasciilookupcommand != NULL) {
+            printf("                   _      _\n");
+            printf("                  / \\    / \\\n");
+            printf("                 /   \\__/   \\\n");
+            printf("                /   |    |   \\\n");
+            printf("               |      -       |\n");
+            printf("              =|       o      |=\n");
+            printf("              =\\              /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
+        }
+        char* catasciihappycommand = k_strstr(token, "catascii-happy");
+        if (catasciihappycommand != NULL) {
+            printf("                   _      _\n");
+            printf("                  / \\    / \\\n");
+            printf("                 /   \\__/   \\\n");
+            printf("                /            \\\n");
+            printf("               |    |    |    |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      v       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
+        }
+        char* catasciithinkcommand = k_strstr(token, "catascii-eh");
+        if (catasciithinkcommand != NULL) {
+            printf("                   _      _\n");
+            printf("                  / \\    / \\\n");
+            printf("                 /   \\__/   \\\n");
+            printf("                /            \\\n");
+            printf("               |     |    |   |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      _       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
+        }
+        char* catasciisleepcommand = k_strstr(token, "catascii-sleep");
+        if (catasciisleepcommand != NULL) {
+            printf("                   _      _\n");
+            printf("                  / \\    / \\         z\n");
+            printf("                 /   \\__/   \\     z\n");
+            printf("                /            \\   z\n");
+            printf("               |    _    _    |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      o       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
+        }
+        char* catasciisleepycommand = k_strstr(token, "catascii-tired");
+        if (catasciisleepycommand != NULL) {
+            printf("                   _      _\n");
+            printf("                  / \\    / \\         z\n");
+            printf("                 /   \\__/   \\     z\n");
+            printf("                /            \\   z\n");
+            printf("               |    _    _    |\n");
+            printf("              =|      -       |=\n");
+            printf("              =\\      w       /=\n");
+            printf("                \\            /\n");
+            printf("                 =====\\/=====\n");
+            printf("                    (CatK)\n");
+        }
+        // Move to the next line
+        token = k_strtok(NULL, "\n");
+    }
+}

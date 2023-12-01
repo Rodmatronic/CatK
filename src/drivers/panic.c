@@ -17,7 +17,8 @@ void panic(const char* panictext, ...)
     //console_init(COLOR_WHITE, COLOR_BLACK);
     printf("\n%C--------------------------------------------------------------------------------", 0xF, 0x0);
     printf("%C\npanic: %s\n", 0x0, 0xF, panictext);
-    cpuinfo();
+    cpusimple(1);
+    printf("\n");
     GetCurrentTime();
     printf("%CCatK has been halted.\n", 0xF, 0x0);
     printf("%CPlease switch off the system now\n", 0xF, 0x0);

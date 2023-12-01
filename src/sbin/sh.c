@@ -1,3 +1,4 @@
+#include "fs.h"
 #include "console.h"
 #include "vga.h"
 #include "read.h"
@@ -6,7 +7,6 @@
 #include "keyboard.h"
 #include "string.h"
 #include "libc.h"
-#include "fs.h"
 #include "time.h"
 
 #define MAX_BUFFER_SIZE 128
@@ -87,7 +87,7 @@ void PS1()
     console_gotoxy(0, rows);
     printf("%C[", 0xB, 0x0);
     printf("%s", 0xE, 0x0, username);
-    printf("%s (%s)# ", username, current_directory);
+    printf("%s - %s (%s)", username, host_name, current_directory);
     printf("%C]%C# ", 0xB, 0x0, 0xF, 0x0);
 }
 
