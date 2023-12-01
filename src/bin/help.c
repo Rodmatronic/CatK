@@ -1,3 +1,5 @@
+#include "libc.h"
+
 void help()
 {
     Application help;

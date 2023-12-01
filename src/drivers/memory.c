@@ -6,6 +6,7 @@
 #include "string.h"
 #include "io_ports.h"
 #include "memory.h"
+#include "libc.h"
 
 int Memoryamount;
 

@@ -9,6 +9,7 @@
 #include "vga.h"
 #include "cpu.h"
 #include "syspw.h"
+#include "libc.h"
 
 void panic(const char* panictext, ...)
 {

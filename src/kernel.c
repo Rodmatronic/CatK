@@ -15,6 +15,7 @@
 #include "sh.h"
 #include "sysdiag.h"
 #include "smbios.h"
+#include "devconfig.h"
 
 void boot() {
     bootmessage("CatKernel boot() started");
@@ -110,41 +111,9 @@ void boot() {
     write_to_file(&rootfs, "vga", "80x25");
     printf("%C   Created /proc/vga\n", 0x8, 0x0);
 
-    bootmessage("Copying kernel values to dev");
-    current_directory = "/dev";
-
-    write_to_file(&rootfs, "console", "1");
-    printf("%C   Created /dev/console\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "null", "0");
-    printf("%C   Created /dev/console\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "random", "1234");
-    printf("%C   Created /dev/console\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty0", "1");
-    printf("%C   Created /dev/tty1\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty1", "0");
-    printf("%C   Created /dev/tty1\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty2", "0");
-    printf("%C   Created /proc/tty2\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty3", "0");
-    printf("%C   Created /proc/tty3\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty4", "0");
-    printf("%C   Created /proc/tty4\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty5", "0");
-    printf("%C   Created /proc/tty5\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty6", "0");
-    printf("%C   Created /proc/tty6\n", 0x8, 0x0);
-
-    write_to_file(&rootfs, "tty7", "0");
-    printf("%C   Created /dev/tty1\n", 0x8, 0x0);
+    printf("Autoconfiguring devices...\n");
+    BootDevConfig();
+    sleep(1);
 
     bootmessage("Setting up default user");
     // root user
@@ -158,7 +127,7 @@ void boot() {
     bootmessage("Finishing up...");
     //char* shell = "k_sh";
 
-current_directory = "/bin";
+    current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
 
     current_directory = "/";

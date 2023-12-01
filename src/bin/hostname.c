@@ -1,4 +1,5 @@
 #include "config.h"
+#include "libc.h"
 
 void hostname(char* input) {
     if (strlen(input) < sizeof(host_name)) {

@@ -1,5 +1,7 @@
 #include "types.h"
 #include "io_ports.h"
+#include "libc.h"
+
 // Define the I/O ports
 #define ETH_STATUS_PORT 0x2
 #define ETH_STATUS_REGISTER 0x00

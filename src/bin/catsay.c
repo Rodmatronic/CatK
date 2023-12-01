@@ -1,3 +1,5 @@
+#include "libc.h"
+
 void catsay(input)
 {
     add_data_to_file(&rootfs, "logs.catk", "catsay: [ ok ] Started\n");

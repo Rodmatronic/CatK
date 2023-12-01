@@ -1,5 +1,6 @@
 #include "fs.h"
 #include "config.h"
+#include "libc.h"
 
 void pkg(char* package)
 {

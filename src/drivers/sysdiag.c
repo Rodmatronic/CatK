@@ -1,4 +1,5 @@
 #include "fs.h"
+#include "libc.h"
 
 void sysdiaginit()
 {

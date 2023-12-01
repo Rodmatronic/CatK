@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "console.h"
 #include "io_ports.h"
+#include "libc.h"
 
 // Keyboard I/O ports
 #define KEYBOARD_DATA_PORT 0x60

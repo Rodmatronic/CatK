@@ -1,6 +1,7 @@
 #include "sleep.h"
 #include "time.h"
 #include "string.h"
+#include "libc.h"
 
 void sleep(int seconds) {
     uint8 start_time = read_RTC_register(RTC_SECONDS);

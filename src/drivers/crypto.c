@@ -1,3 +1,6 @@
+#include "libc.h"
+#include "fs.h"
+
 uint8 seedpasswd = 7;
 
 char* cryptobuffer[128];

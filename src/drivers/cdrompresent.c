@@ -1,4 +1,5 @@
 #include "io_ports.h"
+#include "libc.h"
 
 // I/O Ports for ATA/ATAPI
 #define ATA_REG_DATA 0x1F0 // Data Register

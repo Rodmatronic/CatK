@@ -4,6 +4,7 @@
 #include "panic.h"
 #include "read.h"
 #include "keyboard.h"
+#include "libc.h"
 
 int readnum;
 

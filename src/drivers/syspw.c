@@ -28,6 +28,7 @@
 #include "panic.h"
 #include "syspw.h"
 #include "panic.h"
+#include "libc.h"
 
 void syspw(int type) {
 

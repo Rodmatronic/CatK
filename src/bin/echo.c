@@ -1,6 +1,7 @@
 #include "console.h"
 #include "vga.h"
 #include "runtimepid.h"
+#include "libc.h"
 
 void echo(char* echotext) {
     Application echo;

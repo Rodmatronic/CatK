@@ -1,3 +1,5 @@
+#include "libc.h"
+
 void man(char* command)
 {
     add_data_to_file(&rootfs, "logs.catk", "man: [ ok ] Started\n");

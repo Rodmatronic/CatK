@@ -1,4 +1,5 @@
 #include "config.h"
+#include "libc.h"
 
 int strstr(const char *haystack, const char *needle) {
     int i, j;

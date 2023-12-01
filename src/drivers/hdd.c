@@ -5,7 +5,7 @@
 #include "types.h"
 #include "io_ports.h"
 #include "config.h"
-
+#include "libc.h"
 
 #define ATA_IDENTIFY_PORT   0x1F7   // Command port for ATA identify
 #define ATA_STATUS_PORT     0x1F7   // Status port for ATA

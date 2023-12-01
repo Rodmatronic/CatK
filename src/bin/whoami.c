@@ -1,4 +1,5 @@
-#include "../etc/passwd.catk"
+#include "config.h"
+#include "libc.h"
 
 void whoami();
 

@@ -27,7 +27,6 @@ void console_gotoxy(uint16 x, uint16 y);
 
 void console_putstr(const char *str);
 void printf(const char *format, ...);
-void printf_dark(const char *format, ...);
 
 #endif
 
