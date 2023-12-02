@@ -3,7 +3,6 @@
 #include "libc.h"
 #include "string.h"
 #include "io_ports.h"
-#include "PreBoot.c"
 #include "memory.h"
 #include "cpu.h"
 #include "fs.h"
@@ -14,9 +13,10 @@
 #include "usb.h"
 #include "sh.h"
 #include "sysdiag.h"
-#include "smbios.h"
 #include "devconfig.h"
 #include "exec.h"
+#include "panic.h"
+#include "PreBoot.h"
 
 void boot() {
     bootmessage("CatKernel boot() started");
@@ -42,9 +42,6 @@ void boot() {
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
-
-    bootmessage("Getting SMBIOS\\/ ");
-    initsmbiosfind();
 
     bootmessage("Perfect! &rootfs created with max files from MAX_FILES");
     bootmessage("Creating '/' structure");
@@ -88,7 +85,6 @@ void boot() {
     read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
 
     strcpy(host_name, buffer);
-
     bootmessage("Copying kernel values to proc");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
@@ -125,7 +121,6 @@ void boot() {
     write_to_file(&rootfs, "session.catk", rootUser.username);
     create_folder(&rootfs, "/home", "/");
     create_folder(&rootfs, "/root", "/home");
-
     bootmessage("Finishing up...");
     //char* shell = "k_sh";
 

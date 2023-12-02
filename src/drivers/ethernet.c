@@ -1,13 +1,14 @@
 #include "types.h"
 #include "io_ports.h"
 #include "libc.h"
+#include "console.h"
 
 // Define the I/O ports
 #define ETH_STATUS_PORT 0x2
 #define ETH_STATUS_REGISTER 0x00
 
 // Function to read a byte from an I/O port
-static inline uint8 ethplugged(uint16 port) {
+uint8 ethplugged(uint16 port) {
     uint8 data;
     asm volatile("inb %1, %0" : "=a"(data) : "Nd"(port));
     return data;
@@ -22,11 +23,9 @@ const char* isEthernetPluggedIn() {
     // Check the link status bit (bit 2)
     if (status & (1 << 2)) {
         printf("\nDetected Ethernet!");
-        catkmessagefixed(1);
         return "1";
     } else {
         printf("\nDid not detect Ethernet");
-        catkmessagefixed(2);
         return "0";
     }
 }

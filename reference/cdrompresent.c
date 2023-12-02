@@ -1,5 +1,6 @@
 #include "io_ports.h"
 #include "libc.h"
+#include "console.h"
 
 // I/O Ports for ATA/ATAPI
 #define ATA_REG_DATA 0x1F0 // Data Register
@@ -18,7 +19,7 @@
 #define ATA_DEVICE_SELECT 0xA0 // Select Device
 
 // Function to check for the presence of a CD-ROM drive
-int isCDROMDrivePresent() {
+void isCDROMDrivePresent() {
     // Select the CD-ROM drive
     outportb(ATA_REG_DRIVE, ATA_DEVICE_SELECT);
 

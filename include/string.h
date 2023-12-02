@@ -15,6 +15,8 @@ int strcmp(const char *s1, char *s2);
 
 int strcpy(char *dst, const char *src);
 
+void strncpy(char *dest, const char *src, size n);
+
 void strcat(char *dest, const char *src);
 
 int isspace(char c);

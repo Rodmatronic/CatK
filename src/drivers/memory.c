@@ -7,6 +7,7 @@
 #include "io_ports.h"
 #include "memory.h"
 #include "libc.h"
+#include "console.h"
 
 int Memoryamount;
 

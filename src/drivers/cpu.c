@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "io_ports.h"
 #include "libc.h"
+#include "console.h"
 
 void __cpuid(uint32 type, uint32 *eax, uint32 *ebx, uint32 *ecx, uint32 *edx) {
     asm volatile("cpuid"

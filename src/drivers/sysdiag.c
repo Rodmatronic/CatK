@@ -1,5 +1,6 @@
 #include "fs.h"
 #include "libc.h"
+#include "config.h"
 
 void sysdiaginit()
 {

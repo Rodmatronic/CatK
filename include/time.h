@@ -15,13 +15,12 @@
 
 #include "types.h"
 
-#include "../src/drivers/time.c"
+extern uint8 seconds, minutes, hours, day, month, year;
 
-uint8 seconds, minutes, hours, day, month, year;
-
-uint8 seed;
+extern uint8 seed;
 
 void GetCurrentTime(); 
-
+uint8 read_RTC_register(uint8 reg);
+void write_RTC_register(uint8 reg, uint8 value);
 #endif
 

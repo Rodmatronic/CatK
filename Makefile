@@ -24,7 +24,7 @@ DEFINES=
 # assembler flags
 ASM_FLAGS = -f elf32
 # compiler flags
-CC_FLAGS = $(INCLUDE) $(DEFINES) -m32 -std=gnu99 -ffreestanding -Wall -Wextra -ferror-limit=9999
+CC_FLAGS = $(INCLUDE) $(DEFINES) --target=i686-pc-none-elf -march=i686 -std=gnu99 -ffreestanding -fno-exceptions -fno-rtti -fno-stack-protector -Werror=implicit-function-declaration -Wall -Wextra -ferror-limit=9999
 
 # linker flags, for linker add linker.ld file too
 LD_FLAGS = -m elf_i386 -T $(CONFIG)/linker.ld -nostdlib
@@ -36,17 +36,16 @@ TARGET=$(OUT)/catkernel.bin
 TARGET_ISO=$(OUT)/catkernel.iso
 ISO_DIR=$(OUT)/isodir
 
-OBJECTS=$(ASM_OBJ)/entry.o\
-		$(OBJ)/io_ports.o $(OBJ)/vga.o\
-		$(OBJ)/string.o $(OBJ)/console.o\
-		$(OBJ)/kernel.o
+# automatically find all C source files in src/ and its subdirectories
+C_SOURCES := $(wildcard $(SRC)/**/*.c $(SRC)/*.c)
 
+# generate object file names from source file names
+OBJECTS := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(C_SOURCES))
+ASM_OBJECTS := $(ASM_OBJ)/entry.o
 
-all: $(OBJECTS)
-	@printf "[ linking... ]\n"
-	$(LD) $(LD_FLAGS) -o $(TARGET) $(OBJECTS)
-	grub-file --is-x86-multiboot $(TARGET)
-	@printf "\n"
+all: $(TARGET_ISO)
+
+$(TARGET_ISO): $(TARGET)
 	@printf "[ building ISO... ]\n"
 	$(MKDIR) $(ISO_DIR)/boot/grub
 	$(CP) $(TARGET) $(ISO_DIR)/boot/
@@ -54,37 +53,25 @@ all: $(OBJECTS)
 	$(GRUB) -o $(TARGET_ISO) $(ISO_DIR)
 	rm -f $(TARGET)
 
-$(ASM_OBJ)/entry.o : $(ASM_SRC)/entry.asm
+$(TARGET): $(ASM_OBJECTS) $(OBJECTS)
+	@printf "[ linking... ]\n"
+	$(LD) $(LD_FLAGS) -o $(TARGET) $^
+	grub-file --is-x86-multiboot $(TARGET)
+	@printf "\n"
+
+$(ASM_OBJ)/entry.o: $(ASM_SRC)/entry.asm
 	@printf "[ $(ASM_SRC)/entry.asm ]\n"
-	$(ASM) $(ASM_FLAGS) $(ASM_SRC)/entry.asm -o $(ASM_OBJ)/entry.o
+	$(MKDIR) $(dir $@)
+	$(ASM) $(ASM_FLAGS) $< -o $@
 	@printf "\n"
 
-$(OBJ)/io_ports.o : $(SRC)/io_ports.c
-	@printf "[ $(SRC)/io_ports.c ]\n"
-	$(CC) $(CC_FLAGS) -c $(SRC)/io_ports.c -o $(OBJ)/io_ports.o
-	@printf "\n"
-
-$(OBJ)/vga.o : $(SRC)/vga.c
-	@printf "[ $(SRC)/vga.c ]\n"
-	$(CC) $(CC_FLAGS) -c $(SRC)/vga.c -o $(OBJ)/vga.o
-	@printf "\n"
-
-$(OBJ)/string.o : $(SRC)/string.c
-	@printf "[ $(SRC)/string.c ]\n"
-	$(CC) $(CC_FLAGS) -c $(SRC)/string.c -o $(OBJ)/string.o
-	@printf "\n"
-
-$(OBJ)/console.o : $(SRC)/console.c
-	@printf "[ $(SRC)/console.c ]\n"
-	$(CC) $(CC_FLAGS) -c $(SRC)/console.c -o $(OBJ)/console.o
-	@printf "\n"
-
-$(OBJ)/kernel.o : $(SRC)/kernel.c
-	@printf "[ $(SRC)/kernel.c ]\n"
-	$(CC) $(CC_FLAGS) -c $(SRC)/kernel.c -o $(OBJ)/kernel.o
+$(OBJ)/%.o: $(SRC)/%.c
+	@printf "[ $< ]\n"
+	$(MKDIR) $(dir $@)
+	$(CC) $(CC_FLAGS) -c $< -o $@
 	@printf "\n"
 
 clean:
-	rm -f $(OBJ)/*.o
+	rm -rf $(OBJ)/*
 	rm -f $(ASM_OBJ)/*.o
 	rm -rf $(OUT)/*

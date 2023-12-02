@@ -3,8 +3,6 @@
 
 #include "types.h"
 
-#include "../src/drivers/syspw.c"
-
 void syspw();
 
 #endif

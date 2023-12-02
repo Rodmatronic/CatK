@@ -50,3 +50,9 @@ void vga_disable_cursor() {
     outportb(0x3D5, 32);
 }
 
+void vga_enable_cursor() {
+    outportb(0x3D4, 0x0A);
+    outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
+    outportb(0x3D4, 0x0B);
+    outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 0x0E);  // Set the end scanline to 14 and disable blink
+}

@@ -10,6 +10,8 @@
 #include "cpu.h"
 #include "syspw.h"
 #include "libc.h"
+#include "console.h"
+#include "panic.h"
 
 void panic(const char* panictext, ...)
 {
