@@ -2,7 +2,6 @@
 #define SYNC_H
 
 #include "types.h"
-#include "../src/drivers/sync.c"
 
 void sync();
 

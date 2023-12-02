@@ -2,7 +2,6 @@
 #define USB_H
 
 #include "types.h"
-#include "../src/drivers/usb.c"
 
 
 #endif

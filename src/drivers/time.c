@@ -1,7 +1,9 @@
 #include "string.h"
 #include "io_ports.h"
 #include "time.h"
+#include "console.h"
 #include "libc.h"
+#include "time.h"
 
 uint8 seconds, minutes, hours, day, month, year;
 

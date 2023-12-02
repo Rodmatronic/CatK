@@ -1,3 +1,4 @@
+#include "config.h"
 #include "fs.h"
 #include "console.h"
 #include "vga.h"
@@ -8,6 +9,7 @@
 #include "string.h"
 #include "libc.h"
 #include "time.h"
+#include "exec.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -101,6 +103,7 @@ void PS1()
 
 void k_sh() {
     rows = 0;
+    current_directory = "/";
     vga_enable_cursor();
     PS1();
     while (1) {

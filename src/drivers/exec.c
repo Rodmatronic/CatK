@@ -3,6 +3,14 @@
 #include "console.h"
 #include "time.h"
 #include "read.h"
+#include "config.h"
+#include "libc.h"
+#include "string.h"
+#include "sleep.h"
+#include "panic.h"
+#include "syspw.h"
+#include "vga.h"
+
 
 void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char buffer[BLOCK_SIZE];

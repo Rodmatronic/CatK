@@ -7,8 +7,6 @@
 // enter scancode
 #define ENTER_KEY_SCANCODE 0x1C
 
-#include "../src/drivers/keyboard.c"
-
 char scancode_to_char(unsigned char scancode);
 unsigned char read_key();
 

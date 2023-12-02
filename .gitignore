@@ -55,3 +55,8 @@ out/isodir
 out/catkernel.iso
 out/isodir/boot/catkernel.bin
 out/isodir/boot/grub/grub.cfg
+
+# ide stuffs
+compile_commands.json
+.vscode/
+.cache/

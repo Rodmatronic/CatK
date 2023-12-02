@@ -29,6 +29,7 @@
 #include "syspw.h"
 #include "panic.h"
 #include "libc.h"
+#include "console.h"
 
 void syspw(int type) {
 

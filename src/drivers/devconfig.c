@@ -1,5 +1,7 @@
 #include "libc.h"
 #include "keyboard.h"
+#include "fs.h"
+#include "console.h"
 
 void BootDevConfig()
 {

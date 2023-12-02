@@ -49,7 +49,7 @@ char* k_strchr(const char* str, int c) {
     return NULL;  // Character not found
 }
 
-char* k_strcmp(const char* s1, const char* s2) {
+int k_strcmp(const char* s1, const char* s2) {
     while (*s1 && (*s1 == *s2)) {
         ++s1;
         ++s2;
@@ -80,7 +80,7 @@ char* k_strtok(char* str, const char* delim) {
     return start;
 }
 
-char* k_strncmp(const char* str1, const char* str2, size n) {
+char k_strncmp(const char* str1, const char* str2, size n) {
     for (size i = 0; i < n; ++i) {
         if (str1[i] != str2[i]) {
             return (str1[i] < str2[i]) ? -1 : 1;
@@ -126,7 +126,7 @@ int strncmp(const char* str1, const char* str2, size n) {
     return 0;
 }
 
-int k_malloc(size size) {
+void* k_malloc(size size) {
     if ((nextFreeAddress + size) <= (memoryPool + MEMORY_POOL_SIZE)) {
         void* allocatedMemory = nextFreeAddress;
         nextFreeAddress += size;

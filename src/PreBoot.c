@@ -1,14 +1,11 @@
 #include "read.h"
 #include "config.h"
+#include "kernel.h"
+#include "console.h"
+#include "vga.h"
+#include "io_ports.h"
 
 char* args;
-
-void vga_enable_cursor() {
-    outportb(0x3D4, 0x0A);
-    outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
-    outportb(0x3D4, 0x0B);
-    outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 0x0E);  // Set the end scanline to 14 and disable blink
-}
 
 void PreBoot()
 {

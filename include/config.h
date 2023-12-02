@@ -8,30 +8,27 @@ struct User {
     char shell[50];
 };
 
-struct User rootUser;
+// Declare the rootUser variable with 'extern'
+extern struct User rootUser;
 
-char* usersh;
-char* hostnamesh;
-char usersh_buffer[80];
-char hostnamesh_buffer[80];
-char motdbuffer[1024];
-char* hostnamebuffer[128];
-char defaulthostname[30] = "catk";
-int total_files = 0;
-int rows = 0;
+// Declare other variables with 'extern'
+extern char* usersh;
+extern char* hostnamesh;
+extern char usersh_buffer[80];
+extern char hostnamesh_buffer[80];
+extern char motdbuffer[1024];
+extern char* hostnamebuffer[128];
+extern char defaulthostname[30];
+extern int total_files;
+extern int rows;
 extern char* bootargs;
-
-
-char host_name[30] = ""; // hostname with a maximum length of 63 characters
-char username[30] = ""; // username
-
-char* current_directory = "/";  // Set it initially to the root directory
-
-char* versionnumber = "0.059re";
-char* vername = "CatK Version Bittin'";
-char* arch = "x86_64";
-char* prebootversion = "0.059re";
-char* bootargs = "n/a"; // Boot args
-
+extern char host_name[30];
+extern char username[30];
+extern char* current_directory;
+extern char* versionnumber;
+extern char* vername;
+extern char* arch;
+extern char* prebootversion;
+extern char* bootargs;
 
 #endif
