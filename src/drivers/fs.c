@@ -179,9 +179,9 @@ void list_files(const struct FileSystem* fs, int type) {
                 (strcmp(fs->file_table[i].parent_folder, current_folder) == 0 || strcmp(fs->file_table[i].parent_folder, current_directory) == 0)) {
                 // Print in green if it's a folder, and in blue otherwise
                 if (fs->file_table[i].is_folder) {
-                    printf("%s  ", fs->file_table[i].filename);
+                    printf("%C▓%s  ", 0xB, 0x0, fs->file_table[i].filename);
                 } else {
-                    printf("%s  ", fs->file_table[i].filename);
+                    printf("%C▓%s  ", 0x9, 0x0, fs->file_table[i].filename);
                 }
 
                 line_length += strlen(fs->file_table[i].filename) + 2; // Account for filename and spaces

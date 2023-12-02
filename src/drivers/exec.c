@@ -24,10 +24,9 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         {
             return;
         }else
-        printf("Error: File is not of type 'app', or does not exist.\n");
         if (quiet == 0)
         {
-            printf("Error: File is not of type 'app', or does not exist.\n");
+            printf("%C -error- No such file or directory\n", 0xF, 0x0);
             return;
         }
         return;

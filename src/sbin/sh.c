@@ -40,7 +40,6 @@ void execute_command(const char* command) {
     } else if (strncmp(command, "exec ", 5) == 0) {
         const char* new_directory = command + 5;
         // Change to the specified directory
-        printf("\n\n%s", new_directory);
         execute_file(&rootfs, new_directory, 0);
         vga_enable_cursor();
         rows+=25;
@@ -54,12 +53,13 @@ void execute_command(const char* command) {
         printf("\n\n");
         GetCurrentTime();
         rows+=2;
-        
     }else if (strncmp(command, "cat ", 4) == 0) {
+        console_init(COLOR_WHITE, COLOR_BLACK);
         const char* new_directory = command + 4;
+        printf("%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
         read_from_file(&rootfs, new_directory, buffer, sizeof(buffer), 0);
-        printf("\n%s\n", buffer);
-        rows+=25;
+        printf("%s\n", buffer);
+        rows+=24;
     } else if (strncmp(command, "uname", 4) == 0) {
         char* workingdir = current_directory;
         current_directory = "/proc";
@@ -76,7 +76,7 @@ void execute_command(const char* command) {
         const char* new_directory = command + 5;
         // Change to the specified directory
         printf("\n\n%s", new_directory);
-        rows+=2;
+        rows+=3;
     } else if (strncmp(command, "cd ", 3) == 0) {
         // Check if the command starts with "cd "
         const char* new_directory = command + 3;  // Get the characters after "cd "
@@ -88,8 +88,7 @@ void execute_command(const char* command) {
         }
     } else {
         // Default action for unrecognized commands
-        printf("\nUnrecognized command.\n");
-        rows+=3;
+        printf("%C -error- Unrecognized command.\n", 0xF, 0x0);
     }
 }
 void PS1()
