@@ -17,9 +17,66 @@
 #include "exec.h"
 #include "panic.h"
 #include "PreBoot.h"
+#define PORT 0x3f8          // COM1
+ 
+static int init_serial() {
+   outportb(PORT + 1, 0x00);    // Disable all interrupts
+   outportb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
+   outportb(PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
+   outportb(PORT + 1, 0x00);    //                  (hi byte)
+   outportb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
+   outportb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
+   outportb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+   outportb(PORT + 4, 0x1E);    // Set in loopback mode, test the serial chip
+   outportb(PORT + 0, 0xAE);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
+ 
+   // Check if serial is faulty (i.e: not same byte as sent)
+   if(inportb(PORT + 0) != 0xAE) {
+      return 1;
+   }
+ 
+   // If serial is not faulty set it in normal operation mode
+   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
+   outportb(PORT + 4, 0x0F);
+   return 0;
+}
+
+int is_transmit_empty() {
+   return inportb(PORT + 5) & 0x20;
+}
+ 
+void write_serial(const char* str) {
+   while (*str != '\0') {
+      while (is_transmit_empty() == 0);
+
+      if (*str == '\n') {
+         // Move to the beginning of the next line while staying at the same X position
+         outportb(PORT, '\r');  // Carriage return
+         while (is_transmit_empty() == 0);
+      }
+
+      outportb(PORT, *str);
+      str++;
+   }
+}
+
+void pserial(const char* str) { // Use const char* for the string parameter
+    write_serial(str);
+    write_serial("\n");
+}
 
 void boot() {
-    bootmessage("CatKernel boot() started");
+    printf("CatKernel boot() started");
+    // Initialize the file table
+    for (size i = 0; i < MAX_FILES; ++i) {
+        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
+    }
+    bootmessage("Starting sysdiag");
+    sysdiaginit();
+
+    bootmessage("init_serial() on COM1");
+    is_transmit_empty();
+    init_serial();
     printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
     printf("Boot arguments: %s\n", args);
     //sleep(3);
@@ -31,17 +88,19 @@ void boot() {
     GetMemory();
     bootmessage("Showing kernel's config.h configuration \\/ ");
     printf("   hostname: %s\n", host_name);
+    pserial(host_name);
     printf("   username: %s\n", username);
+    pserial(username);
     printf("   versionnumber: %s\n", versionnumber);
+    pserial(versionnumber);
     printf("   versionname: %s\n", vername);
+    pserial(vername);
     printf("   arch: %s\n", arch);
+    pserial(arch);
     printf("   prebootver: %s\n", prebootversion);
+    pserial(prebootversion);
     printf("   bootargs(default): %s\n", bootargs);
-
-    // Initialize the file table
-    for (size i = 0; i < MAX_FILES; ++i) {
-        rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
-    }
+    pserial(bootargs);
 
     bootmessage("Perfect! &rootfs created with max files from MAX_FILES");
     bootmessage("Creating '/' structure");
@@ -68,16 +127,13 @@ void boot() {
     write_to_file(&rootfs, "sh", "type:App\nsh");
     bootmessage("Created /sbin/sh");
 
-    bootmessage("Starting sysdiag");
-    sysdiaginit();
-
     bootmessage("Freeing system memory");
 
     size size = 6 * 1024 * 1024; // 6 MB in bytes
     //void* memory = k_malloc(size);
     k_malloc(size);
 
-    bootmessage("Allocated 6000 KB using k_malloc");
+    bootmessage("Allocated 6000 KB using k_malloc()");
 
     bootmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
@@ -127,10 +183,9 @@ void boot() {
     current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
 
+    pserial("Boot should be finished. Starting a shell");
     current_directory = "/";
-
     console_init(COLOR_WHITE, COLOR_BLACK);
-
     current_directory = "/sbin";
     execute_file(&rootfs, "sh", 1);
 }
@@ -142,13 +197,14 @@ void kmain() {
 
 void bootmessage(const char* str) { // Use const char* for the string parameter
     printf("kernel: %s\n", str); // Print the message and the string
+    write_serial(str);
+    write_serial("\n");
     char* workingdirectory = current_directory;
     current_directory = "/etc";
     add_data_to_file(&rootfs, "logs", "\n");
     add_data_to_file(&rootfs, "logs", str);
     current_directory = workingdirectory;
 }
-
 
 /*
 void catkmessagefixed(int NUM) { // Use const char* for the string parameter

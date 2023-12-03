@@ -1,4 +1,4 @@
-#include "string.h"
+#include "kernel.h"
 #include "fs.h"
 #include "console.h"
 #include "libc.h"
@@ -180,6 +180,8 @@ void list_files(const struct FileSystem* fs, int type) {
                 // Print in green if it's a folder, and in blue otherwise
                 if (fs->file_table[i].is_folder) {
                     printf("%C▓%s  ", 0xB, 0x0, fs->file_table[i].filename);
+                    write_serial(fs->file_table[i].filename);
+                    write_serial(" ");
                 } else {
                     printf("%C▓%s  ", 0x9, 0x0, fs->file_table[i].filename);
                 }

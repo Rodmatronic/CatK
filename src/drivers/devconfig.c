@@ -12,6 +12,10 @@ void BootDevConfig()
     init_keyboard();
     printf("%C   Made devnode for keyboard\n", 0x8, 0x0);
 
+    write_to_file(&rootfs, "serial", "1");
+    init_keyboard();
+    printf("%C   Made devnode for serial\n", 0x8, 0x0);
+
     write_to_file(&rootfs, "null", "0");
     printf("%C   Created /dev/null\n", 0x8, 0x0);
 

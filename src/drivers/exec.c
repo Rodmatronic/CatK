@@ -10,11 +10,14 @@
 #include "panic.h"
 #include "syspw.h"
 #include "vga.h"
-
+#include "kernel.h"
 
 void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char buffer[BLOCK_SIZE];
     read_from_file(fs, filename, buffer, BLOCK_SIZE, 0);
+    write_serial("exec: starting: ");
+    write_serial(filename);
+    write_serial("\n");
 
     // Check if the file is of type "app"
     char* typeToken = k_strstr(buffer, "type:App");

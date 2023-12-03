@@ -21,6 +21,15 @@ void PreBoot()
     printf("%C|  |____ |   _   |  |   |  |    _  |\n", 0xF, 0x0);
     printf("%C|_______||__| |__|  |___|  |___| |_|\n\n", 0xF, 0x0);
 
+    pserial(" _______   _____   _______  ___   _");
+    pserial("|   ____| /  _  \\ |       ||   | | |");
+    pserial("|  |     |  | |  ||_     _||   |_| |");
+    pserial("|  |     |  |_|  |  |   |  |      _|");
+    pserial("|  |     |       |  |   |  |     |_ ");
+    pserial("|  |____ |   _   |  |   |  |    _  |");
+    pserial("|_______||__| |__|  |___|  |___| |_|");
+    pserial("          PreBoot Serial");
+
     printf("+========== CatK PreBoot ==========+\n");
     printf("%C| Boot normally [Enter]            |\n", 0xB, 0x0);
     printf("| 1.  Suppress boot logs           |\n");
@@ -219,6 +228,8 @@ void PreBoot()
     }
     
     args = "none";
+    pserial("PreBoot: boot(), starting kernel");
+    pserial("---------------------------------------------");
     boot();
 
 }

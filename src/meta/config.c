@@ -16,6 +16,6 @@ char username[30] = "";
 char* current_directory = "/";
 char* versionnumber = "0.06re";
 char* vername = "CatK Version Bittin'";
-char* arch = "x86_64";
+char* arch = "x86-legacy";
 char* prebootversion = "0.06re";
 char* bootargs = "n/a";

@@ -1,4 +1,5 @@
 #include "config.h"
+#include "kernel.h"
 #include "fs.h"
 #include "console.h"
 #include "vga.h"
@@ -65,25 +66,34 @@ void execute_command(const char* command) {
         current_directory = "/proc";
         read_from_file(&rootfs, "version", buffer, sizeof(buffer), 0);
         printf("\n%s\n", buffer);
+        write_serial("uname: ");
+        write_serial(buffer);
+        write_serial("\n");
         rows+=2;
         current_directory = workingdir;
     } else if (strcmp(command, "ls") == 0) {
         printf("\n\n");
         list_files(&rootfs, 0);
+        write_serial("\n");
         rows+=4;
     } else if (strncmp(command, "echo ", 5) == 0) {
         const char* new_directory = command + 5;
         // Change to the specified directory
         printf("\n\n%s", new_directory);
+        pserial(new_directory);
         rows+=3;
     } else if (strncmp(command, "cd ", 3) == 0) {
         // Check if the command starts with "cd "
         const char* new_directory = command + 3;  // Get the characters after "cd "
         if (strcmp(new_directory, "..") == 0) {
             cd_parent_directory();
+            pserial("cd to ..");
         } else {
             // Change to the specified directory
             change_directory(&rootfs, new_directory);
+            write_serial("cd to ");
+            write_serial(new_directory);
+            write_serial("\n");
         }
     } else {
         // Default action for unrecognized commands
@@ -100,6 +110,9 @@ void PS1()
 }
 
 void k_sh() {
+    write_serial("k_sh for catk version ");
+    write_serial(versionnumber);
+    write_serial("\n");
     rows = 0;
     current_directory = "/";
     vga_enable_cursor();
