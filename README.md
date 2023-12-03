@@ -25,14 +25,19 @@ We love CatK.
 
 ## Compiling it
 You'll need:
-- a unix-like system (preferably Linux)
-  - compiling on Windows is uncharted territory
-- clang 14+ with support for i686-pc-none-elf (so, most installs) and GNU ld
+- a unix-like system/environment (preferably Linux)
+  - compiling on Windows is possible provided a unix-style environment (uutils, mingw, etc). you cannot build any ISOs however (credit [@Ruthenic](https://github.com/Ruthenic))
+- clang 14+ with support for i686-pc-none-elf (so, most installs)
+- LLVM lld (or GNU ld, if you set it manually)
 - grub-mkrescue (This usually comes with GRUB) and xorriso
 - the NASM assembler
 - GNU make
 
 Afterwards, it's very simple to compile. All you need to do is run `make`, and your ISO will be automagically prepared in the out/ folder.
+
+You can skip ISO building and multiboot signature checking by using `SKIP_ISO=1 make` and `SKIP_MB_CHECK=1 make` respectively.
+
+These are implied and forced on Windows, as they cannot be performed.
 
 If you prefer, you can compile with multiple threads with `make -j$(nproc)`. This will use as many threads as your CPU has available.
 
@@ -40,7 +45,7 @@ If you prefer, you can compile with multiple threads with `make -j$(nproc)`. Thi
 You can use essentially any virtualizer you have. We prefer QEMU or VirtualBox.
 
 If you wanna use QEMU, you can start the ISO up with `qemu-system-i386 -cdrom /path/to/catkernel.iso` (hint: it's usually in out/)\
-Also, if you're using QEMU, you can directly start the kernel with `qemu-system-i386 -kernel /path/to/catkernel.bin` (hint: it's usually in out/isodir/boot)
+Also, if you're using QEMU, you can directly start the kernel with `qemu-system-i386 -kernel /path/to/catkernel.bin` (hint: it's usually in out/isodir/boot, or just out/ if you are not building the ISO)
 
 See "Debugging it" for compiling/running with a debugger (GDB/LLDB).
 

@@ -1,7 +1,8 @@
 These are all the people who have helped out with CatK! 
 
 Rodmatronic/s - Original kernel creator
+irix - Co-developer
 Gamer117 - Testing and finding major/minor bugs
 roighteously - Adding .gitignore
 4vul - Kernel tester
-irix - Fixing bugs/pointing out many issues, as well as helping clean up code
+Ruthenic - Assisting in Windows compilation, giving the idea to move to lld

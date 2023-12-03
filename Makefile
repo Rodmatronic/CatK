@@ -1,8 +1,10 @@
 MKDIR = mkdir -p
 CP = cp -f
+RM = rm
+RM_FORCE = rm -rf
 
 # assembler
-ASM = /usr/bin/nasm
+ASM = nasm
 
 # compiler
 
@@ -10,13 +12,11 @@ ASM = /usr/bin/nasm
 # i don't care if you can't use clang, i don't care if you hate clang.
 # this project targets clang and clang only. you will not be helped if it fails.
 # gcc broke this project. i am not fixing it again. - irix
-CC = /usr/bin/clang
+CC = clang
 
-# linker
-LD = /usr/bin/ld
-
-# grub iso creator
-GRUB = /usr/bin/grub-mkrescue
+# linker. this can be GNU ld or LLVM lld.
+# lld is now preferred as it works everywhere
+LD = ld.lld 
 
 # sources
 SRC = src
@@ -27,20 +27,26 @@ OBJ = obj
 ASM_OBJ = $(OBJ)/asm
 
 CONFIG = ./config
+
 OUT = out
+
 INC = ./include
 
 INCLUDE =-I$(INC)
 
-DEFINES =
-
 # assembler flags
 ASM_FLAGS = -f elf32
-# compiler flags
-CC_FLAGS = $(INCLUDE) $(DEFINES) --target=i686-pc-none-elf -march=i686 -std=gnu99 -ffreestanding -fno-exceptions -fno-rtti -fno-stack-protector -Werror=implicit-function-declaration -Wall -Wextra -ferror-limit=9999
 
-ifeq ($(DEBUG),1)
+# compiler flags
+CC_FLAGS = $(INCLUDE) --target=i686-pc-none-elf -march=i686 -std=gnu99 -ffreestanding -fno-exceptions -fno-rtti -fno-stack-protector -Werror=implicit-function-declaration -Wall -Wextra -ferror-limit=9999
+
+ifeq ($(DEBUG), 1)
 CC_FLAGS += -g
+endif
+
+ifeq ($(OS), Windows_NT)
+override SKIP_ISO = 1
+override SKIP_MB_CHECK = 1
 endif
 
 # linker flags, for linker add linker.ld file too
@@ -66,17 +72,25 @@ all: $(TARGET_ISO)
 
 $(TARGET_ISO): $(TARGET)
 	@printf "[ building ISO... ]\n"
+ifneq ($(SKIP_ISO), 1)
 	$(MKDIR) $(ISO_DIR)/boot/grub
 	$(CP) $(TARGET) $(ISO_DIR)/boot/
 	$(CP) $(CONFIG)/grub.cfg $(ISO_DIR)/boot/grub/
-	$(GRUB) -o $(TARGET_ISO) $(ISO_DIR)
-	rm -f $(TARGET)
+	grub-mkrescue -o $(TARGET_ISO) $(ISO_DIR)
+	$(RM) $(TARGET)
+else
+	@printf "[ iso build skipped ]\n"
+endif
 
 $(TARGET): $(ASM_OBJECTS) $(OBJECTS)
 	@printf "[ linking... ]\n"
 	$(LD) $(LD_FLAGS) -o $(TARGET) $^
+	@printf "[ checking multiboot signature... ]\n"
+ifneq ($(SKIP_MB_CHECK), 1)
 	grub-file --is-x86-multiboot $(TARGET)
-	@printf "\n"
+else
+	@printf "[ multiboot check skipped ]\n"
+endif
 
 $(ASM_OBJ)/entry.o: $(ASM_SRC)/entry.asm
 	@printf "[ $(ASM_SRC)/entry.asm ]\n"
@@ -91,5 +105,5 @@ $(OBJ)/%.o: $(SRC)/%.c
 	@printf "\n"
 
 clean:
-	rm -rf $(OBJ)
-	rm -rf $(OUT)
+	$(RM_FORCE) $(OBJ)
+	$(RM_FORCE) $(OUT)
