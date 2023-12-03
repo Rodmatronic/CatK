@@ -11,6 +11,7 @@
 
 // Define a variable to track the Shift key state
 int shift_pressed = 0;
+int ctrl_pressed = 0;
 
 // Define a custom keymap for uppercase characters
 static char uppercase_keymap[] = {
@@ -46,6 +47,25 @@ char scancode_to_char(unsigned char scancode) {
         'b', 'n', 'm', ',', '.', '/', '.', '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
+    if (scancode == 0x1D) { // CTRL pressed
+        ctrl_pressed = 1;
+        return 0;
+    } else if (scancode == 0xAA) { // CTRL released
+        ctrl_pressed = 0;
+    }
+
+    if (ctrl_pressed) {
+        if (ctrl_pressed && scancode == 0x1F) {
+            //this is C
+            printf("^");
+        }else
+        if (ctrl_pressed && scancode == 0x2E) {
+            //this is S
+            printf("^");
+        }else
+        ctrl_pressed = 0;
+    }
+
     if (scancode == 0x2A) { // Left Shift pressed
         shift_pressed = 1;
         return 0; // Return 0 to indicate a special case
@@ -72,18 +92,4 @@ char scancode_to_char(unsigned char scancode) {
     if (scancode == 0xE0) { //Down
         printf(" ");
     }else*/
-
-    if (scancode == 0x2A) { // Left Shift pressed
-        shift_pressed = 1;
-        return uppercase_keymap[scancode];
-    } else if (scancode == 0xAA) { // Left Shift released
-        shift_pressed = 0;
-    }else
-
-    // Check if the scancode is within the array bounds
-    if (scancode < sizeof(keymap)) {
-        return keymap[scancode];
-    } else {
-        return 0; // Unhandled scancode
-    }
 }

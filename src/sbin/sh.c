@@ -68,9 +68,8 @@ void execute_command(const char* command) {
         rows+=2;
         current_directory = workingdir;
     } else if (strcmp(command, "ls") == 0) {
-        printf("\n");
+        printf("\n\n");
         list_files(&rootfs, 0);
-        printf("\n");
         rows+=4;
     } else if (strncmp(command, "echo ", 5) == 0) {
         const char* new_directory = command + 5;
