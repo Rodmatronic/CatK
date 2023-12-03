@@ -3,7 +3,8 @@
 
 #include "types.h"
 
+extern int readnum;
+
 void read(int Boot);
 
 #endif
-

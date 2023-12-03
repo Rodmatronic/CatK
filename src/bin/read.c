@@ -1,6 +1,5 @@
 #include "console.h"
 #include "vga.h"
-#include "read.h"
 #include "panic.h"
 #include "read.h"
 #include "keyboard.h"
@@ -9,7 +8,10 @@
 int readnum;
 
 void read(int Boot) {
-    printf("\n");
+    if (Boot != 1)
+    {
+        printf("\n");
+    }
     while (1) {
             // Read a key scancode
             unsigned char scancode = read_key();
