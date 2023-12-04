@@ -5,6 +5,8 @@
 #include "sleep.h"
 #include "panic.h"
 #include "kernel.h"
+#include "fs.h"
+#include "config.h"
 
 // https://wiki.osdev.org/PCI_IDE_Controller
 // https://datacadamia.com/io/drive/lba
@@ -342,6 +344,10 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
             printf("  signature: 0x%x, features: %d\n", g_ide_devices[i].signature, g_ide_devices[i].features);
             write_serial(g_ide_devices[i].model);
             pserial("\n");
+            char* workingdirectory = current_directory;
+            current_directory = "/mount";
+            write_to_file(&rootfs, g_ide_devices[i].model, "TBA");
+            current_directory = workingdirectory;
         }
 }
 

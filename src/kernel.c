@@ -114,6 +114,7 @@ void boot() {
     create_folder(&rootfs, "/lib", "/");
     create_folder(&rootfs, "/media", "/");
     create_folder(&rootfs, "/mnt", "/");
+    create_folder(&rootfs, "/mount", "/");
     create_folder(&rootfs, "/proc", "/");
     create_folder(&rootfs, "/run", "/");
     create_folder(&rootfs, "/sbin", "/");

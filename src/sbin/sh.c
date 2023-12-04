@@ -94,6 +94,7 @@ void execute_command(const char* command) {
             write_serial("cd to ");
             write_serial(new_directory);
             write_serial("\n");
+            new_directory = 0;
         }
     } else {
         // Default action for unrecognized commands
