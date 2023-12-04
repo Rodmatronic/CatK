@@ -32,8 +32,9 @@ void panic(const char* panictext, ...)
     printf("%CPlease switch off the system now\n", 0xF, 0x0);
     vga_disable_cursor();
     console_gotoxy(0, 24);
-    //printf_dark("The system will reboot in 5 seconds");
-    //sleep(5);
+
+    //This should now properly stop the CPU, so no further damage can be done
+    asm("hlt");
     while(1)
     {
         for(;;);

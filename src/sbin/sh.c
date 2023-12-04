@@ -11,6 +11,7 @@
 #include "libc.h"
 #include "time.h"
 #include "exec.h"
+#include "cpu.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -21,6 +22,18 @@ void execute_command(const char* command) {
     // Pre-built commands
     if (strcmp(command, "") == 0) {
         // Do nothing for an empty command
+    } else if (strcmp(command, "help") == 0) {
+        printf("\n%CCatK %s k_sh help\n\n", 0xB, 0x0, versionnumber);
+        printf("cd - [dir]            echo - [input]\n");
+        printf("ls - n/a              halt - n/a\n");
+        printf("rm - [input]          time - n/a\n");
+        printf("reboot - n/a          cat  - [input]\n");
+        printf("shutdown - n/a        help - n/a\n");
+        printf("halt - n/a            exec - [input]\n");
+        printf("panic - [input]       uname - n/a\n");
+        printf("cpuver - n/a          ");
+        rows+=13;
+
     } else if (strcmp(command, "clear") == 0) {
         rows = 0;
         rows--;
@@ -50,7 +63,11 @@ void execute_command(const char* command) {
         printf("\n");
         rm_file(&rootfs, new_directory);
         rows+=2;
-    } else if (strncmp(command, "time ", 4) == 0) {
+    } else if (strncmp(command, "cpuver ", 6) == 0) {
+        printf("\n\n");
+        cpusimple(1);
+        rows+=2;
+    }else if (strncmp(command, "time ", 4) == 0) {
         printf("\n\n");
         GetCurrentTime();
         rows+=2;

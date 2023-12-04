@@ -2,9 +2,12 @@
 #include "keyboard.h"
 #include "fs.h"
 #include "console.h"
+#include "config.h"
 
 void BootDevConfig()
 {
+    char* working_directory = current_directory;
+    current_directory = "/dev";
     write_to_file(&rootfs, "console", "1");
     printf("%C   Created /dev/console\n", 0x8, 0x0);
     
@@ -42,4 +45,7 @@ void BootDevConfig()
 
     write_to_file(&rootfs, "tty6", "0");
     printf("%C   Created /dev/tty6\n", 0x8, 0x0);
+
+    current_directory = working_directory;
+
 }
