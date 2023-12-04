@@ -17,6 +17,7 @@
 #include "exec.h"
 #include "panic.h"
 #include "PreBoot.h"
+#include "ide.h"
 #define PORT 0x3f8          // COM1
  
 static int init_serial() {
@@ -167,6 +168,19 @@ void boot() {
 
     printf("Autoconfiguring devices...\n");
     BootDevConfig();
+
+    bootmessage("Detecting ATA drives");
+    ata_init();
+    printf("\nExample\n");
+    const uint32 LBA = 0;
+    const uint8 NO_OF_SECTORS = 1;
+    char buf[ATA_SECTOR_SIZE] = {0};
+
+    struct example {
+        int id;
+        char name[32];
+    };
+
     sleep(1);
 
     bootmessage("Setting up default user");
@@ -178,7 +192,6 @@ void boot() {
     create_folder(&rootfs, "/home", "/");
     create_folder(&rootfs, "/root", "/home");
     bootmessage("Finishing up...");
-    //char* shell = "k_sh";
 
     current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
