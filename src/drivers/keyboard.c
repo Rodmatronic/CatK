@@ -47,25 +47,6 @@ char scancode_to_char(unsigned char scancode) {
         'b', 'n', 'm', ',', '.', '/', '.', '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    if (scancode == 0x1D) { // CTRL pressed
-        ctrl_pressed = 1;
-        return 0;
-    } else if (scancode == 0xAA) { // CTRL released
-        ctrl_pressed = 0;
-    }
-
-    if (ctrl_pressed) {
-        if (ctrl_pressed && scancode == 0x1F) {
-            //this is C
-            printf("^");
-        }else
-        if (ctrl_pressed && scancode == 0x2E) {
-            //this is S
-            printf("^");
-        }else
-        ctrl_pressed = 0;
-    }
-
     if (scancode == 0x2A) { // Left Shift pressed
         shift_pressed = 1;
         return 0; // Return 0 to indicate a special case
