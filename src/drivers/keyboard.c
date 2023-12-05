@@ -1,17 +1,16 @@
 #include "kernel.h"
 #include "console.h"
+#include "keyboard.h"
 #include "io_ports.h"
 #include "libc.h"
+
+int shift_pressed;
 
 // Keyboard I/O ports
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 // enter scancode
 #define ENTER_KEY_SCANCODE 0x1C
-
-// Define a variable to track the Shift key state
-int shift_pressed = 0;
-int ctrl_pressed = 0;
 
 // Define a custom keymap for uppercase characters
 static char uppercase_keymap[] = {
@@ -44,7 +43,10 @@ char scancode_to_char(unsigned char scancode) {
         0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', '\t',
         'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n', 0, 'a', 's',
         'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x', 'c', 'v',
-        'b', 'n', 'm', ',', '.', '/', '.', '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        'b', 'n', 'm', ',', '.', '/', '.', '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
     if (scancode == 0x2A) { // Left Shift pressed

@@ -104,7 +104,6 @@ unsigned char read_key();
 #define SCAN_CODE_KEY_F11         0x57
 #define SCAN_CODE_KEY_F12         0x58
 
-
 void init_keyboard();
 
 // a blocking character read

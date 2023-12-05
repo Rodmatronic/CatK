@@ -11,7 +11,7 @@
 #include "libc.h"
 #include "time.h"
 #include "exec.h"
-#include "cpu.h"
+#include "fwrite.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -24,15 +24,14 @@ void execute_command(const char* command) {
         // Do nothing for an empty command
     } else if (strcmp(command, "help") == 0) {
         printf("\n%CCatK %s k_sh help\n\n", 0xB, 0x0, versionnumber);
-        printf("cd - [dir]            echo - [input]\n");
-        printf("ls - n/a              halt - n/a\n");
-        printf("rm - [input]          time - n/a\n");
-        printf("reboot - n/a          cat  - [input]\n");
-        printf("shutdown - n/a        help - n/a\n");
-        printf("halt - n/a            exec - [input]\n");
-        printf("panic - [input]       uname - n/a\n");
-        printf("cpuver - n/a          ");
-        rows+=13;
+        printf("cd - [dir]        echo - [input]\n");
+        printf("ls - [input]      halt - n/a\n");
+        printf("rm - [input]      time - n/a\n");
+        printf("reboot - n/a      cat  - [input]\n");
+        printf("shutdown - n/a    help - n/a\n");
+        printf("halt - n/a        exec - [input]\n");
+        printf("panic - [input]   uname - n/a\n");
+        rows+=12;
 
     } else if (strcmp(command, "clear") == 0) {
         rows = 0;
@@ -44,7 +43,13 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "shutdown") == 0) {
         rows = 0;
         syspw(1);
-    } else if (strcmp(command, "halt") == 0) {
+    } else if (strncmp(command, "fwrite ", 7) == 0) {
+        const char* new_directory = command + 7;
+        fwrite(new_directory);
+        rows+=24;
+    } else if (strcmp(command, "fwrite") == 0) {
+        printf("%C --Please specify a filename--", 0xF, 0x0);
+    } else  if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
     } else if (strncmp(command, "panic ", 6) == 0) {
@@ -63,18 +68,14 @@ void execute_command(const char* command) {
         printf("\n");
         rm_file(&rootfs, new_directory);
         rows+=2;
-    } else if (strncmp(command, "cpuver ", 6) == 0) {
-        printf("\n\n");
-        cpusimple(1);
-        rows+=2;
-    }else if (strncmp(command, "time ", 4) == 0) {
+    } else if (strncmp(command, "time ", 4) == 0) {
         printf("\n\n");
         GetCurrentTime();
         rows+=2;
     }else if (strncmp(command, "cat ", 4) == 0) {
         console_init(COLOR_WHITE, COLOR_BLACK);
         const char* new_directory = command + 4;
-        printf("%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
+        printf("%CCat-----------------------------------------------------------------------------\n", 0xF, 0x0);
         read_from_file(&rootfs, new_directory, buffer, sizeof(buffer), 0);
         printf("%s\n", buffer);
         rows+=24;
@@ -93,11 +94,12 @@ void execute_command(const char* command) {
         list_files(&rootfs, 0);
         write_serial("\n");
         rows+=4;
+    } else if (strncmp(command, "serial ", 7) == 0) {
+        const char* new_directory = command + 7;
+        pserial(new_directory);
     } else if (strncmp(command, "echo ", 5) == 0) {
         const char* new_directory = command + 5;
-        // Change to the specified directory
         printf("\n\n%s", new_directory);
-        pserial(new_directory);
         rows+=3;
     } else if (strncmp(command, "cd ", 3) == 0) {
         // Check if the command starts with "cd "
