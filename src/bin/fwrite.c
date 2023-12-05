@@ -6,24 +6,7 @@ int ctrl_pressed;
 
 void fwrite(char* name) {
     console_init(COLOR_WHITE, COLOR_BLACK);
-    // Original string with hyphens
-    char* bar = "--------------------------------------------------------------------------";
-
-    // Calculate the number of hyphens to remove based on the length of the name
-    int hyphens_to_remove = strlen(name);
-
-    // Ensure we don't remove more hyphens than the original string length
-    hyphens_to_remove = (hyphens_to_remove < strlen(bar)) ? hyphens_to_remove : strlen(bar);
-
-    // Calculate the new length of the bar string
-    int new_length = strlen(bar) - hyphens_to_remove;
-
-    // Create a new string without the trailing hyphens
-    char new_bar[new_length + 1];  // +1 for the null terminator
-    strncpy(new_bar, bar, new_length);
-    new_bar[new_length] = '\0';  // Null-terminate the new string
-
-    printf("%Cfwrite%s\n", 0xF, 0x0, new_bar);
+    printf("%Cfwrite%s\n", 0xF, 0x0, name);
     console_gotoxy(1, 22);
     printf("%C--------------------------------------------------------------------------------", 0xF, 0x0);
     console_gotoxy(1, 23);
