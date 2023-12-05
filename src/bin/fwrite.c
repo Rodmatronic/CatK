@@ -6,7 +6,7 @@ int ctrl_pressed;
 
 void fwrite(char* name) {
     console_init(COLOR_WHITE, COLOR_BLACK);
-    printf("%Cfwrite%s\n", 0xF, 0x0, name);
+    printf("%Cfwrite - %s\n", 0xF, 0x0, name);
     console_gotoxy(1, 22);
     printf("%C--------------------------------------------------------------------------------", 0xF, 0x0);
     console_gotoxy(1, 23);
