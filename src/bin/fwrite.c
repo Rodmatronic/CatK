@@ -1,16 +1,19 @@
 #include "fs.h"
 #include "console.h"
 #include "keyboard.h"
-
+#include "io_ports.h"
 int ctrl_pressed;
 
 void fwrite(char* name) {
     console_init(COLOR_WHITE, COLOR_BLACK);
+    console_gotoxy(0, 0);
+    printf("%C--------------------------------------------------------------------------------", 0xF, 0x0);
+    console_gotoxy(0, 0);
     printf("%Cfwrite - %s\n", 0xF, 0x0, name);
     console_gotoxy(1, 22);
     printf("%C--------------------------------------------------------------------------------", 0xF, 0x0);
     console_gotoxy(1, 23);
-    printf("%C^Q: Save and quit", 0xF, 0x0);
+    printf("%C^Q: Save and quit  S: Save", 0xF, 0x0);
     console_gotoxy(0, 1);
     // Buffer to store input
     char input_buffer[1024];  // Adjust size as needed
@@ -49,6 +52,12 @@ void fwrite(char* name) {
 
                 // Break out of the loop and exit
                 break;
+            }else
+            if (scancode == 0x1F && ctrl_pressed == 1) {
+                
+                // Write buffer contents to file
+                write_to_file(&rootfs, filename, input_buffer);
+
             }else
             if (scancode == SCAN_CODE_KEY_BACKSPACE) {
                 if (buffer_position > 0) {

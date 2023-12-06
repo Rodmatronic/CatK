@@ -20,6 +20,12 @@
 #include "ide.h"
 #define PORT 0x3f8          // COM1
  
+#define VGA_CRT_CTRL_REG 0x3D4
+#define VGA_CRT_DATA_REG 0x3D5
+
+#define VGA_CRT_CTRL_REG 0x3D4
+#define VGA_CRT_DATA_REG 0x3D5
+
 static int init_serial() {
    outportb(PORT + 1, 0x00);    // Disable all interrupts
    outportb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
@@ -65,6 +71,29 @@ void pserial(const char* str) { // Use const char* for the string parameter
     write_serial(str);
     write_serial("\n");
 }
+
+void setVgaResolution(uint16 width, uint16 height) {
+    // Disable sequencer to unlock CRTC registers
+    outportb(VGA_CRT_CTRL_REG, 0x00);
+    outportb(VGA_CRT_DATA_REG, 0x01);
+
+    // Set width
+    outportb(VGA_CRT_CTRL_REG, 0x01);  // CRT controller register to set horizontal resolution
+    outportb(VGA_CRT_DATA_REG, (uint8)(width / 8 - 1));
+    outportb(VGA_CRT_CTRL_REG, 0x04);  // Increment CRT controller address for sequential write
+    outportb(VGA_CRT_DATA_REG, (uint8)((width / 8 - 1) >> 8));
+
+    // Set height
+    outportb(VGA_CRT_CTRL_REG, 0x12);  // CRT controller register to set vertical resolution
+    outportb(VGA_CRT_DATA_REG, (uint8)(height - 1));
+    outportb(VGA_CRT_CTRL_REG, 0x07);  // Increment CRT controller address for sequential write
+    outportb(VGA_CRT_DATA_REG, (uint8)((height - 1) >> 8));
+
+    // Enable sequencer
+    outportb(VGA_CRT_CTRL_REG, 0x00);
+    outportb(VGA_CRT_DATA_REG, 0x03);
+}
+
 
 void boot() {
     printf("CatKernel boot() started");
@@ -124,6 +153,7 @@ void boot() {
     create_folder(&rootfs, "/var", "/");
     list_files(&rootfs, 0);
     printf("\n");
+    setVgaResolution(510, 255);
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "sh", "type:App\nsh");
@@ -176,11 +206,6 @@ void boot() {
     const uint32 LBA = 0;
     const uint8 NO_OF_SECTORS = 1;
     char buf[ATA_SECTOR_SIZE] = {0};
-
-    struct example {
-        int id;
-        char name[32];
-    };
 
     sleep(1);
 
