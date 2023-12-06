@@ -153,7 +153,6 @@ void boot() {
     create_folder(&rootfs, "/var", "/");
     list_files(&rootfs, 0);
     printf("\n");
-    setVgaResolution(510, 255);
 
     current_directory = "/sbin";
     write_to_file(&rootfs, "sh", "type:App\nsh");
