@@ -248,6 +248,8 @@ void rm_file(struct FileSystem* fs, const char* filename) {
             fs->file_table[i].size = 0;
             memset(fs->data_blocks[i], 0, BLOCK_SIZE); // Clear the data block
             total_files--;
+            current_directory = current_folder;
+            write_to_file(&rootfs, filename, "");
 
             return;
         }

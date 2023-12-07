@@ -210,10 +210,13 @@ void boot() {
 
     bootmessage("Setting up default user");
     // root user
+    current_directory = "/etc";
     strcpy(rootUser.username, "root");
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
-    write_to_file(&rootfs, "session.catk", rootUser.username);
+    write_to_file(&rootfs, "session", rootUser.username);
+
+    current_directory = "/";
     create_folder(&rootfs, "/home", "/");
     create_folder(&rootfs, "/root", "/home");
     bootmessage("Finishing up...");

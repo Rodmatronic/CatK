@@ -30,9 +30,23 @@ void execute_command(const char* command) {
         printf("reboot - n/a      cat  - [input]\n");
         printf("shutdown - n/a    help - n/a\n");
         printf("halt - n/a        exec - [input]\n");
+        printf("whoami - n/a      hostname - [input]\n");
         printf("panic - [input]   uname - n/a\n");
         rows+=12;
 
+    } else if (strcmp(command, "whoami") == 0) {
+        char* workingdir = current_directory;
+        current_directory = "/etc";
+        read_from_file(&rootfs, "session", buffer, sizeof(buffer), 0);
+        printf("\n\n%s\n", buffer);
+        rows+=3;
+        current_directory = workingdir;
+    } else if (strncmp(command, "hostname ", 8) == 0)  {
+        char* working_dir = current_directory;
+        const char* hostname2be_added = command + 9;
+        current_directory = "/etc";
+        write_to_file(&rootfs, "hostname", hostname2be_added);
+        current_directory = working_dir;
     } else if (strcmp(command, "clear") == 0) {
         rows = 0;
         rows--;
@@ -122,11 +136,15 @@ void execute_command(const char* command) {
 }
 void PS1()
 {
+    pserial("Setting PS1 for k_sh");
+    char* working_dir = current_directory;
     console_gotoxy(0, rows);
     printf("%C[", 0xB, 0x0);
-    printf("%s", 0xE, 0x0, username);
-    printf("%C▓%s - %s (%s)", 0x3, 0x0, username, host_name, current_directory);
+    read_from_file(&rootfs, "session", buffer, sizeof(buffer), 1);
+    read_from_file(&rootfs, "hostname", buffer2, sizeof(buffer2), 1);
+    printf("%C▓%s - %s (%s)", 0x3, 0x0, buffer, buffer2, current_directory);
     printf("%C]%C# ", 0xB, 0x0, 0xF, 0x0);
+    current_directory = working_dir;
 }
 
 void k_sh() {
@@ -134,9 +152,9 @@ void k_sh() {
     write_serial(versionnumber);
     write_serial("\n");
     rows = 0;
-    current_directory = "/";
     vga_enable_cursor();
     PS1();
+    current_directory = "/";
     while (1) {
         unsigned char scancode = read_key();
         char key = scancode_to_char(scancode);
