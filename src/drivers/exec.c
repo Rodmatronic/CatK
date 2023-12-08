@@ -62,6 +62,8 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         char* clearToken = k_strstr(token, "clear");
         if (clearToken != NULL) {
             // Print the text following "clear"
+            rows = 0;
+            rows--;
             console_init(COLOR_WHITE, COLOR_BLACK);
         }
         char* Time = k_strstr(token, "time");

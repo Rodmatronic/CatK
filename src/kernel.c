@@ -94,6 +94,32 @@ void setVgaResolution(uint16 width, uint16 height) {
     outportb(VGA_CRT_DATA_REG, 0x03);
 }
 
+void bootlogo_splash()
+{
+        console_clear(COLOR_WHITE, COLOR_BLACK);
+            console_gotoxy(30, 7);
+            printf("%C       _      _", 0xF, 0x0);
+            console_gotoxy(30, 8);
+            printf("%C      / \\    / \\", 0xF, 0x0);
+            console_gotoxy(30, 9);
+            printf("%C     /   \\__/   \\", 0xB, 0x0);
+            console_gotoxy(30, 10);
+            printf("%C    /            \\", 0xB, 0x0);
+            console_gotoxy(30, 11);
+            printf("%C   |    |    |    |", 0xB, 0x0);
+            console_gotoxy(30, 12);
+            printf("%C  =|      -       |=", 0xB, 0x0);
+            console_gotoxy(30, 13);
+            printf("%C  =\\     \\/\\/     /=", 0xB, 0x0);
+            console_gotoxy(30, 14);
+            printf("%C    \\            /", 0x3, 0x0);
+            console_gotoxy(30, 15);
+            printf("%C     =====\\/=====", 0xC, 0x0);
+            console_gotoxy(30, 16);
+            printf("%C        (CatK)", 0xE, 0x0);
+            console_gotoxy(28, 18);
+        console_gotoxy(0, 0);
+}
 
 void boot() {
     printf("CatKernel boot() started");
@@ -101,10 +127,10 @@ void boot() {
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
-    bootmessage("Starting sysdiag");
+    kernmessage("Starting sysdiag");
     sysdiaginit();
 
-    bootmessage("init_serial() on COM1");
+    kernmessage("init_serial() on COM1");
     is_transmit_empty();
     init_serial();
     printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
@@ -112,11 +138,11 @@ void boot() {
     //sleep(3);
 
     printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
-    bootmessage("cpuid_info(1): Attempting to get CPU info");
+    kernmessage("cpuid_info(1): Attempting to get CPU info");
     cpuid_info(1);
-    bootmessage("GetMemory(): Attempting to get Memory info");
+    kernmessage("GetMemory(): Attempting to get Memory info");
     GetMemory();
-    bootmessage("Showing kernel's config.h configuration \\/ ");
+    kernmessage("Showing kernel's config.h configuration \\/ ");
     printf("   hostname: %s\n", host_name);
     pserial(host_name);
     printf("   username: %s\n", username);
@@ -132,8 +158,8 @@ void boot() {
     printf("   bootargs(default): %s\n", bootargs);
     pserial(bootargs);
 
-    bootmessage("Perfect! &rootfs created with max files from MAX_FILES");
-    bootmessage("Creating '/' structure");
+    kernmessage("Perfect! &rootfs created with max files from MAX_FILES");
+    kernmessage("Creating '/' structure");
     create_folder(&rootfs, "/bin", "/");
     create_folder(&rootfs, "/boot", "/");
     create_folder(&rootfs, "/cdrom", "/");
@@ -154,25 +180,40 @@ void boot() {
     list_files(&rootfs, 0);
     printf("\n");
 
+    kernmessage("Dumping kernel values to /proc");
+    pserial("Dumping kernel values to /proc");
+    current_directory = "/proc";
+    write_to_file(&rootfs, "splash", bootlogo);
+    write_to_file(&rootfs, "pre-art", art);
+    write_to_file(&rootfs, "buff", buffer);
+    write_to_file(&rootfs, "buff-second", buffer2);
+
+    kernmessage("Dumping apps to /bin");
+    pserial("Dumping apps to /bin");
+    current_directory = "/bin";
+    write_to_file(&rootfs, "print", "type:App\nprint");
+    write_to_file(&rootfs, "clear", "type:App\nclear");
+    write_to_file(&rootfs, "delay", "type:App\ndelay");
+
     current_directory = "/sbin";
     write_to_file(&rootfs, "sh", "type:App\nsh");
-    bootmessage("Created /sbin/sh");
+    kernmessage("Created /sbin/sh");
 
-    bootmessage("Freeing system memory");
+    kernmessage("Freeing system memory");
 
     size size = 6 * 1024 * 1024; // 6 MB in bytes
     //void* memory = k_malloc(size);
     k_malloc(size);
 
-    bootmessage("Allocated 6000 KB using k_malloc()");
+    kernmessage("Allocated 6000 KB using k_malloc()");
 
-    bootmessage("Setting hostname to defaults from 'defaulthostname'");
+    kernmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
     write_to_file(&rootfs, "hostname", defaulthostname);
     read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
 
     strcpy(host_name, buffer);
-    bootmessage("Copying kernel values to proc");
+    kernmessage("Copying kernel values to proc");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
     printf("%C   Created /proc/arch\n", 0x8, 0x0);
@@ -199,16 +240,16 @@ void boot() {
     printf("Autoconfiguring devices...\n");
     BootDevConfig();
 
-    bootmessage("Detecting ATA drives");
+    kernmessage("Detecting ATA drives");
     ata_init();
-    printf("\nExample\n");
+    //printf("\nExample\n");
     const uint32 LBA = 0;
     const uint8 NO_OF_SECTORS = 1;
     char buf[ATA_SECTOR_SIZE] = {0};
 
     sleep(1);
 
-    bootmessage("Setting up default user");
+    kernmessage("Setting up default user");
     // root user
     current_directory = "/etc";
     strcpy(rootUser.username, "root");
@@ -219,7 +260,9 @@ void boot() {
     current_directory = "/";
     create_folder(&rootfs, "/home", "/");
     create_folder(&rootfs, "/root", "/home");
-    bootmessage("Finishing up...");
+    kernmessage("Finishing up...");
+
+    bootlogo = 0;
 
     current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
@@ -236,8 +279,12 @@ void kmain() {
     PreBoot();
 }
 
-void bootmessage(const char* str) { // Use const char* for the string parameter
-    printf("kernel: %s\n", str); // Print the message and the string
+void kernmessage(const char* str) { // Use const char* for the string parameter
+    if (bootlogo == 1)
+    {
+        bootlogo_splash();
+    }else
+    printf("kernel: %s\n", str); // Print the message and the string   
     write_serial(str);
     write_serial("\n");
     char* workingdirectory = current_directory;

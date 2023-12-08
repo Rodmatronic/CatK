@@ -6,6 +6,7 @@
 #include "syspw.h"
 #include "io_ports.h"
 
+int bootlogo;
 char* args;
 int art = 2;
 
@@ -35,8 +36,8 @@ void PreBoot()
     printf("| 1.  Suppress boot logs           |\n");
     printf("| 2.  Kitty artwork                |\n");
     printf("| 3.  Reboot                       |\n");
-    printf("|                                  |\n");
-    printf("|                                  |\n");
+    printf("|----------------------------------|\n");
+    printf("| 4.  Graphical boot               |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");
@@ -190,8 +191,8 @@ void PreBoot()
         printf("%C| 1.  Suppress boot logs           |\n", 0x8, 0x0);
         printf("%C| Kitty artwork                    |\n", 0xB, 0x0);
         printf("%C| 3.  Reboot                       |\n", 0x8, 0x0);
-        printf("%C|                                  |\n", 0x8, 0x0);
-        printf("%C|                                  |\n", 0x8, 0x0);
+        printf("%C|----------------------------------|\n", 0x8, 0x0);
+        printf("%C| 4.  Graphical boot               |\n", 0x8, 0x0);
         printf("%C|                                  |\n", 0x8, 0x0);
         printf("%C|                                  |\n", 0x8, 0x0);
         printf("%C|                                  |\n", 0x8, 0x0);
@@ -226,10 +227,21 @@ void PreBoot()
     {
         syspw(0);
     }
-    
+
+    if (readnum == 4)
+    {
+        bootlogo = 1;
+    }
+
     args = "none";
     pserial("PreBoot: boot(), starting kernel");
     pserial("---------------------------------------------");
+
+    if (bootlogo == 1)
+    {
+        console_init(COLOR_WHITE, COLOR_BLACK);
+    }
+
     boot();
 
 }

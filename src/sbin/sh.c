@@ -31,9 +31,17 @@ void execute_command(const char* command) {
         printf("shutdown - n/a    help - n/a\n");
         printf("halt - n/a        exec - [input]\n");
         printf("whoami - n/a      hostname - [input]\n");
-        printf("panic - [input]   uname - n/a\n");
+        printf("dmesg - n/a       uname - n/a\n");
+        printf("panic - [input]\n");
         rows+=12;
 
+    } else if (strcmp(command, "dmesg") == 0) {
+        char* workingdir = current_directory;
+        current_directory = "/etc";
+        read_from_file(&rootfs, "logs", buffer, sizeof(buffer), 0);
+        printf("\n\n%s\n", buffer);
+        rows+=24;
+        current_directory = workingdir;
     } else if (strcmp(command, "whoami") == 0) {
         char* workingdir = current_directory;
         current_directory = "/etc";
@@ -48,9 +56,10 @@ void execute_command(const char* command) {
         write_to_file(&rootfs, "hostname", hostname2be_added);
         current_directory = working_dir;
     } else if (strcmp(command, "clear") == 0) {
-        rows = 0;
-        rows--;
-        console_init(COLOR_WHITE, COLOR_BLACK);
+        char* workingdir = current_directory;
+        current_directory = "/bin";
+        execute_file(&rootfs, "clear", 1);
+        current_directory = workingdir;
     } else if (strcmp(command, "reboot") == 0) {
         rows = 0;
         syspw(0);
