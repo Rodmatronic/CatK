@@ -37,7 +37,7 @@ void PreBoot()
     printf("| 2.  Kitty artwork                |\n");
     printf("| 3.  Reboot                       |\n");
     printf("|----------------------------------|\n");
-    printf("| 4.  Graphical boot               |\n");
+    printf("|                                  |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");
     printf("|                                  |\n");
@@ -192,9 +192,6 @@ void PreBoot()
         printf("%C| Kitty artwork                    |\n", 0xB, 0x0);
         printf("%C| 3.  Reboot                       |\n", 0x8, 0x0);
         printf("%C|----------------------------------|\n", 0x8, 0x0);
-        printf("%C| 4.  Graphical boot               |\n", 0x8, 0x0);
-        printf("%C|                                  |\n", 0x8, 0x0);
-        printf("%C|                                  |\n", 0x8, 0x0);
         printf("%C|                                  |\n", 0x8, 0x0);
         printf("%C+==================================+\n", 0x8, 0x0);
 

@@ -3,7 +3,6 @@
 #define PORT 0x3f8          // COM1
 #include "types.h"
 
-void bootlogo_splash();
 void kernmessage(const char* str);
 void wait_seconds(int seconds);
 void boot();

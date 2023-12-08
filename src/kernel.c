@@ -94,33 +94,6 @@ void setVgaResolution(uint16 width, uint16 height) {
     outportb(VGA_CRT_DATA_REG, 0x03);
 }
 
-void bootlogo_splash()
-{
-        console_clear(COLOR_WHITE, COLOR_BLACK);
-            console_gotoxy(30, 7);
-            printf("%C       _      _", 0xF, 0x0);
-            console_gotoxy(30, 8);
-            printf("%C      / \\    / \\", 0xF, 0x0);
-            console_gotoxy(30, 9);
-            printf("%C     /   \\__/   \\", 0xB, 0x0);
-            console_gotoxy(30, 10);
-            printf("%C    /            \\", 0xB, 0x0);
-            console_gotoxy(30, 11);
-            printf("%C   |    |    |    |", 0xB, 0x0);
-            console_gotoxy(30, 12);
-            printf("%C  =|      -       |=", 0xB, 0x0);
-            console_gotoxy(30, 13);
-            printf("%C  =\\     \\/\\/     /=", 0xB, 0x0);
-            console_gotoxy(30, 14);
-            printf("%C    \\            /", 0x3, 0x0);
-            console_gotoxy(30, 15);
-            printf("%C     =====\\/=====", 0xC, 0x0);
-            console_gotoxy(30, 16);
-            printf("%C        (CatK)", 0xE, 0x0);
-            console_gotoxy(28, 18);
-        console_gotoxy(0, 0);
-}
-
 void boot() {
     printf("CatKernel boot() started");
     // Initialize the file table
@@ -183,7 +156,6 @@ void boot() {
     kernmessage("Dumping kernel values to /proc");
     pserial("Dumping kernel values to /proc");
     current_directory = "/proc";
-    write_to_file(&rootfs, "splash", bootlogo);
     write_to_file(&rootfs, "pre-art", art);
     write_to_file(&rootfs, "buff", buffer);
     write_to_file(&rootfs, "buff-second", buffer2);
@@ -280,10 +252,6 @@ void kmain() {
 }
 
 void kernmessage(const char* str) { // Use const char* for the string parameter
-    if (bootlogo == 1)
-    {
-        bootlogo_splash();
-    }else
     printf("kernel: %s\n", str); // Print the message and the string   
     write_serial(str);
     write_serial("\n");
