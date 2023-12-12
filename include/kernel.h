@@ -6,7 +6,7 @@
 void kernmessage(const char* str);
 void wait_seconds(int seconds);
 void boot();
-static int init_serial();
+//static int init_serial();
 int is_transmit_empty();
 void write_serial(const char* str);
 void pserial(const char* str);

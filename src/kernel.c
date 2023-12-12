@@ -213,11 +213,11 @@ void boot() {
     BootDevConfig();
 
     kernmessage("Detecting ATA drives");
-    ata_init();
     //printf("\nExample\n");
-    const uint32 LBA = 0;
-    const uint8 NO_OF_SECTORS = 1;
-    char buf[ATA_SECTOR_SIZE] = {0};
+    //const uint32 LBA = 0;
+    //const uint8 NO_OF_SECTORS = 1;
+    //char buf[ATA_SECTOR_SIZE] = {0};
+    ata_init();
 
     sleep(1);
 

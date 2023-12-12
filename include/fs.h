@@ -9,7 +9,7 @@
 #define MAX_FOLDERS 50
 #define FOLDERNAME_SIZE 30
 
-extern struct FileEntry {
+struct FileEntry {
     char filename[FILENAME_SIZE];
     uint32 start_block;
     uint32 size;
@@ -18,7 +18,7 @@ extern struct FileEntry {
 };
 
 
-extern struct FileSystem {
+struct FileSystem {
     struct FileEntry file_table[MAX_FILES];
     char data_blocks[MAX_FILES][BLOCK_SIZE];
     char folder_table[MAX_FOLDERS][FOLDERNAME_SIZE];

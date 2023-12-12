@@ -345,8 +345,20 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
             write_serial(g_ide_devices[i].model);
             pserial("\n");
             char* workingdirectory = current_directory;
-            current_directory = "/mount";
-            write_to_file(&rootfs, g_ide_devices[i].model, "TBA");
+            current_directory = "/dev";
+            write_to_file(&rootfs, g_ide_devices[i].model, g_ide_devices[i].model);
+            /*
+            add_data_to_file(&rootfs, g_ide_devices[i].model, "\n");
+            add_data_to_file(&rootfs, g_ide_devices[i].model, g_ide_devices[i].type);
+            add_data_to_file(&rootfs, g_ide_devices[i].model, "\n");
+            add_data_to_file(&rootfs, g_ide_devices[i].model, g_ide_devices[i].channel);
+            add_data_to_file(&rootfs, g_ide_devices[i].model, "\n");
+            add_data_to_file(&rootfs, g_ide_devices[i].model, g_ide_channels[i].control);
+            add_data_to_file(&rootfs, g_ide_devices[i].model, "\n");
+            add_data_to_file(&rootfs, g_ide_devices[i].model,  g_ide_devices[i].size * ATA_SECTOR_SIZE);
+            add_data_to_file(&rootfs, g_ide_devices[i].model, "\n");
+            add_data_to_file(&rootfs, g_ide_devices[i].model, g_ide_devices[i].features);
+            */
             current_directory = workingdirectory;
         }
 }
