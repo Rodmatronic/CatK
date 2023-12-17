@@ -10,6 +10,7 @@
 #include "panic.h"
 #include "syspw.h"
 #include "vga.h"
+#include "bitmap.h"
 #include "kernel.h"
 
 void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
@@ -46,6 +47,11 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         char* shutdown = k_strstr(token, "shutdown");
         if (shutdown != NULL) {
             syspw(1);
+        }
+        char* graphics = k_strstr(token, "graphics_init");
+        if (graphics != NULL) {
+            vga_graphics_init();
+            draw_string(0, 5, COLOR_WHITE, "abcdefghijklmnopqrstuvwxyz");
         }
         // Check if the line contains "print "
         char* printToken = k_strstr(token, "print ");

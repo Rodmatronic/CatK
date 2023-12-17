@@ -28,7 +28,7 @@ void console_clear(VGA_COLOR_TYPE fore_color, VGA_COLOR_TYPE back_color) {
 
 //initialize console
 void console_init(VGA_COLOR_TYPE fore_color, VGA_COLOR_TYPE back_color) {
-    g_vga_buffer = (uint16 *)VGA_ADDRESS;
+    g_vga_buffer = (uint16 *)VGA_ADDRESS_TEXT;
     g_fore_color = fore_color;
     g_back_color = back_color;
     cursor_pos_x = 0;

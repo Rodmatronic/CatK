@@ -18,6 +18,7 @@
 #include "panic.h"
 #include "PreBoot.h"
 #include "ide.h"
+#include "bitmap.h"
 #include "launchp.h"
 #define PORT 0x3f8          // COM1
  
@@ -179,6 +180,8 @@ void boot() {
     kernmessage("Created /sbin/sh");
     write_to_file(&rootfs, "shutdown", "type:App\nshutdown");
     kernmessage("Created /sbin/shutdown");
+    write_to_file(&rootfs, "startgvga", "type:App\ngraphics_init");
+    kernmessage("Created /sbin/startgvga");
     write_to_file(&rootfs, "reboot", "type:App\nreboot");
     kernmessage("Created /sbin/reboot");
 
