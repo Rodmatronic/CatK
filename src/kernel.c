@@ -18,6 +18,7 @@
 #include "panic.h"
 #include "PreBoot.h"
 #include "ide.h"
+#include "launchp.h"
 #define PORT 0x3f8          // COM1
  
 #define VGA_CRT_CTRL_REG 0x3D4
@@ -153,6 +154,11 @@ void boot() {
     list_files(&rootfs, 0);
     printf("\n");
 
+    current_directory = "/etc";
+
+    write_to_file(&rootfs, "launchp", "");
+    add_data_to_file(&rootfs, "launchp", "sh\n");
+
     kernmessage("Dumping kernel values to /proc");
     pserial("Dumping kernel values to /proc");
     current_directory = "/proc";
@@ -163,6 +169,7 @@ void boot() {
     kernmessage("Dumping apps to /bin");
     pserial("Dumping apps to /bin");
     current_directory = "/bin";
+
     write_to_file(&rootfs, "print", "type:App\nprint");
     write_to_file(&rootfs, "clear", "type:App\nclear");
     write_to_file(&rootfs, "delay", "type:App\ndelay");
@@ -170,6 +177,11 @@ void boot() {
     current_directory = "/sbin";
     write_to_file(&rootfs, "sh", "type:App\nsh");
     kernmessage("Created /sbin/sh");
+    write_to_file(&rootfs, "shutdown", "type:App\nshutdown");
+    kernmessage("Created /sbin/shutdown");
+    write_to_file(&rootfs, "reboot", "type:App\nreboot");
+    kernmessage("Created /sbin/reboot");
+
 
     kernmessage("Freeing system memory");
 
@@ -232,7 +244,7 @@ void boot() {
     current_directory = "/";
     create_folder(&rootfs, "/home", "/");
     create_folder(&rootfs, "/root", "/home");
-    kernmessage("Finishing up...");
+    kernmessage("Starting launchp...");
 
     bootlogo = 0;
 
@@ -242,8 +254,7 @@ void boot() {
     pserial("Boot should be finished. Starting a shell");
     current_directory = "/";
     console_init(COLOR_WHITE, COLOR_BLACK);
-    current_directory = "/sbin";
-    execute_file(&rootfs, "sh", 1);
+    launchp();
 }
 
 void kmain() {

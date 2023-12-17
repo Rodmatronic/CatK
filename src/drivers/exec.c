@@ -38,6 +38,15 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
         vga_disable_cursor();
+        
+        char* Reboot = k_strstr(token, "reboot");
+        if (Reboot != NULL) {
+            syspw(0);
+        }
+        char* shutdown = k_strstr(token, "shutdown");
+        if (shutdown != NULL) {
+            syspw(1);
+        }
         // Check if the line contains "print "
         char* printToken = k_strstr(token, "print ");
         if (printToken != NULL) {
@@ -58,27 +67,17 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
             current_directory = "/";
             k_sh();
         }
-        
+        char* Time = k_strstr(token, "time");
+        if (Time != NULL) {
+            GetCurrentTime();
+        }
         char* clearToken = k_strstr(token, "clear");
         if (clearToken != NULL) {
             // Print the text following "clear"
             rows = 0;
             rows--;
             console_init(COLOR_WHITE, COLOR_BLACK);
-        }
-        char* Time = k_strstr(token, "time");
-        if (Time != NULL) {
-            GetCurrentTime();
-        }
-        /*
-        char* Reboot = k_strstr(token, "reboot");
-        if (Reboot != NULL) {
-            syspw(0);
-        }
-        char* shutdown = k_strstr(token, "shutdown");
-        if (shutdown != NULL) {
-            syspw(1);
-        }
+        }/*
         char* initcommand = k_strstr(token, "init");
         if (initcommand != NULL) {
             init();
