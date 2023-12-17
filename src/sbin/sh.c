@@ -9,6 +9,7 @@
 #include "keyboard.h"
 #include "string.h"
 #include "libc.h"
+#include "ide.h"
 #include "time.h"
 #include "exec.h"
 #include "fwrite.h"
@@ -34,7 +35,6 @@ void execute_command(const char* command) {
         printf("dmesg - n/a       uname - n/a\n");
         printf("panic - [input]\n");
         rows+=12;
-
     } else if (strcmp(command, "dmesg") == 0) {
         char* workingdir = current_directory;
         current_directory = "/etc";
@@ -102,6 +102,55 @@ void execute_command(const char* command) {
         read_from_file(&rootfs, new_directory, buffer, sizeof(buffer), 0);
         printf("%s\n", buffer);
         rows+=24;
+    } else if (strncmp(command, "dd ", 3) == 0) {
+        char* workingdir = current_directory;
+        console_init(COLOR_WHITE, COLOR_BLACK);
+        printf("WARNING. THIS WILL WRITE ANY DATA PROVIDED TO THE FIRST DISK AVALIBLE!\n", 0x8, 0x0);
+        printf("PLEASE %CREMOVE", 0x4, 0x0);
+        printf(" ANY DISKS YOU CARE ABOUT!");
+        read(0);
+        printf("THIS IS NOT A JOKE! THIS IS AN IN DEVELOPMENT FEATURE!");
+        read(0);
+        printf("PLEASE %CREMOVE", 0x4, 0x0);
+        printf(" ANY DISKS YOU CARE ABOUT!\n");
+        read(0);
+        const int DRIVE = ata_get_drive_by_model("VBOX HARDDISK");
+        const uint32 LBA = 0;
+        const uint8 NO_OF_SECTORS = 1;
+        char buf[ATA_SECTOR_SIZE] = {0};
+
+        const char* datatorw = command + 3;
+        struct data {
+            int id;
+            char name[32];
+        };
+
+        struct data e;
+        e.id = 10012;
+        strcpy(e.name, datatorw);
+
+        // write message to drive
+        strcpy(buf, datatorw);
+        ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
+
+        memset(buf, 0, sizeof(buf));
+        memcpy(buf, &e, sizeof(e));
+        ide_write_sectors(DRIVE, NO_OF_SECTORS, LBA + 1, (uint32)buf);
+        printf("data written\n");
+
+        // read message from drive
+        memset(buf, 0, sizeof(buf));
+        ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA, (uint32)buf);
+        printf("read data: %s\n", buf);
+
+        memset(buf, 0, sizeof(buf));
+        ide_read_sectors(DRIVE, NO_OF_SECTORS, LBA + 1, (uint32)buf);
+        memcpy(&e, buf, sizeof(e));
+        printf("id: %d, name: %s\n", e.id, e.name);
+
+        rows += 23;
+
+        current_directory = workingdir;
     } else if (strncmp(command, "uname", 4) == 0) {
         char* workingdir = current_directory;
         current_directory = "/proc";
@@ -143,6 +192,8 @@ void execute_command(const char* command) {
         printf("%C -error- Unrecognized command.\n", 0xF, 0x0);
     }
 }
+
+
 void PS1()
 {
     pserial("Setting PS1 for k_sh");

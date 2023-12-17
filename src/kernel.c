@@ -182,8 +182,8 @@ void boot() {
     kernmessage("Created /sbin/sh");
     write_to_file(&rootfs, "shutdown", "type:App\nshutdown");
     kernmessage("Created /sbin/shutdown");
-    write_to_file(&rootfs, "startgvga", "type:App\ngraphics_init");
-    kernmessage("Created /sbin/startgvga");
+    write_to_file(&rootfs, "vga", "type:App\ngraphics_init");
+    kernmessage("Created /sbin/vga");
     write_to_file(&rootfs, "reboot", "type:App\nreboot");
     kernmessage("Created /sbin/reboot");
 
