@@ -1,4 +1,5 @@
 #include "vga.h"
+#include "bitmap.h"
 #include "io_ports.h"
 #include "kernel.h"
 
@@ -172,7 +173,7 @@ void vga_graphics_init() {
 
     g_vga_buffer = (uint8*)VGA_ADDRESS;
 
-    vga_graphics_clear_color(COLOR_BLACK);
+    vga_graphics_clear_color(BLACK);
 }
 
 void vga_graphics_exit() {
@@ -274,6 +275,9 @@ void vga_graphics_draw_circle(uint16 x, uint16 y, uint16 radius, uint8 color) {
     }
 }
 
+void drawcursor()
+{
+}
 
 void vga_enable_cursor() {
     outportb(0x3D4, 0x0A);

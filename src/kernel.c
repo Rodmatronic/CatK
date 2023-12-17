@@ -20,6 +20,8 @@
 #include "ide.h"
 #include "bitmap.h"
 #include "launchp.h"
+#include "interface.h"
+
 #define PORT 0x3f8          // COM1
  
 #define VGA_CRT_CTRL_REG 0x3D4

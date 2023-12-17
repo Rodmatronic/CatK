@@ -47,6 +47,25 @@ typedef enum {
     COLOR_WHITE,
 } VGA_COLOR_TYPE;
 
+enum vga_color {
+    BLACK,
+    BLUE,
+    GREEN,
+    CYAN,
+    RED,
+    MAGENTA,
+    BROWN,
+    GREY,
+    DARK_GREY,
+    BRIGHT_BLUE,
+    BRIGHT_GREEN,
+    BRIGHT_CYAN,
+    BRIGHT_RED,
+    BRIGHT_MAGENTA,
+    YELLOW,
+    WHITE,
+};
+
 #define VGA_TEXT_ADDRESS       0xB8000
 #define VGA_TEXT_TOTAL_ITEMS   2200
 
@@ -109,6 +128,8 @@ void vga_graphics_draw_line(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 co
 void vga_graphics_draw_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint8 color);
 void vga_graphics_fill_rect(uint16 x, uint16 y, uint16 width, uint16 height, uint8 color);
 void vga_graphics_draw_circle(uint16 x, uint16 y, uint16 radius, uint8 color);
+
+void vga_graphics_interface();
 
 /**
  * disable blinking top-left cursor

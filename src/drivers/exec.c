@@ -12,6 +12,7 @@
 #include "vga.h"
 #include "bitmap.h"
 #include "kernel.h"
+#include "interface.h"
 
 void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char buffer[BLOCK_SIZE];
@@ -51,7 +52,8 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         char* graphics = k_strstr(token, "graphics_init");
         if (graphics != NULL) {
             vga_graphics_init();
-            draw_string(0, 5, COLOR_WHITE, "abcdefghijklmnopqrstuvwxyz");
+            vga_graphics_clear_color(BLUE);
+            vga_graphics_interface();
         }
         // Check if the line contains "print "
         char* printToken = k_strstr(token, "print ");
