@@ -225,11 +225,6 @@ void PreBoot()
         syspw(0);
     }
 
-    if (readnum == 4)
-    {
-        bootlogo = 1;
-    }
-
     args = "none";
     pserial("PreBoot: boot(), starting kernel");
     pserial("---------------------------------------------");

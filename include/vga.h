@@ -131,6 +131,8 @@ void vga_graphics_draw_circle(uint16 x, uint16 y, uint16 radius, uint8 color);
 
 void vga_graphics_interface();
 
+void drawpopupwindow();
+
 /**
  * disable blinking top-left cursor
  * by writing to CRT controller registers

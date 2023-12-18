@@ -25,10 +25,10 @@ void panic(const char* panictext, ...)
     write_serial("\n");
     printf("%Cpanic: %s\n", 0x0, 0xF, panictext);
 
-    vga_graphics_fill_rect(0, 0, VGA_MAX_WIDTH-1, VGA_MAX_HEIGHT/6, BLACK);
-    draw_string(0, 0, GREY, "panic: ");
-    draw_string(45, 0, GREY, panictext);
-    draw_string(0, 20, GREY, "Please turn off your computer");
+    vga_graphics_clear_color(BLUE);
+    drawpopupwindow();
+    draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 4, COLOR_DARK_GREY, "panic");
+    draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 20, COLOR_DARK_GREY, panictext);
     write_serial("panic: ");
     write_serial(panictext);
     write_serial("\n");
