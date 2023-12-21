@@ -29,6 +29,12 @@ extern struct FileSystem rootfs;
 
 static char buffer[BLOCK_SIZE];
 static char buffer2[BLOCK_SIZE];
+static char buffer3[BLOCK_SIZE];
+static char buffer4[BLOCK_SIZE];
+static char buffer5[BLOCK_SIZE];
+static char buffer6[BLOCK_SIZE];
+static char buffer7[BLOCK_SIZE];
+static char buffer8[BLOCK_SIZE];
 
 void rm_file(struct FileSystem* fs, const char* filename);
 void create_folder(struct FileSystem* fs, const char* foldername, const char* parent_folder);

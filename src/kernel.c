@@ -214,6 +214,9 @@ void boot() {
     add_data_to_file(&rootfs, "version", versionnumber);
     printf("%C   Created /proc/version\n", 0x8, 0x0);
 
+    write_to_file(&rootfs, "versionnum", versionnumber);
+    printf("%C   Created /proc/versionnum\n", 0x8, 0x0);
+
     write_to_file(&rootfs, "prebootver", prebootversion);
     printf("%C   Created /proc/prebootver\n", 0x8, 0x0);
 
