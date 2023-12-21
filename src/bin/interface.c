@@ -317,12 +317,12 @@ void powerapp()
                 char key = scancode_to_char(scancode);
 
                 if (scancode == 0x03) {
-                    vga_graphics_interface();
+                    vga_graphics_clear_color(back_color);
+                    powerapp();                    
                     break;
                 }
 
                 if (scancode == 0x02) {
-                    powerapp();
                     break;
                 }
             }
@@ -333,9 +333,9 @@ void powerapp()
         draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 4, COLOR_DARK_GREY, "Power");
         draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 20, COLOR_DARK_GREY, "1  Back");
         draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 32, COLOR_DARK_GREY, "2  Shutdown");
-        draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 42, COLOR_DARK_GREY, "3  reboot");
-        draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 52, COLOR_DARK_GREY, "4  halt");
-        draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 62, COLOR_DARK_GREY, "5  panic");
+        draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 42, COLOR_DARK_GREY, "3  Reboot");
+        draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 52, COLOR_DARK_GREY, "4  Halt");
+        draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 62, COLOR_DARK_GREY, "5  Panic");
     }
 }
 

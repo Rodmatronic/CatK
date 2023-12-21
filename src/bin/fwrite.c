@@ -13,7 +13,7 @@ void fwrite(char* name) {
     console_gotoxy(1, 22);
     printf("%C--------------------------------------------------------------------------------", 0xF, 0x0);
     console_gotoxy(1, 23);
-    printf("%C^Q: Save and quit  S: Save", 0xF, 0x0);
+    printf("%C^Q: Save and quit  ^S: Save", 0xF, 0x0);
     console_gotoxy(0, 1);
     // Buffer to store input
     char input_buffer[1024];  // Adjust size as needed
@@ -54,7 +54,6 @@ void fwrite(char* name) {
                 break;
             }else
             if (scancode == 0x1F && ctrl_pressed == 1) {
-                
                 // Write buffer contents to file
                 write_to_file(&rootfs, filename, input_buffer);
 
