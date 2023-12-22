@@ -25,7 +25,7 @@ void drawconfirmwindow(char* name, char* text, char* textp2, char* textp3)
     draw_string(VGA_MAX_WIDTH/5 + 2, VGA_MAX_HEIGHT/5 + 20, COLOR_DARK_GREY, text);
     draw_string(VGA_MAX_WIDTH/5 + 2, VGA_MAX_HEIGHT/5 + 30, COLOR_DARK_GREY, textp2);
     draw_string(VGA_MAX_WIDTH/5 + 2, VGA_MAX_HEIGHT/5 + 40, COLOR_DARK_GREY, textp3);
-    draw_string(VGA_MAX_WIDTH/5 + 2, VGA_MAX_HEIGHT/5 + 55, COLOR_DARK_GREY, "1  yes");
+    draw_string(VGA_MAX_WIDTH/5 + 2, VGA_MAX_HEIGHT/5 + 55, COLOR_DARK_GREY, "1  ok");
     draw_string(VGA_MAX_WIDTH/5 + 80, VGA_MAX_HEIGHT/5 + 55, COLOR_DARK_GREY, "2  back");
 }
 
@@ -244,7 +244,7 @@ void powerapp()
         }
 
         if (scancode == 0x03) {
-            drawconfirmwindow("confirm", "this will end", "your catk session", "");
+            drawconfirmwindow("Warning", "this will end", "your catk session", "");
             while (1)
             {
                 unsigned char scancode = read_key();
@@ -267,7 +267,7 @@ void powerapp()
         }
 
         if (scancode == 0x04) {
-            drawconfirmwindow("confirm", "this will end", "your catk session", "");
+            drawconfirmwindow("Warning", "this will end", "your catk session", "");
             while (1)
             {
                 unsigned char scancode = read_key();
@@ -288,7 +288,7 @@ void powerapp()
         }
 
         if (scancode == 0x05) {
-            drawconfirmwindow("confirm", "this will end", "your catk session", "");
+            drawconfirmwindow("Warning", "this will end", "your catk session", "");
             while (1)
             {
                 unsigned char scancode = read_key();
@@ -310,7 +310,7 @@ void powerapp()
         }
 
         if (scancode == 0x06) {
-            drawconfirmwindow("confirm", "this will end", "your catk session", "");
+            drawconfirmwindow("Warning", "this will end", "your catk session", "");
             while (1)
             {
                 unsigned char scancode = read_key();
