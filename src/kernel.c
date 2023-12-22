@@ -21,6 +21,7 @@
 #include "bitmap.h"
 #include "launchp.h"
 #include "interface.h"
+#include "process.h"
 
 #define PORT 0x3f8          // COM1
  
@@ -156,6 +157,9 @@ void boot() {
     create_folder(&rootfs, "/var", "/");
     list_files(&rootfs, 0);
     printf("\n");
+
+    //Add the kernel to the list of running processes
+    addProcess("kernel");
 
     current_directory = "/etc";
 

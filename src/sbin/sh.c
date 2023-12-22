@@ -13,6 +13,7 @@
 #include "time.h"
 #include "exec.h"
 #include "fwrite.h"
+#include "process.h"
 
 #define MAX_BUFFER_SIZE 128
 char input_buffer[MAX_BUFFER_SIZE];
@@ -21,7 +22,12 @@ int clearint = 0;
 
 void execute_command(const char* command) {
     // Pre-built commands
-    if (strcmp(command, "") == 0) {
+    if (strcmp(command, "top") == 0) {
+        console_init(COLOR_WHITE, COLOR_BLACK);
+        listProcesses();
+        rows+=24;
+
+    } else if (strcmp(command, "") == 0) {
         // Do nothing for an empty command
     } else if (strcmp(command, "help") == 0) {
         printf("\n%CCatK %s k_sh help\n\n", 0xB, 0x0, versionnumber);
@@ -35,6 +41,7 @@ void execute_command(const char* command) {
         printf("dmesg - n/a       uname - n/a\n");
         printf("panic - [input]\n");
         rows+=12;
+
     } else if (strcmp(command, "dmesg") == 0) {
         char* workingdir = current_directory;
         current_directory = "/etc";

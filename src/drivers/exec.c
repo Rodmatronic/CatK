@@ -13,6 +13,7 @@
 #include "bitmap.h"
 #include "kernel.h"
 #include "interface.h"
+#include "process.h"
 
 void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     char buffer[BLOCK_SIZE];
@@ -31,11 +32,22 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         }else
         if (quiet == 0)
         {
-            printf("%C -error- No such file or directory\n", 0xF, 0x0);
+            printf("\n%C -error- No such file or directory\n", 0xF, 0x0);
             return;
         }
         return;
     }
+
+    addProcess(filename);
+
+    // Print the values for demonstration
+    //printf("Process ID: %d\n", pid);
+    //printf("Process Name: %s\n", process.name);
+    write_serial("\n");
+    write_serial("Started process! Process name: ");
+    write_serial(processes[pid].name);
+    write_serial("\n");
+
     // Tokenize and execute each line
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
