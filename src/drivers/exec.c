@@ -65,7 +65,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         if (graphics != NULL) {
             vga_graphics_init();
             vga_graphics_clear_color(BLUE);
-            vga_graphics_interface();
+            vga_graphics_interface(1);
         }
         // Check if the line contains "print "
         char* printToken = k_strstr(token, "print ");

@@ -14,6 +14,7 @@
 #include "libc.h"
 #include "console.h"
 #include "panic.h"
+#include "interface.h"
 
 void panic(const char* panictext, ...)
 {
@@ -25,8 +26,10 @@ void panic(const char* panictext, ...)
     write_serial("\n");
     printf("%Cpanic: %s\n", 0x0, 0xF, panictext);
 
-    vga_graphics_clear_color(BLUE);
-    drawpopupwindow();
+    vga_graphics_clear_color(back_color);
+    app = "fatal error";
+    constUI(0);
+    drawpopupwindow(0);
     draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 4, COLOR_DARK_GREY, "panic");
     draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 20, COLOR_DARK_GREY, panictext);
     write_serial("panic: ");
