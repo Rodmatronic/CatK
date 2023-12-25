@@ -39,7 +39,7 @@ void execute_command(const char* command) {
         printf("halt - n/a        exec - [input]\n");
         printf("whoami - n/a      hostname - [input]\n");
         printf("dmesg - n/a       uname - n/a\n");
-        printf("panic - [input]\n");
+        printf("about - n/a       panic - [input]\n");
         rows+=12;
 
     } else if (strcmp(command, "dmesg") == 0) {
@@ -98,7 +98,21 @@ void execute_command(const char* command) {
         printf("\n");
         rm_file(&rootfs, new_directory);
         rows+=2;
-    } else if (strncmp(command, "time ", 4) == 0) {
+    } else if (strncmp(command, "about ", 5) == 0) {
+        char* workingdir = current_directory;
+        printf("\n\n");
+        printf("Current shell is k_sh, running on ");
+        current_directory = "/proc";
+        read_from_file(&rootfs, "arch", buffer, sizeof(buffer), 0);
+        printf("%s", buffer);
+        printf(". Thank you for using Catkernel.\n");
+        if (rows > 24)
+        {
+            rows+=2;
+        }
+        current_directory = workingdir;
+        rows+=3;
+    }else if (strncmp(command, "time ", 4) == 0) {
         printf("\n\n");
         GetCurrentTime();
         rows+=2;
@@ -214,12 +228,25 @@ void PS1()
     current_directory = working_dir;
 }
 
+void motd()
+{
+    char* working_dir = current_directory;
+    current_directory = "/etc";
+    read_from_file(&rootfs, "motd", buffer, sizeof(buffer), 1);
+    printf("%s", buffer);
+    current_directory = working_dir;
+}
+
 void k_sh() {
+    console_init(COLOR_WHITE, COLOR_BLACK);
     write_serial("k_sh for catk version ");
     write_serial(versionnumber);
     write_serial("\n");
-    rows = 0;
+    rows = 3;
     vga_enable_cursor();
+    pserial("showing motd");
+    motd();
+    pserial("showing PS1");
     PS1();
     current_directory = "/";
     while (1) {

@@ -252,6 +252,7 @@ void boot() {
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
     write_to_file(&rootfs, "session", rootUser.username);
+    write_to_file(&rootfs, "motd", "Welcome to Catkernel. You are using k_sh, Catkernel's built-in shell.\nYou can change this message in /etc/motd");
 
     current_directory = "/";
     create_folder(&rootfs, "/home", "/");

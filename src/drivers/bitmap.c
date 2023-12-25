@@ -1,5 +1,4 @@
 #include "bitmap.h"
-
 #include "types.h"
 #include "vga.h"
 

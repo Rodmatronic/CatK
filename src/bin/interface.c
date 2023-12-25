@@ -399,6 +399,58 @@ void vga_graphics_interface(int firstopen)
 {   
     app = "desktop";
 
+        if (firstopen == 1)
+        {
+            vga_graphics_clear_color(back_color);
+
+        }
+/*
+//desktop pattern.
+        int i = 0;
+        int X = 0;
+
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 25);
+            X+=25;
+        }
+        X = 0;
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 50);
+            X+=25;
+        }
+        X = 0;
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 75);
+            X+=25;
+        }
+        X = 0;
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 100);
+            X+=25;
+        }
+        X = 0;
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 125);
+            X+=25;
+        }
+        X = 0;
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 150);
+            X+=25;
+        }
+        X = 0;
+        for (i = 1; i < 14; ++i)
+        {
+            creu(X, 175);
+            X+=25;
+        }
+*/
     while (1)
     {
         constUI(1);
@@ -424,12 +476,6 @@ void vga_graphics_interface(int firstopen)
         if (scancode == 0x05)
         {
             powerapp();
-        }
-
-        if (firstopen == 1)
-        {
-            vga_graphics_clear_color(back_color);
-
         }
 
     }
