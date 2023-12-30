@@ -79,7 +79,13 @@ void execute_command(const char* command) {
         rows+=24;
     } else if (strcmp(command, "fwrite") == 0) {
         printf("%C --Please specify a filename--", 0xF, 0x0);
-    } else  if (strcmp(command, "halt") == 0) {
+    } else if (strncmp(command, "mkdir ", 6) == 0) {
+        const char* new_directory = command + 6;
+        char* workingdir = current_directory;
+        create_folder(&rootfs, new_directory, workingdir);
+        
+        rows+=24;
+    } else if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
     } else if (strncmp(command, "panic ", 6) == 0) {

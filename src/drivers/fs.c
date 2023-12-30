@@ -23,7 +23,6 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
         if (strcmp(fs->folder_table[i], foldername) == 0 &&
             strcmp(fs->file_table[i].parent_folder, parent_folder) == 0) {
             printf("Error: Folder %s already exists\n", foldername);
-            total_files++;
             return;
         }
     }
@@ -34,12 +33,18 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
             // Empty slot found, create a new folder entry
             strncpy(fs->folder_table[i], foldername, FOLDERNAME_SIZE);
 
-            // Adjust the parent folder path for absolute paths
+            // Adjust the parent folder path
             char adjusted_parent[FOLDERNAME_SIZE];
-            if (foldername[0] == '/') {
-                strncpy(adjusted_parent, "/", FOLDERNAME_SIZE);
-            } else {
+            if (parent_folder[0] == '/') {
+                // Absolute path
                 strncpy(adjusted_parent, parent_folder, FOLDERNAME_SIZE);
+            } else {
+                // Relative path
+                strncpy(adjusted_parent, current_directory, FOLDERNAME_SIZE);
+                if (adjusted_parent[strlen(adjusted_parent) - 1] != '/') {
+                    strncat(adjusted_parent, "/", 1);
+                }
+                strncat(adjusted_parent, parent_folder, FOLDERNAME_SIZE - strlen(adjusted_parent) - 1);
             }
 
             // Find an empty slot in the file table
@@ -48,7 +53,7 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
                     // Empty slot found, create a new file entry for the folder
                     strncpy(fs->file_table[j].filename, foldername, FILENAME_SIZE);
                     fs->file_table[j].is_folder = 1;
-                    strncpy(fs->file_table[j].parent_folder, adjusted_parent, FOLDERNAME_SIZE); // Set the parent folder
+                    strncpy(fs->file_table[j].parent_folder, adjusted_parent, FOLDERNAME_SIZE);
                     return;
                 }
             }
@@ -58,6 +63,7 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
     }
     printf("Error: Folder table is full\n");
 }
+
 
 void cd_parent_directory() {
     // Find the last occurrence of '/' in the current directory
@@ -81,36 +87,27 @@ void cd_parent_directory() {
 void change_directory(struct FileSystem* fs, const char* path) {
     char new_path[FOLDERNAME_SIZE];
 
-    if (path[0] == '/') {
-        // Absolute path
-        strncpy(new_path, path, FOLDERNAME_SIZE - 1);
-        new_path[FOLDERNAME_SIZE - 1] = '\0';
-    } else {
-        // Relative path
-        strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
-        new_path[FOLDERNAME_SIZE - 1] = '\0';
+    // Relative path
+    strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
+    new_path[FOLDERNAME_SIZE - 1] = '\0';
 
-        // Ensure there is a '/' between the current directory and the relative path
-        if (new_path[strlen(new_path) - 1] != '/' && strlen(new_path) < FOLDERNAME_SIZE - 1) {
-            strncat(new_path, "/", 1);
-        }
-
-        strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
-        new_path[FOLDERNAME_SIZE - 1] = '\0';
+    if (new_path[strlen(new_path) - 1] != '/') {
+        strncat(new_path, "/", 1);
     }
+
+    strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
+    new_path[FOLDERNAME_SIZE - 1] = '\0';
 
     // Check if the folder exists
     int folder_found = 0;
     for (size i = 0; i < MAX_FOLDERS; ++i) {
-        // Ensure the folder is an exact match and not just a substring
-        if (strcmp(fs->folder_table[i], new_path) == 0) {
-            // Set the flag to indicate folder found
+        if (strcmp(fs->folder_table[i], new_path) == 0 ||
+            strcmp(fs->folder_table[i], path) == 0) {
             folder_found = 1;
             break;
         }
     }
 
-    // Update the current working directory only if the folder is found
     if (folder_found) {
         strncpy(current_directory, new_path, FOLDERNAME_SIZE);
         //printf("Changed directory to %s\n", current_directory);
@@ -119,7 +116,6 @@ void change_directory(struct FileSystem* fs, const char* path) {
         // Reset the current directory to a safe default or handle it based on your design.
     }
 }
-
 
 void write_to_file(struct FileSystem* fs, const char* filename, const char* data, ...) {
     const char* current_folder = current_directory; // Get the current folder
