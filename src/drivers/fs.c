@@ -87,16 +87,32 @@ void cd_parent_directory() {
 void change_directory(struct FileSystem* fs, const char* path) {
     char new_path[FOLDERNAME_SIZE];
 
-    // Relative path
-    strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
-    new_path[FOLDERNAME_SIZE - 1] = '\0';
-
-    if (new_path[strlen(new_path) - 1] != '/') {
-        strncat(new_path, "/", 1);
+    // Check if the path is "/"
+    if (strcmp(path, "/") == 0) {
+        current_directory = "/";
+        return;
     }
 
-    strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
-    new_path[FOLDERNAME_SIZE - 1] = '\0';
+    // Check if the path starts with "/"
+    if (path[0] == '/') {
+        current_directory = "/";
+        return;
+        // If the path starts with "/", set the current directory to root and then change to the specified folder
+        strncpy(new_path, "/", FOLDERNAME_SIZE - 1);
+        new_path[FOLDERNAME_SIZE - 1] = '\0';
+        strncat(new_path, path + 1, FOLDERNAME_SIZE - strlen(new_path) - 1);
+    } else {
+        // Relative path
+        strncpy(new_path, current_directory, FOLDERNAME_SIZE - 1);
+        new_path[FOLDERNAME_SIZE - 1] = '\0';
+
+        if (new_path[strlen(new_path) - 1] != '/') {
+            strncat(new_path, "/", 1);
+        }
+
+        strncat(new_path, path, FOLDERNAME_SIZE - strlen(new_path) - 1);
+        new_path[FOLDERNAME_SIZE - 1] = '\0';
+    }
 
     // Check if the folder exists
     int folder_found = 0;
