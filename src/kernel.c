@@ -138,23 +138,27 @@ void boot() {
 
     kernmessage("Perfect! &rootfs created with max files from MAX_FILES");
     kernmessage("Creating '/' structure");
-    create_folder(&rootfs, "/bin", "/");
-    create_folder(&rootfs, "/boot", "/");
-    create_folder(&rootfs, "/cdrom", "/");
-    create_folder(&rootfs, "/dev", "/");
-    create_folder(&rootfs, "/etc", "/");
-    create_folder(&rootfs, "/home", "/");
-    create_folder(&rootfs, "/lib", "/");
-    create_folder(&rootfs, "/media", "/");
-    create_folder(&rootfs, "/mnt", "/");
-    create_folder(&rootfs, "/mount", "/");
-    create_folder(&rootfs, "/proc", "/");
-    create_folder(&rootfs, "/run", "/");
-    create_folder(&rootfs, "/sbin", "/");
-    create_folder(&rootfs, "/sys", "/");
-    create_folder(&rootfs, "/tmp", "/");
-    create_folder(&rootfs, "/usr", "/");
-    create_folder(&rootfs, "/var", "/");
+    create_folder(&rootfs, "bin", "/");
+    create_folder(&rootfs, "boot", "/");
+    create_folder(&rootfs, "cdrom", "/");
+    create_folder(&rootfs, "dev", "/");
+    create_folder(&rootfs, "etc", "/");
+        create_folder(&rootfs, "ksh", "/etc");
+    create_folder(&rootfs, "home", "/");
+    create_folder(&rootfs, "lib", "/");
+    create_folder(&rootfs, "media", "/");
+    create_folder(&rootfs, "mnt", "/");
+    create_folder(&rootfs, "mount", "/");
+    create_folder(&rootfs, "proc", "/");
+    create_folder(&rootfs, "run", "/");
+    create_folder(&rootfs, "sbin", "/");
+    create_folder(&rootfs, "sys", "/");
+    create_folder(&rootfs, "tmp", "/");
+    create_folder(&rootfs, "usr", "/");
+        create_folder(&rootfs, "bin", "/usr");
+        create_folder(&rootfs, "local", "/usr");
+        create_folder(&rootfs, "share", "/usr");
+    create_folder(&rootfs, "var", "/");
     list_files(&rootfs, 0);
     printf("\n");
 
@@ -190,7 +194,6 @@ void boot() {
     kernmessage("Created /sbin/vga");
     write_to_file(&rootfs, "reboot", "type:App\nreboot");
     kernmessage("Created /sbin/reboot");
-
 
     kernmessage("Freeing system memory");
 
@@ -243,20 +246,28 @@ void boot() {
     //char buf[ATA_SECTOR_SIZE] = {0};
     ata_init();
 
+    current_directory = "/boot";
+
+    write_to_file(&rootfs, "compat-readme", "This folder is not use by CatK in any resonable way.\n\nThis is just here for UNIX compatibility :3");
+
     sleep(1);
 
-    kernmessage("Setting up default user");
     // root user
+    kernmessage("Setting up default user");
     current_directory = "/etc";
     strcpy(rootUser.username, "root");
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);
     write_to_file(&rootfs, "session", rootUser.username);
     write_to_file(&rootfs, "motd", "Welcome to Catkernel. You are using k_sh, Catkernel's built-in shell.\nYou can change this message in /etc/motd");
+    current_directory = "/home";
+    create_folder(&rootfs, "root", "/home");
+    current_directory = "/home/root";
+    write_to_file(&rootfs, "readme", "Welcome to CatK! This is the default root user.\n\nThank you for using CatK. Built with love and care by Rodmatronics, Irix, and a few other awesome dudes :3");
+    write_to_file(&rootfs, "history", "");
+
 
     current_directory = "/";
-    create_folder(&rootfs, "/home", "/");
-    create_folder(&rootfs, "/root", "/home");
     kernmessage("Starting launchp...");
 
     bootlogo = 0;

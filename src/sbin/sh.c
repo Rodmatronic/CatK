@@ -21,12 +21,24 @@ int buffer_index = 0;
 int clearint = 0;
 
 void execute_command(const char* command) {
+    char* workingdir = current_directory;
+    current_directory = "/home/root";
+    add_data_to_file(&rootfs, "history", command);
+    add_data_to_file(&rootfs, "history", "\n");
+    current_directory = workingdir;
+
     // Pre-built commands
     if (strcmp(command, "top") == 0) {
         console_init(COLOR_WHITE, COLOR_BLACK);
         listProcesses();
         rows+=24;
-
+    } else if (strcmp(command, "history") == 0) {
+        char* workingdir = current_directory;
+        current_directory = "/home/root";
+        read_from_file(&rootfs, "history", buffer, sizeof(buffer), 0);
+        printf("\n\n%s\n", buffer);
+        rows+=24;
+        current_directory = workingdir;
     } else if (strcmp(command, "") == 0) {
         // Do nothing for an empty command
     } else if (strcmp(command, "help") == 0) {
@@ -39,6 +51,7 @@ void execute_command(const char* command) {
         printf("halt - n/a        exec - [input]\n");
         printf("whoami - n/a      hostname - [input]\n");
         printf("dmesg - n/a       uname - n/a\n");
+        printf("mkdir - [input]   history - n/a\n");
         printf("about - n/a       panic - [input]\n");
         rows+=12;
 
@@ -83,8 +96,6 @@ void execute_command(const char* command) {
         const char* new_directory = command + 6;
         char* workingdir = current_directory;
         create_folder(&rootfs, new_directory, workingdir);
-        
-        rows+=24;
     } else if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
