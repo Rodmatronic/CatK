@@ -69,6 +69,11 @@ void execute_command(const char* command) {
         printf("\n\n%s\n", buffer);
         rows+=3;
         current_directory = workingdir;
+    } else if (strncmp(command, "useradd ", 7) == 0)  {
+        char* working_dir = current_directory;
+        const char* newuser = command + 8;
+        create_folder(&rootfs, newuser, "/home");
+        current_directory = working_dir;
     } else if (strncmp(command, "hostname ", 8) == 0)  {
         char* working_dir = current_directory;
         const char* hostname2be_added = command + 9;

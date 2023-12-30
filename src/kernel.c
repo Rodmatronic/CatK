@@ -248,8 +248,6 @@ void boot() {
 
     current_directory = "/boot";
 
-    write_to_file(&rootfs, "compat-readme", "This folder is not use by CatK in any resonable way.\n\nThis is just here for UNIX compatibility :3");
-
     sleep(1);
 
     // root user
@@ -266,14 +264,14 @@ void boot() {
     write_to_file(&rootfs, "readme", "Welcome to CatK! This is the default root user.\n\nThank you for using CatK. Built with love and care by Rodmatronics, Irix, and a few other awesome dudes :3");
     write_to_file(&rootfs, "history", "");
 
-
-    current_directory = "/";
-    kernmessage("Starting launchp...");
-
     bootlogo = 0;
 
+    kernmessage("Creating needed files in the rootFS");
     current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
+    write_to_file(&rootfs, "compat-readme", "This folder is not used by CatK in any resonable way.\n\nThis is just here for UNIX compatibility :3");
+
+    kernmessage("Starting launchp...");
 
     pserial("Boot should be finished. Starting a shell");
 
