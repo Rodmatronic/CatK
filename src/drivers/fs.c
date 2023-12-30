@@ -112,7 +112,7 @@ void change_directory(struct FileSystem* fs, const char* path) {
         strncpy(current_directory, new_path, FOLDERNAME_SIZE);
         //printf("Changed directory to %s\n", current_directory);
     } else {
-        printf("Error: Folder %s not found\n", new_path);
+        printf("%C --Error: Folder %s not found\n", 0xF, 0x0, new_path);
         // Reset the current directory to a safe default or handle it based on your design.
     }
 }
