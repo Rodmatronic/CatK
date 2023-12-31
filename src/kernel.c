@@ -12,6 +12,7 @@
 #include "keyboard.h"
 #include "usb.h"
 #include "sh.h"
+#include "helpdocs.h"
 #include "sysdiag.h"
 #include "devconfig.h"
 #include "exec.h"
@@ -270,6 +271,7 @@ void boot() {
     current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
     write_to_file(&rootfs, "compat-readme", "This folder is not used by CatK in any resonable way.\n\nThis is just here for UNIX compatibility :3");
+    createhelpdocs();
 
     kernmessage("Setting up ENV variables");
     current_directory = "/var";

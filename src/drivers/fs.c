@@ -22,7 +22,7 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
     for (size i = 0; i < MAX_FOLDERS; ++i) {
         if (strcmp(fs->folder_table[i], foldername) == 0 &&
             strcmp(fs->file_table[i].parent_folder, parent_folder) == 0) {
-            printf("Error: Folder %s already exists\n", foldername);
+            printf("%C -error- Folder already exists\n", 0xF, 0x0);
             return;
         }
     }
@@ -57,11 +57,11 @@ void create_folder(struct FileSystem* fs, const char* foldername, const char* pa
                     return;
                 }
             }
-            printf("Error: File table is full\n");
+            printf("%C -error- File table is full\n", 0xF, 0x0);
             return;
         }
     }
-    printf("Error: Folder table is full\n");
+    printf("%C -error- File table is full\n", 0xF, 0x0);
 }
 
 
@@ -114,13 +114,27 @@ void change_directory(struct FileSystem* fs, const char* path) {
         new_path[FOLDERNAME_SIZE - 1] = '\0';
     }
 
-    // Check if the folder exists
+    // Check if the folder exists in the current or any subdirectory
     int folder_found = 0;
     for (size i = 0; i < MAX_FOLDERS; ++i) {
-        if (strcmp(fs->folder_table[i], new_path) == 0 ||
-            strcmp(fs->folder_table[i], path) == 0) {
+        if (strcmp(fs->folder_table[i], new_path) == 0) {
             folder_found = 1;
             break;
+        }
+        if (k_strstr(new_path, fs->folder_table[i]) != NULL) {
+            folder_found = 1;
+            break;
+        }
+    }
+
+    // Check if the folder exists in the parent directory
+    if (!folder_found) {
+        for (size i = 0; i < MAX_FOLDERS; ++i) {
+            if (strcmp(fs->folder_table[i], new_path) == 0 ||
+                strcmp(fs->folder_table[i], path) == 0) {
+                folder_found = 1;
+                break;
+            }
         }
     }
 
@@ -129,9 +143,11 @@ void change_directory(struct FileSystem* fs, const char* path) {
         //printf("Changed directory to %s\n", current_directory);
     } else {
         printf("%C -error- Folder %s not found\n", 0xF, 0x0, new_path);
-        // Reset the current directory to a safe default or handle it based on your design.
     }
 }
+
+
+
 
 void write_to_file(struct FileSystem* fs, const char* filename, const char* data, ...) {
     const char* current_folder = current_directory; // Get the current folder
@@ -161,7 +177,7 @@ void write_to_file(struct FileSystem* fs, const char* filename, const char* data
     }
 
     // File table is full
-    printf("Error: File table is full\n");
+    printf("%C -error- File table is full\n", 0xF, 0x0);
 }
 
 
@@ -272,7 +288,7 @@ void rm_file(struct FileSystem* fs, const char* filename) {
     }
 
     // File not found or not in the current folder
-    printf("Error: File %s not found in the current folder\n", filename);
+    printf("%C -error- No such file or directory\n", 0xF, 0x0);
 }
 
 void read_from_file(const struct FileSystem* fs, const char* filename, char* buffer, size buffer_size, int allow_anywhere) {
@@ -285,7 +301,7 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
             strcmp(fs->file_table[i].parent_folder, current_folder) == 0) {
             // Check if the file is a folder
             if (fs->file_table[i].is_folder) {
-                printf("%s is a folder and cannot be read as a file.\n", filename);
+                printf("%C -error- %s is a folder\n", 0xF, 0x0, filename);
                 strncpy(buffer, "", buffer_size); // Clear the buffer
                 return;
             }
@@ -297,7 +313,7 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
     }
 
     // File not found or not in the current folder
-    printf("Error: File %s not found in the current folder\n", filename);
+    printf("%C -error- No such file or directory\n", 0xF, 0x0);
     strncpy(buffer, "", buffer_size); // Clear the buffer
 }
 
@@ -307,7 +323,7 @@ void read_last_line_from_file(const struct FileSystem* fs, const char* filename,
         if (strcmp(fs->file_table[i].filename, filename) == 0) {
             // Check if the file is a folder
             if (fs->file_table[i].is_folder) {
-                printf("%s is a folder and cannot be read as a file.\n", filename);
+                printf("%C -error- %s is a folder\n", 0xF, 0x0, filename);
                 strncpy(buffer, "", buffer_size); // Clear the buffer
                 return;
             }
@@ -337,7 +353,7 @@ void read_last_line_from_file(const struct FileSystem* fs, const char* filename,
     }
 
     // File not found
-    strncpy(buffer, "File not found", buffer_size);
+    printf("%C -error- No such file or directory\n", 0xF, 0x0);
 }
 
 void add_data_to_file(struct FileSystem* fs, const char* filename, const char* additional_data) {
@@ -357,7 +373,7 @@ void add_data_to_file(struct FileSystem* fs, const char* filename, const char* a
                 // Update the file size
                 fs->file_table[i].size += len_to_copy;
             } else {
-                printf("Error: Not enough space to add more data to the file %s\n", filename);
+                printf("%C -fatal I/O error- Not enough space to add more data to the file %s\n", 0xF, 0x0, filename);
             }
             
             return;
@@ -365,5 +381,5 @@ void add_data_to_file(struct FileSystem* fs, const char* filename, const char* a
     }
 
     // File not found
-    printf("Error: File %s not found\n", filename);
+    printf("%C -error- No such file or directory\n", 0xF, 0x0);
 }

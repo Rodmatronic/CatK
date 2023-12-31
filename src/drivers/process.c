@@ -14,7 +14,7 @@ void addProcess(const char *name) {
         strncpy(processes[pid].name, name, sizeof(processes[pid].name) - 1);
         processes[pid].name[sizeof(processes[pid].name) - 1] = '\0'; // Ensure null-termination
         pid++;
-        printf("Added process: %s\n", name);
+        //printf("Added process: %s\n", name);
     } else {
         printf("Max number of entries reached. Cannot add more processes.\n");
     }

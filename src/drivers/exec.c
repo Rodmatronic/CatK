@@ -32,13 +32,13 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         }else
         if (quiet == 0)
         {
-            printf("\n%C -error- No such file or directory\n", 0xF, 0x0);
             return;
         }
         return;
     }
 
     addProcess(filename);
+    rows+=25;
 
     // Print the values for demonstration
     //printf("Process ID: %d\n", pid);
@@ -72,7 +72,8 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         if (printToken != NULL) {
             // Print the text following "print "
             printf("%s\n", printToken + strlen("print "));
-        }
+            break;;
+        } else {
         char* printTokendark = k_strstr(token, "print_dark ");
         if (printTokendark != NULL) {
             // Print the text following "print "
@@ -191,5 +192,6 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         // Move to the next line
         vga_enable_cursor();
         token = k_strtok(NULL, "\n");
+        }
     }
 }

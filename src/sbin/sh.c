@@ -42,20 +42,13 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "") == 0) {
         // Do nothing for an empty command
     } else if (strcmp(command, "help") == 0) {
-        printf("\n%CCatK %s k_sh help\n\n", 0xB, 0x0, versionnumber);
-        printf("cd - [dir]        echo - [input]\n");
-        printf("ls - [input]      halt - n/a\n");
-        printf("rm - [input]      time - n/a\n");
-        printf("reboot - n/a      cat  - [input]\n");
-        printf("shutdown - n/a    help - n/a\n");
-        printf("halt - n/a        exec - [input]\n");
-        printf("whoami - n/a      hostname - [input]\n");
-        printf("dmesg - n/a       uname - n/a\n");
-        printf("mkdir - [input]   history - n/a\n");
-        printf("about - n/a       adduser - [input]\n");
-        printf("panic - [input]\n");
-        rows+=12;
-
+        char* working_dir = current_directory;
+        console_init(COLOR_WHITE, COLOR_BLACK);
+        rows+=24;
+        current_directory = "/etc/docs";
+        read_from_file(&rootfs, "helpdocs1", buffer, sizeof(buffer), 0);
+        printf("%s", buffer);
+        current_directory = working_dir;
     } else if (strcmp(command, "dmesg") == 0) {
         char* workingdir = current_directory;
         current_directory = "/etc";
@@ -114,13 +107,11 @@ void execute_command(const char* command) {
         // Change to the specified directory
         execute_file(&rootfs, new_directory, 0);
         vga_enable_cursor();
-        rows+=25;
     } else if (strncmp(command, "rm ", 3) == 0) {
         const char* new_directory = command + 3;
         // Change to the specified directory
-        printf("\n");
         rm_file(&rootfs, new_directory);
-        rows+=2;
+        rows+=1;
     } else if (strncmp(command, "about ", 5) == 0) {
         char* workingdir = current_directory;
         console_init(COLOR_WHITE, COLOR_BLACK);
