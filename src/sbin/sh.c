@@ -122,18 +122,62 @@ void execute_command(const char* command) {
         rows+=2;
     } else if (strncmp(command, "about ", 5) == 0) {
         char* workingdir = current_directory;
-        printf("\n\n");
-        printf("Current shell is k_sh, running on ");
+        console_init(COLOR_WHITE, COLOR_BLACK);
+        console_gotoxy(0, 0);
+        printf("%CABOUT\n", 0xF, 0x0);
+        console_gotoxy(4, 6);
+        printf("%C             _      _\n", 0xF, 0x0);
+        console_gotoxy(4, 7);
+        printf("%C            / \\    / \\\n", 0xF, 0x0);
+        console_gotoxy(4, 8);
+        printf("%C           /   \\__/   \\\n", 0xB, 0x0);
+        console_gotoxy(4, 9);
+        printf("%C          /            \\\n", 0xB, 0x0);
+        console_gotoxy(4, 10);
+        printf("%C         |    |    |    |\n", 0xB, 0x0);
+        console_gotoxy(4, 11);
+        printf("%C        =|      -       |=\n", 0xB, 0x0);
+        console_gotoxy(4, 12);
+        printf("%C        =\\      v       /=\n", 0xB, 0x0);
+        console_gotoxy(4, 13);
+        printf("%C          \\            /\n", 0x3, 0x0);
+        console_gotoxy(4, 14);
+        printf("%C           =====\\/=====\n", 0xC, 0x0);
+        console_gotoxy(4, 15);
+        printf("%C              (CatK)\n", 0xE, 0x0);
+        console_gotoxy(40, 4);
+        printf("%CThank you for using ", 0xF, 0x0);
+        printf("%CCatkernel.\n", 0xB, 0x0);
+        console_gotoxy(40, 5);
+        printf("------------------------------\n");
+        console_gotoxy(40, 6);
         current_directory = "/proc";
         read_from_file(&rootfs, "arch", buffer, sizeof(buffer), 0);
-        printf("%s", buffer);
-        printf(". Thank you for using Catkernel.\n");
-        if (rows > 24)
-        {
-            rows+=2;
-        }
+        printf("Arch: %s\n", buffer);
+        console_gotoxy(40, 7);
+        read_from_file(&rootfs, "ostype", buffer, sizeof(buffer), 0);
+        printf("OS: %s\n", buffer);
+        console_gotoxy(40, 8);
+        current_directory = "/var";
+        read_from_file(&rootfs, "SHELL", buffer, sizeof(buffer), 0);
+        printf("Shell: %s\n", buffer);
+        console_gotoxy(40, 9);
+        printf("Dimensions: %ux%u\n", VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+        console_gotoxy(40, 10);
+        current_directory = "/proc";
+        read_from_file(&rootfs, "cpu", buffer, sizeof(buffer), 0);
+        printf("CPU: %s\n", buffer);
+        console_gotoxy(40, 11);
+        current_directory = "/var";
+        read_from_file(&rootfs, "USER", buffer, sizeof(buffer), 0);
+        printf("User: %s\n", buffer);
+        console_gotoxy(40, 12);
+        current_directory = "/var";
+        read_from_file(&rootfs, "HOME", buffer, sizeof(buffer), 0);
+        printf("Home: %s\n", buffer);
+
         current_directory = workingdir;
-        rows+=3;
+        rows+=24;
     }else if (strncmp(command, "time ", 4) == 0) {
         printf("\n\n");
         GetCurrentTime();
@@ -198,24 +242,38 @@ void execute_command(const char* command) {
         char* workingdir = current_directory;
         current_directory = "/proc";
         read_from_file(&rootfs, "version", buffer, sizeof(buffer), 0);
-        printf("\n%s\n", buffer);
+        printf("\n");
+        if (rows >= 24)
+        {
+            printf("\n");
+        }
+        printf("%s\n", buffer);
         write_serial("uname: ");
         write_serial(buffer);
         write_serial("\n");
-        rows+=2;
+        rows+=1;
         current_directory = workingdir;
     } else if (strcmp(command, "ls") == 0) {
-        printf("\n\n");
+        printf("\n");
+        if (rows >= 24)
+        {
+            printf("\n");
+        }
         list_files(&rootfs, 0);
         write_serial("\n");
-        rows+=4;
+        rows+=2;
     } else if (strncmp(command, "serial ", 7) == 0) {
         const char* new_directory = command + 7;
         pserial(new_directory);
     } else if (strncmp(command, "echo ", 5) == 0) {
         const char* new_directory = command + 5;
-        printf("\n\n%s", new_directory);
-        rows+=3;
+        printf("\n");
+        if (rows >= 24)
+        {
+            printf("\n");
+        }
+        printf("%s", new_directory);
+        rows+=1;
     } else if (strncmp(command, "cd ", 3) == 0) {
         // Check if the command starts with "cd "
         const char* new_directory = command + 3;  // Get the characters after "cd "
@@ -243,9 +301,10 @@ void PS1()
     char* working_dir = current_directory;
     console_gotoxy(0, rows);
     printf("%C[", 0xB, 0x0);
+    current_directory = "/etc";
     read_from_file(&rootfs, "session", buffer, sizeof(buffer), 1);
     read_from_file(&rootfs, "hostname", buffer2, sizeof(buffer2), 1);
-    printf("%C▓%s - %s (%s)", 0x3, 0x0, buffer, buffer2, current_directory);
+    printf("%C▓%s - %s (%s)", 0x3, 0x0, buffer, buffer2, working_dir);
     printf("%C]%C# ", 0xB, 0x0, 0xF, 0x0);
     current_directory = working_dir;
 }
@@ -269,8 +328,8 @@ void k_sh() {
     pserial("showing motd");
     motd();
     pserial("showing PS1");
-    PS1();
     current_directory = "/";
+    PS1();
     while (1) {
         unsigned char scancode = read_key();
         char key = scancode_to_char(scancode);

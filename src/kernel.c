@@ -143,7 +143,6 @@ void boot() {
     create_folder(&rootfs, "cdrom", "/");
     create_folder(&rootfs, "dev", "/");
     create_folder(&rootfs, "etc", "/");
-        create_folder(&rootfs, "ksh", "/etc");
     create_folder(&rootfs, "home", "/");
     create_folder(&rootfs, "lib", "/");
     create_folder(&rootfs, "media", "/");
@@ -155,10 +154,13 @@ void boot() {
     create_folder(&rootfs, "sys", "/");
     create_folder(&rootfs, "tmp", "/");
     create_folder(&rootfs, "usr", "/");
-        create_folder(&rootfs, "bin", "/usr");
-        create_folder(&rootfs, "local", "/usr");
-        create_folder(&rootfs, "share", "/usr");
     create_folder(&rootfs, "var", "/");
+
+    create_folder(&rootfs, "ksh", "/etc");
+    create_folder(&rootfs, "bin", "/usr");
+    create_folder(&rootfs, "local", "/usr");
+    create_folder(&rootfs, "share", "/usr");
+
     list_files(&rootfs, 0);
     printf("\n");
 
@@ -248,8 +250,6 @@ void boot() {
 
     current_directory = "/boot";
 
-    sleep(1);
-
     // root user
     kernmessage("Setting up default user");
     current_directory = "/etc";
@@ -271,9 +271,18 @@ void boot() {
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
     write_to_file(&rootfs, "compat-readme", "This folder is not used by CatK in any resonable way.\n\nThis is just here for UNIX compatibility :3");
 
-    kernmessage("Starting launchp...");
+    kernmessage("Setting up ENV variables");
+    current_directory = "/var";
+    write_to_file(&rootfs, "CATKVER", versionnumber);
+    write_to_file(&rootfs, "HOSTNAME", "catk");
+    write_to_file(&rootfs, "LANG", "en");
+    write_to_file(&rootfs, "USER", "root");
+    write_to_file(&rootfs, "HOME", "/home");
+    write_to_file(&rootfs, "SHELL", "k_sh");
 
     pserial("Boot should be finished. Starting a shell");
+
+    kernmessage("Starting launchp...");
 
     current_directory = "/";
     console_init(COLOR_WHITE, COLOR_BLACK);

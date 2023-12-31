@@ -185,6 +185,7 @@ void list_files(const struct FileSystem* fs, int type) {
 
     if (type == 0) {
         int line_length = 0;
+        int row_count = 0;  // Track the number of rows
 
         for (size i = 0; i < MAX_FILES; ++i) {
             if (fs->file_table[i].filename[0] != '\0' &&
@@ -203,9 +204,13 @@ void list_files(const struct FileSystem* fs, int type) {
                 if (line_length > VGA_WIDTH) {
                     printf("\n");
                     line_length = 0;
+                    ++row_count;  // Increment row count
                 }
             }
         }
+
+        // Add ++ to rows
+        //printf("\nNumber of Rows: %d\n", row_count);
     }
 }
 
@@ -276,14 +281,8 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
     size i;
 
     for (i = 0; i < MAX_FILES; ++i) {
-        if (strcmp(fs->file_table[i].filename, filename) == 0) {
-            // Check if the current folder matches the parent folder, unless explicitly allowed
-            if (!allow_anywhere && strcmp(fs->file_table[i].parent_folder, current_folder) != 0) {
-                printf("No such file in the current folder\n");
-                strncpy(buffer, "", buffer_size); // Clear the buffer
-                break;
-            }
-
+        if (strcmp(fs->file_table[i].filename, filename) == 0 &&
+            strcmp(fs->file_table[i].parent_folder, current_folder) == 0) {
             // Check if the file is a folder
             if (fs->file_table[i].is_folder) {
                 printf("%s is a folder and cannot be read as a file.\n", filename);
@@ -297,8 +296,9 @@ void read_from_file(const struct FileSystem* fs, const char* filename, char* buf
         }
     }
 
-    // File not found
-    strncpy(buffer, "File not found", buffer_size);
+    // File not found or not in the current folder
+    printf("Error: File %s not found in the current folder\n", filename);
+    strncpy(buffer, "", buffer_size); // Clear the buffer
 }
 
 
