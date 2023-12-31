@@ -52,7 +52,8 @@ void execute_command(const char* command) {
         printf("whoami - n/a      hostname - [input]\n");
         printf("dmesg - n/a       uname - n/a\n");
         printf("mkdir - [input]   history - n/a\n");
-        printf("about - n/a       panic - [input]\n");
+        printf("about - n/a       adduser - [input]\n");
+        printf("panic - [input]\n");
         rows+=12;
 
     } else if (strcmp(command, "dmesg") == 0) {
@@ -138,7 +139,7 @@ void execute_command(const char* command) {
         console_gotoxy(4, 11);
         printf("%C        =|      -       |=\n", 0xB, 0x0);
         console_gotoxy(4, 12);
-        printf("%C        =\\      v       /=\n", 0xB, 0x0);
+        printf("%C        =\\     \\/\\/     /=\n", 0xB, 0x0);
         console_gotoxy(4, 13);
         printf("%C          \\            /\n", 0x3, 0x0);
         console_gotoxy(4, 14);

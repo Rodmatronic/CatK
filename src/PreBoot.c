@@ -107,7 +107,7 @@ void PreBoot()
         console_gotoxy(40, 9);
         printf("%C       / /      \\___/      \\ \\     ", 0xB, 0x0);
         console_gotoxy(40, 10);
-        printf("%C      /        \\  /           \\    ", 0xB, 0x0);
+        printf("%C      /                       \\    ", 0xB, 0x0);
         console_gotoxy(40, 11);
         printf("%C     |        |      |         |   ", 0xB, 0x0);
         console_gotoxy(40, 12);

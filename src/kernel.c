@@ -290,6 +290,9 @@ void boot() {
 }
 
 void kmain() {
+    // small delay to let grub finish it's thing
+    int i;for (int i = 0; i < 10000; ++i) {for (int j = 0; j < 1800; ++j) {}}
+    
     console_init(COLOR_GREY, COLOR_BLACK);
     PreBoot();
 }
