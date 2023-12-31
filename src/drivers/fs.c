@@ -114,27 +114,13 @@ void change_directory(struct FileSystem* fs, const char* path) {
         new_path[FOLDERNAME_SIZE - 1] = '\0';
     }
 
-    // Check if the folder exists in the current or any subdirectory
+    // Check if the folder exists in the current folder or its subdirectories
     int folder_found = 0;
     for (size i = 0; i < MAX_FOLDERS; ++i) {
-        if (strcmp(fs->folder_table[i], new_path) == 0) {
+        if (strcmp(fs->folder_table[i], new_path) == 0 ||
+            strcmp(fs->folder_table[i], path) == 0) {
             folder_found = 1;
             break;
-        }
-        if (k_strstr(new_path, fs->folder_table[i]) != NULL) {
-            folder_found = 1;
-            break;
-        }
-    }
-
-    // Check if the folder exists in the parent directory
-    if (!folder_found) {
-        for (size i = 0; i < MAX_FOLDERS; ++i) {
-            if (strcmp(fs->folder_table[i], new_path) == 0 ||
-                strcmp(fs->folder_table[i], path) == 0) {
-                folder_found = 1;
-                break;
-            }
         }
     }
 
@@ -143,9 +129,9 @@ void change_directory(struct FileSystem* fs, const char* path) {
         //printf("Changed directory to %s\n", current_directory);
     } else {
         printf("%C -error- Folder %s not found\n", 0xF, 0x0, new_path);
+        // Reset the current directory to a safe default or handle it based on your design.
     }
 }
-
 
 
 

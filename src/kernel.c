@@ -193,8 +193,6 @@ void boot() {
     kernmessage("Created /sbin/sh");
     write_to_file(&rootfs, "shutdown", "type:App\nshutdown");
     kernmessage("Created /sbin/shutdown");
-    write_to_file(&rootfs, "vga", "type:App\ngraphics_init");
-    kernmessage("Created /sbin/vga");
     write_to_file(&rootfs, "reboot", "type:App\nreboot");
     kernmessage("Created /sbin/reboot");
 
@@ -272,6 +270,10 @@ void boot() {
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
     write_to_file(&rootfs, "compat-readme", "This folder is not used by CatK in any resonable way.\n\nThis is just here for UNIX compatibility :3");
     createhelpdocs();
+    create_folder(&rootfs, "desktop", "/bin");
+    current_directory = "/bin/desktop";
+    write_to_file(&rootfs, "vga", "type:App\ngraphics_init");
+    kernmessage("Created /sbin/vga");
 
     kernmessage("Setting up ENV variables");
     current_directory = "/var";
