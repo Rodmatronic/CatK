@@ -28,5 +28,8 @@ void console_gotoxy(uint16 x, uint16 y);
 void console_putstr(const char *str);
 void printf(const char *format, ...);
 
+void k_printf(const char *format, ...);
+
+
 #endif
 

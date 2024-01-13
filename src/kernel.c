@@ -23,6 +23,7 @@
 #include "launchp.h"
 #include "interface.h"
 #include "process.h"
+#include "GDT.h"
 
 #define PORT 0x3f8          // COM1
  
@@ -101,7 +102,7 @@ void setVgaResolution(uint16 width, uint16 height) {
 }
 
 void boot() {
-    printf("CatKernel boot() started");
+    k_printf("CatKernel boot() started");
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
@@ -112,29 +113,31 @@ void boot() {
     kernmessage("init_serial() on COM1");
     is_transmit_empty();
     init_serial();
-    printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
-    printf("Boot arguments: %s\n", args);
+    k_printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
+    k_printf("Boot arguments: %s\n", args);
     //sleep(3);
 
-    printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
+    gdt_init();
+
+    k_printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
     kernmessage("cpuid_info(1): Attempting to get CPU info");
     cpuid_info(1);
     kernmessage("GetMemory(): Attempting to get Memory info");
     GetMemory();
     kernmessage("Showing kernel's config.h configuration \\/ ");
-    printf("   hostname: %s\n", host_name);
+    k_printf("   hostname: %s\n", host_name);
     pserial(host_name);
-    printf("   username: %s\n", username);
+    k_printf("   username: %s\n", username);
     pserial(username);
-    printf("   versionnumber: %s\n", versionnumber);
+    k_printf("   versionnumber: %s\n", versionnumber);
     pserial(versionnumber);
-    printf("   versionname: %s\n", vername);
+    k_printf("   versionname: %s\n", vername);
     pserial(vername);
-    printf("   arch: %s\n", arch);
+    k_printf("   arch: %s\n", arch);
     pserial(arch);
-    printf("   prebootver: %s\n", prebootversion);
+    k_printf("   prebootver: %s\n", prebootversion);
     pserial(prebootversion);
-    printf("   bootargs(default): %s\n", bootargs);
+    k_printf("   bootargs(default): %s\n", bootargs);
     pserial(bootargs);
 
     kernmessage("Perfect! &rootfs created with max files from MAX_FILES");
@@ -163,7 +166,7 @@ void boot() {
     create_folder(&rootfs, "share", "/usr");
 
     list_files(&rootfs, 0);
-    printf("\n");
+    k_printf("\n");
 
     //Add the kernel to the list of running processes
     addProcess("kernel");
@@ -213,31 +216,31 @@ void boot() {
     kernmessage("Copying kernel values to proc");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
-    printf("%C   Created /proc/arch\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/arch\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "args", bootargs);
-    printf("%C   Created /proc/args\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/args\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "version", vername);
     add_data_to_file(&rootfs, "version", versionnumber);
-    printf("%C   Created /proc/version\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/version\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "versionnum", versionnumber);
-    printf("%C   Created /proc/versionnum\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/versionnum\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "prebootver", prebootversion);
-    printf("%C   Created /proc/prebootver\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/prebootver\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "ostype", "Catkernel");
-    printf("%C   Created /proc/ostype\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/ostype\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "cpu", brand);
-    printf("%C   Created /proc/cpu\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/cpu\n", 0x8, 0x0);
 
     write_to_file(&rootfs, "vga", "80x25");
-    printf("%C   Created /proc/vga\n", 0x8, 0x0);
+    k_printf("%C   Created /proc/vga\n", 0x8, 0x0);
 
-    printf("Autoconfiguring devices...\n");
+    k_printf("Autoconfiguring devices...\n");
     BootDevConfig();
 
     kernmessage("Detecting ATA drives");
@@ -294,6 +297,7 @@ void boot() {
 }
 
 void kmain() {
+    k_printf("Booted!\n");
     // small delay to let grub finish it's thing
     int i;for (int i = 0; i < 10000; ++i) {for (int j = 0; j < 1800; ++j) {}}
     
@@ -302,7 +306,7 @@ void kmain() {
 }
 
 void kernmessage(const char* str) { // Use const char* for the string parameter
-    printf("kernel: %s\n", str); // Print the message and the string   
+    k_printf("kernel: %s\n", str); // Print the message and the string   
     write_serial(str);
     write_serial("\n");
     char* workingdirectory = current_directory;

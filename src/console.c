@@ -190,6 +190,88 @@ void console_putstr(const char *str) {
     }
 }
 
+void k_printf(const char *format, ...) {
+    char **arg = (char **)&format;
+    int c;
+    char buf[32];
+
+    arg++;
+
+    unsigned char fore_color = COLOR_GREY;
+    unsigned char back_color = COLOR_BLACK;
+
+    memset(buf, 0, sizeof(buf));
+    while ((c = *format++) != 0) {
+        if (c != '%') {
+            console_putchar(c, fore_color, back_color);
+        } else {
+            char *p, *p2;
+            int pad0 = 0, pad = 0;
+
+            c = *format++;
+            if (c == '0') {
+                pad0 = 1;
+                c = *format++;
+            }
+
+            if (c >= '0' && c <= '9') {
+                pad = c - '0';
+                c = *format++;
+            }
+
+            // Check for color specifier
+            if (c == 'C') {
+                // Update the colors based on the arguments
+                fore_color = *((unsigned char *)arg++);
+                back_color = *((unsigned char *)arg++);
+                c = *format++;
+            }
+
+            switch (c) {
+                case 'd':
+                case 'u':
+                case 'x':
+                    itoa(buf, c, *((int *)arg++));
+                    p = buf;
+                    goto string;
+                    break;
+
+            case 's':
+                p = *arg++;
+                if (!p)
+                    p = "(null)";
+
+                for (p2 = p; *p2; p2++)
+                    ;
+                for (; p2 < p + pad; p2++)
+                    console_putchar(pad0 ? '0' : ' ', fore_color, back_color);
+                while (*p)
+                    console_putchar(*p++, fore_color, back_color);
+                break;
+
+            case 'c':
+                console_putchar((char)*arg++, fore_color, back_color);
+                break;
+
+
+                string:
+                    for (p2 = p; *p2; p2++)
+                        ;
+                    for (; p2 < p + pad; p2++)
+                        console_putchar(pad0 ? '0' : ' ', fore_color, back_color);
+                    while (*p)
+                        console_putchar(*p++, fore_color, back_color);
+                    break;
+
+                default:
+                    // Print the character without formatting
+                    console_putchar(c, fore_color, back_color);
+                    break;
+            }
+        }
+    }
+}
+
 void printf(const char *format, ...) {
     char **arg = (char **)&format;
     int c;
