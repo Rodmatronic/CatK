@@ -16,7 +16,7 @@ CC = clang
 
 # linker. this can be GNU ld or LLVM lld.
 # lld is now preferred as it works everywhere
-LD = ld.lld 
+LD = ld.lld
 
 # sources
 SRC = src
@@ -63,10 +63,12 @@ $(shell $(MKDIR) $(OBJ) $(OUT))
 
 # automatically find all C source files in src/ and its subdirectories
 C_SOURCES := $(wildcard $(SRC)/**/*.c $(SRC)/*.c)
+ASM_SOURCES := $(wildcard $(ASM_SRC)/**/*.asm $(ASM_SRC)/*.asm)
 
 # generate object file names from source file names
 OBJECTS := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(C_SOURCES))
-ASM_OBJECTS := $(ASM_OBJ)/entry.o
+ASM_OBJECTS := $(patsubst $(ASM_SRC)/%.asm,$(ASM_OBJ)/%.o,$(ASM_SOURCES))
+
 
 all: $(TARGET_ISO)
 
@@ -92,8 +94,8 @@ else
 	@printf "[ multiboot check skipped ]\n"
 endif
 
-$(ASM_OBJ)/entry.o: $(ASM_SRC)/entry.asm
-	@printf "[ $(ASM_SRC)/entry.asm ]\n"
+$(ASM_OBJ)/%.o: $(ASM_SRC)/%.asm
+	@printf "[ $< ]\n"
 	$(MKDIR) $(dir $@)
 	$(ASM) $(ASM_FLAGS) $< -o $@
 	@printf "\n"
