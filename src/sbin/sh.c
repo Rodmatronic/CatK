@@ -98,18 +98,16 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "halt") == 0) {
         rows = 0;
         syspw(2);
-    } else if (strncmp(command, "panic ", 6) == 0) {
-        const char* new_directory = command + 6;
-        // Change to the specified directory
-        panic(new_directory);
+    } else if (strncmp(command, "panic", 6) == 0) {
+        int numerator = 5;
+        int divisor = 0;
+        int result = numerator / divisor;
     } else if (strncmp(command, "exec ", 5) == 0) {
         const char* new_directory = command + 5;
-        // Change to the specified directory
         execute_file(&rootfs, new_directory, 0);
         vga_enable_cursor();
     } else if (strncmp(command, "rm ", 3) == 0) {
         const char* new_directory = command + 3;
-        // Change to the specified directory
         rm_file(&rootfs, new_directory);
         rows+=1;
     } else if (strncmp(command, "about ", 5) == 0) {

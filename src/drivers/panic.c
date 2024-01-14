@@ -26,27 +26,21 @@ void panic(const char* panictext, ...)
     write_serial("\n");
     printf("%Cpanic: %s\n", 0x0, 0xF, panictext);
 
+    //this is for VGA graphical mode
+
     vga_graphics_clear_color(back_color);
     app = "fatal error";
     constUI(0);
     drawpopupwindow(0);
     draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 4, COLOR_DARK_GREY, "panic");
     draw_string(VGA_MAX_WIDTH/4 + 2, VGA_MAX_HEIGHT/4 + 20, COLOR_DARK_GREY, panictext);
+
+    //more kernel stuff
+
     write_serial("panic: ");
     write_serial(panictext);
     write_serial("\n");
     cpusimple(1);
     printf("\n");
     GetCurrentTime();
-    printf("%CCatK has been halted.\n", 0xF, 0x0);
-    printf("%CPlease switch off the system now\n", 0xF, 0x0);
-    vga_disable_cursor();
-    console_gotoxy(0, 24);
-
-    //This should now properly stop the CPU, so no further damage can be done
-    asm("hlt");
-    while(1)
-    {
-        for(;;);
-    }
 }

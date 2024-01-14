@@ -24,6 +24,7 @@
 #include "interface.h"
 #include "process.h"
 #include "GDT.h"
+#include "IDT.h"
 
 #define PORT 0x3f8          // COM1
  
@@ -117,7 +118,7 @@ void boot() {
     k_printf("Boot arguments: %s\n", args);
     //sleep(3);
 
-    gdt_init();
+    idt_init();
 
     k_printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
     kernmessage("cpuid_info(1): Attempting to get CPU info");
@@ -290,9 +291,14 @@ void boot() {
     pserial("Boot should be finished. Starting a shell");
 
     kernmessage("Starting launchp...");
-
+    
     current_directory = "/";
     console_init(COLOR_WHITE, COLOR_BLACK);
+
+    // Enter USER mode (ring 3)
+    kernmessage("Making the jump to user mode");
+    gdt_init();
+
     launchp();
 }
 
