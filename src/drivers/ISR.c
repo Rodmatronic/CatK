@@ -3,6 +3,9 @@
 #include "8259_pic.h"
 #include "console.h"
 #include "panic.h"
+#include "cpu.h"
+#include "time.h"
+#include "kernel.h"
 
 // For both exceptions and irq interrupt
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
@@ -83,16 +86,27 @@ static void print_registers(REGISTERS *reg) {
  */
 void isr_exception_handler(REGISTERS reg) {
     if (reg.int_no < 32) {
-        panic(exception_messages[reg.int_no]);
+        printf("\n%C--------------------------------------------------------------------------------\n", 0xF, 0x0);
+        write_serial("--------------------------------------------------------------------------------");
+        write_serial("\n");
+        printf("%Cpanic: %s\n", 0x0, 0xF, exception_messages[reg.int_no]);
+
+        //more kernel stuff
+
+        write_serial("panic: ");
+        write_serial(exception_messages[reg.int_no]);
+        write_serial("\n");
+        cpusimple(1);
+        printf("\n");
+        GetCurrentTime();
         print_registers(&reg);
         printf("%CCatK has been halted.\n", 0xF, 0x0);
         printf("%CPlease switch off the system now\n", 0xF, 0x0);
-        for (;;)
-            ;
+
+        for (;;);
     }
     if (g_interrupt_handlers[reg.int_no] != NULL) {
         ISR handler = g_interrupt_handlers[reg.int_no];
         handler(&reg);
     }
 }
-

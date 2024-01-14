@@ -43,4 +43,10 @@ void panic(const char* panictext, ...)
     cpusimple(1);
     printf("\n");
     GetCurrentTime();
+
+    printf("%CCatK has been halted.\n", 0xF, 0x0);
+    printf("%CPlease switch off the system now\n", 0xF, 0x0);
+
+    for (;;);
+
 }
