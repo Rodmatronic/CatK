@@ -16,8 +16,6 @@
 #include "process.h"
 
 #define MAX_BUFFER_SIZE 128
-char input_buffer[MAX_BUFFER_SIZE];
-int buffer_index = 0;
 int clearint = 0;
 
 void execute_command(const char* command) {
@@ -60,8 +58,8 @@ void execute_command(const char* command) {
         char* workingdir = current_directory;
         current_directory = "/etc";
         read_from_file(&rootfs, "session", buffer, sizeof(buffer), 0);
-        printf("\n\n%s\n", buffer);
-        rows+=3;
+        printf("\n%s\n", buffer);
+        rows+=2;
         current_directory = workingdir;
     } else if (strncmp(command, "useradd ", 7) == 0)  {
         char* working_dir = current_directory;
