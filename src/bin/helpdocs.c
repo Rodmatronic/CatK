@@ -16,7 +16,7 @@ void createhelpdocs()
     add_data_to_file(&rootfs, "helpdocs1", " whoami - n/a      hostname - [input]\n");
     add_data_to_file(&rootfs, "helpdocs1", " dmesg - n/a       uname - n/a\n");
     add_data_to_file(&rootfs, "helpdocs1", " mkdir - [input]   history - n/a\n");
-    add_data_to_file(&rootfs, "helpdocs1", " about - n/a       adduser - [input]\n");
+    add_data_to_file(&rootfs, "helpdocs1", " about - n/a       useradd - [input]\n");
     add_data_to_file(&rootfs, "helpdocs1", " panic - [input]\n");
     add_data_to_file(&rootfs, "helpdocs1", "-------------------------------------\n");
 }
