@@ -7,7 +7,6 @@
 #include "cpu.h"
 #include "fs.h"
 #include "time.h"
-#include "sleep.h"
 #include "config.h"
 #include "keyboard.h"
 #include "usb.h"
@@ -25,6 +24,7 @@
 #include "process.h"
 #include "GDT.h"
 #include "IDT.h"
+#include "timer.h"
 
 #define PORT 0x3f8          // COM1
  
@@ -75,35 +75,20 @@ void write_serial(const char* str) {
    }
 }
 
+void daemon(TIMER_FUNCTION function, uint32 timeout) {
+    TIMER_FUNC_ARGS args = {0};
+    args.timeout = timeout;
+    timer_register_function(function, &args);
+}
+
 void pserial(const char* str) { // Use const char* for the string parameter
     write_serial(str);
     write_serial("\n");
 }
 
-void setVgaResolution(uint16 width, uint16 height) {
-    // Disable sequencer to unlock CRTC registers
-    outportb(VGA_CRT_CTRL_REG, 0x00);
-    outportb(VGA_CRT_DATA_REG, 0x01);
-
-    // Set width
-    outportb(VGA_CRT_CTRL_REG, 0x01);  // CRT controller register to set horizontal resolution
-    outportb(VGA_CRT_DATA_REG, (uint8)(width / 8 - 1));
-    outportb(VGA_CRT_CTRL_REG, 0x04);  // Increment CRT controller address for sequential write
-    outportb(VGA_CRT_DATA_REG, (uint8)((width / 8 - 1) >> 8));
-
-    // Set height
-    outportb(VGA_CRT_CTRL_REG, 0x12);  // CRT controller register to set vertical resolution
-    outportb(VGA_CRT_DATA_REG, (uint8)(height - 1));
-    outportb(VGA_CRT_CTRL_REG, 0x07);  // Increment CRT controller address for sequential write
-    outportb(VGA_CRT_DATA_REG, (uint8)((height - 1) >> 8));
-
-    // Enable sequencer
-    outportb(VGA_CRT_CTRL_REG, 0x00);
-    outportb(VGA_CRT_DATA_REG, 0x03);
-}
-
 void boot() {
     k_printf("CatKernel boot() started");
+    sleep(1);
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
@@ -111,14 +96,17 @@ void boot() {
     kernmessage("Starting sysdiag");
     sysdiaginit();
 
+    sleep(1000);
+
     kernmessage("init_serial() on COM1");
     is_transmit_empty();
+    sleep(1);
     init_serial();
     k_printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
     k_printf("Boot arguments: %s\n", args);
     //sleep(3);
 
-    idt_init();
+    timer_init();
 
     k_printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
     kernmessage("cpuid_info(1): Attempting to get CPU info");
@@ -213,6 +201,14 @@ void boot() {
     write_to_file(&rootfs, "hostname", defaulthostname);
     read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
 
+    gdt_init();
+    idt_init();
+
+    kernmessage("Setting hostname to defaults from 'defaulthostname'");
+    current_directory = "/etc";
+    write_to_file(&rootfs, "hostname", defaulthostname);
+    read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
+
     strcpy(host_name, buffer);
     kernmessage("Copying kernel values to proc");
     current_directory = "/proc";
@@ -250,6 +246,8 @@ void boot() {
     //const uint8 NO_OF_SECTORS = 1;
     //char buf[ATA_SECTOR_SIZE] = {0};
     ata_init();
+
+    daemon(launchp, 50);
 
     current_directory = "/boot";
 
@@ -291,17 +289,6 @@ void boot() {
     write_to_file(&rootfs, "SHELL", "k_sh");
 
     pserial("Boot should be finished. Starting a shell");
-
-    kernmessage("Starting launchp...");
-    
-    current_directory = "/";
-    console_init(COLOR_WHITE, COLOR_BLACK);
-
-    // Enter USER mode (ring 3)
-    kernmessage("Making the jump to user mode");
-    gdt_init();
-
-    launchp();
 }
 
 void kmain() {

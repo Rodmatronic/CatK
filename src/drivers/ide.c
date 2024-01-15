@@ -2,7 +2,6 @@
 #include "console.h"
 #include "io_ports.h"
 #include "string.h"
-#include "sleep.h"
 #include "panic.h"
 #include "kernel.h"
 #include "fs.h"

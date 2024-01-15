@@ -6,7 +6,6 @@
 #include "config.h"
 #include "libc.h"
 #include "string.h"
-#include "sleep.h"
 #include "panic.h"
 #include "syspw.h"
 #include "vga.h"
@@ -81,7 +80,7 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
         }
         char* delaycommand = k_strstr(token, "delay");
         if (delaycommand != NULL) {
-            sleep(1);
+            //sleep(1);
         }
         char* shcommand = k_strstr(token, "sh");
         if (shcommand != NULL) {

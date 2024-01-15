@@ -78,5 +78,6 @@ void idt_init() {
     idt_set_entry(128, (uint32)exception_128, 0x08, 0x8E);
 
     load_idt((uint32)&g_idt_ptr);
+    asm volatile("sti");
 }
 

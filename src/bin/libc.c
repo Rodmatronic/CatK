@@ -165,3 +165,32 @@ int snprintf(char *str, size size, const char *format, const char *arg, ...) {
 
     return result;
 }
+
+int sprintf(char* buffer, const char* format, uint32 value) {
+    // Assume a simple format: "%u" for an unsigned integer
+    
+    // Check if the format string is "%u"
+    if (format[0] == '%' && format[1] == 'u' && format[2] == '\0') {
+        // Convert the unsigned integer to a string and copy it to the buffer
+        int length = 0;
+        while (value > 0) {
+            buffer[length++] = '0' + (value % 10);
+            value /= 10;
+        }
+
+        // Reverse the string
+        for (int i = 0; i < length / 2; ++i) {
+            char temp = buffer[i];
+            buffer[i] = buffer[length - i - 1];
+            buffer[length - i - 1] = temp;
+        }
+
+        // Null-terminate the string
+        buffer[length] = '\0';
+
+        return length;
+    }
+
+    // Unsupported format
+    return -1;
+}

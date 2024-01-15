@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+int sprintf(char* buffer, const char* format, uint32 value);
+
 char* k_strstr(const char* haystack, const char* needle);
 
 char* k_strchr(const char* str, int c);

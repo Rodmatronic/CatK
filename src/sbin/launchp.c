@@ -10,8 +10,9 @@
 #include "string.h"
 #include "config.h"
 #include "console.h"
+#include "timer.h"
 
-int launchp()
+int launchp(TIMER_FUNC_ARGS *args)
 {
     char* workingdir = current_directory;
     char buffer[BLOCK_SIZE];
