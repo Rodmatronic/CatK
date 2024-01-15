@@ -30,5 +30,7 @@ extern char* vername;
 extern char* arch;
 extern char* prebootversion;
 extern char* bootargs;
+extern char input_buffer[1024];
+extern int buffer_index;
 
 #endif

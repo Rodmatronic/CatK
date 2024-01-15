@@ -100,8 +100,10 @@ void isr_exception_handler(REGISTERS reg) {
         printf("\n");
         GetCurrentTime();
         print_registers(&reg);
-        printf("%CCatK has been halted.\n", 0xF, 0x0);
+        printf("%CCatK has been halted due to a serious error.\n", 0xF, 0x0);
         printf("%CPlease switch off the system now\n", 0xF, 0x0);
+
+        vga_disable_cursor();
 
         for (;;);
     }

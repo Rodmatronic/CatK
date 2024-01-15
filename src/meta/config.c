@@ -19,3 +19,5 @@ char* vername = "CatK Version Bittin'";
 char* arch = "x86-legacy";
 char* prebootversion = "0.065re";
 char* bootargs = "n/a";
+int buffer_index = 0;
+char input_buffer[1024];

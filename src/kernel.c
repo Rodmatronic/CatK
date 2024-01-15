@@ -256,6 +256,7 @@ void boot() {
     // root user
     kernmessage("Setting up default user");
     current_directory = "/etc";
+    write_to_file(&rootfs, "users", "root\n");
     strcpy(rootUser.username, "root");
     strcpy(rootUser.shell, "/bin/sh");
     strcpy(username, rootUser.username);

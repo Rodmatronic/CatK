@@ -47,6 +47,8 @@ void panic(const char* panictext, ...)
     printf("%CCatK has been halted.\n", 0xF, 0x0);
     printf("%CPlease switch off the system now\n", 0xF, 0x0);
 
+    vga_disable_cursor();
+
     for (;;);
 
 }
