@@ -62,7 +62,7 @@ ISO_DIR = $(OUT)/isodir
 $(shell $(MKDIR) $(OBJ) $(OUT))
 
 # automatically find all C source files in src/ and its subdirectories
-C_SOURCES := $(wildcard $(SRC)/**/*.c $(SRC)/*.c)
+C_SOURCES := $(wildcard $(SRC)/**/*.c $(SRC)/*.c $(SRC)/drivers/boot/*.c $(SRC)/drivers/graphics/*.c)
 ASM_SOURCES := $(wildcard $(ASM_SRC)/**/*.asm $(ASM_SRC)/*.asm)
 
 # generate object file names from source file names

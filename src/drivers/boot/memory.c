@@ -1,5 +1,5 @@
 /*
- * Get the system memory
+ * Get the 16-bit system memory
  * Written by Rodmatronics
 */
 
