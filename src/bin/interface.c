@@ -395,6 +395,15 @@ void powerapp()
     }
 }
 
+// Function to draw a rectangle
+void vbe_draw_rect(int x, int y, int width, int height, int color) {
+    for (int i = x; i < x + width; ++i) {
+        for (int j = y; j < y + height; ++j) {
+            vbe_putpixel(i, j, color);
+        }
+    }
+}
+
 void vga_graphics_interface(int firstopen)
 {   
     app = "desktop";
@@ -482,6 +491,18 @@ void vga_graphics_interface(int firstopen)
             x++;
         }
     }
+
+  int y = 0;
+  int bluecolor = 255;
+  int greencolor = 210;
+
+    for (y = 0; y < 8; y++) {
+        vbe_draw_rect(0, y, 800, 40, VBE_RGB(0, greencolor, bluecolor));
+        bluecolor-=5;
+        greencolor-=4;
+    }
+
+    while(1){}
 
     while (1)
     {

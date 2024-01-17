@@ -402,6 +402,9 @@ void boot(unsigned long magic,  long addr) {
     current_directory = "/bin/desktop";
     write_to_file(&rootfs, "vga", "type:App\ngraphics_init");
     kernmessage("Created /sbin/vga");
+    current_directory = "/etc";
+    write_to_file(&rootfs, "issue", "Catkernel ");
+    add_data_to_file(&rootfs, "issue", versionnumber);
 
     kernmessage("Setting up ENV variables");
     current_directory = "/var";
