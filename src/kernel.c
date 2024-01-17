@@ -25,6 +25,7 @@
 #include "GDT.h"
 #include "IDT.h"
 #include "timer.h"
+#include "multiboot.h"
 
 #define PORT 0x3f8          // COM1
  
@@ -86,9 +87,42 @@ void pserial(const char* str) { // Use const char* for the string parameter
     write_serial("\n");
 }
 
-void boot() {
-    k_printf("CatKernel boot() started");
+void boot(unsigned long magic,  long addr) {
+    k_printf("\n\nCatKernel boot() started\n");
     sleep(1);
+
+
+    MULTIBOOT_INFO *mboot_info;
+    mboot_info = (MULTIBOOT_INFO *)addr;
+
+    int i;
+    k_printf("  magic: 0x%x\n", magic);
+    printf("  flags: 0x%x\n", mboot_info->flags);
+    printf("  mem_low: 0x%x KB\n", mboot_info->mem_low);
+    printf("  mem_high: 0x%x KB\n", mboot_info->mem_high);
+    printf("  boot_device: 0x%x\n", mboot_info->boot_device);
+    printf("  cmdline: %s\n", (char *)mboot_info->cmdline);
+    printf("  modules_count: %d\n", mboot_info->modules_count);
+    printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
+    printf("  mmap_length: %d\n", mboot_info->mmap_length);
+    printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
+        for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
+            MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
+            printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
+                    mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
+
+            if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                /**** Available memory  ****/
+            }
+        }
+        printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
+        printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
+        printf("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
+        printf("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
+        printf("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
+        printf("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
+        printf("  framebuffer_type: %d\n", mboot_info->framebuffer_type);
+
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
@@ -291,13 +325,16 @@ void boot() {
     pserial("Boot should be finished. Starting a shell");
 }
 
-void kmain() {
+void kmain(unsigned long magic, unsigned long addr) {
     k_printf("Booted!\n");
     // small delay to let grub finish it's thing
     int i;for (int i = 0; i < 10000; ++i) {for (int j = 0; j < 1800; ++j) {}}
     
     console_init(COLOR_GREY, COLOR_BLACK);
-    PreBoot();
+
+    printf("magic: 0x%x\n", magic);
+
+    PreBoot(magic, addr);
 }
 
 void kernmessage(const char* str) { // Use const char* for the string parameter

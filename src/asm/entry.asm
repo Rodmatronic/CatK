@@ -1,7 +1,8 @@
 ; constants for multiboot header
 MBALIGN     equ  1<<0
 MEMINFO     equ  1<<1
-FLAGS       equ  MBALIGN | MEMINFO
+BOOTDEVICE  equ  1<<1
+FLAGS       equ  MBALIGN | MEMINFO  | BOOTDEVICE
 MAGIC       equ  0x1BADB002
 CHECKSUM    equ -(MAGIC + FLAGS)
 
@@ -33,7 +34,9 @@ section .text
 _start:
     mov esp, stack_top
     extern kmain
+    mov eax, MAGIC
     push ebx
+    push eax
     call kmain
 loop:
     jmp loop

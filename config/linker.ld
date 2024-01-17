@@ -4,9 +4,12 @@ SECTIONS
 {
 	. = 2M;
  
-	.text ALIGN(4K) : 
+	.text 0x0100000 : 
 	{
-		*(.multiboot)
+		/* link the multiboot struct here */
+		. = ALIGN(8);
+		KEEP(*(.multiboot))
+		/* place all code afterwards */
 		*(.text)
 	}
  

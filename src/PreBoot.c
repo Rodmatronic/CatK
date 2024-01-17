@@ -10,7 +10,7 @@ int bootlogo;
 char* args;
 int art = 2;
 
-void PreBoot()
+void PreBoot(unsigned long magic, unsigned long addr)
 {
     vga_enable_cursor();
     console_gotoxy(0, 0);
@@ -45,6 +45,7 @@ void PreBoot()
 
     console_gotoxy(0, 24);
     printf("%CBuild num %s", 0x8, 0x0, versionnumber);
+    printf("%C magic: 0x%x, %x", 0x8, 0x0, magic, addr);
     printf("%C  https://catk.neocities.org/", 0x8, 0x0);
 
     if (art == 1)
@@ -217,7 +218,7 @@ void PreBoot()
         }
         console_init(COLOR_GREY, COLOR_BLACK);
         readnum = 0;
-        PreBoot();
+        PreBoot(magic, addr);
     }
 
     if (readnum == 3)
@@ -234,6 +235,6 @@ void PreBoot()
         console_init(COLOR_WHITE, COLOR_BLACK);
     }
 
-    boot();
+    boot(magic, addr);
 
 }
