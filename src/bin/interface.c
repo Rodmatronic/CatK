@@ -11,7 +11,7 @@
 #include "keyboard.h"
 #include "syspw.h"
 #include "time.h"
-
+#include "vesa.h"
 char* app = "CatK vga interface";
 enum vga_color back_color = BLUE;
 
@@ -451,6 +451,38 @@ void vga_graphics_interface(int firstopen)
             X+=25;
         }
 */
+
+    int ret = vesa_init(800, 600, 32);
+    if (ret < 0) {
+        printf("failed to init vesa graphics\n");
+    }
+    if (ret == 1) {
+        // scroll to top
+        for(int i = 0; i < MAXIMUM_PAGES; i++)
+            console_scroll(SCROLL_UP);
+    } else {
+        // fill some colors
+        uint32 x = 0;
+        for (uint32 c = 0; c < 267; c++) {
+            for (uint32 i = 0; i < 600; i++) {
+                vbe_putpixel(x, i, VBE_RGB(c % 255, 0, 0));
+            }
+            x++;
+        }
+        for (uint32 c = 0; c < 267; c++) {
+            for (uint32 i = 0; i < 600; i++) {
+                vbe_putpixel(x, i, VBE_RGB(0, c % 255, 0));
+            }
+            x++;
+        }
+        for (uint32 c = 0; c < 267; c++) {
+            for (uint32 i = 0; i < 600; i++) {
+                vbe_putpixel(x, i, VBE_RGB(0, 0, c % 255));
+            }
+            x++;
+        }
+    }
+
     while (1)
     {
         constUI(1);

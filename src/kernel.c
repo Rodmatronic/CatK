@@ -27,6 +27,8 @@
 #include "timer.h"
 #include "multiboot.h"
 #include "pmm.h"
+#include "vesa.h"
+#include "kheap.h"
 
 #define PORT 0x3f8          // COM1
  
@@ -288,9 +290,20 @@ void boot(unsigned long magic,  long addr) {
     idt_init();
     timer_init();
 
+    kernmessage("Allocating memory for kernel...");
+
+    // put the memory bitmap at the start of the available memory
+    pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
+    pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
+    void *start = pmm_alloc_blocks(256);
+    void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
+    kheap_init(start, end);
+
+    kernmessage("Allocated");
+
     memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
 
-get_kernel_memory_map(&g_kmap, mboot_info);
+    get_kernel_memory_map(&g_kmap, mboot_info);
 
     //display_kernel_memory_map(&g_kmap);
     printf("total_memory: %d KB, %d Bytes\n", g_kmap.system.total_memory, g_kmap.available.size);
@@ -314,8 +327,6 @@ get_kernel_memory_map(&g_kmap, mboot_info);
 
     uint32 *p3 = pmm_alloc_block();
     printf("block allocated at 0x%x, next free: %d\n", p3, pmm_next_free_frame(1));
-
-    while(1){}
 
     kernmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
