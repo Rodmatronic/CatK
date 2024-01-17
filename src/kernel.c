@@ -89,8 +89,6 @@ void pserial(const char* str) { // Use const char* for the string parameter
 
 void boot(unsigned long magic,  long addr) {
     k_printf("\n\nCatKernel boot() started\n");
-    sleep(1);
-
 
     MULTIBOOT_INFO *mboot_info;
     mboot_info = (MULTIBOOT_INFO *)addr;
@@ -106,22 +104,22 @@ void boot(unsigned long magic,  long addr) {
     printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
     printf("  mmap_length: %d\n", mboot_info->mmap_length);
     printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
-        for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
-            MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
-            printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
-                    mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
+    for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
+        MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
+        printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
+                mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
 
-            if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
-                /**** Available memory  ****/
-            }
+        if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            /**** Available memory  ****/
         }
-        printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
-        printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
-        printf("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
-        printf("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
-        printf("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
-        printf("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
-        printf("  framebuffer_type: %d\n", mboot_info->framebuffer_type);
+    }
+    printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
+    printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
+    printf("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
+    printf("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
+    printf("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
+    printf("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
+    printf("  framebuffer_type: %d\n", mboot_info->framebuffer_type);
 
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
@@ -129,18 +127,12 @@ void boot(unsigned long magic,  long addr) {
     }
     kernmessage("Starting sysdiag");
     sysdiaginit();
-
-    sleep(1000);
-
     kernmessage("init_serial() on COM1");
     is_transmit_empty();
-    sleep(1);
     init_serial();
     k_printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
     k_printf("Boot arguments: %s\n", args);
-    //sleep(3);
-
-    timer_init();
+    //sleep(3)
 
     k_printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
     kernmessage("cpuid_info(1): Attempting to get CPU info");
@@ -237,6 +229,7 @@ void boot(unsigned long magic,  long addr) {
 
     gdt_init();
     idt_init();
+    timer_init();
 
     kernmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
