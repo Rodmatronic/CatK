@@ -219,6 +219,7 @@ void PreBoot(unsigned long magic, unsigned long addr)
         console_init(COLOR_GREY, COLOR_BLACK);
         readnum = 0;
         PreBoot(magic, addr);
+        return;
     }
 
     if (readnum == 3)
