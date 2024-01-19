@@ -127,7 +127,7 @@ static int init_serial() {
 int is_transmit_empty() {
    return inportb(PORT + 5) & 0x20;
 }
- 
+
 void write_serial(const char* str) {
    while (*str != '\0') {
       while (is_transmit_empty() == 0);
@@ -155,6 +155,7 @@ void pserial(const char* str) { // Use const char* for the string parameter
 }
 
 void boot(unsigned long magic,  long addr) {
+
     k_printf("\n\nCatKernel boot() started\n");
 
     MULTIBOOT_INFO *mboot_info;
@@ -162,51 +163,51 @@ void boot(unsigned long magic,  long addr) {
 
     int i;
     k_printf("  magic: 0x%x\n", magic);
-    printf("  flags: 0x%x\n", mboot_info->flags);
-    printf("  mem_low: 0x%x KB\n", mboot_info->mem_low);
-    printf("  mem_high: 0x%x KB\n", mboot_info->mem_high);
-    printf("  boot_device: 0x%x\n", mboot_info->boot_device);
-    printf("  cmdline: %s\n", (char *)mboot_info->cmdline);
-    printf("  modules_count: %d\n", mboot_info->modules_count);
-    printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
-    printf("  mmap_length: %d\n", mboot_info->mmap_length);
-    printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
+    k_printf("  flags: 0x%x\n", mboot_info->flags);
+    k_printf("  mem_low: 0x%x KB\n", mboot_info->mem_low);
+    k_printf("  mem_high: 0x%x KB\n", mboot_info->mem_high);
+    k_printf("  boot_device: 0x%x\n", mboot_info->boot_device);
+    k_printf("  cmdline: %s\n", (char *)mboot_info->cmdline);
+    k_printf("  modules_count: %d\n", mboot_info->modules_count);
+    k_printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
+    k_printf("  mmap_length: %d\n", mboot_info->mmap_length);
+    k_printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
     for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
         MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
-        printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
+        k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
                 mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
 
         if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
             /**** Available memory  ****/
         }
     }
-    printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
-    printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
-    printf("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
-    printf("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
-    printf("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
-    printf("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
-    printf("  framebuffer_type: %d\n", mboot_info->framebuffer_type);
+    k_printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
+    k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
+    k_printf("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
+    k_printf("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
+    k_printf("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
+    k_printf("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
+    k_printf("  framebuffer_type: %d\n", mboot_info->framebuffer_type);
 
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
-    kernmessage("Starting sysdiag");
+    k_printf("Starting sysdiag");
     sysdiaginit();
-    kernmessage("init_serial() on COM1");
+    k_printf("init_serial() on COM1");
     is_transmit_empty();
     init_serial();
-    k_printf("                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
+    k_printf("\n                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
     k_printf("Boot arguments: %s\n", args);
     //sleep(3)
 
     k_printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
-    kernmessage("cpuid_info(1): Attempting to get CPU info");
+    k_printf("cpuid_info(1): Attempting to get CPU info");
     cpuid_info(1);
-    kernmessage("GetMemory(): Attempting to get Memory info");
+    k_printf("GetMemory(): Attempting to get Memory info");
     GetMemory();
-    kernmessage("Showing kernel's config.h configuration \\/ ");
+    k_printf("Showing kernel's config.h configuration \\/ ");
     k_printf("   hostname: %s\n", host_name);
     pserial(host_name);
     k_printf("   username: %s\n", username);
@@ -313,20 +314,6 @@ void boot(unsigned long magic,  long addr) {
     pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
 
     printf("Max blocks: %d\n", pmm_get_max_blocks());
-    // initialize a region of memory of size (4096 * 10), 10 blocks memory
-    pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 10);
-
-    printf("[KERNEL REGION 0-%d] [ALWAYS IN USE]\n\n", pmm_next_free_frame(1) - 1);
-    printf("before alloc- next free: %d\n", pmm_next_free_frame(1));
-
-    uint32 *p1 = pmm_alloc_block();
-    printf("block allocated at 0x%x, next free: %d\n", p1, pmm_next_free_frame(1));
-
-    uint32 *p2 = pmm_alloc_blocks(3);
-    printf("blocks allocated 0x%x, next free: %d\n", p2, pmm_next_free_frame(1));
-
-    uint32 *p3 = pmm_alloc_block();
-    printf("block allocated at 0x%x, next free: %d\n", p3, pmm_next_free_frame(1));
 
     kernmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
@@ -427,7 +414,7 @@ void kmain(unsigned long magic, unsigned long addr) {
 
     printf("magic: 0x%x\n", magic);
 
-    PreBoot(magic, addr);
+    boot(magic, addr);
 }
 
 void kernmessage(const char* str) { // Use const char* for the string parameter
