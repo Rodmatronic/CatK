@@ -156,38 +156,10 @@ void pserial(const char* str) { // Use const char* for the string parameter
 
 void boot(unsigned long magic,  long addr) {
 
-    k_printf("\n\nCatKernel boot() started\n");
-
     MULTIBOOT_INFO *mboot_info;
     mboot_info = (MULTIBOOT_INFO *)addr;
 
-    int i;
-    k_printf("  magic: 0x%x\n", magic);
-    k_printf("  flags: 0x%x\n", mboot_info->flags);
-    k_printf("  mem_low: 0x%x KB\n", mboot_info->mem_low);
-    k_printf("  mem_high: 0x%x KB\n", mboot_info->mem_high);
-    k_printf("  boot_device: 0x%x\n", mboot_info->boot_device);
-    k_printf("  cmdline: %s\n", (char *)mboot_info->cmdline);
-    k_printf("  modules_count: %d\n", mboot_info->modules_count);
-    k_printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
-    k_printf("  mmap_length: %d\n", mboot_info->mmap_length);
-    k_printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
-    for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
-        MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
-        k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
-                mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
-
-        if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
-            /**** Available memory  ****/
-        }
-    }
-    k_printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
-    k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
-    k_printf("  vbe_mode_info: 0x%x\n", mboot_info->vbe_mode_info);
-    k_printf("  framebuffer_addr: 0x%x\n", mboot_info->framebuffer_addr);
-    k_printf("  framebuffer_width: %d\n", mboot_info->framebuffer_width);
-    k_printf("  framebuffer_height: %d\n", mboot_info->framebuffer_height);
-    k_printf("  framebuffer_type: %d\n", mboot_info->framebuffer_type);
+    k_printf("\n\nCatKernel boot() started\n");
 
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
@@ -218,8 +190,6 @@ void boot(unsigned long magic,  long addr) {
     pserial(vername);
     k_printf("   arch: %s\n", arch);
     pserial(arch);
-    k_printf("   prebootver: %s\n", prebootversion);
-    pserial(prebootversion);
     k_printf("   bootargs(default): %s\n", bootargs);
     pserial(bootargs);
 
@@ -336,9 +306,6 @@ void boot(unsigned long magic,  long addr) {
     write_to_file(&rootfs, "versionnum", versionnumber);
     k_printf("%C   Created /proc/versionnum\n", 0x8, 0x0);
 
-    write_to_file(&rootfs, "prebootver", prebootversion);
-    k_printf("%C   Created /proc/prebootver\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "ostype", "Catkernel");
     k_printf("%C   Created /proc/ostype\n", 0x8, 0x0);
 
@@ -406,14 +373,39 @@ void boot(unsigned long magic,  long addr) {
 }
 
 void kmain(unsigned long magic, unsigned long addr) {
-    k_printf("Booted!\n");
-    // small delay to let grub finish it's thing
-    int i;for (int i = 0; i < 10000; ++i) {for (int j = 0; j < 1800; ++j) {}}
-    
+    MULTIBOOT_INFO *mboot_info;
+    int i;
+    mboot_info = (MULTIBOOT_INFO *)addr;
     console_init(COLOR_GREY, COLOR_BLACK);
 
-    printf("magic: 0x%x\n", magic);
+    k_printf("%CCat... %Ckernel!\n", 0x3, 0x0, 0xB, 0x0);
+    k_printf("%CCatkernel %s booted with args: %s\n", 0xE, 0x0, versionnumber, (char *)mboot_info->cmdline);
+    k_printf("%CLoader info \\/\n", 0x8, 0x0);
 
+    k_printf("  magic: 0x%x\n", magic);
+    k_printf("  flags: 0x%x\n", mboot_info->flags);
+    k_printf("  mem_low: 0x%x KB\n", mboot_info->mem_low);
+    k_printf("  mem_high: 0x%x KB\n", mboot_info->mem_high);
+    k_printf("  boot_device: 0x%x\n", mboot_info->boot_device);
+    k_printf("  cmdline: %s\n", (char *)mboot_info->cmdline);
+    k_printf("  modules_count: %d\n", mboot_info->modules_count);
+    k_printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
+    k_printf("  mmap_length: %d\n", mboot_info->mmap_length);
+    k_printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
+    for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
+        MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
+        k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
+                mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
+
+        if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            /**** Available memory  ****/
+        }
+    }
+    k_printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
+    k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
+    k_printf("  vbe_mode_info: 0x%x", mboot_info->vbe_mode_info);
+    // small delay to show the info
+    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1800; ++j) {}}
     boot(magic, addr);
 }
 
