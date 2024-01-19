@@ -158,6 +158,9 @@ void pserial(const char* str) { // Use const char* for the string parameter
 
 void boot(unsigned long magic,  long addr) {
 
+    outportb(0x60, 0xED);  // Command to set LEDs state
+    outportb(0x60, 2);  // Set the desired LED state, where led_state is a bitmask
+
     MULTIBOOT_INFO *mboot_info;
     mboot_info = (MULTIBOOT_INFO *)addr;
 
@@ -261,6 +264,9 @@ void boot(unsigned long magic,  long addr) {
 
     gdt_init();
     idt_init();
+
+    k_printf("TIMER is set to fire 100 times per second.\n");
+
     timer_init();
 
     kernmessage("Allocating memory for kernel...");
@@ -318,16 +324,12 @@ void boot(unsigned long magic,  long addr) {
     k_printf("%C   Created /proc/vga\n", 0x8, 0x0);
 
     k_printf("Autoconfiguring devices...\n");
+
     BootDevConfig();
 
-    kernmessage("Detecting ATA drives");
-    //printf("\nExample\n");
-    //const uint32 LBA = 0;
-    //const uint8 NO_OF_SECTORS = 1;
-    //char buf[ATA_SECTOR_SIZE] = {0};
-    ata_init();
-
-    daemon(launchp, 50);
+    kernmessage("Starting processes...");
+    daemon(ata_init, 100);
+    daemon(launchp, 150);
 
     current_directory = "/boot";
 
@@ -397,20 +399,22 @@ void kmain(unsigned long magic, unsigned long addr) {
     k_printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
     k_printf("  mmap_length: %d\n", mboot_info->mmap_length);
     k_printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
-    for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
-        MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
-        k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
-                mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
-
-        if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
-            /**** Available memory  ****/
-        }
-    }
+    k_printf("Bootloader info \\/\n");
     k_printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
     k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
     k_printf("  vbe_mode_info: 0x%x", mboot_info->vbe_mode_info);
     // small delay to show the info
     for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1800; ++j) {}}
+    for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
+    MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
+    k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
+            mmap->size, mmap->addr_low, mmap->addr_high, mmap->len_low, mmap->len_high, mmap->type);
+
+        if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
+            /**** Available memory  ****/
+        }
+    }
+    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
     boot(magic, addr);
 }
 

@@ -18,7 +18,7 @@ typedef struct {
 
 typedef void (*TIMER_FUNCTION)(TIMER_FUNC_ARGS *);
 
-#define MAXIMUM_TIMER_FUNCTIONS    32
+#define MAXIMUM_TIMER_FUNCTIONS    256
 
 typedef struct {
     uint32 current_index;
