@@ -38,6 +38,8 @@
 #define VGA_CRT_CTRL_REG 0x3D4
 #define VGA_CRT_DATA_REG 0x3D5
 
+void bootart();
+
 KERNEL_MEMORY_MAP g_kmap;
 
 int get_kernel_memory_map(KERNEL_MEMORY_MAP *kmap, MULTIBOOT_INFO *mboot_info) {
@@ -378,6 +380,9 @@ void kmain(unsigned long magic, unsigned long addr) {
     mboot_info = (MULTIBOOT_INFO *)addr;
     console_init(COLOR_GREY, COLOR_BLACK);
 
+    bootart();
+    console_gotoxy(0, 0);
+
     k_printf("%CCat... %Ckernel!\n", 0x3, 0x0, 0xB, 0x0);
     k_printf("%CCatkernel %s booted with args: %s\n", 0xE, 0x0, versionnumber, (char *)mboot_info->cmdline);
     k_printf("%CLoader info \\/\n", 0x8, 0x0);
@@ -418,6 +423,52 @@ void kernmessage(const char* str) { // Use const char* for the string parameter
     add_data_to_file(&rootfs, "logs", "\n");
     add_data_to_file(&rootfs, "logs", str);
     current_directory = workingdirectory;
+}
+
+void bootart()
+{
+        console_gotoxy(40, 3);
+        printf("%C           __           __             ", 0xF, 0x0);
+        console_gotoxy(40, 4);
+        printf("%C          /  \\         /  \\        ", 0xF, 0x0);
+        console_gotoxy(40, 5);
+        printf("%C         / /\\ \\       / /\\ \\       ", 0xF, 0x0);
+        console_gotoxy(40, 6);
+        printf("%C        / /  \\ \\     / /  \\ \\      ", 0xB, 0x0);
+        console_gotoxy(40, 7);
+        printf("%C       / /      \\___/      \\ \\     ", 0xB, 0x0);
+        console_gotoxy(40, 8);
+        printf("%C      /                       \\    ", 0xB, 0x0);
+        console_gotoxy(40, 9);
+        printf("%C     |        |      |         |   ", 0xB, 0x0);
+        console_gotoxy(40, 10);
+        printf("%C   ---        |      |         --- ", 0xB, 0x0);
+        console_gotoxy(40, 11);
+        printf("%C     |                         |   ", 0xB, 0x0);
+        console_gotoxy(40, 12);
+        printf("%C   ---  ", 0x3, 0x0);
+        printf("%C//", 0x3, 0x0);
+        printf("%C       ^       ", 0x3, 0x0);
+        printf("%C//", 0x3, 0x0);
+        printf("%C    --- ", 0x3, 0x0);
+        console_gotoxy(40, 13);
+        printf("%C      \\         \\/\\/          /    ", 0xB, 0x0);
+        console_gotoxy(40, 14);
+        printf(" %C      \\                     /     ", 0xB, 0x0);
+        console_gotoxy(40, 15);
+        printf("%C        \\___________________/      ", 0x3, 0x0);
+        console_gotoxy(40, 16);
+        printf("%C         ===================       ", 0xC, 0x0);
+        console_gotoxy(40, 17);
+        printf("%C        =========", 0x4, 0x0);
+        printf("%C\\/", 0xE,0x0);
+        printf("%C==========      ", 0x4, 0x0);
+        console_gotoxy(40, 18);
+        printf("%C                /  \\               ", 0xE, 0x0);
+        console_gotoxy(40, 19);
+        printf("%C               |catk|              ", 0xE, 0x0);
+        console_gotoxy(40, 20);
+        printf("%C                \\__/               ", 0xE, 0x0);
 }
 
 /*
