@@ -408,58 +408,11 @@ void vga_graphics_interface(int firstopen)
 {   
     app = "desktop";
 
-        if (firstopen == 1)
-        {
-            vga_graphics_clear_color(back_color);
+    if (firstopen == 1)
+    {
+        vga_graphics_clear_color(back_color);
 
-        }
-/*
-//desktop pattern.
-        int i = 0;
-        int X = 0;
-
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 25);
-            X+=25;
-        }
-        X = 0;
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 50);
-            X+=25;
-        }
-        X = 0;
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 75);
-            X+=25;
-        }
-        X = 0;
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 100);
-            X+=25;
-        }
-        X = 0;
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 125);
-            X+=25;
-        }
-        X = 0;
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 150);
-            X+=25;
-        }
-        X = 0;
-        for (i = 1; i < 14; ++i)
-        {
-            creu(X, 175);
-            X+=25;
-        }
-*/
+    }
 
     int ret = vesa_init(800, 600, 32);
     if (ret < 0) {
@@ -491,18 +444,6 @@ void vga_graphics_interface(int firstopen)
             x++;
         }
     }
-
-  int y = 0;
-  int bluecolor = 255;
-  int greencolor = 210;
-
-    for (y = 0; y < 8; y++) {
-        vbe_draw_rect(0, y, 800, 40, VBE_RGB(0, greencolor, bluecolor));
-        bluecolor-=5;
-        greencolor-=4;
-    }
-
-    while(1){}
 
     while (1)
     {

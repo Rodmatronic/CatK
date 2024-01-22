@@ -31,6 +31,7 @@ int get_vbe_info() {
 
 void get_vbe_mode_info(uint16 mode, VBE20_MODEINFOBLOCK *mode_info) {
     REGISTERS16 in = {0}, out = {0};
+    for (int i = 0; i < 1000; ++i) {for (int j = 0; j < 1100; ++j) {}}
     // set specific value 0x4F00 in ax to get vbe mode info into some other bios memory area
     in.ax = 0x4F01;
     in.cx = mode; // set mode info to get
@@ -51,8 +52,12 @@ void vbe_set_mode(uint32 mode) {
 // find the vbe mode by width & height & bits per pixel
 uint32 vbe_find_mode(uint32 width, uint32 height, uint32 bpp) {
     // iterate through video modes list
+    printf("got to 3\n");
+    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
     uint16 *mode_list = (uint16 *)g_vbe_infoblock.VideoModePtr;
     uint16 mode = *mode_list++;
+    printf("got to 4\n");
+    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
     while (mode != 0xffff) {
         // get each mode info
         get_vbe_mode_info(mode, &g_vbe_modeinfoblock);
@@ -100,6 +105,7 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
         printf("No VESA VBE 2.0 detected\n");
         return -1;
     }
+    printf("got to 1\n");
     // set this to 1 to print all available modes to console
     #define PRINT_MODES 0
     #if PRINT_MODES
@@ -108,11 +114,15 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
         vbe_print_available_modes();
         return 1;
     #else
+        printf("got to 2\n");
+        for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
         g_selected_mode = vbe_find_mode(width, height, bpp);
         if (g_selected_mode == -1) {
             printf("failed to find mode for %d-%d\n", width, height);
             return -1;
         }
+        printf("got to vesa\n");
+        for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
         printf("\nselected mode: %d \n", g_selected_mode);
         // set selection resolution to width & height
         g_width = g_vbe_modeinfoblock.XResolution;
@@ -124,4 +134,12 @@ int vesa_init(uint32 width, uint32 height, uint32 bpp) {
     #endif
     
     return 0;
+}
+
+uint32 vbe_get_width() {
+    return g_width;
+}
+
+uint32 vbe_get_height() {
+    return g_height;
 }

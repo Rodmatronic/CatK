@@ -47,5 +47,5 @@ void BootDevConfig()
     printf("%C   Created /dev/tty6\n", 0x8, 0x0);
 
     current_directory = working_directory;
-
+    return;
 }

@@ -231,6 +231,8 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
     int i, j, k, count = 0;
     unsigned char ide_buf[2048] = {0};
 
+    printf("%CIDE disk detection, probing disk process ide_init()\n", 0xF, 0x0);
+
     // 1- Detect I/O Ports which interface IDE Controller:
     // (checking the addr is removed for simplicity, just assigning all ports)
     g_ide_channels[ATA_PRIMARY].base = prim_channel_base_addr;
@@ -359,7 +361,9 @@ void ide_init(uint32 prim_channel_base_addr, uint32 prim_channel_control_base_ad
             add_data_to_file(&rootfs, g_ide_devices[i].model, g_ide_devices[i].features);
             */
             current_directory = workingdirectory;
+            return;
         }
+    return;
 }
 
 uint8 ide_ata_access(uint8 direction, uint8 drive, uint32 lba, uint8 num_sectors, uint32 buffer) {

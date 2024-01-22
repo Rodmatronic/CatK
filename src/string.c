@@ -71,6 +71,18 @@ int isspace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
 }
 
+char upper(char c) {
+    if ((c >= 'a') && (c <= 'z'))
+        return (c - 32);
+    return c;
+}
+
+char lower(char c) {
+    if ((c >= 'A') && (c <= 'Z'))
+        return (c + 32);
+    return c;
+}
+
 void itoa(char *buf, int base, int d) {
     char *p = buf;
     char *p1, *p2;

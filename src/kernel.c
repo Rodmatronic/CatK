@@ -286,12 +286,6 @@ void boot(unsigned long magic,  long addr) {
 
     //display_kernel_memory_map(&g_kmap);
     printf("total_memory: %d KB, %d Bytes\n", g_kmap.system.total_memory, g_kmap.available.size);
-    printf("start_addr: 0x%x, end_addr: 0x%x\n", g_kmap.available.start_addr, g_kmap.available.end_addr);
-
-    // put the memory bitmap at the start of the available memory
-    pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
-
-    printf("Max blocks: %d\n", pmm_get_max_blocks());
 
     kernmessage("Setting hostname to defaults from 'defaulthostname'");
     current_directory = "/etc";
@@ -328,8 +322,7 @@ void boot(unsigned long magic,  long addr) {
     BootDevConfig();
 
     kernmessage("Starting processes...");
-    daemon(ata_init, 100);
-    daemon(launchp, 150);
+    ata_init();
 
     current_directory = "/boot";
 
@@ -374,6 +367,7 @@ void boot(unsigned long magic,  long addr) {
     write_to_file(&rootfs, "SHELL", "k_sh");
 
     pserial("Boot should be finished. Starting a shell");
+    k_sh();
 }
 
 void kmain(unsigned long magic, unsigned long addr) {
@@ -399,7 +393,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     k_printf("  modules_addr: 0x%x\n", mboot_info->modules_addr);
     k_printf("  mmap_length: %d\n", mboot_info->mmap_length);
     k_printf("  mmap_addr: 0x%x\n", mboot_info->mmap_addr);
-    k_printf("Bootloader info \\/\n");
+    k_printf("%CBootloader info \\/\n", 0x8, 0x0);
     k_printf("  boot_loader_name: %s\n", (char *)mboot_info->boot_loader_name);
     k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
     k_printf("  vbe_mode_info: 0x%x", mboot_info->vbe_mode_info);
