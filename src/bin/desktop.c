@@ -30,10 +30,24 @@ void vbe_draw_outline(uint32 x, uint32 y, uint32 width, uint32 height, uint32 co
 
 void drawmenubar()
 {
-        vbe_draw_outline(0, 0, 800, 35, VBE_RGB(255, 255, 255));
-        vbe_draw_outline(1, 1, 799, 34, VBE_RGB(255, 255, 255));
-        vbe_draw_outline(0, 36, 800, 2, VBE_RGB(80, 80, 80));
-        vbe_draw_rectangle(2, 2, 799, 33, VBE_RGB(170, 170, 170));
+    vbe_draw_outline(0, 0, 800, 35, VBE_RGB(255, 255, 255));
+    vbe_draw_outline(1, 1, 799, 34, VBE_RGB(255, 255, 255));
+    vbe_draw_outline(0, 36, 800, 2, VBE_RGB(80, 80, 80));
+    vbe_draw_rectangle(2, 2, 799, 33, VBE_RGB(170, 170, 170));
+}
+
+void windowdraw(int x, int y, char* name)
+{
+    vbe_draw_outline(x, y, 500, 350, VBE_RGB(155, 155, 155));
+    vbe_draw_outline(x+1, y+1, 498, 348, VBE_RGB(220, 220, 220));
+    vbe_draw_outline(x+2, y+2, 496, 346, VBE_RGB(155, 155, 155));
+
+    vbe_draw_rectangle(x+3, y+3, 494, 344, VBE_RGB(255, 255, 255));
+
+    bitmap_draw_string(name, x+3, y+6, VBE_RGB(0, 0, 5));
+    bitmap_draw_string("The kernel is Operating System", x+3, y+30, VBE_RGB(0, 0, 5));
+    bitmap_draw_string("proper", x+3, y+44, VBE_RGB(0, 0, 5));
+    bitmap_draw_string("--Dennis Ritchie", x+3, y+70, VBE_RGB(0, 0, 5));
 }
 
 void desktop()
@@ -53,7 +67,10 @@ void desktop()
         }
         drawmenubar();
 
-        bitmap_draw_string("CatK ", 2, 10, VBE_RGB(0, 5, 10));
-        bitmap_draw_string(versionnumber, 80, 10, VBE_RGB(2, 25, 50));
+        bitmap_draw_string("CatK", 2, 10, VBE_RGB(2, 25, 50));
+        bitmap_draw_string(versionnumber, 76, 10, VBE_RGB(2, 25, 50));
+
+        windowdraw(110, 120, "Welcome");
+
     }
 }

@@ -271,13 +271,6 @@ void boot(unsigned long magic,  long addr) {
 
     kernmessage("Allocating memory for kernel...");
 
-    // put the memory bitmap at the start of the available memory
-    pmm_init(g_kmap.available.start_addr, g_kmap.available.size);
-    pmm_init_region(g_kmap.available.start_addr, PMM_BLOCK_SIZE * 256);
-    void *start = pmm_alloc_blocks(256);
-    void *end = start + (pmm_next_free_frame(1) * PMM_BLOCK_SIZE);
-    kheap_init(start, end);
-
     kernmessage("Allocated");
 
     memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));

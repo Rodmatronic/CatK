@@ -21,11 +21,10 @@ int get_vbe_info() {
     REGISTERS16 in = {0}, out = {0};
     // set specific value 0x4F00 in ax to get vbe info into bios memory area
     in.ax = 0x4F00;
-    // set address pointer to BIOS_CONVENTIONAL_MEMORY where vbe info struct will be stored
-    in.di = BIOS_CONVENTIONAL_MEMORY;
+    in.di = 1024;
     int86(0x10, &in, &out);  // call video interrupt 0x10
     // copy vbe info data to our global variable g_vbe_infoblock
-    memcpy(&g_vbe_infoblock, (void *)BIOS_CONVENTIONAL_MEMORY, sizeof(VBE20_INFOBLOCK));
+    memcpy(&g_vbe_infoblock, in.di, sizeof(VBE20_INFOBLOCK));
     return (out.ax == 0x4F);
 }
 
@@ -35,10 +34,10 @@ void get_vbe_mode_info(uint16 mode, VBE20_MODEINFOBLOCK *mode_info) {
     // set specific value 0x4F00 in ax to get vbe mode info into some other bios memory area
     in.ax = 0x4F01;
     in.cx = mode; // set mode info to get
-    in.di = BIOS_CONVENTIONAL_MEMORY + 1024;  // address pointer, different than used in get_vbe_info()
+    in.di = 4048;  // address pointer, different than used in get_vbe_info()
     int86(0x10, &in, &out);  // call video interrupt 0x10
     // copy vbe mode info data to parameter mode_info
-    memcpy(mode_info, (void *)BIOS_CONVENTIONAL_MEMORY + 1024, sizeof(VBE20_MODEINFOBLOCK));
+    memcpy(mode_info, in.di, sizeof(VBE20_MODEINFOBLOCK));
 }
 
 void vbe_set_mode(uint32 mode) {
