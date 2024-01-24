@@ -64,7 +64,7 @@ void console_newline() {
         for (uint32 i = 0; i < VGA_TOTAL_ITEMS - VGA_WIDTH; i++) {
             g_vga_buffer[i] = g_vga_buffer[i + VGA_WIDTH];
         }
-        g_vga_index = (cursor_pos_y + 1) * VGA_WIDTH;
+        g_vga_index = (cursor_pos_y) * VGA_WIDTH;
         // Update the cursor position
         cursor_pos_x = 0;
         cursor_pos_y = VGA_HEIGHT - 1;

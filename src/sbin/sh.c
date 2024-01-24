@@ -150,7 +150,7 @@ void execute_command(const char* command) {
         read_from_file(&rootfs, "SHELL", buffer, sizeof(buffer), 0);
         printf("Shell: %s\n", buffer);
         console_gotoxy(40, 9);
-        printf("Dimensions: %ux%u\n", VGA_TEXT_WIDTH, VGA_TEXT_HEIGHT);
+        printf("Dimensions: %ux%u\n", VGA_WIDTH, VGA_HEIGHT);
         console_gotoxy(40, 10);
         current_directory = "/proc";
         read_from_file(&rootfs, "cpu", buffer, sizeof(buffer), 0);

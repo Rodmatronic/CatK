@@ -67,7 +67,7 @@ uint16 vga_text_item_entry(uint8 ch, VGA_COLOR_TYPE fore_color, VGA_COLOR_TYPE b
  */
 void vga_text_set_cursor_pos(uint8 x, uint8 y) {
     // The screen is 80 characters wide...
-    uint16 cursorLocation = y * VGA_TEXT_WIDTH + x;
+    uint16 cursorLocation = y * VGA_WIDTH + x;
     outportb(0x3D4, 14);
     outportb(0x3D5, cursorLocation >> 8);
     outportb(0x3D4, 15);

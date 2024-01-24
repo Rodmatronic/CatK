@@ -6,9 +6,6 @@
 #define VGA_TEXT_ADDRESS       0xB8000
 #define VGA_TEXT_TOTAL_ITEMS   2200
 
-#define VGA_TEXT_WIDTH    80
-#define VGA_TEXT_HEIGHT   24
-
 // Miscellaneous Output
 #define VGA_MISC_READ  0x3CC
 #define VGA_MISC_WRITE 0x3C2
@@ -26,7 +23,7 @@
 #define VGA_TOTAL_ITEMS    2200
 
 #define VGA_WIDTH     80
-#define VGA_HEIGHT    24
+#define VGA_HEIGHT    25
 
 typedef enum {
     COLOR_BLACK,
@@ -68,9 +65,6 @@ enum vga_color {
 
 #define VGA_TEXT_ADDRESS       0xB8000
 #define VGA_TEXT_TOTAL_ITEMS   2200
-
-#define VGA_TEXT_WIDTH    80
-#define VGA_TEXT_HEIGHT   24
 
 // Miscellaneous Output
 #define VGA_MISC_READ  0x3CC

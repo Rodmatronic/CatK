@@ -32,6 +32,8 @@
 
 #define PORT 0x3f8          // COM1
  
+#define STACK_SIZE 1024
+
 #define VGA_CRT_CTRL_REG 0x3D4
 #define VGA_CRT_DATA_REG 0x3D5
 
@@ -105,25 +107,26 @@ void display_kernel_memory_map(KERNEL_MEMORY_MAP *kmap) {
 }
 
 static int init_serial() {
-   outportb(PORT + 1, 0x00);    // Disable all interrupts
-   outportb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
-   outportb(PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
-   outportb(PORT + 1, 0x00);    //                  (hi byte)
-   outportb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
-   outportb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
-   outportb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
-   outportb(PORT + 4, 0x1E);    // Set in loopback mode, test the serial chip
-   outportb(PORT + 0, 0xAE);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
+    k_printf("init_serial() on COM1\n");
+    outportb(PORT + 1, 0x00);    // Disable all interrupts
+    outportb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
+    outportb(PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
+    outportb(PORT + 1, 0x00);    //                  (hi byte)
+    outportb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
+    outportb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
+    outportb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+    outportb(PORT + 4, 0x1E);    // Set in loopback mode, test the serial chip
+    outportb(PORT + 0, 0xAE);    // Test serial chip (send byte 0xAE and check if serial returns same byte)
  
-   // Check if serial is faulty (i.e: not same byte as sent)
-   if(inportb(PORT + 0) != 0xAE) {
-      return 1;
-   }
+    // Check if serial is faulty (i.e: not same byte as sent)
+    if(inportb(PORT + 0) != 0xAE) {
+        return 1;
+    }
  
-   // If serial is not faulty set it in normal operation mode
-   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
-   outportb(PORT + 4, 0x0F);
-   return 0;
+    // If serial is not faulty set it in normal operation mode
+    // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
+    outportb(PORT + 4, 0x0F);
+    return 0;
 }
 
 int is_transmit_empty() {
@@ -156,50 +159,48 @@ void pserial(const char* str) { // Use const char* for the string parameter
     write_serial("\n");
 }
 
-void boot(unsigned long magic,  long addr) {
+typedef struct {
+    void (*func)();
+    void *stack;
+} Process;
 
-    outportb(0x60, 0xED);  // Command to set LEDs state
-    outportb(0x60, 2);  // Set the desired LED state, where led_state is a bitmask
+void execute(Process *process) {
+    // Switch to the new process by setting the stack pointer
+    asm volatile (
+        "mov %0, %%esp\n\t"
+        "call *%1"
+        :
+        : "g"(process->stack), "g"(process->func)
+        : "memory"
+    );
+}
 
-    MULTIBOOT_INFO *mboot_info;
-    mboot_info = (MULTIBOOT_INFO *)addr;
+Process *fork(void (*func)()) {
+    // Allocate memory for the new process
+    Process *child = (Process *)kmalloc(sizeof(Process));
+    child->stack = kmalloc(STACK_SIZE);
 
-    k_printf("\n\nCatKernel boot() started\n");
+    if (child == NULL || child->stack == NULL) {
+        panic("Fork child memory error");
+    }
 
+    // Copy the function pointer
+    child->func = func;
+
+    // Create a new process by copying the stack and function pointer
+    memcpy(child->stack, child, sizeof(Process));
+
+    execute(child);
+}
+
+void vfs_init()
+{
     // Initialize the file table
     for (size i = 0; i < MAX_FILES; ++i) {
         rootfs.file_table[i].filename[0] = '\0';  // Empty filename indicates an unused entry
     }
-    k_printf("Starting sysdiag");
-    sysdiaginit();
-    k_printf("init_serial() on COM1");
-    is_transmit_empty();
-    init_serial();
-    k_printf("\n                              Welcome to %CCat%CKernel\n", 0xB, 0x0, 0xE, 0x0);
-    k_printf("Boot arguments: %s\n", args);
-    //sleep(3)
 
-    k_printf("Using standard VGA '%ux%u'\n", VGA_WIDTH, VGA_HEIGHT);
-    k_printf("cpuid_info(1): Attempting to get CPU info");
-    cpuid_info(1);
-    k_printf("GetMemory(): Attempting to get Memory info");
-    GetMemory();
-    k_printf("Showing kernel's config.h configuration \\/ ");
-    k_printf("   hostname: %s\n", host_name);
-    pserial(host_name);
-    k_printf("   username: %s\n", username);
-    pserial(username);
-    k_printf("   versionnumber: %s\n", versionnumber);
-    pserial(versionnumber);
-    k_printf("   versionname: %s\n", vername);
-    pserial(vername);
-    k_printf("   arch: %s\n", arch);
-    pserial(arch);
-    k_printf("   bootargs(default): %s\n", bootargs);
-    pserial(bootargs);
-
-    kernmessage("Perfect! &rootfs created with max files from MAX_FILES");
-    kernmessage("Creating '/' structure");
+    k_printf("Creating '/' structure\n");
     create_folder(&rootfs, "bin", "/");
     create_folder(&rootfs, "boot", "/");
     create_folder(&rootfs, "cdrom", "/");
@@ -223,104 +224,54 @@ void boot(unsigned long magic,  long addr) {
     create_folder(&rootfs, "local", "/usr");
     create_folder(&rootfs, "share", "/usr");
 
-    list_files(&rootfs, 0);
-    k_printf("\n");
-
-    //Add the kernel to the list of running processes
-    addProcess("kernel");
-
     current_directory = "/etc";
-
     write_to_file(&rootfs, "launchp", "");
     add_data_to_file(&rootfs, "launchp", "sh\n");
-
-    kernmessage("Dumping kernel values to /proc");
+    k_printf("Dumping kernel values to /proc\n");
     pserial("Dumping kernel values to /proc");
     current_directory = "/proc";
     write_to_file(&rootfs, "pre-art", art);
     write_to_file(&rootfs, "buff", buffer);
     write_to_file(&rootfs, "buff-second", buffer2);
-
-    kernmessage("Dumping apps to /bin");
+    k_printf("Dumping apps to /bin\n");
     pserial("Dumping apps to /bin");
     current_directory = "/bin";
-
     write_to_file(&rootfs, "print", "type:App\nprint");
     write_to_file(&rootfs, "clear", "type:App\nclear");
     write_to_file(&rootfs, "delay", "type:App\ndelay");
-
     current_directory = "/sbin";
     write_to_file(&rootfs, "sh", "type:App\nsh");
-    kernmessage("Created /sbin/sh");
+    k_printf("Created /sbin/sh\n");
     write_to_file(&rootfs, "shutdown", "type:App\nshutdown");
-    kernmessage("Created /sbin/shutdown");
+    k_printf("Created /sbin/shutdown\n");
     write_to_file(&rootfs, "reboot", "type:App\nreboot");
-    kernmessage("Created /sbin/reboot");
-
-    kernmessage("Setting hostname to defaults from 'defaulthostname'");
+    k_printf("Created /sbin/reboot\n");
+    k_printf("Setting hostname to defaults from 'defaulthostname'\n");
     current_directory = "/etc";
     write_to_file(&rootfs, "hostname", defaulthostname);
     read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
-
-    gdt_init();
-    idt_init();
-
-    k_printf("TIMER is set to fire 100 times per second.\n");
-
-    timer_init();
-
-    kernmessage("Allocating memory for kernel...");
-
-    kernmessage("Allocated");
-
-    memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
-
-    get_kernel_memory_map(&g_kmap, mboot_info);
-
-    //display_kernel_memory_map(&g_kmap);
-    printf("total_memory: %d KB, %d Bytes\n", g_kmap.system.total_memory, g_kmap.available.size);
-
-    kernmessage("Setting hostname to defaults from 'defaulthostname'");
+    k_printf("Setting hostname to defaults from 'defaulthostname'\n");
     current_directory = "/etc";
     write_to_file(&rootfs, "hostname", defaulthostname);
     read_from_file(&rootfs, "hostname", buffer, sizeof(buffer), 1);
-
     strcpy(host_name, buffer);
-    kernmessage("Copying kernel values to proc");
+    k_printf("Copying kernel values to proc\n");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
-    k_printf("%C   Created /proc/arch\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "args", bootargs);
-    k_printf("%C   Created /proc/args\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "version", vername);
     add_data_to_file(&rootfs, "version", versionnumber);
-    k_printf("%C   Created /proc/version\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "versionnum", versionnumber);
-    k_printf("%C   Created /proc/versionnum\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "ostype", "Catkernel");
-    k_printf("%C   Created /proc/ostype\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "cpu", brand);
-    k_printf("%C   Created /proc/cpu\n", 0x8, 0x0);
-
     write_to_file(&rootfs, "vga", "80x25");
-    k_printf("%C   Created /proc/vga\n", 0x8, 0x0);
+}
 
-    k_printf("Autoconfiguring devices...\n");
-
-    BootDevConfig();
-
-    kernmessage("Starting processes...");
-    ata_init();
-
-    current_directory = "/boot";
-
+void makeroot()
+{
     // root user
-    kernmessage("Setting up default user");
+
+    k_printf("Setting up default user\n");
     current_directory = "/etc";
     write_to_file(&rootfs, "users", "root\n");
     strcpy(rootUser.username, "root");
@@ -333,10 +284,28 @@ void boot(unsigned long magic,  long addr) {
     current_directory = "/home/root";
     write_to_file(&rootfs, "readme", "Welcome to CatK! This is the default root user.\n\nThank you for using CatK. Built with love and care by Rodmatronics, Irix, and a few other awesome dudes :3");
     write_to_file(&rootfs, "history", "");
+}
 
-    bootlogo = 0;
+void make_boot_env_var()
+{
 
-    kernmessage("Creating needed files in the rootFS");
+    // Write the ENV variables to /var
+
+    current_directory = "/var";
+    write_to_file(&rootfs, "CATKVER", versionnumber);
+    write_to_file(&rootfs, "HOSTNAME", "catk");
+    write_to_file(&rootfs, "LANG", "en");
+    write_to_file(&rootfs, "USER", "root");
+    write_to_file(&rootfs, "HOME", "/home");
+    write_to_file(&rootfs, "SHELL", "k_sh");
+}
+
+void miscFSwrite()
+{
+
+    // Write misc data in the late stages of boot to the VFS
+
+    current_directory = "/boot";
     current_directory = "/bin";
     write_to_file(&rootfs, "game", "type:App\nclear\ncatascii-happy\nprint -----------------------------------------------\nprint Well hello, this is a simple game.\nprint -----------------------------------------------\nprint Press [ENTER]\nread\nclear\nprint COMMENCING SLEEP..\ncatascii-lookup\nprint -----------------------------------------------\nprint ?\nprint -----------------------------------------------\nprint Press [ENTER]\nread\ndelay\nclear\\ncatascii-tired\nprint_dark -----------------------------------------------\nprint_dark ...\nprint_dark -----------------------------------------------\ndelay\nclear\ncatascii-sleep\ndelay");
     current_directory = "/boot";
@@ -345,22 +314,47 @@ void boot(unsigned long magic,  long addr) {
     create_folder(&rootfs, "desktop", "/bin");
     current_directory = "/bin/desktop";
     write_to_file(&rootfs, "vga", "type:App\ngraphics_init");
-    kernmessage("Created /sbin/vga");
     current_directory = "/etc";
     write_to_file(&rootfs, "issue", "Catkernel ");
     add_data_to_file(&rootfs, "issue", versionnumber);
+}
 
-    kernmessage("Setting up ENV variables");
-    current_directory = "/var";
-    write_to_file(&rootfs, "CATKVER", versionnumber);
-    write_to_file(&rootfs, "HOSTNAME", "catk");
-    write_to_file(&rootfs, "LANG", "en");
-    write_to_file(&rootfs, "USER", "root");
-    write_to_file(&rootfs, "HOME", "/home");
-    write_to_file(&rootfs, "SHELL", "k_sh");
+void boot(unsigned long magic,  long addr) {
 
-    pserial("Boot should be finished. Starting a shell");
-    k_sh();
+    MULTIBOOT_INFO *mboot_info;
+    mboot_info = (MULTIBOOT_INFO *)addr;
+
+    // Print kern info
+    k_printf("Term = con%dx%d\n",VGA_WIDTH, VGA_HEIGHT);
+    k_printf("Hostname = %s\n", host_name);
+    k_printf("Username = %s\n", username);
+    k_printf("Vernum = %s\n", versionnumber);
+    k_printf("Arch = %s\n", arch);
+
+    // This is where the main funcs are called
+    cpuid_info(1);
+    kheap_init(mboot_info->mem_low, mboot_info->mem_high);
+    GetMemory();
+    memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
+    get_kernel_memory_map(&g_kmap, mboot_info);
+    
+    addProcess("kernel");
+    vfs_init();
+    sysdiaginit();
+    is_transmit_empty();
+    init_serial();
+    gdt_init();
+    idt_init();
+    timer_init();
+    ata_init();
+    BootDevConfig();
+    makeroot();
+    make_boot_env_var();
+
+    // Please work. If not, big issues!
+    if (!fork(k_sh)) {
+        panic("Yikes! Forking SHELL failed");
+    }
 }
 
 void kmain(unsigned long magic, unsigned long addr) {
@@ -391,7 +385,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
     k_printf("  vbe_mode_info: 0x%x", mboot_info->vbe_mode_info);
     // small delay to show the info
-    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1800; ++j) {}}
+    for (int i = 0; i < 1000; ++i) {for (int j = 0; j < 1800; ++j) {}}
     for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
     MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
     k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
@@ -401,7 +395,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             /**** Available memory  ****/
         }
     }
-    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
+    for (int i = 0; i < 1000; ++i) {for (int j = 0; j < 1100; ++j) {}}
     boot(magic, addr);
 }
 
