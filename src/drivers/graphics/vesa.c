@@ -99,7 +99,7 @@ void vbe_putpixel(int x, int y, int color) {
 
 int vesa_init(uint32 width, uint32 height, uint32 bpp) {
     bios32_init();
-    printf("initializing vesa vbe 2.0\n");
+    printf("\ninitializing vesa vbe 2.0\n");
     if (!get_vbe_info()) {
         printf("No VESA VBE 2.0 detected\n");
         return -1;

@@ -176,7 +176,7 @@ Process *fork(void (*func)(void), ...){
     //child->stack = kmalloc(STACK_SIZE);
 
     if (child == NULL || child->stack == NULL) {
-        panic("Fork child memory error");
+        return 0;
     }
 
     // Copy the function pointer
@@ -259,6 +259,8 @@ void vfs_init()
     write_to_file(&rootfs, "ostype", "Catkernel");
     write_to_file(&rootfs, "cpu", brand);
     write_to_file(&rootfs, "vga", "80x25");
+    current_directory = "/";
+    write_to_file(&rootfs, "desk", "type:App\ngraphics_init");
 }
 
 void makeroot()

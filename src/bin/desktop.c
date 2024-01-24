@@ -28,26 +28,67 @@ void vbe_draw_outline(uint32 x, uint32 y, uint32 width, uint32 height, uint32 co
     }
 }
 
-void drawmenubar()
+void drawwindow(int xw, int yw, char* name)
 {
-    vbe_draw_outline(0, 0, 800, 35, VBE_RGB(255, 255, 255));
-    vbe_draw_outline(1, 1, 799, 34, VBE_RGB(255, 255, 255));
-    vbe_draw_outline(0, 36, 800, 2, VBE_RGB(80, 80, 80));
-    vbe_draw_rectangle(2, 2, 799, 33, VBE_RGB(170, 170, 170));
-}
 
-void windowdraw(int x, int y, char* name)
-{
-    vbe_draw_outline(x, y, 500, 350, VBE_RGB(155, 155, 155));
-    vbe_draw_outline(x+1, y+1, 498, 348, VBE_RGB(220, 220, 220));
-    vbe_draw_outline(x+2, y+2, 496, 346, VBE_RGB(155, 155, 155));
+    // Window grabber
+    for (int x = 5; x < 330; x++) {
+        for (int y = 5; y < 30; y++) {
+            vbe_putpixel(x, y, VBE_RGB(2,190,249));
+        }
+    }
 
-    vbe_draw_rectangle(x+3, y+3, 494, 344, VBE_RGB(255, 255, 255));
+    // Window close button shadow
+    for (int x = 10; x < 25; x++) {
+        for (int y = 10; y < 25; y++) {
+            vbe_putpixel(x, y, VBE_RGB(0,90,180));
+        }
+    }
 
-    bitmap_draw_string(name, x+3, y+6, VBE_RGB(0, 0, 5));
-    bitmap_draw_string("The kernel is Operating System", x+3, y+30, VBE_RGB(0, 0, 5));
-    bitmap_draw_string("proper", x+3, y+44, VBE_RGB(0, 0, 5));
-    bitmap_draw_string("--Dennis Ritchie", x+3, y+70, VBE_RGB(0, 0, 5));
+    // Window close button
+    for (int x = 11; x < 23; x++) {
+        for (int y = 11; y < 23; y++) {
+            vbe_putpixel(x, y, VBE_RGB(0,120,230));
+        }
+    }
+
+    // Window Body
+    for (int x = 8; x < 328; x++) {
+        for (int y = 33; y < 278; y++) { 
+            vbe_putpixel(x, y, VBE_RGB(255,255,255));
+        }
+    }
+
+    // Window Border UP
+    for (int x = 5; x < 327; x++) {
+        for (int y = 30; y < 33; y++) { 
+            vbe_putpixel(x, y, VBE_RGB(203,203,203));
+        }
+    }
+
+    // Window Border LEFT
+    for (int x = 5; x < 8; x++) {
+        for (int y = 33; y < 277; y++) { 
+            vbe_putpixel(x, y, VBE_RGB(203,203,203));
+        }
+    }
+
+    // Window Border RIGHT
+    for (int x = 327; x < 330; x++) {
+        for (int y = 30; y < 277; y++) { 
+            vbe_putpixel(x, y, VBE_RGB(203,203,203));
+        }
+    }
+
+    // Window Border DOWN
+    for (int x = 5; x < 330; x++) {
+        for (int y = 277; y < 280; y++) { 
+            vbe_putpixel(x, y, VBE_RGB(203,203,203));
+        }
+    }
+
+    bitmap_draw_string(name, 25, 9, VBE_RGB(0, 0, 5));
+
 }
 
 void desktop()
@@ -58,19 +99,17 @@ void desktop()
     }
     if (ret == 1) {
     } else {
-        // fill with a solid color
-        uint32 x = 0;
-        for (uint32 i = 0; i < 600; i++) {
-            for (uint32 j = 0; j < 800; j++) {
-                vbe_putpixel(j, i, VBE_RGB(0, 100, 190));
+        // Fill the desktop
+        for (int x = 0; x < 800; x++) {
+            for (int y = 0; y < 600; y++) {
+                vbe_putpixel(x, y, VBE_RGB(37, 150, 190));
             }
         }
-        drawmenubar();
 
-        bitmap_draw_string("CatK", 2, 10, VBE_RGB(2, 25, 50));
-        bitmap_draw_string(versionnumber, 76, 10, VBE_RGB(2, 25, 50));
+        bitmap_draw_string("CatK", 2, 570, VBE_RGB(2, 25, 50));
+        bitmap_draw_string(versionnumber, 76, 570, VBE_RGB(2, 25, 50));
 
-        windowdraw(110, 120, "Welcome");
+        drawwindow(80, 80, "Hello");
 
     }
 }
