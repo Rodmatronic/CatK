@@ -333,7 +333,7 @@ void boot(unsigned long magic,  long addr) {
 
     // This is where the main funcs are called
     cpuid_info(1);
-    kheap_init(mboot_info->mem_low, mboot_info->mem_high);
+    kheap_init(mboot_info->mem_low, mboot_info->mem_high * 1024);
     GetMemory();
     memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
     get_kernel_memory_map(&g_kmap, mboot_info);

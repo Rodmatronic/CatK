@@ -14,7 +14,7 @@ char* bootargs;
 char host_name[30] = "catk";
 char username[30] = "root";
 char* current_directory = "/";
-char* versionnumber = "0.067";
+char* versionnumber = "0.068";
 char* vername = "CatK Version Bittin'";
 char* arch = "x86";
 //char* prebootversion = "0.066re";
