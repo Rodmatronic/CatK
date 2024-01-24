@@ -75,7 +75,7 @@ void execute_command(const char* command) {
     } else if (strcmp(command, "clear") == 0) {
         char* workingdir = current_directory;
         current_directory = "/bin";
-        execute_file(&rootfs, "clear", 1);
+        execute_file(&rootfs, "clear");
         current_directory = workingdir;
     } else if (strcmp(command, "reboot") == 0) {
         rows = 0;
@@ -102,7 +102,7 @@ void execute_command(const char* command) {
         int result = numerator / divisor;
     } else if (strncmp(command, "exec ", 5) == 0) {
         const char* new_directory = command + 5;
-        execute_file(&rootfs, new_directory, 0);
+        execute_file(&rootfs, new_directory);
         vga_enable_cursor();
     } else if (strncmp(command, "rm ", 3) == 0) {
         const char* new_directory = command + 3;

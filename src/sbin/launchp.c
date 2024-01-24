@@ -22,7 +22,7 @@ int launchp(TIMER_FUNC_ARGS *args)
     // Tokenize and execute each line
     char* token = k_strtok(buffer, "\n");
     while (token != NULL) {
-        execute_file(&rootfs, token, 1);
+        execute_file(&rootfs, token);
         kernmessage(token);
 
         token = k_strtok(NULL, "\n");

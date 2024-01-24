@@ -32,7 +32,7 @@
 
 #define PORT 0x3f8          // COM1
  
-#define STACK_SIZE 1024
+#define STACK_SIZE 4096
 
 #define VGA_CRT_CTRL_REG 0x3D4
 #define VGA_CRT_DATA_REG 0x3D5
@@ -159,11 +159,6 @@ void pserial(const char* str) { // Use const char* for the string parameter
     write_serial("\n");
 }
 
-typedef struct {
-    void (*func)();
-    void *stack;
-} Process;
-
 void execute(Process *process) {
     // Switch to the new process by setting the stack pointer
     asm volatile (
@@ -175,10 +170,10 @@ void execute(Process *process) {
     );
 }
 
-Process *fork(void (*func)()) {
+Process *fork(void (*func)(void), ...){
     // Allocate memory for the new process
     Process *child = (Process *)kmalloc(sizeof(Process));
-    child->stack = kmalloc(STACK_SIZE);
+    //child->stack = kmalloc(STACK_SIZE);
 
     if (child == NULL || child->stack == NULL) {
         panic("Fork child memory error");
@@ -192,6 +187,7 @@ Process *fork(void (*func)()) {
 
     execute(child);
 }
+
 
 void vfs_init()
 {
@@ -331,13 +327,14 @@ void boot(unsigned long magic,  long addr) {
 
     // This is where the main funcs are called
     cpuid_info(1);
-    kheap_init(mboot_info->mem_low, mboot_info->mem_high * 1024);
+    kheap_init(mboot_info->mem_low, 1024 * 1024);
     GetMemory();
     memset(&g_kmap, 0, sizeof(KERNEL_MEMORY_MAP));
     get_kernel_memory_map(&g_kmap, mboot_info);
     
     addProcess("kernel");
     vfs_init();
+    miscFSwrite();
     sysdiaginit();
     is_transmit_empty();
     init_serial();

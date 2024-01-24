@@ -4,6 +4,11 @@
 #include "types.h"
 #include "timer.h"
 
+typedef struct {
+    void (*func)();
+    void *stack;
+} Process;
+
 void kernmessage(const char* str);
 void wait_seconds(int seconds);
 void boot();
@@ -12,6 +17,9 @@ int is_transmit_empty();
 void write_serial(const char* str);
 void pserial(const char* str);
 void daemon(TIMER_FUNCTION function, uint32 timeout);
+
+Process *fork(void (*func)(void), ...);
+
 // symbols from linker.ld for section addresses
 extern uint8 __kernel_section_start;
 extern uint8 __kernel_section_end;

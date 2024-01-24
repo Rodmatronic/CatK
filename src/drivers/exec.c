@@ -15,7 +15,7 @@
 #include "process.h"
 #include "desktop.h"
 
-void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
+void execute_file(struct FileSystem* fs, const char* filename) {
     char buffer[BLOCK_SIZE];
     read_from_file(fs, filename, buffer, BLOCK_SIZE, 0);
     write_serial("exec: starting: ");
@@ -25,15 +25,6 @@ void execute_file(struct FileSystem* fs, const char* filename, int quiet) {
     // Check if the file is of type "app"
     char* typeToken = k_strstr(buffer, "type:App");
     if (typeToken == NULL) {
-        // File is not of type "app", do not execute
-        if (quiet == 1)
-        {
-            return;
-        }else
-        if (quiet == 0)
-        {
-            return;
-        }
         return;
     }
 
