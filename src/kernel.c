@@ -230,7 +230,6 @@ void vfs_init()
     k_printf("Dumping kernel values to /proc\n");
     pserial("Dumping kernel values to /proc");
     current_directory = "/proc";
-    write_to_file(&rootfs, "pre-art", art);
     write_to_file(&rootfs, "buff", buffer);
     write_to_file(&rootfs, "buff-second", buffer2);
     k_printf("Dumping apps to /bin\n");
@@ -258,7 +257,6 @@ void vfs_init()
     k_printf("Copying kernel values to proc\n");
     current_directory = "/proc";
     write_to_file(&rootfs, "arch", arch);
-    write_to_file(&rootfs, "args", bootargs);
     write_to_file(&rootfs, "version", vername);
     add_data_to_file(&rootfs, "version", versionnumber);
     write_to_file(&rootfs, "versionnum", versionnumber);
@@ -385,7 +383,7 @@ void kmain(unsigned long magic, unsigned long addr) {
     k_printf("  vbe_control_info: 0x%x\n", mboot_info->vbe_control_info);
     k_printf("  vbe_mode_info: 0x%x", mboot_info->vbe_mode_info);
     // small delay to show the info
-    for (int i = 0; i < 1000; ++i) {for (int j = 0; j < 1800; ++j) {}}
+    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1800; ++j) {}}
     for (i = 0; i < mboot_info->mmap_length; i += sizeof(MULTIBOOT_MEMORY_MAP)) {
     MULTIBOOT_MEMORY_MAP *mmap = (MULTIBOOT_MEMORY_MAP *)(mboot_info->mmap_addr + i);
     k_printf("    size: %d, addr: 0x%x%x, len: %d%d, type: %d\n", 
@@ -395,7 +393,7 @@ void kmain(unsigned long magic, unsigned long addr) {
             /**** Available memory  ****/
         }
     }
-    for (int i = 0; i < 1000; ++i) {for (int j = 0; j < 1100; ++j) {}}
+    for (int i = 0; i < 100000; ++i) {for (int j = 0; j < 1100; ++j) {}}
     boot(magic, addr);
 }
 

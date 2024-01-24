@@ -21,7 +21,6 @@ extern char* hostnamebuffer[128];
 extern char defaulthostname[30];
 extern int total_files;
 extern int rows;
-extern char* bootargs;
 extern char host_name[30];
 extern char username[30];
 extern char* current_directory;
@@ -29,7 +28,6 @@ extern char* versionnumber;
 extern char* vername;
 extern char* arch;
 //extern char* prebootversion;
-extern char* bootargs;
 extern char input_buffer[1024];
 extern int buffer_index;
 
