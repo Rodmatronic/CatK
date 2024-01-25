@@ -18,7 +18,7 @@ void write_serial(const char* str);
 void pserial(const char* str);
 void daemon(TIMER_FUNCTION function, uint32 timeout);
 
-Process *fork(void (*func)(void), ...);
+Process *fork(void (*func)(void));
 
 // symbols from linker.ld for section addresses
 extern uint8 __kernel_section_start;

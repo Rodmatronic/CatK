@@ -159,34 +159,33 @@ void pserial(const char* str) { // Use const char* for the string parameter
     write_serial("\n");
 }
 
-void execute(Process *process) {
-    // Switch to the new process by setting the stack pointer
-    asm volatile (
-        "mov %0, %%esp\n\t"
-        "call *%1"
-        :
-        : "g"(process->stack), "g"(process->func)
-        : "memory"
-    );
-}
 
-Process *fork(void (*func)(void), ...){
+extern void execute(Process *process); // Declaration for the assembly function
+
+Process* fork(void (*func)(void)) {
     // Allocate memory for the new process
     Process *child = (Process *)kmalloc(sizeof(Process));
-    //child->stack = kmalloc(STACK_SIZE);
 
-    if (child == NULL || child->stack == NULL) {
-        return 0;
+    if (child == NULL) {
+        return NULL;
     }
+
+    printf("copying child\n");
 
     // Copy the function pointer
     child->func = func;
 
-    // Create a new process by copying the stack and function pointer
-    memcpy(child->stack, child, sizeof(Process));
+    // Copy the parent's memory to the child
+    memcpy(child->stack, func, STACK_SIZE);
+
+    printf("executing child\n");
 
     execute(child);
+
+    return child;
 }
+
+
 
 
 void vfs_init()
@@ -317,8 +316,8 @@ void miscFSwrite()
 
 void boot(unsigned long magic,  long addr) {
 
-    MULTIBOOT_INFO *mboot_info;
-    mboot_info = (MULTIBOOT_INFO *)addr;
+    MULTIBOOT_INFO *mboot_info;      /* need this for multiboot. DONT REMOVE. */
+    mboot_info = (MULTIBOOT_INFO *)addr;      /* DONT REMOVE EITHER */
 
     // Print kern info
     k_printf("Term = con%dx%d\n",VGA_WIDTH, VGA_HEIGHT);
@@ -348,8 +347,7 @@ void boot(unsigned long magic,  long addr) {
     makeroot();
     make_boot_env_var();
 
-    // Please work. If not, big issues!
-    if (!fork(k_sh)) {
+    if (!fork(k_sh)) {    /* DONT CRASH VBOX you FAT FORKING FUCK. */
         panic("Yikes! Forking SHELL failed");
     }
 }
