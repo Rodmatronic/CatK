@@ -1,9 +1,19 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <term.h>
 #include "term.h"
 #include "libc.h"
+
+void itoa_hex(char* buf, int num) 
+{
+    // Assuming a 32-bit integer
+    for (int i = 7; i >= 0; --i) 
+    {
+        int nibble = (num >> (i * 4)) & 0xF;
+        buf[7 - i] = (nibble < 10) ? nibble + '0' : nibble - 10 + 'a';
+    }
+    buf[8] = '\0';
+}
 
 void printk(const char* format, ...) 
 {
@@ -28,7 +38,15 @@ void printk(const char* format, ...)
             else if (*format == 'd') 
             {
                 int num = *((int*)arg);
-                terminal_write(num, sizeof(num));
+                terminal_write_int(num);
+                arg += sizeof(int);
+            } 
+            else if (*format == 'x') 
+            {
+                int num = *((int*)arg);
+                char hex_buf[9];
+                itoa_hex(hex_buf, num);
+                terminal_write(hex_buf, strlen(hex_buf));
                 arg += sizeof(int);
             } 
             else if (*format == 'C') 

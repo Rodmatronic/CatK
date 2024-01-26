@@ -54,13 +54,34 @@ void vga_set_cursor_pos(uint8_t x, uint8_t y)
     outportb(0x3D5, cursorLocation);
 }
 
+
 void terminal_putchar(char c) 
 {
     if (c == '\n') 
     {
         terminal_column = 0;
         if (++terminal_row == VGA_HEIGHT)
-            terminal_row = 0;
+        {
+            terminal_row--;
+            vga_set_cursor_pos(0, 24);
+            // Scroll up when the screen is full
+            for (size_t y = 0; y < VGA_HEIGHT - 1; y++) 
+            {
+                for (size_t x = 0; x < VGA_WIDTH; x++) 
+                {
+                    const size_t index = y * VGA_WIDTH + x;
+                    const size_t nextIndex = (y + 1) * VGA_WIDTH + x;
+                    terminal_buffer[index] = terminal_buffer[nextIndex];
+                }
+            }
+
+            // Clear the last line
+            for (size_t x = 0; x < VGA_WIDTH; x++) 
+            {
+                const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+                terminal_buffer[index] = vga_entry(' ', terminal_color);
+            }
+        }
     } 
     else 
     {
@@ -70,7 +91,26 @@ void terminal_putchar(char c)
         {
             terminal_column = 0;
             if (++terminal_row == VGA_HEIGHT)
-                terminal_row = 0;
+            {
+                terminal_row--;
+                // Scroll up when the screen is full
+                for (size_t y = 0; y < VGA_HEIGHT - 1; y++) 
+                {
+                    for (size_t x = 0; x < VGA_WIDTH; x++) 
+                    {
+                        const size_t index = y * VGA_WIDTH + x;
+                        const size_t nextIndex = (y + 1) * VGA_WIDTH + x;
+                        terminal_buffer[index] = terminal_buffer[nextIndex];
+                    }
+                }
+
+                // Clear the last line
+                for (size_t x = 0; x < VGA_WIDTH; x++) 
+                {
+                    const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+                    terminal_buffer[index] = vga_entry(' ', terminal_color);
+                }
+            }
         }
 
         // Update the cursor position using vga_set_cursor_pos
@@ -78,11 +118,19 @@ void terminal_putchar(char c)
     }
 }
 
+
 void terminal_write(const char* data, size_t size) 
 {
 	for (size_t i = 0; i < size; i++)
 		terminal_putchar(data[i]);
 }
+
+void terminal_write_int(int num) 
+{
+    char buf[20]; // Assuming a 32-bit integer
+    terminal_write(buf, strlen(buf));
+}
+
 
 void vga_enable_cursor() {
     outportb(0x3D4, 0x0A);
