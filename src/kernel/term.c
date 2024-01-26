@@ -125,12 +125,11 @@ void terminal_write(const char* data, size_t size)
 		terminal_putchar(data[i]);
 }
 
-void terminal_write_int(int num) 
+void terminal_write_int() 
 {
     char buf[20]; // Assuming a 32-bit integer
     terminal_write(buf, strlen(buf));
 }
-
 
 void vga_enable_cursor() {
     outportb(0x3D4, 0x0A);

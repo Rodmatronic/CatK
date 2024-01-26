@@ -7,7 +7,7 @@
 #include "cpu.h"
 
 static char * sys_arch = "X86/intel";
-static char * sys_term = "80x60";
+static char * sys_term = "80x25";
 static char * sys_sesh = "/bin/k_sh";
 
 void bootart();
@@ -15,7 +15,7 @@ void bootart();
 void kmain() 
 {
 
-	terminal_init();                                /* This starts the terminal, prints the Cat... kernel! message, and */
+	terminal_init();                                /* This starts the terminal, prints the "Cat... kernel!"" message, and */
 	printk("%CCat... ", VGA_COLOR_CYAN);			/* shows the CatK boot logo.*/
 	printk("%Ckernel!\n", VGA_COLOR_LIGHT_CYAN);
 	bootart();
@@ -43,7 +43,7 @@ void bootart()
         printk("%C//", VGA_COLOR_CYAN);
         printk("%C    ---    |  |____ |   _   |  |   |  |    _  |\n", VGA_COLOR_LIGHT_CYAN);
         printk("%C      \\         \\/\\/          /       |_______||__| |__|  |___|  |___| |_|\n", VGA_COLOR_LIGHT_CYAN);
-        printk(" %C      \\                     /                      loaded! \n", VGA_COLOR_CYAN);
+        printk(" %C      \\                     /        Written from scratch by the team! :3 \n", VGA_COLOR_CYAN);
         printk("%C        \\___________________/      \n", VGA_COLOR_CYAN);
         printk("%C         ===================       \n", VGA_COLOR_LIGHT_RED);
         printk("%C        =========", VGA_COLOR_RED);
