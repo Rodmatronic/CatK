@@ -10,4 +10,5 @@ void kmain()
  
 	/* Newline support is left as an exercise. */
 	terminal_writestring("Cat... kernel!\n");
+	terminal_writestring(":3");
 }
