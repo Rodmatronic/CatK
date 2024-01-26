@@ -12,25 +12,16 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color)
 {
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
- 
-size_t strlen(const char* str) 
-{
-	size_t len = 0;
-	while (str[len])
-		len++;
-	return len;
-}
- 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
- 
+
 size_t terminal_row;
 size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
  
-void terminal_initialize(void) 
+void terminal_init(void) 
 {
+    vga_set_cursor_pos(0, 0);
+    vga_enable_cursor();
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
@@ -54,28 +45,48 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, color);
 }
  
-void terminal_putchar(char c) {
-    if (c == '\n') {
-        terminal_row++;
+void vga_set_cursor_pos(uint8_t x, uint8_t y) 
+{
+    uint16_t cursorLocation = y * VGA_WIDTH + x;
+    outportb(0x3D4, 14);
+    outportb(0x3D5, cursorLocation >> 8);
+    outportb(0x3D4, 15);
+    outportb(0x3D5, cursorLocation);
+}
+
+void terminal_putchar(char c) 
+{
+    if (c == '\n') 
+    {
         terminal_column = 0;
-    } else {
+        if (++terminal_row == VGA_HEIGHT)
+            terminal_row = 0;
+    } 
+    else 
+    {
         terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-        if (++terminal_column == VGA_WIDTH) {
+
+        if (++terminal_column == VGA_WIDTH) 
+        {
             terminal_column = 0;
             if (++terminal_row == VGA_HEIGHT)
                 terminal_row = 0;
         }
+
+        // Update the cursor position using vga_set_cursor_pos
+        vga_set_cursor_pos(terminal_column, terminal_row);
     }
 }
 
- 
 void terminal_write(const char* data, size_t size) 
 {
 	for (size_t i = 0; i < size; i++)
 		terminal_putchar(data[i]);
 }
- 
-void terminal_writestring(const char* data) 
-{
-	terminal_write(data, strlen(data));
+
+void vga_enable_cursor() {
+    outportb(0x3D4, 0x0A);
+    outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
+    outportb(0x3D4, 0x0B);
+    outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 0x0E);
 }

@@ -1,6 +1,14 @@
 #ifndef TERM_H
 #define TERM_H
 
+#include <stddef.h>
+#include <stdint.h>
+#include "libc.h"
+
+static const size_t VGA_WIDTH = 80;
+static const size_t VGA_HEIGHT = 25;
+
+
 /* Hardware text mode color constants. */
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -21,7 +29,10 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
-void terminal_writestring(const char* data);
-void terminal_initialize(void);
+void terminal_init(void);
+void terminal_write(const char* data, size_t size) ;
+void terminal_setcolor(uint8_t color);
+void vga_enable_cursor();
+void vga_set_cursor_pos(uint8_t x, uint8_t y);
 
 #endif
