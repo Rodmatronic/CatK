@@ -5,32 +5,20 @@ RM_FORCE = rm -rf
 
 # assembler
 ASM = nasm
-
-# compiler
-
-# !!! DO NOT CHANGE THIS !!!
-# i don't care if you can't use clang, i don't care if you hate clang.
-# this project targets clang and clang only. you will not be helped if it fails.
-# gcc broke this project. i am not fixing it again. - irix
-CC = clang
-
-# linker. this can be GNU ld or LLVM lld.
-# lld is now preferred as it works everywhere
-LD = ld.lld
+CC = clang # We Only Support Clang.
+LD = ld.lld # We Only Support GNU ld or LLVM ld.lld.
 
 # sources
 SRC = src
 ASM_SRC = $(SRC)/asm
+INC = ./include
 
 # objects
 OBJ = obj
 ASM_OBJ = $(OBJ)/asm
 
 CONFIG = ./config
-
-OUT = out
-
-INC = ./include
+OUT = ./out
 
 INCLUDE =-I$(INC)
 
@@ -62,7 +50,7 @@ ISO_DIR = $(OUT)/isodir
 $(shell $(MKDIR) $(OBJ) $(OUT))
 
 # automatically find all C source files in src/ and its subdirectories
-C_SOURCES := $(wildcard $(SRC)/**/*.c $(SRC)/*.c $(SRC)/drivers/boot/*.c $(SRC)/drivers/graphics/*.c)
+C_SOURCES := $(wildcard $(SRC)/**/*.c $(SRC)/*.c)
 ASM_SOURCES := $(wildcard $(ASM_SRC)/**/*.asm $(ASM_SRC)/*.asm)
 
 # generate object file names from source file names
