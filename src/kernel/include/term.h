@@ -33,3 +33,9 @@ void terminal_setcolor(uint8_t color);
 void vga_enable_cursor();
 void vga_set_cursor_pos(uint8_t x, uint8_t y);
 void terminal_write_int();
+void terminal_putchar(char c);
+
+extern size_t terminal_row;
+extern size_t terminal_column;
+extern uint8_t terminal_color;
+extern uint16_t* terminal_buffer;

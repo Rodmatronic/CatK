@@ -6,6 +6,7 @@
 #include "panic.h"
 #include "cpu.h"
 #include "keyboard.h"
+#include "k_sh.h"
 
 static char * sys_arch = "X86/intel";
 static char * sys_term = "80x25";
@@ -33,24 +34,7 @@ void kmain()
     printk("\n");
 	cpuid_info();
 
-    // Take in keyboard inputs (no shell started, default action)
-    while (1) {
-        // Read a key scancode
-        unsigned char scancode = read_key();
-
-        // Convert the scancode to a character
-        char key = scancode_to_char(scancode);
-
-        // Check if a valid character was returned
-        if (key != 0) {
-            // Print the character to the console
-            if (scancode == SCAN_CODE_KEY_ENTER) {
-                printk("");
-            }
-            printk("%c", key);
-        }
-    
-    }
+    k_sh();
 }
 
 

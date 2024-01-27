@@ -12,3 +12,7 @@ uint8_t inportb(uint16_t port) {
 void outportb(uint16_t port, uint8_t val) {
     asm volatile("outb %1, %0" :: "dN"(port), "a"(val));
 }
+
+void outports(uint16_t port, uint16_t data) {
+    asm volatile ("outw %1, %0" : : "dN" (port), "a" (data));
+}
