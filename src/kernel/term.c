@@ -1,7 +1,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "term.h"
+#include <term.h>
+#include <pc.h>
+#include <string.h>
 
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
 {

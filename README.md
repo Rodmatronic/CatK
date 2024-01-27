@@ -1,6 +1,6 @@
 <h1 align=center><a href="https://catk.neocities.org">CatK</a></h1>
 
-<p align=center>a simple Unix-like kernel made in C, with a cute kitty (CatK) to go with it</p>
+<p align=center>a simple Unix-like system made in C, with a cute kitty (CatK) to go with it</p>
 
 ---
 
@@ -30,6 +30,7 @@ You'll need:
 - clang 14+ with support for i686-pc-none-elf (so, most installs)
 - LLVM lld (or GNU ld, if you set it manually)
 - grub-mkrescue (This usually comes with GRUB) and xorriso
+  - if you don't want to make an ISO, or you don't have grub, see below about skipping these
 - the NASM assembler
 - GNU make
 
@@ -73,6 +74,8 @@ Contributions are accepted and encouraged!
 Please try to follow the coding style (we have so much cleaning up to do...) that the rest of the code follows.
 
 Please discuss changes you intend on making if they are large in the dev section of our Discord (see "Get in touch").
+
+See DEVS.md for information regarding the actual layout and such.
 
 ## Support/Issues
 If you have a question or a small issue/something you don't quite understand, it's best to just join our Discord. See "Get in touch" for that.

@@ -1,4 +1,5 @@
-#include "printk.h"
+#include <panic.h>
+#include <printk.h>
 
 void panic(char* message)
 {

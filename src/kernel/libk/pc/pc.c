@@ -1,14 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-size_t strlen(const char* str) 
-{
-	size_t len = 0;
-	while (str[len])
-		len++;
-	return len;
-}
+#include <limits.h>
 
 uint8_t inportb(uint16_t port) {
     uint8_t ret;

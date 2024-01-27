@@ -6,15 +6,16 @@
 #include "panic.h"
 #include "cpu.h"
 
+uint32_t brand[12];
+uint32_t eax, ebx, ecx, edx;
+uint32_t type;
+
 void __cpuid(uint32_t type, uint32_t *eax, uint32_t *ebx, uint32_t *ecx, uint32_t *edx) {
     asm volatile("cpuid"
                 : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
                 : "0"(type)); // put the type into eax
 }
 
-    uint32_t brand[12];
-    uint32_t eax, ebx, ecx, edx;
-    uint32_t type;
 
 void cpuid_info() {
     __cpuid(0x80000002, (uint32_t *)brand+0x0, (uint32_t *)brand+0x1, (uint32_t *)brand+0x2, (uint32_t *)brand+0x3);

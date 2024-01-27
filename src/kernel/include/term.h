@@ -1,9 +1,7 @@
-#ifndef TERM_H
-#define TERM_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
-#include "libc.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -34,6 +32,4 @@ void terminal_write(const char* data, size_t size) ;
 void terminal_setcolor(uint8_t color);
 void vga_enable_cursor();
 void vga_set_cursor_pos(uint8_t x, uint8_t y);
-void terminal_write_int(int num);
-
-#endif
+void terminal_write_int();
