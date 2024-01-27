@@ -33,6 +33,11 @@ void printk(const char* format, ...)
                 terminal_write(buf, strlen(buf));
                 arg += sizeof(int);
             }  
+            else if (*format == 'c') 
+            {
+                terminal_write(arg, strlen(arg));
+                arg += sizeof(char);
+            }  
             else if (*format == 'x') 
             {
                 int num = *((int*)arg);

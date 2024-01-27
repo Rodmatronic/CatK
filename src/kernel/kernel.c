@@ -5,10 +5,14 @@
 #include "printk.h"
 #include "panic.h"
 #include "cpu.h"
+#include "keyboard.h"
 
 static char * sys_arch = "X86/intel";
 static char * sys_term = "80x25";
 static char * sys_sesh = "/bin/k_sh";
+static char * sys_ver = "0.07";
+static char * sys_home = "/home/root";
+static char * sys_name = "Catkernel";
 
 void bootart();
 
@@ -23,9 +27,32 @@ void kmain()
 	printk("Arch: %s\n", sys_arch);
 	printk("Term: %s\n", sys_term);
 	printk("Sesh: %s\n", sys_sesh);
+	printk("Vers: %s\n", sys_ver);
+	printk("Home: %s\n", sys_home);
+	printk("Name: %s\n", sys_name);
     printk("\n");
 	cpuid_info();
+
+    // Take in keyboard inputs (no shell started, default action)
+    while (1) {
+        // Read a key scancode
+        unsigned char scancode = read_key();
+
+        // Convert the scancode to a character
+        char key = scancode_to_char(scancode);
+
+        // Check if a valid character was returned
+        if (key != 0) {
+            // Print the character to the console
+            if (scancode == SCAN_CODE_KEY_ENTER) {
+                printk("");
+            }
+            printk("%c", key);
+        }
+    
+    }
 }
+
 
 void bootart()
 {
