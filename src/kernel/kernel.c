@@ -23,6 +23,7 @@ void kmain()
 	printk("Arch: %s\n", sys_arch);
 	printk("Term: %s\n", sys_term);
 	printk("Sesh: %s\n", sys_sesh);
+    printk("\n");
 	cpuid_info();
 }
 
