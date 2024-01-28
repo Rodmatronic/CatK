@@ -91,27 +91,21 @@ void terminal_putchar(char c)
 
         if (++terminal_column == VGA_WIDTH) 
         {
-            terminal_column = 0;
-            if (++terminal_row == VGA_HEIGHT)
+            for (size_t y = 0; y < VGA_HEIGHT - 1; y++) 
             {
-                terminal_row--;
-                // Scroll up when the screen is full
-                for (size_t y = 0; y < VGA_HEIGHT - 1; y++) 
-                {
-                    for (size_t x = 0; x < VGA_WIDTH; x++) 
-                    {
-                        const size_t index = y * VGA_WIDTH + x;
-                        const size_t nextIndex = (y + 1) * VGA_WIDTH + x;
-                        terminal_buffer[index] = terminal_buffer[nextIndex];
-                    }
-                }
-
-                // Clear the last line
                 for (size_t x = 0; x < VGA_WIDTH; x++) 
                 {
-                    const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
-                    terminal_buffer[index] = vga_entry(' ', terminal_color);
+                    const size_t index = y * VGA_WIDTH + x;
+                    const size_t nextIndex = (y + 1) * VGA_WIDTH + x;
+                    terminal_buffer[index] = terminal_buffer[nextIndex];
                 }
+            }
+
+            // Clear the last line
+            for (size_t x = 0; x < VGA_WIDTH; x++) 
+            {
+                const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+                terminal_buffer[index] = vga_entry(' ', terminal_color);
             }
         }
 
@@ -119,7 +113,6 @@ void terminal_putchar(char c)
         vga_set_cursor_pos(terminal_column, terminal_row);
     }
 }
-
 
 void terminal_write(const char* data, size_t size) 
 {

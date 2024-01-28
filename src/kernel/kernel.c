@@ -7,6 +7,7 @@
 #include "cpu.h"
 #include "keyboard.h"
 #include "k_sh.h"
+#include "vfs.h"
 
 static char * sys_arch = "X86/intel";
 static char * sys_term = "80x25";
@@ -14,6 +15,7 @@ static char * sys_sesh = "/bin/k_sh";
 static char * sys_ver = "0.07";
 static char * sys_home = "/home/root";
 static char * sys_name = "Catkernel";
+static char * sys_mountpoint = "/";
 
 void bootart();
 
@@ -31,8 +33,13 @@ void kmain()
 	printk("Vers: %s\n", sys_ver);
 	printk("Home: %s\n", sys_home);
 	printk("Name: %s\n", sys_name);
+	printk("Mntp: %s\n", sys_mountpoint);
     printk("\n");
 	cpuid_info();
+    v_createdir("/kernel");
+    v_createfile("/kernel/testingVFS");
+    v_readfile("/kernel/testingVFS");
+    v_rmfile("/kernel/testingVFS");
 
     k_sh();
 }

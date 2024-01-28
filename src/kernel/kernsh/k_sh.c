@@ -38,8 +38,7 @@ void k_sh() {
     printk("\n");
     printk("CatK built-in shell 0.01-------\n\n");
 
-    printk("%c", 1);
-    printk(" ");
+    printk("K_sh# ");
 
     while (1) {
         unsigned char scancode = read_key();
@@ -57,8 +56,7 @@ void k_sh() {
                 shbuffer[shbuffer_index] = '\0';
                 execute_command(shbuffer);
                 printk("\n");
-                printk("%c", 1);
-                printk(" ");
+                printk("K_sh# ");
                 shbuffer_index = 0;
             } else {
                 shbuffer[shbuffer_index++] = key;
