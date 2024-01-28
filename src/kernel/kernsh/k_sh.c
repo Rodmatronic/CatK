@@ -2,16 +2,19 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <term.h>
+#include <string.h>
 #include "printk.h"
 #include "keyboard.h"
 #include "k_sh.h"
 #include "term.h"
-#include "strcmp.h"
 #include "power.h"
 #include "config.h"
+#include "panic.h"
 
 char shbuffer[128];
 int shbuffer_index = 0;
+
+char * shprompt = "k_sh";
 
 void execute_command(const char* command) {
     if (command[0] == '\0') {
@@ -31,6 +34,23 @@ void execute_command(const char* command) {
     }
     extracted_command[space_index] = '\0';
 
+    if (strcmp(extracted_command, "echo") == 0) {
+        if (command[space_index] == ' ') {
+            space_index++;
+            printk("\n%s", &command[space_index]);
+        } else {
+            // No argument provided for echo
+            printk("\n%s: missing argument", extracted_command);
+        }
+    } else
+    if (strcmp(extracted_command, "prompt") == 0) {
+        if (command[space_index] == ' ') {
+            space_index++;
+            strcpy(shprompt, &command[space_index]);
+        } else {
+            printk("\n%s: missing argument", extracted_command);
+        }
+    } else
     if (strcmp(extracted_command, "uname") == 0) {
         if (command[space_index] == ' ') {
             space_index++;
@@ -52,6 +72,9 @@ void execute_command(const char* command) {
             printk("\n%s", sys_name);
     }
     } else 
+    if (strcmp(extracted_command, "panic") == 0) {
+        panic("Manually triggered");
+    } else 
     if (strcmp(extracted_command, "shutdown") == 0) {
         poweroff(1);
     } else 
@@ -70,7 +93,9 @@ void execute_command(const char* command) {
         printk("Home: %s\n", sys_home);
         printk("Name: %s\n", sys_name);
         printk("Mntp: %s\n", sys_mountpoint);
-
+    } else 
+    if (strcmp(extracted_command, "clear") == 0) {
+        terminal_clear();
     } else 
     if (strcmp(extracted_command, "exit") == 0) {
         // Normally kill the SH on the terminal here, but... we dont have TTY nor processes
@@ -87,7 +112,9 @@ void k_sh() {
     printk("\n");
     printk("CatK built-in shell 0.01 -------\n----------------------\n\n");
 
-    printk("%CK_sh", VGA_COLOR_CYAN);
+    terminal_setcolor(VGA_COLOR_CYAN);
+    printk("%s", shprompt);
+    terminal_setcolor(VGA_COLOR_LIGHT_GREY);
     printk("%C# ", VGA_COLOR_LIGHT_GREY);
     
     while (1) {
@@ -106,7 +133,9 @@ void k_sh() {
                 shbuffer[shbuffer_index] = '\0';
                 execute_command(shbuffer);
                 printk("\n");
-                printk("%CK_sh", VGA_COLOR_CYAN);
+                terminal_setcolor(VGA_COLOR_CYAN);
+                printk("%s", shprompt);
+                terminal_setcolor(VGA_COLOR_LIGHT_GREY);
                 printk("%C# ", VGA_COLOR_LIGHT_GREY);
                 shbuffer_index = 0;
             } else {
