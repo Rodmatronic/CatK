@@ -51,15 +51,33 @@ void execute_command(const char* command) {
         } else {
             printk("\n%s", sys_name);
     }
-    } else if (strcmp(extracted_command, "shutdown") == 0) {
+    } else 
+    if (strcmp(extracted_command, "shutdown") == 0) {
         poweroff(1);
-    } else if (strcmp(extracted_command, "reboot") == 0) {
+    } else 
+    if (strcmp(extracted_command, "reboot") == 0) {
         poweroff(0);
-    } else if (strcmp(extracted_command, "halt") == 0) {
+    } else 
+    if (strcmp(extracted_command, "halt") == 0) {
         poweroff(2);
-    } else if (strcmp(extracted_command, "exit") == 0) {
+    } else 
+    if (strcmp(extracted_command, "debug") == 0) {
+        printk("\n");
+        printk("Arch: %s\n", sys_arch);
+        printk("Term: %s\n", sys_term);
+        printk("Sesh: %s\n", sys_sesh);
+        printk("Vers: %s\n", sys_ver);
+        printk("Home: %s\n", sys_home);
+        printk("Name: %s\n", sys_name);
+        printk("Mntp: %s\n", sys_mountpoint);
+
+    } else 
+    if (strcmp(extracted_command, "exit") == 0) {
+        // Normally kill the SH on the terminal here, but... we dont have TTY nor processes
+        printk("\nexit");
         return;
-    } else {
+    } else 
+    {
         // Command not found
         printk("\n%s: command not found", extracted_command);
     }
@@ -67,10 +85,11 @@ void execute_command(const char* command) {
 
 void k_sh() {
     printk("\n");
-    printk("CatK built-in shell 0.01-------\n\n");
+    printk("CatK built-in shell 0.01 -------\n----------------------\n\n");
 
-    printk("K_sh# ");
-
+    printk("%CK_sh", VGA_COLOR_CYAN);
+    printk("%C# ", VGA_COLOR_LIGHT_GREY);
+    
     while (1) {
         unsigned char scancode = read_key();
         char key = scancode_to_char(scancode);
@@ -87,7 +106,8 @@ void k_sh() {
                 shbuffer[shbuffer_index] = '\0';
                 execute_command(shbuffer);
                 printk("\n");
-                printk("K_sh# ");
+                printk("%CK_sh", VGA_COLOR_CYAN);
+                printk("%C# ", VGA_COLOR_LIGHT_GREY);
                 shbuffer_index = 0;
             } else {
                 shbuffer[shbuffer_index++] = key;
