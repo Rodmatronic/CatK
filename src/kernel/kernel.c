@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "include/config.h"
+#include "include/fsnode.h"
 #include "term.h"
 #include "printk.h"
 #include "panic.h"
@@ -9,12 +11,12 @@
 #include "k_sh.h"
 #include "vfs.h"
 #include "config.h"
+#include "fsnode.h"
 
 void bootart();
 
 void kmain() 
-{
-
+{    
 	terminal_init();                                /* This starts the terminal, prints the "Cat... kernel!"" message, and */
 	printk("%CCat... ", VGA_COLOR_CYAN);			/* shows the CatK boot logo.*/
 	printk("%Ckernel!\n", VGA_COLOR_LIGHT_CYAN);
@@ -29,6 +31,10 @@ void kmain()
 	printk("Mntp: %s\n", sys_mountpoint);
     printk("\n");
 	cpuid_info();
+
+    makefsnode(fsnodes, &nodecount, sys_mountpoint);
+    displaynodes(fsnodes, nodecount);
+
     v_createdir("/kernel");
     v_createfile("/kernel/testingVFS");
     v_readfile("/kernel/testingVFS");
