@@ -15,6 +15,8 @@
 #include "printk.h"
 #include "vfs.h"
 #include "printk.h"
+#include "fsnode.h"
+#include "config.h"
 
 // This would normally ask MOUNT (once that is made) what FS the files are on, and use that fs's driver to R/W/RM the file/directory.
 // This is not implemented yet though
@@ -41,4 +43,22 @@ int v_rmfile(char* filepath)
 {
     printk("Could not remove %s: I/O error\n", filepath);
     return 0;
+}
+
+int v_sync()
+{
+    printk("Failed to sync VFS: Unknown error");
+    return 0;
+}
+
+void vfs_init()
+{
+    printk("VFS init -------\n");
+    makefsnode(fsnodes, &nodecount, sys_mountpoint, "RAMfs");
+    makefsnode(fsnodes, &nodecount, "/dev", "devfs");
+    makefsnode(fsnodes, &nodecount, "/proc", "procfs");
+
+    printk("----------------------\n");
+
+    displaynodes(fsnodes, nodecount);
 }

@@ -10,6 +10,7 @@
 #include "power.h"
 #include "config.h"
 #include "panic.h"
+#include "fsnode.h"
 
 char shbuffer[128];
 int shbuffer_index = 0;
@@ -95,6 +96,10 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "clear") == 0) {
         terminal_clear();
     } else 
+    if (strcmp(extracted_command, "mount") == 0) {
+        printk("\n");
+        displaynodes(fsnodes, nodecount);
+    } else 
     if (strcmp(extracted_command, "exit") == 0) {
         // Normally kill the SH on the terminal here, but... we dont have TTY nor processes
         printk("\nexit");
@@ -109,7 +114,7 @@ void execute_command(const char* command) {
 void k_sh() {
     strcpy(shprompt, "k_sh");
     printk("\n");
-    printk("CatK built-in shell 0.01 -------\n----------------------\n\n");
+    printk("\nCatK built-in shell 0.01 -------\n----------------------\n\n");
 
     terminal_setcolor(VGA_COLOR_CYAN);
     printk("%s", shprompt);

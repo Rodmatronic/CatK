@@ -31,14 +31,13 @@ void kmain()
 	printk("Mntp: %s\n", sys_mountpoint);
     printk("\n");
 	cpuid_info();
-
-    makefsnode(fsnodes, &nodecount, sys_mountpoint);
-    displaynodes(fsnodes, nodecount);
-
+    vfs_init();
+    
     v_createdir("/kernel");
     v_createfile("/kernel/testingVFS");
     v_readfile("/kernel/testingVFS");
     v_rmfile("/kernel/testingVFS");
+    v_sync();
 
     k_sh();
 }
