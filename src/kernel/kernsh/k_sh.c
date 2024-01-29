@@ -14,7 +14,7 @@
 char shbuffer[128];
 int shbuffer_index = 0;
 
-char * shprompt = "k_sh";
+char * shprompt[20];
 
 void execute_command(const char* command) {
     if (command[0] == '\0') {
@@ -46,11 +46,19 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "prompt") == 0) {
         if (command[space_index] == ' ') {
             space_index++;
-            strcpy(shprompt, &command[space_index]);
+            char* argument = &command[space_index];
+
+            if (strlen(argument) < 12) {
+                strcpy(shprompt, argument);
+                printk("\nUpdated prompt: %s", shprompt);
+            } else {
+                printk("\n%s: argument length exceeds 20 characters", extracted_command);
+            }
         } else {
+            // No argument provided for prompt
             printk("\n%s: missing argument", extracted_command);
         }
-    } else
+    }else
     if (strcmp(extracted_command, "uname") == 0) {
         if (command[space_index] == ' ') {
             space_index++;
@@ -84,16 +92,6 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "halt") == 0) {
         poweroff(2);
     } else 
-    if (strcmp(extracted_command, "debug") == 0) {
-        printk("\n");
-        printk("Arch: %s\n", sys_arch);
-        printk("Term: %s\n", sys_term);
-        printk("Sesh: %s\n", sys_sesh);
-        printk("Vers: %s\n", sys_ver);
-        printk("Home: %s\n", sys_home);
-        printk("Name: %s\n", sys_name);
-        printk("Mntp: %s\n", sys_mountpoint);
-    } else 
     if (strcmp(extracted_command, "clear") == 0) {
         terminal_clear();
     } else 
@@ -109,6 +107,7 @@ void execute_command(const char* command) {
 }
 
 void k_sh() {
+    strcpy(shprompt, "k_sh");
     printk("\n");
     printk("CatK built-in shell 0.01 -------\n----------------------\n\n");
 
