@@ -12,7 +12,8 @@
 #include "vfs.h"
 #include "config.h"
 #include "fsnode.h"
-
+#include "pc.h"
+#include "ramfs.h"
 void bootart();
 
 void kmain() 
@@ -21,6 +22,10 @@ void kmain()
 	printk("%CCat... ", VGA_COLOR_CYAN);			/* shows the CatK boot logo.*/
 	printk("%Ckernel!\n", VGA_COLOR_LIGHT_CYAN);
 	bootart();
+    for (int i = 0; i < 80; ++i) {
+    for (int i = 0; i < 1000; ++i) 
+    {for (int j = 0; j < 1900; ++j) 
+    {}}printk("#");}
     // Print static vars
 	printk("Arch: %s\n", sys_arch);
 	printk("Term: %s\n", sys_term);
@@ -32,12 +37,7 @@ void kmain()
     printk("\n");
 	cpuid_info();
     vfs_init();
-    
-    v_createdir("/kernel");
-    v_createfile("/kernel/testingVFS");
-    v_readfile("/kernel/testingVFS");
-    v_rmfile("/kernel/testingVFS");
-    v_sync();
+    createramfs();
 
     k_sh();
 }
@@ -70,4 +70,5 @@ void bootart()
         printk("%C               |catk|              \n", VGA_COLOR_LIGHT_BROWN);
         printk("%C                \\__/               \n", VGA_COLOR_LIGHT_BROWN);
 		printk("%C", VGA_COLOR_LIGHT_GREY);
+        printk("\n\n\nCatK(mascot) was created by Rodmatronics\n", VGA_COLOR_LIGHT_GREY);
 }

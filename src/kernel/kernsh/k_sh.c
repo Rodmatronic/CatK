@@ -15,7 +15,7 @@
 char shbuffer[128];
 int shbuffer_index = 0;
 
-char * shprompt[20];
+char * shprompt;
 
 void execute_command(const char* command) {
     if (command[0] == '\0') {
@@ -49,7 +49,7 @@ void execute_command(const char* command) {
             space_index++;
             char* argument = &command[space_index];
 
-            if (strlen(argument) < 12) {
+            if (strlen(argument) < 20) {
                 strcpy(shprompt, argument);
                 printk("\nUpdated prompt: %s", shprompt);
             } else {

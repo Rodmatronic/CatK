@@ -13,3 +13,4 @@ extern struct Nodes fsnodes[MAX_ITEMS];
 
 void makefsnode(struct Nodes list[], int *count, const char *nodename, char* fstype);
 void displaynodes(const struct Nodes list[], int nodecount);
+void setroot(const struct Nodes list[], int count, const char *mountPoint);
