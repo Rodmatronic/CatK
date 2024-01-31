@@ -15,10 +15,10 @@ void bootloader_info(unsigned long magic, unsigned long addr) {
 
     printk("Bootloader info -------\n");
     printk("cmdline: %s\n", (char *)mboot_info->cmdline);
-    printk("bootloader: %s\n", (char *)mboot_info->boot_loader_name);
-    printk("magic: 0x%x\n", magic);
-    printk("flags: 0x%x\n", mboot_info->flags);
-    printk("mem_low: 0x%x KB\n", mboot_info->mem_low);
-    printk("mem_high: 0x%x KB\n", mboot_info->mem_high);
+    printk("booted from: %s\n", (char *)mboot_info->boot_loader_name);
+    printk("loader magic: 0x%x\n", magic);
+    printk("loader flags: 0x%x\n", mboot_info->flags);
+    printk("bios low mem: 0x%x KB\n", mboot_info->mem_low);
+    printk("bios high mem: 0x%x KB\n", mboot_info->mem_high);
     printk("----------------------\n");
 }

@@ -17,6 +17,7 @@
 #include "kernel.h"
 #include "multiboot.h"
 #include "memory.h"
+#include "time.h"
 
 void bootart();
 
@@ -42,8 +43,9 @@ void kmain(unsigned long magic, unsigned long addr)
     printk("\n");
     bootloader_info(magic, addr);
 	cpuid_info();
-    vfs_init();
     memory_init();
+    vfs_init();
+    time_init();
     createramfs();
     k_sh();
 }
