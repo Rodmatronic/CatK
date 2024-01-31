@@ -8,7 +8,7 @@
 #include "time.h"
 #include "pc.h"
 
-#define CURRENT_YEAR        2023                            // Change this each year!
+#define CURRENT_YEAR        2024                            // Change this each year!
  
 int century_register = 0x00;                                // Set by ACPI table parsing code if possible
  
