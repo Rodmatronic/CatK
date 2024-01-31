@@ -114,7 +114,7 @@ void execute_command(const char* command) {
 void k_sh() {
     strcpy(shprompt, "k_sh");
     printk("\n");
-    printk("\nCatK built-in shell 0.01 -------\n----------------------\n\n");
+    printk("CatK built-in shell 0.01 -------\n----------------------\n\n");
 
     terminal_setcolor(VGA_COLOR_CYAN);
     printk("%s", shprompt);
@@ -127,6 +127,10 @@ void k_sh() {
 
         if (scancode == 0x0E)
         {
+            if (shbuffer_index == 0)
+            {
+                printk(" ");
+            }else
             shbuffer_index--;
             terminal_column--;
             terminal_putchar(0);

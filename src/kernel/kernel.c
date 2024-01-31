@@ -51,7 +51,7 @@ void kmain(unsigned long magic, unsigned long addr)
 
 void bootart()
 {
-        printk("%C           __           __             \n",VGA_COLOR_WHITE);
+        printk("\n%C           __           __             \n",VGA_COLOR_WHITE);
         printk("%C          /  \\         /  \\        \n", VGA_COLOR_WHITE);
         printk("%C         / /\\ \\       / /\\ \\       \n", VGA_COLOR_LIGHT_CYAN);
         printk("%C        / /  \\ \\     / /  \\ \\      \n", VGA_COLOR_LIGHT_CYAN);
@@ -73,7 +73,7 @@ void bootart()
         printk("%C\\/", VGA_COLOR_LIGHT_BROWN);
         printk("%C==========      \n", VGA_COLOR_RED);
         printk("%C                /  \\               \n", VGA_COLOR_LIGHT_BROWN);
-        printk("%C               |catk|              \n", VGA_COLOR_LIGHT_BROWN);
+        printk("%C               |CatK|              \n", VGA_COLOR_LIGHT_BROWN);
         printk("%C                \\__/               \n", VGA_COLOR_LIGHT_BROWN);
 		printk("%C", VGA_COLOR_LIGHT_GREY);
         printk("\n\n\nCatK(mascot) was created by Rodmatronics\n", VGA_COLOR_LIGHT_GREY);

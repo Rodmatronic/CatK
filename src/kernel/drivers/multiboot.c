@@ -20,6 +20,5 @@ void bootloader_info(unsigned long magic, unsigned long addr) {
     printk("flags: 0x%x\n", mboot_info->flags);
     printk("mem_low: 0x%x KB\n", mboot_info->mem_low);
     printk("mem_high: 0x%x KB\n", mboot_info->mem_high);
-    printk("boot_device: 0x%x\n", mboot_info->boot_device);
     printk("----------------------\n");
 }
