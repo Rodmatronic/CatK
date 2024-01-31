@@ -14,9 +14,13 @@
 #include "fsnode.h"
 #include "pc.h"
 #include "ramfs.h"
+#include "kernel.h"
+#include "multiboot.h"
+#include "memory.h"
+
 void bootart();
 
-void kmain() 
+void kmain(unsigned long magic, unsigned long addr) 
 {    
 	terminal_init();                                /* This starts the terminal, prints the "Cat... kernel!"" message, and */
 	printk("%CCat... ", VGA_COLOR_CYAN);			/* shows the CatK boot logo.*/
@@ -26,6 +30,7 @@ void kmain()
     for (int i = 0; i < 1000; ++i) 
     {for (int j = 0; j < 1900; ++j) 
     {}}printk("#");}
+
     // Print static vars
 	printk("Arch: %s\n", sys_arch);
 	printk("Term: %s\n", sys_term);
@@ -35,10 +40,11 @@ void kmain()
 	printk("Name: %s\n", sys_name);
 	printk("Mntp: %s\n", sys_mountpoint);
     printk("\n");
+    bootloader_info(magic, addr);
 	cpuid_info();
     vfs_init();
+    memory_init();
     createramfs();
-
     k_sh();
 }
 

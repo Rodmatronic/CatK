@@ -4,10 +4,12 @@ SECTIONS
 {
 	. = 2M;
  
-	.text ALIGN(4K) : 
-	{
-		*(.multiboot)
-		*(.text)
+	.text ALIGN(4K) : {
+	/* link the multiboot struct here */
+	. = ALIGN(8);
+	KEEP(*(.multiboot))
+	/* place all of your code afterwards */
+	*(.text)
 	}
 
  	.rodata ALIGN(4K) : 
