@@ -15,8 +15,7 @@
 int kill = 0;
 char shbuffer[128];
 int shbuffer_index = 0;
-
-char * shprompt;
+char shprompt[20]; 
 
 void execute_command(const char* command) {
     if (command[0] == '\0') {
