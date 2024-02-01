@@ -85,4 +85,5 @@ char scancode_to_char(unsigned char scancode) {
     } else {
         return 0; // Unhandled scancode
     }
+    return 1;
 }

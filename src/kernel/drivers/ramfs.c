@@ -19,4 +19,6 @@ void createramfs()
 }
 
 void ramfs_createdir(char* filepath)
-{}
+{
+    filepath;
+}

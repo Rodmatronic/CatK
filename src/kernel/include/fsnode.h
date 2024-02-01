@@ -4,7 +4,7 @@
 
 struct Nodes {
     char name[50];
-    char* fs[256];
+    char* fs;
 };
 
 extern int nodecount;

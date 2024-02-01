@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "include/config.h"
 #include "include/fsnode.h"
+#include "include/gdt.h"
 #include "term.h"
 #include "printk.h"
 #include "panic.h"
@@ -18,6 +19,8 @@
 #include "multiboot.h"
 #include "memory.h"
 #include "time.h"
+#include "gdt.h"
+#include "idt.h"
 
 void bootart();
 
@@ -28,8 +31,8 @@ void kmain(unsigned long magic, unsigned long addr)
 	printk("%Ckernel!\n", VGA_COLOR_LIGHT_CYAN);
 	bootart();
     for (int i = 0; i < 80; ++i) {
-    for (int i = 0; i < 1000; ++i) 
-    {for (int j = 0; j < 1900; ++j) 
+    for (int i = 0; i < 200; ++i) 
+    {for (int j = 0; j < 1200; ++j) 
     {}}printk("#");}
 
     // Print static vars
@@ -42,14 +45,16 @@ void kmain(unsigned long magic, unsigned long addr)
 	printk("Mntp: %s\n", sys_mountpoint);
     printk("\n");
     bootloader_info(magic, addr);
+    gdt_init();
+    idt_init();
 	cpuid_info();
     memory_init();
     vfs_init();
     time_init();
     createramfs();
     k_sh();
+    panic("Attempted to kill SH");
 }
-
 
 void bootart()
 {

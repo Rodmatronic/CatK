@@ -36,7 +36,7 @@ unsigned char get_RTC_register(int reg) {
 }
  
 void read_rtc() {
-      unsigned char century;
+      unsigned char century = '\0';
       unsigned char last_second;
       unsigned char last_minute;
       unsigned char last_hour;

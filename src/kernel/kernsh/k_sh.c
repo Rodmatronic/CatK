@@ -12,6 +12,7 @@
 #include "panic.h"
 #include "fsnode.h"
 
+int kill = 0;
 char shbuffer[128];
 int shbuffer_index = 0;
 
@@ -47,7 +48,7 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "prompt") == 0) {
         if (command[space_index] == ' ') {
             space_index++;
-            char* argument = &command[space_index];
+            const char* argument = &command[space_index];
 
             if (strlen(argument) < 20) {
                 strcpy(shprompt, argument);
@@ -82,7 +83,30 @@ void execute_command(const char* command) {
     }
     } else 
     if (strcmp(extracted_command, "panic") == 0) {
-        panic("Manually triggered");
+        if (command[space_index] == ' ') {
+            space_index++;
+
+            if (strcmp(&command[space_index], "-d") == 0) {
+                int zero = 0;
+                int kill = zero / zero;
+            } else 
+            if (strcmp(&command[space_index], "-k") == 0) {
+                kill = 1;
+                return;
+            } else 
+            if (strcmp(&command[space_index], "-m") == 0) {
+                asm("int     $0x10");
+            } else
+            if (strcmp(&command[space_index], "-b") == 0) {
+                asm("int3");
+            } else
+            {
+                // Unknown option
+                printk("\nunknown option %s", &command[space_index]);
+            }
+        } else {
+            panic("Generic SH error. (Specify using '-' next time!)");
+    }
     } else 
     if (strcmp(extracted_command, "shutdown") == 0) {
         poweroff(1);
@@ -101,7 +125,6 @@ void execute_command(const char* command) {
         displaynodes(fsnodes, nodecount);
     } else 
     if (strcmp(extracted_command, "exit") == 0) {
-        // Normally kill the SH on the terminal here, but... we dont have TTY nor processes
         printk("\nexit");
         return;
     } else 
@@ -140,6 +163,10 @@ void k_sh() {
                 // Handle Enter key press
                 shbuffer[shbuffer_index] = '\0';
                 execute_command(shbuffer);
+                if (kill == 1)
+                {
+                    break;
+                }
                 printk("\n");
                 terminal_setcolor(VGA_COLOR_CYAN);
                 printk("%s", shprompt);
