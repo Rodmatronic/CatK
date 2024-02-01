@@ -33,8 +33,8 @@ TARGET_ISO = $(OUT)/catkernel.iso
 ISO_DIR = $(OUT)/isodir
 
 # automatically find all C source files in src/ and its subdirectories
-C_SOURCES := $(shell find $(SRC)/ -type f -name "*.c")
-ASM_SOURCES := $(shell find $(ASM_SRC)/ -type f -name "*.asm")
+C_SOURCES := $(shell find $(SRC)/ -type f -name "*.c" -maxdepth 25)
+ASM_SOURCES := $(shell find $(ASM_SRC)/ -type f -name "*.asm" -maxdepth 25)
 
 # generate object file names from source file names
 OBJECTS := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(C_SOURCES))
