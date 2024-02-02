@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <term.h>
 #include "term.h"
 #include "printk.h"
 #include "panic.h"
@@ -125,10 +126,60 @@ void time_init()
 
 void current_time()
 {
+    read_rtc();
     printk("%d:%d:%d", hour, minute, second);
 }
 
 void current_date()
 {
+    read_rtc();
     printk("%d/%d/%d", day, month, year);
+}
+
+void cal() {
+    printk("        %d\n", CURRENT_YEAR);
+    printk("Su Mo Tu We Th Fr Sa\n");
+    read_rtc();
+    
+    // Determine the day of the week for the first day of the month
+    int dayOfWeek = (day + 2 * (13 * (month + 1) / 5) + (year % 100) + ((year % 100) / 4) + ((year / 100) / 4) - 2 * (year / 100) + 700) % 7;
+
+    // Print leading spaces for the first week
+    for (int i = 0; i < dayOfWeek; i++) {
+        printk("   ");
+    }
+
+    // Print the days of the month
+    for (int i = 1; i <= 31; i++) {
+        if (i == day) {
+            // Print the current day with a lighter color
+            printk("#%d# ", i);
+        } else {
+            if (i > 9) {
+                printk("%d ", i);
+            } else {
+                printk("%d  ", i);
+            }
+        }
+
+        // Move to the next line for the next week
+        if ((dayOfWeek + i) % 7 == 0) {
+            printk("\n");
+        }
+    }
+
+    printk("\n");
+}
+
+
+void sleep(unsigned int seconds) {
+    unsigned int start_seconds, elapsed_seconds;
+
+    read_rtc();
+    start_seconds = second + (minute * 60) + (hour * 3600);
+
+    do {
+        read_rtc();
+        elapsed_seconds = second + (minute * 60) + (hour * 3600) - start_seconds;
+    } while (elapsed_seconds < seconds);
 }

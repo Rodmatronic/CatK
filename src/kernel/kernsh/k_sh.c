@@ -11,6 +11,9 @@
 #include "config.h"
 #include "panic.h"
 #include "fsnode.h"
+#include "time.h"
+#include "read.h"
+#include "stdlib.h"
 
 int kill = 0;
 char shbuffer[128];
@@ -38,10 +41,10 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "echo") == 0) {
         if (command[space_index] == ' ') {
             space_index++;
-            printk("\n%s", &command[space_index]);
+            printk("%s\n", &command[space_index]);
         } else {
             // No argument provided for echo
-            printk("\n%s: missing argument", extracted_command);
+            printk("%s: missing argument\n", extracted_command);
         }
     } else
     if (strcmp(extracted_command, "prompt") == 0) {
@@ -51,13 +54,13 @@ void execute_command(const char* command) {
 
             if (strlen(argument) < 20) {
                 strcpy(shprompt, argument);
-                printk("\nUpdated prompt: %s", shprompt);
+                printk("Updated prompt: %s\n", shprompt);
             } else {
-                printk("\n%s: argument length exceeds 20 characters", extracted_command);
+                printk("%s: argument length exceeds 20 characters\n", extracted_command);
             }
         } else {
             // No argument provided for prompt
-            printk("\n%s: missing argument", extracted_command);
+            printk("%s: missing argument\n", extracted_command);
         }
     }else
     if (strcmp(extracted_command, "uname") == 0) {
@@ -65,20 +68,20 @@ void execute_command(const char* command) {
             space_index++;
 
             if (strcmp(&command[space_index], "-a") == 0) {
-                printk("\n%s %s %s", sys_name, sys_ver, sys_arch);
+                printk("%s %s %s\n", sys_name, sys_ver, sys_arch);
             } else 
             if (strcmp(&command[space_index], "-m") == 0) {
-                printk("\n%s", sys_arch);
+                printk("%s\n", sys_arch);
             } else
             if (strcmp(&command[space_index], "-s") == 0) {
-                printk("\n%s", sys_name);
+                printk("%s\n", sys_name);
             } else
             {
                 // Unknown option
-                printk("\nunknown option %s", &command[space_index]);
+                printk("unknown option %s\n", &command[space_index]);
             }
         } else {
-            printk("\n%s", sys_name);
+            printk("%s\n", sys_name);
     }
     } else 
     if (strcmp(extracted_command, "panic") == 0) {
@@ -101,7 +104,7 @@ void execute_command(const char* command) {
             } else
             {
                 // Unknown option
-                printk("\nunknown option %s", &command[space_index]);
+                printk("unknown option %s\n", &command[space_index]);
             }
         } else {
             panic("Generic SH error. (Specify using '-' next time!)");
@@ -120,16 +123,47 @@ void execute_command(const char* command) {
         terminal_clear();
     } else 
     if (strcmp(extracted_command, "mount") == 0) {
-        printk("\n");
         displaynodes(fsnodes, nodecount);
     } else 
     if (strcmp(extracted_command, "exit") == 0) {
-        printk("\nexit");
+        printk("exit\n");
         return;
     } else 
+    // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
+    if (strcmp(extracted_command, "date") == 0) {
+        current_date();
+        printk(" ");
+        current_time();
+        printk("\n");
+    } else 
+    if (strcmp(extracted_command, "alias") == 0) {
+    } else 
+    if (strcmp(extracted_command, "logname") == 0) {
+        printk("%s\n", sys_user);
+    } else 
+    if (strcmp(extracted_command, "lp") == 0) {
+        printk("No printer device!\n");
+    } else 
+    if (strcmp(extracted_command, "read") == 0) {
+        read();
+    } else 
+    if (strcmp(extracted_command, "test") == 0) {
+    } else 
+    if (strcmp(extracted_command, "cal") == 0) {
+        cal();
+    } else 
+    if (strcmp(extracted_command, "sleep") == 0) {
+        if (command[space_index] == ' ') {
+            space_index++;
+            const char* sleep_argument = &command[space_index];
+            sleep(atoi(sleep_argument));
+        } else {
+            printk("%s: missing argument\n", extracted_command);
+        }
+    }else
     {
         // Command not found
-        printk("\n%s: command not found", extracted_command);
+        printk("%s: command not found\n", extracted_command);
     }
 }
 
@@ -161,12 +195,12 @@ void k_sh() {
             if (scancode == SCAN_CODE_KEY_ENTER) {
                 // Handle Enter key press
                 shbuffer[shbuffer_index] = '\0';
+                printk("\n");
                 execute_command(shbuffer);
                 if (kill == 1)
                 {
                     break;
                 }
-                printk("\n");
                 terminal_setcolor(VGA_COLOR_CYAN);
                 printk("%s", shprompt);
                 terminal_setcolor(VGA_COLOR_LIGHT_GREY);
