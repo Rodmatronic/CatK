@@ -131,10 +131,7 @@ void execute_command(const char* command) {
     } else 
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {
-        current_date();
-        printk(" ");
-        current_time();
-        printk("\n");
+        current_full_date();
     } else 
     if (strcmp(extracted_command, "alias") == 0) {
     } else 

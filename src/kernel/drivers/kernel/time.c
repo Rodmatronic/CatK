@@ -20,7 +20,21 @@ unsigned char day;
 unsigned char month;
 unsigned int year;
 
- 
+ const char *months[] = {
+    "Jan", "Feb", "Mar", "Apr",
+    "May", "Jun", "Jul", "Aug",
+    "Sep", "Oct", "Nov", "Dec"
+};
+
+const char *daysOfWeek[] = {
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
+
+int dayOfWeek() {
+    // Determine the day of the week for the current date
+    return (day + 2 * (13 * (month + 1) / 5) + (year % 100) + ((year % 100) / 4) + ((year / 100) / 4) - 2 * (year / 100) + 700) % 7;
+}
+
 enum {
       cmos_address = 0x70,
       cmos_data    = 0x71
@@ -134,6 +148,12 @@ void current_date()
 {
     read_rtc();
     printk("%d/%d/%d", day, month, year);
+}
+
+void current_full_date()
+{
+    read_rtc();
+    printk("%s %s %d %d:%d:%d %d\n", daysOfWeek[dayOfWeek()], months[month - 1], day, hour, minute, second, CURRENT_YEAR);
 }
 
 void cal() {
