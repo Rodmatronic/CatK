@@ -177,7 +177,32 @@ void execute_command(const char* command) {
         } else {
             printk("%s: missing argument\n", extracted_command);
         }
+        
     }else
+    if (strcmp(extracted_command, "help") == 0) {
+        printk("-- CatK and POSIX commands --\n");
+        printk("alias\n");
+        printk("cal\n");
+        printk("clear\n");
+        printk("date\n");
+        printk("echo   [string]\n");
+        printk("exit\n");
+        printk("halt\n");
+        printk("help\n");
+        printk("logname\n");
+        printk("lp\n");
+        printk("mount\n");
+        printk("mem\n");
+        printk("panic   -d -k -m -b\n");
+        printk("poweroff\n");
+        printk("prompt   [string]\n");
+        printk("read   [standard input]\n");
+        printk("reboot\n");
+        printk("shutdown\n");
+        printk("sleep   [int]\n");
+        printk("test\n");
+        printk("uname   -a -m -s\n");
+    } else 
     {
         // Command not found
         printk("%s: command not found\n", extracted_command);

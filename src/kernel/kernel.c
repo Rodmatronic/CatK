@@ -51,7 +51,7 @@ void kmain(unsigned long magic, unsigned long addr)
     memory_init();
     vfs_init();
     time_init();
-    createramfs();
+    //createramfs();
     k_sh();
     panic("Attempted to kill SH");
 }

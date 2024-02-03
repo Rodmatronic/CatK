@@ -6,9 +6,6 @@
 #include "string.h"
 #include "ramfs.h"
 
-// This would normally ask MOUNT (once that is made) what FS the files are on, and use that fs's driver to R/W/RM the file/directory.
-// This is not implemented yet though
-
 int v_createfile(char* filepath, char* content) {
     // Extract the filesystem type from the root node
     char rootFS[50];
