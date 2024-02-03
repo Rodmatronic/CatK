@@ -154,20 +154,20 @@ void execute_command(const char* command) {
         v_listdir(sys_pwd);
     } else 
     if (strcmp(extracted_command, "mkdir") == 0) {
-        if (command[space_index] == ' ') {
-            space_index++;
-            v_createdir(&command[space_index]);
-        } else {
-            printk("%s: missing argument\n", extracted_command);
-        }
+        //if (command[space_index] == ' ') {
+        //    space_index++;
+        //    v_createdir(&command[space_index]);
+        //} else {
+        //    printk("%s: missing argument\n", extracted_command);
+        //}
     } else
     if (strcmp(extracted_command, "touch") == 0) {
-        if (command[space_index] == ' ') {
-            space_index++;
-            v_createfile(&command[space_index], sys_pwd);
-        } else {
-            printk("%s: missing argument\n", extracted_command);
-        }
+        //if (command[space_index] == ' ') {
+        //    space_index++;
+        //    v_createfile(&command[space_index], sys_pwd);
+        //} else {
+        //    printk("%s: missing argument\n", extracted_command);
+        //}
     } else
     if (strcmp(extracted_command, "sleep") == 0) {
         if (command[space_index] == ' ') {
