@@ -8,3 +8,4 @@ static char * sys_home = "/home/root";
 static char * sys_name = "Catkernel";
 static char * sys_user = "root";
 static char * sys_mountpoint = "/";
+static char * sys_pwd = "/";

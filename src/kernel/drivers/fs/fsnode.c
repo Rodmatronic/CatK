@@ -2,7 +2,7 @@
 #include <printk.h>
 #include <fsnode.h>
 
-struct Nodes fsnodes[MAX_ITEMS];
+struct Nodes fsnodes[MAX_ITEMS_FSNODES];
 
 int nodecount = 0;
 char nodename[50];
@@ -23,10 +23,11 @@ void setroot(const struct Nodes list[], int count, const char *mountPoint) {
 }
 
 // Add a filesystem node to the list of known nodes
-void makefsnode(struct Nodes list[], int *count, const char *nodename, char* fstype) {
-    if (*count < MAX_ITEMS) {
+void makefsnode(struct Nodes list[], int *count, const char *nodename, char* fstype, char* device) {
+    if (*count < MAX_ITEMS_FSNODES) {
         strcpy(list[*count].name, nodename);
         strcpy(list[*count].fs, fstype);
+        strcpy(list[*count].device, device);
         (*count)++;
         printk("created FS node '%s', with filesystem '%s'\n", nodename, fstype);
     } else {
@@ -35,8 +36,7 @@ void makefsnode(struct Nodes list[], int *count, const char *nodename, char* fst
 }
 
 void displaynodes(const struct Nodes list[], int count) {
-    printk("all FS nodes:\n");
     for (int i = 0; i < count; ++i) {
-        printk("%d: %s '%s'\n", i + 1, list[i].fs, list[i].name);
+        printk("%d: fs node '%s' with type '%s' at '%s'\n", i + 1, list[i].name, list[i].fs, list[i].device);
     }
 }

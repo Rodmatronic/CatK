@@ -14,6 +14,7 @@
 #include "time.h"
 #include "read.h"
 #include "stdlib.h"
+#include "vfs.h"
 
 int kill = 0;
 char shbuffer[128];
@@ -149,30 +150,25 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "cal") == 0) {
         cal();
     } else 
-        if (strcmp(extracted_command, "help") == 0) {
-        printk("-- CatK and POSIX commands --\n");
-        printk("alias\n");
-        printk("cal\n");
-        printk("clear\n");
-        printk("date\n");
-        printk("echo   [string]\n");
-        printk("exit\n");
-        printk("halt\n");
-        printk("help\n");
-        printk("logname\n");
-        printk("lp\n");
-        printk("mount\n");
-        printk("mem\n");
-        printk("panic   -d -k -m -b\n");
-        printk("poweroff\n");
-        printk("prompt   [string]\n");
-        printk("read   [standard input]\n");
-        printk("reboot\n");
-        printk("shutdown\n");
-        printk("sleep   [int]\n");
-        printk("test\n");
-        printk("uname   -a -m -s\n");
+    if (strcmp(extracted_command, "ls") == 0) {
+        v_listdir(sys_pwd);
     } else 
+    if (strcmp(extracted_command, "mkdir") == 0) {
+        if (command[space_index] == ' ') {
+            space_index++;
+            v_createdir(&command[space_index]);
+        } else {
+            printk("%s: missing argument\n", extracted_command);
+        }
+    } else
+    if (strcmp(extracted_command, "touch") == 0) {
+        if (command[space_index] == ' ') {
+            space_index++;
+            v_createfile(&command[space_index], sys_pwd);
+        } else {
+            printk("%s: missing argument\n", extracted_command);
+        }
+    } else
     if (strcmp(extracted_command, "sleep") == 0) {
         if (command[space_index] == ' ') {
             space_index++;
