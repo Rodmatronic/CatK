@@ -17,6 +17,12 @@ void read() {
      while (1) {
         unsigned char scancode = read_key();
         char key = scancode_to_char(scancode);
+
+        if (scancode == 0x01)
+        {
+            break; // Exit the inner loop
+        }
+
         if (scancode == 0x0E)
         {
             terminal_column--;
