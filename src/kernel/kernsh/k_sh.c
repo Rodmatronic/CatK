@@ -114,6 +114,9 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "shutdown") == 0) {
         poweroff(1);
     } else 
+    if (strcmp(extracted_command, "poweroff") == 0) {
+        poweroff(1);
+    } else 
     if (strcmp(extracted_command, "reboot") == 0) {
         poweroff(0);
     } else 
@@ -190,6 +193,7 @@ void execute_command(const char* command) {
         printk("alias\n");
         printk("cal\n");
         printk("clear\n");
+        printk("cmdline\n");
         printk("date\n");
         printk("echo   [string]\n");
         printk("exit\n");
@@ -197,8 +201,8 @@ void execute_command(const char* command) {
         printk("help\n");
         printk("logname\n");
         printk("lp\n");
+        printk("loader\n");
         printk("mount\n");
-        printk("mem\n");
         printk("panic   -d -k -m -b\n");
         printk("poweroff\n");
         printk("prompt   [string]\n");
