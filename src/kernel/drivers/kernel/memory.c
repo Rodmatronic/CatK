@@ -18,5 +18,5 @@ void memory_init() {
     outportb(0x70, 0x31);
     highmem = inportb(0x71);
     total = lowmem | highmem << 8;
-    printk("real mode memory = %d\n", total);
+    printk("bios mode memory = %d\n", total);
 }

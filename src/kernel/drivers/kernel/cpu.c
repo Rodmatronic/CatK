@@ -49,5 +49,5 @@ void cpuid_info() {
     itos(ecx, model, sizeof(uint32_t) * 10);
     itos(edx, model, sizeof(uint32_t) * 11);
 
-    printk("Processor info -------\n%s\n%s\n----------------------\n", vendor, model);
+    printk("cpu: %s\n  %s\n", vendor, model);
 }

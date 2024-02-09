@@ -22,6 +22,7 @@
 #include "gdt.h"
 #include "idt.h"
 #include "read.h"
+#include "serial.h"
 
 void bootart();
 
@@ -47,6 +48,7 @@ void kmain(unsigned long magic, unsigned long addr)
     printk("\n");
     bootloader_info(magic, addr);
 	cpuid_info();
+    init_serial();
     gdt_init();
     idt_init();
     memory_init();
