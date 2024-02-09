@@ -28,14 +28,17 @@ void bootart();
 
 void kmain(unsigned long magic, unsigned long addr) 
 {    
+    time_init();
 	terminal_init();                                /* This starts the terminal, prints the "Cat... kernel!"" message, and */
 	printk("%CCat... ", VGA_COLOR_CYAN);			/* shows the CatK boot logo.*/
 	printk("%Ckernel!\n", VGA_COLOR_LIGHT_CYAN);
 	bootart();
-    for (int i = 0; i < 80; ++i) {
-    for (int i = 0; i < 200; ++i) 
-    {for (int j = 0; j < 1200; ++j) 
-    {}}printk("#");}
+    printk("booting in 3...");
+    sleep(1);
+    printk(" 2...");
+    sleep(1);
+    printk(" 1...");
+    sleep(1);
 
     // Print static vars
 	printk("Arch: %s\n", sys_arch);
@@ -53,7 +56,6 @@ void kmain(unsigned long magic, unsigned long addr)
     idt_init();
     memory_init();
     vfs_init();
-    time_init();
     //createramfs();
     printk("%Chit ESC to continue boot to k_sh\n", VGA_COLOR_DARK_GREY);
     read();
