@@ -15,8 +15,7 @@ void createramfs()
 {
     printk("RAMfs init -------\n");
     makefsnode(fsnodes, &nodecount, sys_mountpoint, "RAMfs", "ramdisk1");
-    setroot(fsnodes, &nodecount, "/");
-
+    setroot(fsnodes, nodecount, "/");
     v_createdir("/bin");
     v_createdir("/sbin");
     v_createdir("/dev");

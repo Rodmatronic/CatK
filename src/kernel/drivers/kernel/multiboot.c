@@ -15,8 +15,8 @@ void bootloader_info(unsigned long magic, unsigned long addr) {
 
     mboot_info = (MULTIBOOT_INFO *)addr;
 
-    strcpy(cmdline, mboot_info->cmdline);
-    strcpy(loader, mboot_info->boot_loader_name);
+    strcpy(cmdline, (const char *)mboot_info->cmdline);
+    strcpy(loader, (const char *)mboot_info->boot_loader_name);
 
     printk("cmdline: %s\n", (char *)mboot_info->cmdline);
     printk("booted from: %s\n", (char *)mboot_info->boot_loader_name);
