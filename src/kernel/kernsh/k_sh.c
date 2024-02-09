@@ -130,6 +130,12 @@ void execute_command(const char* command) {
         printk("exit\n");
         return;
     } else 
+    if (strcmp(extracted_command, "cmdline") == 0) {
+        printk("%s\n", cmdline);
+    } else 
+    if (strcmp(extracted_command, "loader") == 0) {
+        printk("%s\n", loader);
+    } else 
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {
         current_full_date();
@@ -209,16 +215,16 @@ void execute_command(const char* command) {
     }
 }
 
-void k_sh() {
-    strcpy(shprompt, "k_sh");
-    printk("\n");
-    printk("CatK built-in shell 0.01 -------\n----------------------\n\n");
-
+void prompt()
+{
     terminal_setcolor(VGA_COLOR_CYAN);
     printk("%s", shprompt);
     terminal_setcolor(VGA_COLOR_LIGHT_GREY);
     printk("%C# ", VGA_COLOR_LIGHT_GREY);
-    
+}
+
+void k_sh() {
+    prompt();
     while (1) {
         unsigned char scancode = read_key();
         char key = scancode_to_char(scancode);
@@ -243,10 +249,7 @@ void k_sh() {
                 {
                     break;
                 }
-                terminal_setcolor(VGA_COLOR_CYAN);
-                printk("%s", shprompt);
-                terminal_setcolor(VGA_COLOR_LIGHT_GREY);
-                printk("%C# ", VGA_COLOR_LIGHT_GREY);
+                prompt();
                 shbuffer_index = 0;
             } else {
                 shbuffer[shbuffer_index++] = key;

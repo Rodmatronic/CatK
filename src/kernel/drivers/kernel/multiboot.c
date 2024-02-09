@@ -6,6 +6,8 @@
 #include "panic.h"
 #include "kernel.h"
 #include "multiboot.h"
+#include "config.h"
+#include "string.h"
 
 void bootloader_info(unsigned long magic, unsigned long addr) {
 
@@ -13,12 +15,13 @@ void bootloader_info(unsigned long magic, unsigned long addr) {
 
     mboot_info = (MULTIBOOT_INFO *)addr;
 
-    printk("Bootloader info -------\n");
+    strcpy(cmdline, mboot_info->cmdline);
+    strcpy(loader, mboot_info->boot_loader_name);
+
     printk("cmdline: %s\n", (char *)mboot_info->cmdline);
     printk("booted from: %s\n", (char *)mboot_info->boot_loader_name);
     printk("loader magic: 0x%x\n", magic);
     printk("loader flags: 0x%x\n", mboot_info->flags);
     printk("bios low mem: 0x%x KB\n", mboot_info->mem_low);
     printk("bios high mem: 0x%x KB\n", mboot_info->mem_high);
-    printk("----------------------\n");
 }

@@ -62,7 +62,7 @@ void gdt_set_entry(int index, uint32_t base, uint32_t limit, uint8_t access, uin
 // initialize GDT
 void gdt_init() {
 
-    printk("GDT init -------\n");
+    printk("gdt_init(): init\n");
     g_gdt_ptr.limit = sizeof(g_gdt) - 1;
     g_gdt_ptr.base_address = (uint32_t)g_gdt;
 
@@ -79,7 +79,6 @@ void gdt_init() {
 
     load_gdt((uint32_t)&g_gdt_ptr);
 
-    printk("GDT has been loaded and initialized.");
+    printk("gdt_init(): loaded!\n");
 
-    printk("\n----------------------\n");
 }

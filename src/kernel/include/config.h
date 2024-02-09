@@ -9,3 +9,5 @@ static char * sys_name = "Catkernel";
 static char * sys_user = "root";
 static char * sys_mountpoint = "/";
 static char * sys_pwd = "/";
+extern char cmdline[256];
+extern char loader[256];

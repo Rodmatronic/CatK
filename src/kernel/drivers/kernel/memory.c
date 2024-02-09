@@ -11,13 +11,12 @@ unsigned short total;
 unsigned char lowmem, highmem;
 
 void memory_init() {
-    printk("Memory info -------\n");
+    printk("memory_init(): init\n");
 
     outportb(0x70, 0x30);
     lowmem = inportb(0x71);
     outportb(0x70, 0x31);
     highmem = inportb(0x71);
     total = lowmem | highmem << 8;
-    printk("BIOS memory: %d", total);
-    printk("\n----------------------\n");
+    printk("real mode memory = %d\n", total);
 }

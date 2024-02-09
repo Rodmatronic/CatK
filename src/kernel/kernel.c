@@ -21,6 +21,7 @@
 #include "time.h"
 #include "gdt.h"
 #include "idt.h"
+#include "read.h"
 
 void bootart();
 
@@ -45,13 +46,15 @@ void kmain(unsigned long magic, unsigned long addr)
 	printk("Mntp: %s\n", sys_mountpoint);
     printk("\n");
     bootloader_info(magic, addr);
+	cpuid_info();
     gdt_init();
     idt_init();
-	cpuid_info();
     memory_init();
     vfs_init();
     time_init();
     //createramfs();
+    printk("%Chit ESC to continue boot to k_sh\n", VGA_COLOR_DARK_GREY);
+    read();
     k_sh();
     panic("Attempted to kill SH");
 }

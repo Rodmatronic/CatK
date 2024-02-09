@@ -132,10 +132,9 @@ void read_rtc() {
 
 void time_init()
 {
-    printk("Time/date info -------\n");
+    printk("time_init(): init\n");
     read_rtc();
-    printk("%d/%d/%d %d:%d:%d", day, month, year, hour, minute, second);
-    printk("\n----------------------\n");
+    printk("%d/%d/%d %d:%d:%d\n", day, month, year, hour, minute, second);
 }
 
 void current_time()
