@@ -1,6 +1,7 @@
 /* keyboard interface IO port: data and control
    READ:   status port
    WRITE:  control register */
+#include <term.h>
 #define KBRD_INTRFC 0x64
 
 /* keyboard interface bits */
@@ -26,7 +27,8 @@ void poweroff(int type) {
 
     if (type == 0)
     {
-        printk("\nRebooting...\n");
+        terminal_setcolor(VGA_COLOR_WHITE);
+        printk("Rebooting...\n");
         uint8_t temp;
         asm volatile ("cli"); /* disable all interrupts */
         /* Clear all keyboard buffers (output and command buffers) */
@@ -47,8 +49,8 @@ void poweroff(int type) {
 
     if (type == 1)
     {
-
-        printk("\nPowering off...\n");
+        terminal_setcolor(VGA_COLOR_WHITE);
+        printk("Powering off...\n");
 
         //for Vbox
         outports(0x4004, 0x3400);
@@ -59,10 +61,13 @@ void poweroff(int type) {
 
     if (type == 2)
     {
-        printk("\nHalting...\n");
+        terminal_setcolor(VGA_COLOR_WHITE);
+        printk("Halting...\n");
 
         printk("CatK has been halted.\n");
-        printk("Please switch off your machine now, or press the reset switch.\n");
+        printk("Please switch off your machine now, or press the reset switch.");
+
+        vga_disable_cursor();
 
         while(1){
             for (;;);

@@ -11,8 +11,6 @@
 #include "config.h"
 #include "isr.h"
 
-#define CURRENT_YEAR        2024                            // Change this each year!
- 
 int century_register = 0x00;                                // Set by ACPI table parsing code if possible
  
 unsigned char second;
@@ -22,7 +20,7 @@ unsigned char day;
 unsigned char month;
 unsigned int year;
 
- const char *months[] = {
+const char *months[] = {
     "Jan", "Feb", "Mar", "Apr",
     "May", "Jun", "Jul", "Aug",
     "Sep", "Oct", "Nov", "Dec"
@@ -139,10 +137,11 @@ void time_init()
     printk("%d/%d/%d %d:%d:%d\n", day, month, year, hour, minute, second);
 }
 
-void current_time()
+int current_time()
 {
     read_rtc();
     printk("%d:%d:%d", hour, minute, second);
+    return second;
 }
 
 void current_date()

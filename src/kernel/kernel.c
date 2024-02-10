@@ -4,6 +4,7 @@
 #include "include/config.h"
 #include "include/fsnode.h"
 #include "include/gdt.h"
+#include "include/keyboard.h"
 #include "term.h"
 #include "printk.h"
 #include "panic.h"
@@ -24,6 +25,7 @@
 #include "read.h"
 #include "serial.h"
 #include "isr.h"
+#include "entropy.h"
 
 void bootart();
 
@@ -44,12 +46,11 @@ void kmain(unsigned long magic, unsigned long addr)
 
     asm volatile("cli");
     bootloader_info(magic, addr);
-
+    cpuid_info();
     gdt_init();
     idt_init();
     init_pit();
-
-	cpuid_info();
+    feed_entropy(magic, terminal_column, KEYBOARD_DATA_PORT, second, minute);
     memory_init();
     init_serial();
     time_init();

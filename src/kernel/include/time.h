@@ -5,9 +5,20 @@
 #define PIT_FREQUENCY 1193182
 #define DESIRED_ACCURACY 0.0001 // 0.0001 seconds
 
+#define CURRENT_YEAR        2024                            // Change this each year!
+ 
+extern int century_register;                                // Set by ACPI table parsing code if possible
+ 
+extern unsigned char second;
+extern unsigned char minute;
+extern unsigned char hour;
+extern unsigned char day;
+extern unsigned char month;
+extern unsigned int year;
+
 void time_init();
 void current_date();
-void current_time();
+int current_time();
 void sleep(unsigned int seconds);
 void cal();
 void current_full_date();
