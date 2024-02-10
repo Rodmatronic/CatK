@@ -25,13 +25,13 @@ void printk(const char* format, ...)
                 terminal_write(str, strlen(str));
                 arg += sizeof(const char*);
             }
-            else if (*format == 'd') 
+            else if (*format == 'd' || *format == 'u') 
             {
                 char buf[64];
-                int num = *((int*)arg);
+                uint32_t num = *((uint32_t*)arg);
                 itoa(buf, 10, num);
                 terminal_write(buf, strlen(buf));
-                arg += sizeof(int);
+                arg += sizeof(uint32_t);
             }  
             else if (*format == 'c') 
             {

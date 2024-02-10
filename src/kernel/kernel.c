@@ -47,12 +47,12 @@ void kmain(unsigned long magic, unsigned long addr)
     asm volatile("cli");
     bootloader_info(magic, addr);
     cpuid_info();
+    memory_init();
+    init_serial();
     gdt_init();
     idt_init();
     init_pit();
     feed_entropy(terminal_row, terminal_column, KEYBOARD_DATA_PORT, second, minute);
-    memory_init();
-    init_serial();
     time_init();
     vfs_init();
     //createramfs();

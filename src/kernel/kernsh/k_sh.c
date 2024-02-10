@@ -21,6 +21,14 @@ char shbuffer[128];
 int shbuffer_index = 0;
 char shprompt[20]; 
 
+void convertToReadable(uint32_t value) {
+    // Extract seconds and milliseconds
+    uint32_t seconds = value / 10000;
+    uint32_t milliseconds = value % 10000;
+
+    printk("%d.%u", seconds, milliseconds);
+}
+
 void execute_command(const char* command) {
     if (command[0] == '\0') {
         return;
@@ -140,7 +148,8 @@ void execute_command(const char* command) {
         printk("%s\n", loader);
     } else 
     if (strcmp(extracted_command, "times") == 0) {
-        printk("%d\n", counter);
+        convertToReadable(counter);
+        printk("\n");
     } else 
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {

@@ -24,4 +24,7 @@ void bootloader_info(unsigned long magic, unsigned long addr) {
     printk("bootloader_info: loader flags: 0x%x\n", mboot_info->flags);
     printk("bootloader_info: bios low mem: 0x%x KB\n", mboot_info->mem_low);
     printk("bootloader_info: bios high mem: 0x%x KB\n", mboot_info->mem_high);
+    printk("bootloader_info: drives length: 0x%x KB\n", mboot_info->drives_length);
+    printk("bootloader_info: drives address: 0x%x KB\n", mboot_info->drives_addr);
+    printk("It is reccomended to use GRUB, if you arent, be warned that certain features \nmay not function properly in the future\n");
 }
