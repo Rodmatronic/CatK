@@ -24,7 +24,7 @@ void idt_init() {
     g_idt_ptr.limit = sizeof(g_idt) - 1;
     pic8259_init();
 
-    printk("idt_init(): init\n");
+    printk("idt_init: init\n");
 
     idt_set_entry(0, (uint32_t)exception_0, 0x08, 0x8E);
     idt_set_entry(1, (uint32_t)exception_1, 0x08, 0x8E);
@@ -76,12 +76,12 @@ void idt_init() {
     idt_set_entry(47, (uint32_t)irq_15, 0x08, 0x8E);
     idt_set_entry(128, (uint32_t)exception_128, 0x08, 0x8E);
 
-    printk("idt_init(): set entries\n");
+    printk("idt_init: set entries\n");
 
     load_idt((uint32_t)&g_idt_ptr);
     asm volatile("sti");
 
-    printk("idt_init(): loaded!\n");
+    printk("idt_init: loaded!\n");
 
 }
 

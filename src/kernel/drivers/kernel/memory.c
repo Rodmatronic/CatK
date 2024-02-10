@@ -11,7 +11,7 @@ unsigned short total;
 unsigned char lowmem, highmem;
 
 void memory_init() {
-    printk("memory_init(): init\n");
+    printk("memory_init: init\n");
 
     outportb(0x70, 0x30);
     lowmem = inportb(0x71);

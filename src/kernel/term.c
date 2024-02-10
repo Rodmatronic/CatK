@@ -148,3 +148,8 @@ void vga_enable_cursor() {
     outportb(0x3D4, 0x0B);
     outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 0x0E);
 }
+
+void vga_disable_cursor() {
+    outportb(0x3D4, 10);
+    outportb(0x3D5, 32);
+}

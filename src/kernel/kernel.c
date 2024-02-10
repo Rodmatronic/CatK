@@ -23,44 +23,48 @@
 #include "idt.h"
 #include "read.h"
 #include "serial.h"
+#include "isr.h"
 
 void bootart();
 
 void kmain(unsigned long magic, unsigned long addr) 
-{    
-    time_init();
+{
 	terminal_init();                                /* This starts the terminal, prints the "Cat... kernel!"" message, and */
 	printk("%CCat... ", VGA_COLOR_CYAN);			/* shows the CatK boot logo.*/
 	printk("%Ckernel!\n", VGA_COLOR_LIGHT_CYAN);
 	bootart();
     printk("booting in 3...");
     sleep(1);
-    printk(" 2...");
-    sleep(1);
-    printk(" 1...");
-    sleep(1);
+    printk(" 2..."); sleep(1); printk(" 1..."); sleep(1);
 
-    // Print static vars
-	printk("Arch: %s\n", sys_arch);
-	printk("Term: %s\n", sys_term);
-	printk("Sesh: %s\n", sys_sesh);
-	printk("Vers: %s\n", sys_ver);
-	printk("Home: %s\n", sys_home);
-	printk("Name: %s\n", sys_name);
-	printk("Mntp: %s\n", sys_mountpoint);
-    printk("\n");
+    /* This is where the actual loading starts. */
+
+    terminal_init();   
+    printk("%C-<CATKERNEL START!>-\n", VGA_COLOR_WHITE);
+
+    asm volatile("cli");
     bootloader_info(magic, addr);
-	cpuid_info();
-    init_serial();
+
     gdt_init();
     idt_init();
+    init_pit();
+
+	cpuid_info();
     memory_init();
+    init_serial();
+    time_init();
     vfs_init();
     //createramfs();
     printk("%Chit ESC to continue boot to k_sh\n", VGA_COLOR_DARK_GREY);
     read();
     k_sh();
-    panic("Attempted to kill SH");
+
+    /*
+     * We dont normally get here. If we do, either something has crashed, 
+     * or the kernel has literally nothing left to do.
+    */
+
+    panic("Kernel has nothing left to do!");
 }
 
 void bootart()

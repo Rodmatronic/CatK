@@ -139,6 +139,9 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "loader") == 0) {
         printk("%s\n", loader);
     } else 
+    if (strcmp(extracted_command, "times") == 0) {
+        printk("%d\n", counter);
+    } else 
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {
         current_full_date();
@@ -211,6 +214,7 @@ void execute_command(const char* command) {
         printk("shutdown\n");
         printk("sleep   [int]\n");
         printk("test\n");
+        printk("times\n");
         printk("uname   -a -m -s\n");
     } else 
     {

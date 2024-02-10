@@ -31,6 +31,7 @@ void terminal_init(void);
 void terminal_write(const char* data, size_t size) ;
 void terminal_setcolor(uint8_t color);
 void vga_enable_cursor();
+void vga_disable_cursor();
 void vga_set_cursor_pos(uint8_t x, uint8_t y);
 void terminal_write_int();
 void terminal_putchar(char c);

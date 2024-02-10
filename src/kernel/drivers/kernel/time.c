@@ -8,6 +8,8 @@
 #include "kernel.h"
 #include "time.h"
 #include "pc.h"
+#include "config.h"
+#include "isr.h"
 
 #define CURRENT_YEAR        2024                            // Change this each year!
  
@@ -132,7 +134,7 @@ void read_rtc() {
 
 void time_init()
 {
-    printk("time_init(): init\n");
+    printk("time_init: init\n");
     read_rtc();
     printk("%d/%d/%d %d:%d:%d\n", day, month, year, hour, minute, second);
 }
@@ -156,12 +158,12 @@ void current_full_date()
 }
 
 void cal() {
-    printk("        %d\n", CURRENT_YEAR);
-    printk("Su Mo Tu We Th Fr Sa\n");
-    read_rtc();
-    
     // Determine the day of the week for the first day of the month
     int dayOfWeek = (day + 2 * (13 * (month + 1) / 5) + (year % 100) + ((year % 100) / 4) + ((year / 100) / 4) - 2 * (year / 100) + 700) % 7;
+
+    printk("      %s %d\n", months[month - 1], CURRENT_YEAR);
+    printk("Su Mo Tu We Th Fr Sa\n");
+    read_rtc();
 
     // Print leading spaces for the first week
     for (int i = 0; i < dayOfWeek; i++) {
@@ -201,4 +203,24 @@ void sleep(unsigned int seconds) {
         read_rtc();
         elapsed_seconds = second + (minute * 60) + (hour * 3600) - start_seconds;
     } while (elapsed_seconds < seconds);
+}
+
+void pit_interrupt_handler() {
+    counter++;
+}
+
+void init_pit() {
+    printk("init_pit: init\n");
+    // Calculate the divisor for the desired accuracy
+    uint16_t divisor = (uint16_t)(PIT_FREQUENCY * DESIRED_ACCURACY);
+
+    // Send the command byte to initialize the PIT
+    outportb(PIT_COMMAND, 0x34); // Channel 0, lobyte/hibyte access, mode 2 (rate generator), binary mode
+
+    // Send the divisor (low byte, then high byte)
+    outportb(PIT_CHANNEL_0, (uint8_t)(divisor & 0xFF)); // Send low byte
+    outportb(PIT_CHANNEL_0, (uint8_t)((divisor >> 8) & 0xFF)); // Send high byte
+
+    printk("init_pit: (added to IDT) ");
+    isr_register_interrupt_handler(0x20, pit_interrupt_handler);
 }

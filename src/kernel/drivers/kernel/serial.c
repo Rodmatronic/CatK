@@ -7,7 +7,7 @@
 #include "serial.h"
 
 int init_serial() {
-   printk("init_serial(): init\n");
+   printk("init_serial: init\n");
    outportb(PORT + 1, 0x00);    // Disable all interrupts
    outportb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
    outportb(PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
@@ -22,12 +22,12 @@ int init_serial() {
    if(inportb(PORT + 0) != 0xAE) {
       return 1;
    }
-   printk("init_serial(): not faulty. good\n");
+   printk("init_serial: not faulty. good\n");
  
    // If serial is not faulty set it in normal operation mode
    // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
    outportb(PORT + 4, 0x0F);
-   printk("init_serial(): loaded!\n");
+   printk("init_serial: loaded!\n");
    return 0;
 }
 

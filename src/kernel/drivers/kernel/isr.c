@@ -7,6 +7,10 @@
 #include <cpu.h>
 #include <term.h>
 #include "printk.h"
+#include "time.h"
+#include "read.h"
+#include "power.h"
+#include "panic.h"
 
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
 
@@ -73,14 +77,9 @@ static void print_registers(REGISTERS *reg) {
 
 void isr_exception_handler(REGISTERS reg) {
     if (reg.int_no < 32) {
-        printk("\n%Cpanic: ", VGA_COLOR_WHITE);
-        printk("%s\n", exception_messages[reg.int_no]);
-        cpuid_info();
+        terminal_setcolor(VGA_COLOR_WHITE);
         print_registers(&reg);
-        printk("CatK has panicked due to an unrecoverable error, please reboot");
-
-        for (;;)
-            ;
+        panic(exception_messages[reg.int_no]);
     }
     if (g_interrupt_handlers[reg.int_no] != NULL) {
         ISR handler = g_interrupt_handlers[reg.int_no];
