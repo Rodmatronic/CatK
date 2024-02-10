@@ -9,6 +9,6 @@ void feed_entropy(int num1, int num2, int num3, int num4, int num5)
     num1 = num1 * 2;
     num2 = num2 * 3;
     num3 = num3 * 4;
-    seed = num1 * num2 + num3 * num4 + num5 * num3 * num4 * num1;
+    seed = num1 * num2 + num3 * num4 + num5 * num3 * num4 * 1.2;
     printk("feed_entropy: seed is %d\n", seed);
 }

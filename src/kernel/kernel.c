@@ -50,7 +50,7 @@ void kmain(unsigned long magic, unsigned long addr)
     gdt_init();
     idt_init();
     init_pit();
-    feed_entropy(magic, terminal_column, KEYBOARD_DATA_PORT, second, minute);
+    feed_entropy(terminal_row, terminal_column, KEYBOARD_DATA_PORT, second, minute);
     memory_init();
     init_serial();
     time_init();
