@@ -150,7 +150,9 @@ void execute_command(const char* command) {
         printk("\n");
     } else 
     if (strcmp(extracted_command, "mem") == 0) {
-        printk("%u MB\n", mem);
+        printk("%u MB of real memory\n", mem);
+        printk("%u KB of bios memory\n", bmem);
+
     } else 
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {

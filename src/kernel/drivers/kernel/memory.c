@@ -5,6 +5,7 @@
 #include "printk.h"
 #include "panic.h"
 #include "memory.h"
+#include "config.h"
 #include "pc.h"
 
 /*
@@ -22,5 +23,6 @@ void memory_init() {
     outportb(0x70, 0x31);
     highmem = inportb(0x71);
     total = lowmem | highmem << 8;
-    printk("bios mode memory = %d\n", total);
+    printk("bios mode memory = %d KB\n", total / 1000);
+    bmem = total / 1000;
 }
