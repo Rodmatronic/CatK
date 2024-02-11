@@ -72,6 +72,11 @@ void vga_set_cursor_pos(uint8_t x, uint8_t y)
     outportb(0x3D5, cursorLocation);
 }
 
+void terminal_goto(uint8_t x, uint8_t y) 
+{
+    terminal_row = y;
+    terminal_column = x;
+}
 
 void terminal_putchar(char c) 
 {

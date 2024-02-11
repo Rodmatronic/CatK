@@ -36,6 +36,7 @@ void vga_set_cursor_pos(uint8_t x, uint8_t y);
 void terminal_write_int();
 void terminal_putchar(char c);
 void terminal_clear();
+void terminal_goto(uint8_t x, uint8_t y);
 
 extern size_t terminal_row;
 extern size_t terminal_column;

@@ -6,6 +6,9 @@
 #include "panic.h"
 #include "cpu.h"
 #include <cpuid.h>
+#include <config.h>
+#include <string.h>
+
 uint32_t eax, ebx, ecx, edx;
 
 // takes in a 32-bit uint, a buffer, and an offset, and outputs the raw bytes
@@ -67,4 +70,7 @@ void cpuid_info() {
     }
 
     printk("cpu: %s\n  %s\n  logical processors: %d\n", vendor, model, cores);
+    strcpy(cpubrand, vendor);
+    strcpy(cpumodel, model);
+    cpulogicores = cores;
 }

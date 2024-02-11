@@ -149,11 +149,77 @@ void execute_command(const char* command) {
         convertToReadable(counter);
         printk("\n");
     } else 
+    if (strcmp(extracted_command, "uptime") == 0) {
+        convertToReadable(counter);
+        printk(" up, ");
+        current_time();
+        printk("\n");
+
+    } else 
     if (strcmp(extracted_command, "mem") == 0) {
         printk("%u MB of real memory\n", mem);
         printk("%u KB of bios memory\n", bmem);
-
     } else 
+    if (strcmp(extracted_command, "about") == 0) {
+        terminal_clear();
+        terminal_goto(37, 2);
+        printk("%C           __           __             \n",VGA_COLOR_WHITE);
+        terminal_goto(37, 3);
+        printk("%C          /  \\         /  \\        \n", VGA_COLOR_WHITE);
+        terminal_goto(37, 4);
+        printk("%C         / /\\ \\       / /\\ \\       \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 5);
+        printk("%C        / /  \\ \\     / /  \\ \\      \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 6);
+        printk("%C       / /      \\___/      \\ \\     \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 7);
+        printk("%C      /                       \\      \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 8);
+        printk("%C     |         |               |      \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 9);
+        printk("%C   ---         |    --         ---    \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 10);
+        printk("%C     |                         |       \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 11);
+        printk("%C   ---  ", VGA_COLOR_LIGHT_CYAN);
+        printk("%C//", VGA_COLOR_CYAN);
+        printk("%C       ^       ", VGA_COLOR_LIGHT_CYAN);
+        printk("%C//", VGA_COLOR_CYAN);
+        printk("%C    ---  \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 12);
+        printk("%C      \\         \\/\\/          /       \n", VGA_COLOR_LIGHT_CYAN);
+        terminal_goto(37, 13);
+        printk(" %C      \\                     /      \n", VGA_COLOR_CYAN);
+        terminal_goto(37, 14);
+        printk("%C        \\___________________/      \n", VGA_COLOR_CYAN);
+        terminal_goto(37, 15);
+        printk("%C         ===================       \n", VGA_COLOR_LIGHT_RED);
+        terminal_goto(37, 16);
+        printk("%C        =========", VGA_COLOR_RED);
+        printk("%C\\/", VGA_COLOR_LIGHT_BROWN);
+        printk("%C==========      \n", VGA_COLOR_RED);
+        terminal_goto(37, 17);
+        printk("%C                /  \\               \n", VGA_COLOR_LIGHT_BROWN);
+        terminal_goto(37, 18);
+        printk("%C               |CatK|              \n", VGA_COLOR_LIGHT_BROWN);
+        terminal_goto(37, 19);
+        printk("%C                \\__/               \n", VGA_COLOR_LIGHT_BROWN);
+        terminal_goto(37, 20);
+		printk("%C", VGA_COLOR_LIGHT_GREY);
+        terminal_goto(0, 3);
+        printk("Here's a quick rundown of this computer...\n----------------------\n");
+        printk("Running CatK version %s\n", sys_ver);
+        printk("CatK's codename is: %s\n", sys_codename);
+        printk("CatK was compiled for: %s\n", sys_arch);
+        printk("CPU has a vendor named: %s\n", cpubrand);
+        printk("CPU is: %s\n", cpumodel);
+        printk("CPU has %d cores\n", cpulogicores);
+        printk("CatK detected %u MB of memory\n", mem);
+        printk("CatK was loaded from: %s\n", loader);
+        printk("CatK also had the argument(s): %s\n", cmdline);
+        printk("Is CatK a dog?: No\n");
+    } else 
+
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {
         current_full_date();
@@ -205,29 +271,29 @@ void execute_command(const char* command) {
     }else
     if (strcmp(extracted_command, "help") == 0) {
         printk("-- CatK and POSIX commands --\n");
-        printk("alias\n");
-        printk("cal\n");
-        printk("clear\n");
-        printk("cmdline\n");
-        printk("date\n");
-        printk("echo   [string]\n");
-        printk("exit\n");
-        printk("halt\n");
-        printk("help\n");
-        printk("logname\n");
-        printk("lp\n");
-        printk("loader\n");
-        printk("mount\n");
-        printk("panic   -d -k -m -b\n");
-        printk("poweroff\n");
-        printk("prompt   [string]\n");
-        printk("read   [standard input]\n");
-        printk("reboot\n");
-        printk("shutdown\n");
-        printk("sleep   [int]\n");
-        printk("test\n");
-        printk("times\n");
-        printk("uname   -a -m -s\n");
+        printk("about                     | uname   -a -m -s          \n");
+        printk("alias                     | uptime                    \n");
+        printk("cal                       | times                     \n");
+        printk("clear                     |\n");
+        printk("cmdline                   |\n");
+        printk("date                      |\n");
+        printk("echo   [string]           |\n");
+        printk("exit                      |\n");
+        printk("halt                      |\n");
+        printk("help                      |\n");
+        printk("logname                   |\n");
+        printk("lp                        |\n");
+        printk("loader                    |\n");
+        printk("mount                     |\n");
+        printk("mem                       |\n");
+        printk("panic   -d -k -m -b       |\n");
+        printk("poweroff                  |\n");
+        printk("prompt   [string]         |\n");
+        printk("read   [standard input]   |\n");
+        printk("reboot                    |\n");
+        printk("shutdown                  |\n");
+        printk("sleep   [int]             |\n");
+        printk("test                      |\n");
     } else 
     {
         // Command not found
