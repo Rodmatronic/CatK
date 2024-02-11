@@ -64,3 +64,11 @@ void printk(const char* format, ...)
         }
     }
 }
+
+void convertToReadable(uint32_t value) {
+    // Extract seconds and milliseconds
+    uint32_t seconds = value / 10000;
+    uint32_t milliseconds = value % 10000;
+
+    printk("%d.%u", seconds, milliseconds);
+}

@@ -23,6 +23,7 @@ void itos(uint32_t number, char* buffer, uint32_t offset) {
 void cpuid_info() {
     char vendor[13];
     char model[49];
+    int cores;
 
     // vendor
     __cpuid(0x00000000, eax, ebx, ecx, edx);
@@ -49,5 +50,21 @@ void cpuid_info() {
     itos(ecx, model, sizeof(uint32_t) * 10);
     itos(edx, model, sizeof(uint32_t) * 11);
 
-    printk("cpu: %s\n  %s\n", vendor, model);
+    // number of cores
+    __cpuid(0x00000001, eax, ebx, ecx, edx);
+    cores = (ebx >> 16) & 0xFF;
+
+    if (cores == 0) {
+        // If the number of cores is reported as 0, we need to check if hyper-threading is enabled
+        cores = (ebx >> 28) & 0xF;
+        if (cores > 0) {
+            // Hyper-threading is enabled, so the actual number of cores is half the number of logical processors
+            cores *= 2;
+        } else {
+            // Hyper-threading is not enabled, so the number of cores remains 1
+            cores = 1;
+        }
+    }
+
+    printk("cpu: %s\n  %s\n  logical processors: %d\n", vendor, model, cores);
 }

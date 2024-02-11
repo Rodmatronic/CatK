@@ -21,14 +21,6 @@ char shbuffer[128];
 int shbuffer_index = 0;
 char shprompt[20]; 
 
-void convertToReadable(uint32_t value) {
-    // Extract seconds and milliseconds
-    uint32_t seconds = value / 10000;
-    uint32_t milliseconds = value % 10000;
-
-    printk("%d.%u", seconds, milliseconds);
-}
-
 void execute_command(const char* command) {
     if (command[0] == '\0') {
         return;
