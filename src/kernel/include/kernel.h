@@ -4,8 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define	KERNEL_BOOT_TAG	"---<<CATKERNEL BOOT>>---"
-
 typedef struct {
     struct {
         uint32_t k_start_addr;

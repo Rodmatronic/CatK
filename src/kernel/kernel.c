@@ -48,10 +48,6 @@ void kmain(unsigned long magic, unsigned long addr)
     terminal_init();
     terminal_setcolor(VGA_COLOR_WHITE);
 
-    /* FreeBSD style dmesg message. Used for the same reason: 
-     * "Tag used to mark the start of a boot in dmesg"
-     * Thank you random FreeBSD dev. you are cool :3
-     */
     printk("%s\n", KERNEL_BOOT_TAG);
     printk("%s %s %s\n", sys_name, sys_ver, sys_arch);
 

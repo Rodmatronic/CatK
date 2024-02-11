@@ -162,49 +162,49 @@ void execute_command(const char* command) {
     } else 
     if (strcmp(extracted_command, "about") == 0) {
         terminal_clear();
-        terminal_goto(37, 2);
+        terminal_goto(40, 2);
         printk("%C           __           __             \n",VGA_COLOR_WHITE);
-        terminal_goto(37, 3);
+        terminal_goto(40, 3);
         printk("%C          /  \\         /  \\        \n", VGA_COLOR_WHITE);
-        terminal_goto(37, 4);
+        terminal_goto(40, 4);
         printk("%C         / /\\ \\       / /\\ \\       \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 5);
+        terminal_goto(40, 5);
         printk("%C        / /  \\ \\     / /  \\ \\      \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 6);
+        terminal_goto(40, 6);
         printk("%C       / /      \\___/      \\ \\     \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 7);
+        terminal_goto(40, 7);
         printk("%C      /                       \\      \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 8);
+        terminal_goto(40, 8);
         printk("%C     |         |               |      \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 9);
+        terminal_goto(40, 9);
         printk("%C   ---         |    --         ---    \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 10);
+        terminal_goto(40, 10);
         printk("%C     |                         |       \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 11);
+        terminal_goto(40, 11);
         printk("%C   ---  ", VGA_COLOR_LIGHT_CYAN);
         printk("%C//", VGA_COLOR_CYAN);
         printk("%C       ^       ", VGA_COLOR_LIGHT_CYAN);
         printk("%C//", VGA_COLOR_CYAN);
         printk("%C    ---  \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 12);
+        terminal_goto(40, 12);
         printk("%C      \\         \\/\\/          /       \n", VGA_COLOR_LIGHT_CYAN);
-        terminal_goto(37, 13);
+        terminal_goto(40, 13);
         printk(" %C      \\                     /      \n", VGA_COLOR_CYAN);
-        terminal_goto(37, 14);
+        terminal_goto(40, 14);
         printk("%C        \\___________________/      \n", VGA_COLOR_CYAN);
-        terminal_goto(37, 15);
+        terminal_goto(40, 15);
         printk("%C         ===================       \n", VGA_COLOR_LIGHT_RED);
-        terminal_goto(37, 16);
+        terminal_goto(40, 16);
         printk("%C        =========", VGA_COLOR_RED);
         printk("%C\\/", VGA_COLOR_LIGHT_BROWN);
         printk("%C==========      \n", VGA_COLOR_RED);
-        terminal_goto(37, 17);
+        terminal_goto(40, 17);
         printk("%C                /  \\               \n", VGA_COLOR_LIGHT_BROWN);
-        terminal_goto(37, 18);
+        terminal_goto(40, 18);
         printk("%C               |CatK|              \n", VGA_COLOR_LIGHT_BROWN);
-        terminal_goto(37, 19);
+        terminal_goto(40, 19);
         printk("%C                \\__/               \n", VGA_COLOR_LIGHT_BROWN);
-        terminal_goto(37, 20);
+        terminal_goto(40, 20);
 		printk("%C", VGA_COLOR_LIGHT_GREY);
         terminal_goto(0, 5);
         printk("Here's a quick rundown of this computer...\n");
@@ -246,7 +246,7 @@ void execute_command(const char* command) {
         cal();
     } else 
     if (strcmp(extracted_command, "ls") == 0) {
-        v_listdir(sys_pwd);
+        v_listdir(pwd);
     } else 
     if (strcmp(extracted_command, "mkdir") == 0) {
         //if (command[space_index] == ' ') {
