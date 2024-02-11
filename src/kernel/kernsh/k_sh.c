@@ -90,17 +90,23 @@ void execute_command(const char* command) {
             space_index++;
 
             if (strcmp(&command[space_index], "-d") == 0) {
+                // This devides by zero
                 int zero = 0;
                 int kill = zero / zero;
             } else 
             if (strcmp(&command[space_index], "-k") == 0) {
+                // This exits k_sh, thus making the kernel go to a place where it shouldn't
                 kill = 1;
                 return;
             } else 
             if (strcmp(&command[space_index], "-m") == 0) {
+                // This makes some assembly, that for some reason causes a math fault
                 asm("int     $0x10");
             } else
             if (strcmp(&command[space_index], "-b") == 0) {
+                // This for some reason makes a breakpoint...
+                // I really dont like assembly. -rod
+
                 asm("int3");
             } else
             {
@@ -142,6 +148,9 @@ void execute_command(const char* command) {
     if (strcmp(extracted_command, "times") == 0) {
         convertToReadable(counter);
         printk("\n");
+    } else 
+    if (strcmp(extracted_command, "mem") == 0) {
+        printk("%u MB\n", mem);
     } else 
     // These commands are for some very simple POSIX complicancy. The FS is not usable currently, though.
     if (strcmp(extracted_command, "date") == 0) {

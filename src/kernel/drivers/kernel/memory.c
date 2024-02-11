@@ -7,6 +7,10 @@
 #include "memory.h"
 #include "pc.h"
 
+/*
+ * I really hate memory.
+ */
+
 unsigned short total;
 unsigned char lowmem, highmem;
 

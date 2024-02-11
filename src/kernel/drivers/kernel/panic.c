@@ -7,20 +7,33 @@
 #include <power.h>
 #include <config.h>
 
+/*
+ *  Written by Rod.
+ */
+
 void panic(char* message)
 {
+    // On panic, set the color to the color used for kernel logs. (white)
+    // This should be standard across CatK. Debugging/kernel text is White, user mode is normal light gray.
     terminal_setcolor(VGA_COLOR_WHITE);
+
+    // Spit out system info. CPU, TIME, CMDLINE, etc.
     cpuid_info();
     printk("time: ");
     current_time();
     printk("\n");
     printk("cmdline: %s\n", cmdline);
     printk("loader: %s\n", loader);
-    printk("uptime: %d\n", counter);
+    uint32_t seconds = counter / 10000;
+    uint32_t milliseconds = counter % 10000;
+    printk("uptime: %d.%u seconds\n", seconds, milliseconds);
+
+    // Print the panic reason
     printk("%Cpanic: ", VGA_COLOR_WHITE);
     printk("%s\n", message);
     vga_disable_cursor();
 
+    // This was added to make debugging easier, Reboot on read break.
     printk("Press any key to reboot...");
     read(1);
     poweroff(0);

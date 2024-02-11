@@ -14,3 +14,4 @@ extern char cmdline[256];
 extern char loader[256];
 extern uint32_t counter;
 extern uint64_t seed;
+extern uint64_t mem;

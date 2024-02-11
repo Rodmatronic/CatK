@@ -27,6 +27,10 @@
 #include "isr.h"
 #include "entropy.h"
 
+/*
+ * This kernel will, and has been subject to heavy internal change.
+ */
+
 void bootart();
 
 void kmain(unsigned long magic, unsigned long addr) 
@@ -41,13 +45,20 @@ void kmain(unsigned long magic, unsigned long addr)
 
     /* This is where the actual loading starts. */
 
-    terminal_init();   
-    printk("%C-<CATKERNEL START!>-\n", VGA_COLOR_WHITE);
+    terminal_init();
+    terminal_setcolor(VGA_COLOR_WHITE);
+
+    /* FreeBSD style dmesg message. Used for the same reason: 
+     * "Tag used to mark the start of a boot in dmesg"
+     * Thank you random FreeBSD dev. you are cool :3
+     */
+    printk("%s\n", KERNEL_BOOT_TAG);
+    printk("%s %s %s\n", sys_name, sys_ver, sys_arch);
 
     asm volatile("cli");
     bootloader_info(magic, addr);
-    cpuid_info();
     memory_init();
+    cpuid_info();
     init_serial();
     gdt_init();
     idt_init();
@@ -63,13 +74,14 @@ void kmain(unsigned long magic, unsigned long addr)
     /*
      * We dont normally get here. If we do, either something has crashed, 
      * or the kernel has literally nothing left to do.
-    */
+     */
 
     panic("Kernel has nothing left to do!");
 }
 
 void bootart()
 {
+        // This is the message printed at the CatK splash screen.
         printk("\n%C           __           __             \n",VGA_COLOR_WHITE);
         printk("%C          /  \\         /  \\        \n", VGA_COLOR_WHITE);
         printk("%C         / /\\ \\       / /\\ \\       \n", VGA_COLOR_LIGHT_CYAN);

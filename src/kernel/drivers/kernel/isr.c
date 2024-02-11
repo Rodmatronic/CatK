@@ -77,6 +77,9 @@ static void print_registers(REGISTERS *reg) {
 
 void isr_exception_handler(REGISTERS reg) {
     if (reg.int_no < 32) {
+        terminal_setcolor(VGA_COLOR_LIGHT_BROWN);
+        // This is here to make PANIC more noticable during boot
+        printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         terminal_setcolor(VGA_COLOR_WHITE);
         print_registers(&reg);
         panic(exception_messages[reg.int_no]);

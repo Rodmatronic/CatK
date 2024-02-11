@@ -5,3 +5,4 @@ char cmdline[256];
 char loader[256];
 uint32_t counter = 0;
 uint64_t seed = 000;
+uint64_t mem;

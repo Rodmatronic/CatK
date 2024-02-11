@@ -95,6 +95,23 @@ typedef struct {
 
 } MULTIBOOT_INFO;
 
+typedef enum {
+    MULTIBOOT_MEMORY_AVAILABLE = 1,
+    MULTIBOOT_MEMORY_RESERVED,
+    MULTIBOOT_MEMORY_ACPI_RECLAIMABLE,
+    MULTIBOOT_MEMORY_NVS,
+    MULTIBOOT_MEMORY_BADRAM
+} MULTIBOOT_MEMORY_TYPE;
+
+typedef struct {
+    uint32_t size;
+    uint32_t addr_low;
+    uint32_t addr_high;
+    uint32_t len_low;
+    uint32_t len_high;
+    MULTIBOOT_MEMORY_TYPE type;
+} MULTIBOOT_MEMORY_MAP;
+
 void bootloader_info(unsigned long magic, unsigned long addr);
 
 #endif
