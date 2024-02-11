@@ -17,7 +17,7 @@
 #include "vfs.h"
 
 int kill = 0;
-char shbuffer[128];
+char shbuffer[1024];
 int shbuffer_index = 0;
 char shprompt[20]; 
 
@@ -206,8 +206,13 @@ void execute_command(const char* command) {
         printk("%C                \\__/               \n", VGA_COLOR_LIGHT_BROWN);
         terminal_goto(37, 20);
 		printk("%C", VGA_COLOR_LIGHT_GREY);
-        terminal_goto(0, 3);
-        printk("Here's a quick rundown of this computer...\n----------------------\n");
+        terminal_goto(0, 5);
+        printk("Here's a quick rundown of this computer...\n");
+        printk("%C----------", VGA_COLOR_BLUE);
+        printk("%C----------", VGA_COLOR_CYAN);
+        printk("%C----------", VGA_COLOR_LIGHT_CYAN);
+        printk("%C----------\n", VGA_COLOR_WHITE);
+
         printk("Running CatK version %s\n", sys_ver);
         printk("CatK's codename is: %s\n", sys_codename);
         printk("CatK was compiled for: %s\n", sys_arch);

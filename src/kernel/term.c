@@ -137,9 +137,71 @@ void terminal_putchar(char c)
 
 void terminal_write(const char* data, size_t size) 
 {
-	for (size_t i = 0; i < size; i++)
-		terminal_putchar(data[i]);
+    for (size_t i = 0; i < size; i++)
+    {
+        if (data[i] == '\n')
+        {
+            // Move to the next line
+            terminal_column = 0;
+            if (++terminal_row == VGA_HEIGHT)
+            {
+                // Scroll up when the screen is full
+                terminal_row--;
+                vga_set_cursor_pos(0, VGA_HEIGHT - 1);
+                for (size_t y = 0; y < VGA_HEIGHT - 1; y++) 
+                {
+                    for (size_t x = 0; x < VGA_WIDTH; x++) 
+                    {
+                        const size_t index = y * VGA_WIDTH + x;
+                        const size_t nextIndex = (y + 1) * VGA_WIDTH + x;
+                        terminal_buffer[index] = terminal_buffer[nextIndex];
+                    }
+                }
+                // Clear the last line
+                for (size_t x = 0; x < VGA_WIDTH; x++) 
+                {
+                    const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+                    terminal_buffer[index] = vga_entry(' ', terminal_color);
+                }
+            }
+            continue; // Skip to the next character
+        }
+
+        // Check if we need to scroll before writing the character
+        if (terminal_column == VGA_WIDTH) 
+        {
+            terminal_column = 0;
+            if (++terminal_row == VGA_HEIGHT)
+            {
+                terminal_row--;
+                vga_set_cursor_pos(0, VGA_HEIGHT - 1);
+                for (size_t y = 0; y < VGA_HEIGHT - 1; y++) 
+                {
+                    for (size_t x = 0; x < VGA_WIDTH; x++) 
+                    {
+                        const size_t index = y * VGA_WIDTH + x;
+                        const size_t nextIndex = (y + 1) * VGA_WIDTH + x;
+                        terminal_buffer[index] = terminal_buffer[nextIndex];
+                    }
+                }
+                // Clear the last line
+                for (size_t x = 0; x < VGA_WIDTH; x++) 
+                {
+                    const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+                    terminal_buffer[index] = vga_entry(' ', terminal_color);
+                }
+            }
+        }
+
+        // Write the character to the buffer
+        terminal_putentryat(data[i], terminal_color, terminal_column, terminal_row);
+        terminal_column++;
+
+        // Update the cursor position
+        vga_set_cursor_pos(terminal_column, terminal_row);
+    }
 }
+
 
 void terminal_write_int() 
 {
