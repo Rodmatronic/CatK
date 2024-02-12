@@ -11,6 +11,8 @@
 #include "read.h"
 #include "power.h"
 #include "panic.h"
+#include "config.h"
+#include <string.h>
 
 ISR g_interrupt_handlers[NO_INTERRUPT_HANDLERS];
 
@@ -77,9 +79,15 @@ static void print_registers(REGISTERS *reg) {
 
 void isr_exception_handler(REGISTERS reg) {
     if (reg.int_no < 32) {
+        if (strcmp(cmdline, "debugboot") == 0)
+        {
+            panic(exception_messages[reg.int_no]);
+            return;
+        }
         terminal_setcolor(VGA_COLOR_LIGHT_BROWN);
-        // This is here to make PANIC more noticable during boot
-        printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+
+        // This is here to make PANIC more noticeable during boot
+        printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         terminal_setcolor(VGA_COLOR_WHITE);
         print_registers(&reg);
         panic(exception_messages[reg.int_no]);

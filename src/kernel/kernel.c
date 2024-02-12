@@ -1,10 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "include/config.h"
-#include "include/fsnode.h"
-#include "include/gdt.h"
-#include "include/keyboard.h"
+#include <stdlib.h>
 #include "term.h"
 #include "printk.h"
 #include "panic.h"
@@ -54,6 +51,15 @@ void kmain(unsigned long magic, unsigned long addr)
     asm volatile("cli");
     bootloader_info(magic, addr);
     memory_init();
+    // Allocate a large block of memory for the kernel to use
+    size_t kernel_memory_size = 10000000; // 100 MB
+    void *kernel_memory = malloc(kernel_memory_size);
+    
+    if (kernel_memory == NULL) {
+        panic("CatK failed to allocate memory!");
+    }
+    
+    printk("kernel memory allocated = %u KB\n", kernel_memory_size / 1000);
     cpuid_info();
     init_serial();
     gdt_init();

@@ -56,4 +56,5 @@ void bootloader_info(unsigned long magic, unsigned long addr) {
     uint64_t total_real_memory_mb = total_real_memory_bytes / (1024 * 1024);
     printk("real memory = %u MB\n", total_real_memory_mb + 1);
     mem = total_real_memory_mb+1;
+    memreal = total_real_memory_bytes;
 }

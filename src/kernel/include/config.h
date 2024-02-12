@@ -37,5 +37,6 @@ extern char pwd[1024];                               // The system's universal P
 extern uint32_t counter;                             // This is the counter that should be started when the kernel starts
 extern uint32_t cpulogicores;                        // The amount of logical cores reported by cpuid_info()
 extern uint64_t seed;                                // The random seed that should be set by entropy
-extern uint64_t mem;                                 // The amount of memory avalible to the system in KB
-extern uint64_t bmem;                                // The BIOS memory reported
+extern uint64_t mem;                                 // The amount of memory avalible to the system in MB
+extern uint64_t memreal;                             // The amount of memory avalible to the system in bytes
+extern uint64_t bmem;                                // The BIOS memory reported in KB

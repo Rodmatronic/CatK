@@ -6,6 +6,7 @@
 #include <read.h>
 #include <power.h>
 #include <config.h>
+#include <string.h>
 
 /*
  *  Written by Rod.
@@ -13,6 +14,19 @@
 
 void panic(char* message)
 {
+    if (strcmp(cmdline, "debugboot") == 0)
+    {    
+        terminal_setcolor(VGA_COLOR_LIGHT_BROWN);
+        printk("!!!!!!!!!!!!!!!!!!\n");
+        printk("panic: %s \n'debugboot' is active. Skipped.\n", message);
+        terminal_setcolor(VGA_COLOR_WHITE);
+        return;
+    }
+    terminal_setcolor(VGA_COLOR_LIGHT_BROWN);
+
+    // This is here to make PANIC more noticeable during boot
+    printk("!!!!!!!!!!!!!!!!!!\n");
+
     // On panic, set the color to the color used for kernel logs. (white)
     // This should be standard across CatK. Debugging/kernel text is White, user mode is normal light gray.
     terminal_setcolor(VGA_COLOR_WHITE);
