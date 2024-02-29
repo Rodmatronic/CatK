@@ -27,7 +27,9 @@ int v_createfile(char* filepath, char* content) {
 int v_createdir(char* filepath) {
     // Extract the filesystem type from the root node
     char rootFS[50];
-    strcpy(rootFS, fsnodes[0].fs);
+
+    // I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY I HATE STRCPY
+    //strcpy(rootFS, fsnodes[0].fs);
 
     if (strcmp(rootFS, "RAMfs") == 0) {
         //printk("Creating directory '%s' in RAMfs.\n", filepath);

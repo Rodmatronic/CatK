@@ -1,3 +1,4 @@
+#include <memory.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -15,7 +16,6 @@
 #include "ramfs.h"
 #include "kernel.h"
 #include "multiboot.h"
-#include "memory.h"
 #include "time.h"
 #include "gdt.h"
 #include "idt.h"
@@ -23,6 +23,7 @@
 #include "serial.h"
 #include "isr.h"
 #include "entropy.h"
+#include "init.h"
 
 /*
  * This kernel will, and has been subject to heavy internal change.
@@ -46,20 +47,15 @@ void kmain(unsigned long magic, unsigned long addr)
     terminal_setcolor(VGA_COLOR_WHITE);
 
     printk("%s\n", KERNEL_BOOT_TAG);
-    printk("%s %s %s\n", sys_name, sys_ver, sys_arch);
+    printk("%s %s %s\n", sys_name, sys_ver, sys_arch, sys_compiler);
+
+    printk("%s version %s", sys_name, sys_ver);
 
     asm volatile("cli");
     bootloader_info(magic, addr);
+    printk("Command line: %s\n", cmdline);
     memory_init();
-    // Allocate a large block of memory for the kernel to use
-    size_t kernel_memory_size = 10000000; // 100 MB
-    void *kernel_memory = malloc(kernel_memory_size);
-    
-    if (kernel_memory == NULL) {
-        panic("CatK failed to allocate memory!");
-    }
-    
-    printk("kernel memory allocated = %u KB\n", kernel_memory_size / 1000);
+    printk("[CatK will allocate memory when switching to kernelfs or debug shell]\n");
     cpuid_info();
     init_serial();
     gdt_init();
@@ -68,7 +64,11 @@ void kmain(unsigned long magic, unsigned long addr)
     feed_entropy(terminal_row, terminal_column, KEYBOARD_DATA_PORT, second, minute);
     time_init();
     vfs_init();
-    //createramfs();
+    printk("[Allocating memory for kernel]\n");
+    malloc(mem-1024);
+    createramfs();
+    start_init();
+
     printk("%Chit ESC to continue boot to k_sh\n", VGA_COLOR_DARK_GREY);
     read();
     k_sh();

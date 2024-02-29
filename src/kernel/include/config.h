@@ -23,6 +23,7 @@ static char * sys_name = "Catkernel";                // The system's name
 static char * sys_codename = "IT'S ALIVE!!";         // CatK's codename
 static char * sys_user = "root";                     // The system's default user (should always be root!)
 static char * sys_mountpoint = "/";                  // The system's mountpoint (should always be "/")
+static char * sys_compiler = "clang";                // This gets changes by MAKE
 
 //------------------------------------------------   
 
@@ -34,9 +35,9 @@ extern char pwd[1024];                               // The system's universal P
 
 //------------------------------------------------
 
+extern int ttyno;                                    // The amount of TTYs avalible to the system
+extern int currentttysession;                        // The current TTY the user is using (to send text through)
 extern uint32_t counter;                             // This is the counter that should be started when the kernel starts
 extern uint32_t cpulogicores;                        // The amount of logical cores reported by cpuid_info()
 extern uint64_t seed;                                // The random seed that should be set by entropy
-extern uint64_t mem;                                 // The amount of memory avalible to the system in MB
-extern uint64_t memreal;                             // The amount of memory avalible to the system in bytes
-extern uint64_t bmem;                                // The BIOS memory reported in KB
+extern uint64_t mem;                                 // The amount of memory avalible to the system

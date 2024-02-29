@@ -10,54 +10,91 @@
 
 /*
  * I really hate memory.
+ * Like, I really hate it. I have been working on making memory in CatK a real working thing for MONTHS!
+ * Screw it! Memory marathon. Going to get this shit to work with an FS. If not, what's the point of CatK?
+ * The memory_init used to be a glorified way to get the BIOS memory. Who needs that? It's nearly useless!
  */
+
+// Define a structure for memory blocks
+typedef struct Block {
+    size_t size;
+    struct Block* next;
+} Block;
+
+// Pointer to the beginning of the free memory
+static Block* freeList = NULL;
 
 unsigned short total;
 unsigned char lowmem, highmem;
 
 void memory_init() {
-    printk("memory_init: init\n");
-    outportb(0x70, 0x30);
-    lowmem = inportb(0x71);
-    outportb(0x70, 0x31);
-    highmem = inportb(0x71);
-    total = lowmem | highmem << 8;
-    printk("bios mode memory = %d KB\n", total / 1000);
-    bmem = total / 1000;
+    freeList = (Block*)&mem;
+    freeList->size = mem - sizeof(Block);
+    freeList->next = NULL;
 }
 
-void *memcpy(void *dest, const void *src, size_t n) {
-    char *d = (char *)dest;
-    const char *s = (const char *)src;
-    
-    for (size_t i = 0; i < n; ++i) {
-        d[i] = s[i];
+void *memcpy(void *dest, const void *src, size_t len)
+{
+  char *d = dest;
+  const char *s = src;
+  while (len--)
+    *d++ = *s++;
+  return dest;
+}
+
+// Function to allocate memory
+void* malloc(size_t size) {
+    // Check if the size is 0 or there is no free memory
+    if (size == 0 || freeList == NULL) {
+        return NULL;
     }
-    
-    return dest;
-}
 
-void *malloc(size_t size) {
-    size_t total_allocated = total_blocks * size;
-    
-    if (total_allocated + size <= memreal && total_blocks < MAX_BLOCKS) {
-        void *ptr = (void *)((char *)memory + total_blocks * size);
-        memory[total_blocks].size = size;
-        memory[total_blocks].ptr = ptr;
-        total_blocks++;
-        return ptr;
-    } else {
-        panic("Memory violation. Out of memory!");
-        return NULL; // Memory allocation failed
-    }
-}
+    // Align size to a multiple of sizeof(Block)
+    size = (size + sizeof(Block) - 1) / sizeof(Block) * sizeof(Block);
 
-void free(void *ptr) {
-    for (size_t i = 0; i < total_blocks; ++i) {
-        if (memory[i].ptr == ptr) {
-            memory[i].ptr = NULL;
-            memory[i].size = 0;
-            break;
+    // Search for a block that fits the requested size
+    Block* prev = NULL;
+    Block* curr = freeList;
+    while (curr != NULL) {
+        if (curr->size >= size) {
+            // Allocate from this block
+            if (curr->size - size > sizeof(Block)) {
+                // Split the block if there is enough space for another block
+                Block* newBlock = (Block*)((char*)curr + size);
+                newBlock->size = curr->size - size - sizeof(Block);
+                newBlock->next = curr->next;
+                curr->size = size;
+                curr->next = newBlock;
+            }
+            // Remove the allocated block from the free list
+            if (prev == NULL) {
+                freeList = curr->next;
+            } else {
+                prev->next = curr->next;
+            }
+            return (void*)(curr + 1); // Return a pointer to the allocated memory
         }
+        prev = curr;
+        curr = curr->next;
     }
+
+    if (size > mem)
+    {
+        panic("Failed to allocate memory");
+    }
+
+    // No suitable block found
+    return NULL;
+}
+
+// Function to free allocated memory
+void free(void* ptr) {
+    if (ptr == NULL) {
+        return;
+    }
+    // Get the block header
+    Block* block = (Block*)ptr - 1;
+    // Add the block back to the free list
+    block->next = freeList;
+    freeList = block;
 }

@@ -13,7 +13,7 @@ void ramfs_init(struct RAMfs *ramfs) {
 
 void createramfs()
 {
-    printk("RAMfs init -------\n");
+    printk("RAMfs: init\n");
     makefsnode(fsnodes, &nodecount, sys_mountpoint, "RAMfs", "ramdisk1");
     setroot(fsnodes, nodecount, "/");
     v_createdir("/bin");
@@ -21,8 +21,6 @@ void createramfs()
     v_createdir("/dev");
     v_createdir("/etc");
     v_createdir("/lib");
-
-    printk("----------------------\n");
 }
 
 void ramfs_createdir(struct RAMfs *ramfs, const char *path) {

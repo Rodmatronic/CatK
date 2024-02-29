@@ -69,7 +69,7 @@ void execute_command(const char* command) {
             space_index++;
 
             if (strcmp(&command[space_index], "-a") == 0) {
-                printk("%s %s %s\n", sys_name, sys_ver, sys_arch);
+                printk("%s %s %s %s\n", sys_name, sys_ver, sys_arch, sys_compiler);
             } else 
             if (strcmp(&command[space_index], "-m") == 0) {
                 printk("%s\n", sys_arch);
@@ -146,6 +146,7 @@ void execute_command(const char* command) {
         printk("%s\n", loader);
     } else 
     if (strcmp(extracted_command, "times") == 0) {
+        printk("systimer: ");
         convertToReadable(counter);
         printk("\n");
     } else 
@@ -157,8 +158,7 @@ void execute_command(const char* command) {
 
     } else 
     if (strcmp(extracted_command, "mem") == 0) {
-        printk("%u MB of real memory\n", mem);
-        printk("%u KB of bios memory\n", bmem);
+        printk("real memory: %u\n", mem);
     } else 
     if (strcmp(extracted_command, "about") == 0) {
         terminal_clear();
@@ -308,10 +308,9 @@ void execute_command(const char* command) {
 
 void prompt()
 {
-    terminal_setcolor(VGA_COLOR_CYAN);
-    printk("%s", shprompt);
     terminal_setcolor(VGA_COLOR_LIGHT_GREY);
-    printk("%C# ", VGA_COLOR_LIGHT_GREY);
+    printk("%s", shprompt);
+    printk("# ");
 }
 
 void k_sh() {

@@ -18,6 +18,8 @@ char pwd[1024];
 
 //------------------------------------------------
 
+int ttyno = 12;
+int currentttysession = 1;
 uint32_t counter = 0;
 uint32_t cpulogicores = 0;
 uint64_t seed = 000;
