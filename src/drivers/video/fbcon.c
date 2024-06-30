@@ -1,0 +1,341 @@
+#include <catk/console.h>
+#include <catk/device.h>
+#include <catk/tty.h>
+#include <catk/mem.h>
+#include <catk/errno.h>
+#include <font/vga8x16.h>
+#include <multiboot2.h>
+#include <lib/common.h>
+#include <lib/ctype.h>
+#include <stdint.h>
+
+#include "ansi.h"
+
+static struct vc_data c;
+static struct consw cb;
+
+static int fbcon_x = 0;
+static int fbcon_y = 0;
+
+static const uint32_t colors[16] = {
+  0x000000,
+  0xaa0000,
+  0x00a000,
+  0xaa7800,
+  0x0000aa,
+  0x7800aa,
+  0x00aaaa,
+  0xaaaaaa,
+  /* high intensity colors */
+  0x6e6e6e,
+  0xff5050,
+  0x00ff00,
+  0xffff00,
+  0x0000ff,
+  0xff00ff,
+  0x00ffff,
+  0xffffff
+};
+
+static uint32_t fbcon_fg = 7;
+static uint32_t fbcon_bg = 0;
+
+static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state */
+static int ansi_list_idx = 0;
+static struct ansi_list ansi_value[8];
+
+void fbcon_putc(char c);
+void fbcon_clear(void);
+void fbcon_color_set(uint8_t fg, uint8_t bg);
+int fbcon_output_intr(struct tty_struct * tty, size_t len);
+
+static struct device fbcon_dev = {
+  .init_name        = "console",
+  .device_type      = DEVICE_TYPE_CHAR,
+  .device_class     = DEVICE_CLASS_CONSOLE,
+  .removable        = false,
+  .parent           = NULL,
+  .tty_output_intr  = fbcon_output_intr
+};
+
+/* startup, and return name */
+static char * fbcon_startup(void)
+{
+  /* use defaults */
+  c.vc_num = 0;
+  c.vc_size_row = c.vc_rows * 4 * 16;
+  c.vc_def_color = 0x07;
+  c.vc_font = font_vga_8x16;
+  c.vc_attr = c.vc_def_color;
+  c.vc_has_color = true;
+  c.vc_pos = 0x0000;                        /* sets cursor to (0, 0) */
+  cb.con_putc = fbcon_putc;
+  cb.con_clear = fbcon_clear;
+  cb.con_color_set = fbcon_color_set;
+  return "vga";
+}
+
+static uint32_t rgb_to_hex(uint8_t r, uint8_t g, uint8_t b)
+{
+  return (uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b;
+}
+
+void fbcon_putpx(int x, int y, uint32_t rgb)
+{
+  uint32_t * buf = (uint32_t *)c.vc_screenbuf;
+  uint32_t offset = y * c.vc_rows + x;
+  buf[offset] = (uint32_t)rgb;
+}
+
+static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
+{
+  int x = con_x * 8;
+  int y = con_y * 16;
+  for (int dy = 0; dy < 16; dy++) 
+  {
+    for (int dx = 0; dx < 8; dx++)
+    {
+      int color = (glyph[dy] >> (7 - dx)) & 1;
+      fbcon_putpx(x + dx, y + dy, color ? colors[fbcon_fg] : colors[fbcon_bg]);
+    }
+  }
+}
+
+static void fbcon_scroll(void)
+{
+  if (fbcon_x > (c.vc_rows / 8) - 1)
+  {
+    fbcon_x = 0;
+    fbcon_y++;
+  }
+  if (fbcon_y > (c.vc_cols / 16) - 1) // Check if the cursor is at the last row
+  {
+    // Calculate the size of a single row in bytes
+    size_t row_size_bytes = c.vc_rows * 4 * 16;
+
+    // Calculate the size of all rows except the last one
+    size_t all_rows_except_last_size = (c.vc_cols / 16) * row_size_bytes;
+
+    // Move all rows up by one (excluding the first row)
+    memmove((uint8_t *)c.vc_screenbuf, (uint8_t *)c.vc_screenbuf + row_size_bytes, all_rows_except_last_size);
+
+    // Clear the last row
+    memset((uint8_t *)c.vc_screenbuf + all_rows_except_last_size, 0, row_size_bytes);
+
+    // Move the cursor up by one row
+    fbcon_y--;
+  }
+}
+
+static inline void bs(void)
+{
+  if(fbcon_x)
+  {
+    fbcon_x--;
+    uint8_t * glyph = &c.vc_font.data[' ' * 16];
+    fbcon_print_glyph(fbcon_x, fbcon_y, glyph);
+  }
+}
+
+static void process_ascii(char ch)
+{
+  switch(ch)
+  {
+    case '\n':
+    {
+      fbcon_y++;
+      fbcon_x = 0;
+      break;
+    }
+    case '\t':
+    {
+      fbcon_x += 4;
+      break;
+    }
+    case 0x08: /* BS (Backspace) */
+    {
+      bs();
+      break;
+    }
+    default:
+    {
+      uint8_t * glyph = &c.vc_font.data[ch * 16];
+      fbcon_print_glyph(fbcon_x, fbcon_y, glyph);
+      fbcon_x++;
+      break;
+    }
+  }
+}
+
+static void process_ansi_sgr(size_t elem)
+{
+  static bool fg_hi = false;
+  static bool bg_hi = false;
+  struct ansi_list * list = &ansi_value[0];
+  for(int i = 0; i < elem; i++)
+  {
+    if (list[i].empty || list[i].value == 0)
+    {
+      fbcon_fg = 7;
+      fbcon_bg = 0;
+    }
+    else
+    {
+      if(list[i].value == 1)
+      {
+        fg_hi = fg_hi ? false : true;
+      }
+      else if(list[i].value == 21)
+      {
+        bg_hi = bg_hi ? false : true;
+      }
+      if(list[i].value >= 30 && list[i].value <= 37)
+      {
+        uint8_t num;
+        if(fg_hi)
+          num = (list[i].value - 30) + 8;
+        else
+          num = list[i].value - 30;
+        fbcon_fg = num;
+      }
+      else if(list[i].value >= 40 && list[i].value <= 47)
+      {
+        uint8_t num;
+        if(bg_hi)
+          num = (list[i].value - 40) + 8;
+        else
+          num = list[i].value - 40;
+        fbcon_bg = num;
+      }
+    }
+  }
+}
+
+static void process_ansi(char ch)
+{
+  switch(ansi_state)
+  {
+    case ANSI_STATE_ESC:
+    {
+      if(ch == '\033')
+      {
+        ansi_state = ANSI_STATE_BRACKET;
+        ansi_list_idx = 0;
+        ansi_value[ansi_list_idx].value = 0;
+        ansi_value[ansi_list_idx].empty = true;
+      }
+      else
+      {
+        ansi_state = ANSI_STATE_ESC;
+        process_ascii(ch);
+      }
+      break;
+    }
+    case ANSI_STATE_BRACKET:
+    {
+      if(ch == '[')
+      {
+        ansi_state = ANSI_STATE_STARTVAL;
+      }
+      else
+      {
+        ansi_state = ANSI_STATE_ESC;
+        process_ascii(ch);
+      }
+      break;
+    }
+    case ANSI_STATE_STARTVAL:
+    {
+      if(isdigit(ch))
+      {
+        ansi_value[ansi_list_idx].value *= 10;
+        ansi_value[ansi_list_idx].value += (ch - '0');
+        ansi_value[ansi_list_idx].empty = false;
+      }
+      else
+      {
+        if(ansi_list_idx < 8)
+          ansi_list_idx++;
+        ansi_value[ansi_list_idx].value = 0;
+        ansi_value[ansi_list_idx].empty = true;
+        ansi_state = ANSI_STATE_ENDVAL;
+      }
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+  if(ansi_state == ANSI_STATE_ENDVAL)
+  {
+    if(ch == ';')
+    {
+      ansi_state = ANSI_STATE_STARTVAL;
+    }
+    else
+    {
+      if(ch == 'm')
+      {
+        process_ansi_sgr(ansi_list_idx);
+      }
+      ansi_state = ANSI_STATE_ESC;
+    }
+  }
+  fbcon_scroll();
+}
+
+void fbcon_putc(char ch)
+{
+  process_ansi(ch);
+}
+
+void fbcon_write(const void * buf, size_t len)
+{
+  char * _buf = (char *)buf;
+  for(int i = 0; i < len; i++)
+  {
+    if(_buf[i])
+      fbcon_putc(_buf[i]);
+    else
+      break;
+  }
+}
+
+void fbcon_color_set(uint8_t fg, uint8_t bg)
+{
+
+}
+
+int fbcon_output_intr(struct tty_struct * tty, size_t len)
+{
+  if(!tty)
+    return -EINVAL;
+  char * str = (char *)malloc(len);
+  if(!str)
+    return -ENOMEM;
+  ring_buffer_read(tty->write_q, (uint8_t *)str, len);
+  fbcon_write(str, len);
+  free(str);
+  return 0;
+}
+
+void fbcon_clear(void)
+{
+}
+
+int fbcon_init(struct console * con, uint32_t addr)
+{
+  struct multiboot_tag_framebuffer_common * grub_fb = (struct multiboot_tag_framebuffer_common *)multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
+  if(!grub_fb)
+    return -ENODEV;
+  c.vc_rows = grub_fb->framebuffer_width;
+  c.vc_cols = grub_fb->framebuffer_height;
+  c.vc_screenbuf = (uintptr_t)grub_fb->framebuffer_addr;
+  cb.con_startup = fbcon_startup;
+  strncpy(con->name, cb.con_startup(), sizeof(con->name));
+  con->write = fbcon_write;
+  con->data = &c;
+  con->dev = &fbcon_dev;
+  return 0;
+}

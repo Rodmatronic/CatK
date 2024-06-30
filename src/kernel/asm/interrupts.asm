@@ -1,0 +1,117 @@
+section .text
+  extern interrupt_handler
+
+early_interrupt_handler:
+  pusha
+  mov ax, ds
+  push eax
+
+  mov ax, 0x10
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+
+  push esp
+  call interrupt_handler
+  pop esp
+
+  pop ebx
+  mov ds, bx
+  mov es, bx
+  mov fs, bx
+  mov gs, bx
+
+  popa
+  add esp, 0x8
+
+  sti
+  iretd
+
+
+; 1 = Dummy error code
+; 0 = CPU-Pushed error code
+%macro DEFINE_INT_HANDLER 2
+global interrupt_%1
+interrupt_%1:
+  cli
+%if %2 == 1
+  push byte 0
+%endif
+  push %1
+  jmp early_interrupt_handler
+%endmacro
+
+DEFINE_INT_HANDLER 0, 1
+DEFINE_INT_HANDLER 1, 1
+DEFINE_INT_HANDLER 2, 1
+DEFINE_INT_HANDLER 3, 1
+DEFINE_INT_HANDLER 4, 1
+DEFINE_INT_HANDLER 5, 1
+DEFINE_INT_HANDLER 6, 1
+DEFINE_INT_HANDLER 7, 1
+DEFINE_INT_HANDLER 8, 0
+DEFINE_INT_HANDLER 9, 1
+DEFINE_INT_HANDLER 10, 0
+DEFINE_INT_HANDLER 11, 0
+DEFINE_INT_HANDLER 12, 0
+DEFINE_INT_HANDLER 13, 0
+DEFINE_INT_HANDLER 14, 0
+DEFINE_INT_HANDLER 15, 1
+DEFINE_INT_HANDLER 16, 1
+DEFINE_INT_HANDLER 17, 0
+DEFINE_INT_HANDLER 18, 1
+DEFINE_INT_HANDLER 19, 1
+DEFINE_INT_HANDLER 20, 1
+DEFINE_INT_HANDLER 21, 0
+DEFINE_INT_HANDLER 22, 1
+DEFINE_INT_HANDLER 23, 1
+DEFINE_INT_HANDLER 24, 1
+DEFINE_INT_HANDLER 25, 1
+DEFINE_INT_HANDLER 26, 1
+DEFINE_INT_HANDLER 27, 1
+DEFINE_INT_HANDLER 28, 1
+DEFINE_INT_HANDLER 29, 0
+DEFINE_INT_HANDLER 30, 0
+DEFINE_INT_HANDLER 31, 1
+DEFINE_INT_HANDLER 32, 1
+DEFINE_INT_HANDLER 33, 1
+DEFINE_INT_HANDLER 34, 1
+DEFINE_INT_HANDLER 35, 1
+DEFINE_INT_HANDLER 36, 1
+DEFINE_INT_HANDLER 37, 1
+DEFINE_INT_HANDLER 38, 1
+DEFINE_INT_HANDLER 39, 1
+DEFINE_INT_HANDLER 40, 1
+DEFINE_INT_HANDLER 41, 1
+DEFINE_INT_HANDLER 42, 1
+DEFINE_INT_HANDLER 43, 1
+DEFINE_INT_HANDLER 44, 1
+DEFINE_INT_HANDLER 45, 1
+DEFINE_INT_HANDLER 46, 1
+DEFINE_INT_HANDLER 47, 1
+
+global syscall_dispatcher
+extern system_call
+
+syscall_dispatcher:
+  push eax
+  push dword 0
+  push ebp
+  push edi
+  push esi
+  push edx
+  push ecx
+  push ebx
+  push esp
+  call system_call
+  add esp, 4
+  pop ebx
+  pop ecx
+  pop edx
+  pop esi
+  pop edi
+  pop ebp
+  pop eax
+  add esp, 4
+  iretd

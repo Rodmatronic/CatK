@@ -5,8 +5,8 @@ export RM_FORCE = rm -rf
 
 # assembler
 export ASM = nasm
-export CC = clang # We Only Support Clang.
-export LD = ld.lld # We Only Support GNU ld or LLVM ld.lld.
+export CC = clang
+export LD = ld
 
 export CATK_ROOT = $(CURDIR)
 export CONFIG = $(CATK_ROOT)/config
@@ -17,10 +17,10 @@ export OBJ = $(CATK_ROOT)/obj
 $(shell $(MKDIR) $(OBJ) $(OUT))
 
 all:
-	@$(MAKE) -C src/kernel || { echo "Kernel build failed"; exit 1; }
-	@$(MAKE) -C src/utils || { echo "Utils build failed"; exit 1; }
+	@$(MAKE) -C src || { echo "Build failed"; exit 1; }
 	@echo "Build successful"
 
 clean:
-	$(RM_FORCE) $(OBJ)
-	$(RM_FORCE) $(OUT)
+	@$(RM_FORCE) $(OBJ)
+	@$(RM_FORCE) $(OUT)
+	@$(RM_FORCE) $(shell find . -type f -name "*.o")
