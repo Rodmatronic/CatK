@@ -1,7 +1,7 @@
 #ifndef __RING_H
 #define __RING_H
 
-#include <sys/types.h>
+#include <catk/types.h>
 #include <stdint.h>
 
 struct ring_buffer

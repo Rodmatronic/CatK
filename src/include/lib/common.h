@@ -1,7 +1,7 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-#include <sys/types.h>
+#include <catk/types.h>
 #include <stdarg.h>
 
 #define BIT(bit) (1 << bit)

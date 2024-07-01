@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <catk/limits.h>
-#include <sys/types.h>
+#include <catk/types.h>
 #include <lib/common.h>
 
 struct console_font

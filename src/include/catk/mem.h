@@ -7,7 +7,7 @@
 */
 
 #include <stdint.h>
-#include <sys/types.h>
+#include <catk/types.h>
 
 void heap_init(uintptr_t * start);
 uintptr_t heap_get_used(void);

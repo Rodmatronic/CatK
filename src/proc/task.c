@@ -7,7 +7,7 @@
 #include <catk/debug.h>
 #include <catk/core.h>
 #include <lib/common.h>
-#include <sys/types.h>
+#include <catk/types.h>
 
 struct task * current;
 struct task * catk_idle_task;

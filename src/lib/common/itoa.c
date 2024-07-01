@@ -1,5 +1,5 @@
 #include <lib/common.h>
-#include <sys/types.h>
+#include <catk/types.h>
 
 void reverse(char * str, size_t sz)
 {

@@ -5,7 +5,7 @@
 #include <catk/tty.h>
 #include <catk/debug.h>
 #include <lib/common.h>
-#include <sys/types.h>
+#include <catk/types.h>
 
 struct tty_struct * ttys[NR_CONSOLES] = {NULL};
 

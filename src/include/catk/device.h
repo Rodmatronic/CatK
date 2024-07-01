@@ -1,26 +1,44 @@
 #ifndef __DEVICE_H
 #define __DEVICE_H
 
-#include <sys/types.h>
-#include <lib/common.h>
+#include <catk/bitops.h>
 #include <catk/tty.h>
+#include <catk/types.h>
+#include <lib/common.h>
 
 #define MAX_BLKDEV 32
 #define MAX_CHRDEV 32
 
-enum device_type
-{
-  DEVICE_TYPE_INVALID,
-  DEVICE_TYPE_CHAR,
-  DEVICE_TYPE_BLOCK
-};
+/* supported majors */
+/* more info listed here: https://www.kernel.org/doc/Documentation/admin-guide/devices.txt */
 
-enum device_class
-{
-  DEVICE_CLASS_UNKNOWN,
-  DEVICE_CLASS_CONSOLE,
-  DEVICE_CLASS_MEMORY
-};
+#define NULL_MAJOR        0
+#define NULL_MINOR        0
+
+#define MEMDEV_MAJOR      1     // char 
+#define DISKDEV_MAJOR     3     // block
+#define TTYDEV_MAJOR      4     // char
+#define FBDEV_MAJOR       29    // char
+/* memdev minors */
+#define MEMDEV_MEM        1
+#define MEMDEV_NULL       3
+#define MEMDEV_PORT       4
+#define MEMDEV_ZERO       5
+#define MEMDEV_FULL       7
+#define MEMDEV_RANDOM     8
+#define MEMDEV_URANDOM    9
+#define MEMDEV_KMSG       11
+/* most harddisk minors are just the amount of partitions */
+#define DISKDEV_MASTER    0
+#define DISKDEV_SLAVE     64
+/* tty minors */
+#define TTYDEV_VC         0
+#define TTYDEV_SERIAL     64
+/* framebuffer minors are just the amount of framebuffers */
+
+#define SET_MINOR(minors, bit)   ((minors[(bit) / 32]) |= (1 << ((bit) % 32)))
+#define CLEAR_MINOR(minors, bit) ((minors[(bit) / 32]) &= ~(1 << ((bit) % 32)))
+#define TEST_MINOR(minors, bit)	 ((minors[(bit) / 32]) & (1 << ((bit) % 32)))
 
 struct tty_struct;
 
@@ -28,8 +46,8 @@ struct tty_struct;
 struct device
 {
   const char * init_name;               /* initial name of device */
-  int device_type;                      /* type of device */
-  int device_class;                     /* class of device */
+  uint8_t major;                        /* acts as a type */
+  uint8_t minors;                       /* acts as a class / classes */
   bool removable;                       /* can it be removed? */
   struct device * parent;               /* parent of the device (if it has one) */
   int (*tty_output_intr)(struct tty_struct *, size_t);

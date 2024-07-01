@@ -35,16 +35,16 @@ void kmain(uint32_t magic, uintptr_t addr)
   unreachable;
 }
 
-static void bobs_task(void)
-{
-  tty_write(tty_lookup(0), (uint8_t *)"Hi!", 3);
-  for(;;);
-}
+extern int ata_device_probe(void);
 
 void bootstrap2(void)
 {
-  printk("\033[1;37mStarting Catk in 3...\033[1;0m\n");
-  spawn_kernel_task("Bob", (uint32_t)bobs_task, TASK_PRIORITY_NORMAL);
+  int rc;
+  rc = ata_device_probe();
+  if(IS_ERR(rc))
+  {
+    printk("ATA probe failed: %d\n", rc);
+  }
   for(;;);
 }
 

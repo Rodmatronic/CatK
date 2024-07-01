@@ -2,7 +2,7 @@
 #include <catk/mem.h>
 #include <catk/printk.h>
 #include <catk/io.h>
-#include <sys/types.h>
+#include <catk/types.h>
 #include <lib/common.h>
 #include <stdint.h>
 

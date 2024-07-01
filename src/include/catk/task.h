@@ -1,7 +1,7 @@
 #ifndef __TASK_H
 #define __TASK_H
 
-#include <sys/types.h>
+#include <catk/types.h>
 #include <lib/common.h>
 #include <stdint.h>
 

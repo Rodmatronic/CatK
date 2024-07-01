@@ -3,7 +3,11 @@
 
 #include <catk/limits.h>
 #include <catk/dirent.h>
-#include <sys/types.h>
+#include <catk/types.h>
+
+#define MAJOR(dev)		(((dev_t)(dev)) >> 8)
+#define MINOR(dev)		(((dev_t)(dev)) & 0xff)
+#define MKDEV(major, minor)	(((major) << 8) | (minor))
 
 struct file;
 

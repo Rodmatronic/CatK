@@ -1,5 +1,5 @@
 #include <lib/common.h>
-#include <sys/types.h>
+#include <catk/types.h>
 
 void strncpy(char * dest, const char * src, size_t n)
 {
