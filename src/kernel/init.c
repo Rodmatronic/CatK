@@ -23,7 +23,7 @@ void kmain(uint32_t magic, uintptr_t addr)
   cpu_init();
   heap_init(&kernel_end);
   serial_init();
-  debug(" ..Kernel!\n");
+  debug(" kernel!\n");
   device_init();
   int rc = console_init(addr);
   if(IS_ERR(rc))
@@ -33,7 +33,7 @@ void kmain(uint32_t magic, uintptr_t addr)
     panic("Could not create TTY0: %d\n", rc);
   tasking_init();
   /* it is impossible for tasking_init to return */
-  unreachable;
+  panic("Failed to init tasks, kernel left in unreachable state");
 }
 
 extern int ata_device_probe(void);
@@ -52,19 +52,15 @@ static void show_bootart(void)
   printk("\n\033[1;37m           __           __             \n");
   printk("          /  \\         /  \\        \n");
   printk("\033[36m         / /\\ \\       / /\\ \\       \n");
-  printk("        / /  \\ \\     / /  \\ \\      \n");
-  printk("       / /      \\___/      \\ \\         _______   _____   _______  ___   _\n");
-  printk("      /                       \\       |   ____| /  _  \\ |       ||   | | |\n");
-  printk("     |        |      |         |      |  |     |  | |  ||_     _||   |_| |\n");
-  printk("   ---        |      |         ---    |  |     |  |_|  |  |   |  |      _|\n");
+  printk("\033[36m        / /  \\ \\     / /  \\ \\      \n");
+  printk("\033[36m       / /      \\___/      \\ \\      \033[1;37m   _______   _____   _______  ___   _\n");
+  printk("\033[36m      /                       \\       \033[1;37m|   ____| /  _  \\ |       ||   | | |\n");
+  printk("\033[36m     |        |      |         |      \033[36m|  |     |  | |  ||_     _||   |_| |\n");
+  printk("\033[36m   ---        |      |         ---    |  |     |  |_|  |  |   |  |      _|\n");
   printk("     |                         |      |  |     |       |  |   |  |     |_ \n");
-  printk("   ---  ");
-  printk("\033[1;36m//\033[1;36m");
-  printk("       ^       ");
-  printk("\033[1;36m//\033[1;36m");
-  printk("    ---    |  |____ |   _   |  |   |  |    _  |\n");
+  printk("\033[1;36m   ---   //      ^       //    ---    \033[1;36m|  |____ |   _   |  |   |  |    _  |\n");
   printk("      \\         \\/\\/          /       \033[1;36m|_______||__| |__|  |___|  |___| |_|\033[1;36m\n");
-  printk("\033[1;36m       \\                     /        Written from scratch by the CatK team! :3\n");
+  printk("\033[1;36m       \\                     /      Written from scratch by the CatK team! :3\n");
   printk("        \\___________________/      \n");
   printk("\033[1;31m         ===================       \n");
   printk("\033[1;31m        =========");
@@ -73,5 +69,5 @@ static void show_bootart(void)
   printk("\033[1;33m                /  \\               \n");
   printk("               |CatK|              \n");
   printk("                \\__/               \033[1;0m\n");
-  printk("\n\n\nCatK(mascot) was created by Rodmatronics\n");
+  printk("\nCatK(mascot) was created by Rodmatronics\n");
 }

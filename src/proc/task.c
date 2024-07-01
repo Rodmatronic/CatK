@@ -176,6 +176,7 @@ static struct task * create_kernel_task(char * name, uint32_t addr, int priority
 	STACK_PUSH(0x10);
 	STACK_PUSH(0x10);
 	p->esp = (uint32_t)stack;
+    printk("added task %s\n", name);
 	return p;
 }
 
@@ -277,5 +278,5 @@ void tasking_init(void)
 	catk_idle_task->prev = catk_idle_task;
 	current = catk_idle_task;
 	exec_task();
-  unreachable;
+    panic("Failed to EXEC task, kernel left in unreachable state");
 }

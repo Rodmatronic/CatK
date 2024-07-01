@@ -19,7 +19,8 @@ $(shell $(MKDIR) $(OBJ) $(OUT))
 all:
 	@$(MAKE) -C src || { echo "Build failed"; exit 1; }
 	@echo "Build successful"
-
+# 		-icount 4,align=on \
+#       For debugging
 run:
 	@qemu-system-x86_64 \
 		-bios /usr/share/qemu/OVMF.fd \
