@@ -1,6 +1,6 @@
 <h1 align=center><a href="https://catk.neocities.org">CatK</a></h1>
 
-<p align=center>a simple Unix-like system made in C, with a cute kitty (CatK) to go with it</p>
+<p align=center>A simple Unix-like system made in C, with a cute kitty (CatK) to go with it</p>
 
 ---
 

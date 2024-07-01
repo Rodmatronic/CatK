@@ -5,10 +5,6 @@
 #include <catk/dirent.h>
 #include <catk/types.h>
 
-#define MAJOR(dev)		(((dev_t)(dev)) >> 8)
-#define MINOR(dev)		(((dev_t)(dev)) & 0xff)
-#define MKDEV(major, minor)	(((major) << 8) | (minor))
-
 struct file;
 
 struct file_operations
@@ -40,11 +36,6 @@ struct filesystem
   * so if i were to set x in a union to 5, and y in the same union to 10, the value of x would be 10
   *
   */
-  union sb
-  {
-    struct ext2_sb_info * ext2_sb;
-    void * other_sb;
-  };
 };
 
 #endif

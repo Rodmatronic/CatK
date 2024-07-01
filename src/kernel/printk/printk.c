@@ -7,29 +7,14 @@
 
 SPINLOCK_INIT(printk_spinlock);
 
-static void die()
+int printk(const char format[], ...)
 {
-  critical_enter();
-  for(;;);
-}
-
-int printk(char * format, ...)
-{
+  int ret = 0;
   spinlock_acquire(&printk_spinlock);
   va_list arg;
   va_start(arg, format);
-  int ret = vprintf(format, arg);
+  ret = vprintf(format, arg);
   va_end(arg);
   spinlock_release(&printk_spinlock);
   return ret;
-}
-
-void panic(char * format, ...)
-{
-  va_list arg;
-  va_start(arg, format);
-  vprintf(strcat("CatK Panic: ", format), arg);
-  va_end(arg);
-  die();
-  unreachable;
 }

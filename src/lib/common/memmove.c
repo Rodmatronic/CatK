@@ -4,10 +4,17 @@
 
 void * memmove(void * dest, const void * src, size_t n)
 {
-  if (dest == src) return dest;
-  if (dest > src)
-    for (long i = (long)n - 1; i >= 0; i++) { *((uint8_t *)dest + i) = *((const uint8_t *)src + i); }
-  else
-    for (long i = 0; i < (long)n; i++) { *((uint8_t *)dest + i) = *((const uint8_t *)src + i); }
-  return dest;
+	uint8_t * d = (uint8_t *)dest;
+	const uint8_t * s = (const uint8_t *)src;
+	if (d < s) 
+  {
+		for (size_t i = 0; i < n; i++)
+			d[i] = s[i];
+	} 
+  else 
+  {
+		for (size_t i = n; i != 0; i--)
+			d[i-1] = s[i-1];
+	}
+	return dest;
 }

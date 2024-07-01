@@ -8,6 +8,7 @@
 #include <catk/task.h>
 #include <catk/debug.h>
 #include <catk/tty.h>
+#include <catk/pci.h>
 #include <lib/ctype.h>
 
 extern uintptr_t kernel_start;
@@ -21,12 +22,12 @@ void kmain(uint32_t magic, uintptr_t addr)
     return; /* return into the infinite halt state */
   cpu_init();
   heap_init(&kernel_end);
+  serial_init();
+  debug(" ..Kernel!\n");
+  device_init();
   int rc = console_init(addr);
   if(IS_ERR(rc))
     return;
-  show_bootart();
-  serial_init();
-  debug(" ..Kernel!\n");
   rc = tty_create(0, get_console()->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
@@ -39,21 +40,18 @@ extern int ata_device_probe(void);
 
 void bootstrap2(void)
 {
-  int rc;
-  rc = ata_device_probe();
-  if(IS_ERR(rc))
-  {
-    printk("ATA probe failed: %d\n", rc);
-  }
+  show_bootart();
+  pci_init();
+  printk("Nothing left to do. Going idle...\n");
   for(;;);
 }
 
 static void show_bootart(void)
 {
   /* CatK splash screen */
-  printk("\n\033[1;36m           __           __             \n");
+  printk("\n\033[1;37m           __           __             \n");
   printk("          /  \\         /  \\        \n");
-  printk("         / /\\ \\       / /\\ \\       \n");
+  printk("\033[36m         / /\\ \\       / /\\ \\       \n");
   printk("        / /  \\ \\     / /  \\ \\      \n");
   printk("       / /      \\___/      \\ \\         _______   _____   _______  ___   _\n");
   printk("      /                       \\       |   ____| /  _  \\ |       ||   | | |\n");
@@ -68,11 +66,11 @@ static void show_bootart(void)
   printk("      \\         \\/\\/          /       \033[1;36m|_______||__| |__|  |___|  |___| |_|\033[1;36m\n");
   printk("\033[1;36m       \\                     /        Written from scratch by the CatK team! :3\n");
   printk("        \\___________________/      \n");
-  printk("\033[31m         ===================       \n");
+  printk("\033[1;31m         ===================       \n");
   printk("\033[1;31m        =========");
-  printk("\033[33m\\/\033[31m");
+  printk("\033[1;33m\\/\033[1;31m");
   printk("==========      \n");
-  printk("\033[33m                /  \\               \n");
+  printk("\033[1;33m                /  \\               \n");
   printk("               |CatK|              \n");
   printk("                \\__/               \033[1;0m\n");
   printk("\n\n\nCatK(mascot) was created by Rodmatronics\n");

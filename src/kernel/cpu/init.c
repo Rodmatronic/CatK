@@ -71,9 +71,11 @@ static void idt_set_vector(int idx, uint32_t base, uint16_t segm_sel, uint8_t fl
   idt[idx].base_hi = (base >> 16) & 0xFFFF;
 }
 
+static void pic_remap_vectors(void);
+
 static void idt_setup(void)
 {
-  pic_init();
+  pic_remap_vectors();
   idt_set_vector(0, (uint32_t)interrupt_0, 0x08, 0x8e);
   idt_set_vector(1, (uint32_t)interrupt_1, 0x08, 0x8e);
   idt_set_vector(2, (uint32_t)interrupt_2, 0x08, 0x8e);
@@ -126,34 +128,132 @@ static void idt_setup(void)
   idt_flush((uint32_t)&idtr);
 }
 
-static void pic_init(void)
+#define PIC_MASTER_COMMAND_PORT 0x0020
+#define PIC_MASTER_DATA_PORT    0x0021
+#define PIC_SLAVE_COMMAND_PORT  0x00a0
+#define PIC_SLAVE_DATA_PORT     0x00a1
+
+#define PIC_EOI	0x20
+#define ICW1_ICW4	0x01
+#define ICW1_SINGLE	0x02
+#define ICW1_INTERVAL4	0x04
+#define ICW1_LEVEL 0x08
+#define ICW1_INIT	0x10
+ 
+#define ICW4_8086	0x01
+#define ICW4_AUTO	0x02
+#define ICW4_BUF_SLAVE 0x08
+#define ICW4_BUF_MASTER	0x0C
+#define ICW4_SFNM	0x10
+
+static void pic_master_send_cmd(uint8_t cmd)
 {
-  uint8_t a1, a2;
-  a1 = inb(PIC1_DATA);
-  a2 = inb(PIC2_DATA);
-
-  outb(PIC1_COMMAND, ICW1);
-  outb(PIC2_COMMAND, ICW1);
-
-  outb(PIC1_DATA, 0x20);
-  outb(PIC2_DATA, 0x28);
-
-  outb(PIC1_DATA, 4);
-
-  outb(PIC2_DATA, 2);
-
-  outb(PIC1_DATA, ICW4_8086);
-  outb(PIC2_DATA, ICW4_8086);
-
-  outb(PIC1_DATA, a1);
-  outb(PIC2_DATA, a2);
+  outb(PIC_MASTER_COMMAND_PORT, cmd);
 }
 
-void pic_eoi(uint8_t irq)
+static void pic_master_send_dat(uint8_t data)
 {
-  if(irq >= 0x28)
-    outb(PIC2, PIC_EOI);
-  outb(PIC1, PIC_EOI);
+  outb(PIC_MASTER_DATA_PORT, data);
+}
+
+static void pic_slave_send_cmd(uint8_t cmd)
+{
+  outb(PIC_SLAVE_COMMAND_PORT, cmd);
+}
+
+static void pic_slave_send_dat(uint8_t data)
+{
+  outb(PIC_SLAVE_DATA_PORT, data);
+}
+
+uint8_t read_pic_master_data(void)
+{
+  return inb(PIC_MASTER_DATA_PORT);
+}
+
+uint8_t read_pic_slave_data(void)
+{
+  return inb(PIC_SLAVE_DATA_PORT);
+}
+
+static void io_wait(void)
+{
+  outb(0x80, 0);
+}
+
+void pic_eoi(uint8_t intr)
+{
+	if(intr >= 0x28)
+		pic_slave_send_cmd(PIC_EOI);
+	pic_master_send_cmd(PIC_EOI);
+}
+
+void pic_mask(uint8_t intr)
+{
+  uint16_t port;
+  uint8_t value;
+ 
+  if(intr < 8)
+  {
+    port = PIC_MASTER_DATA_PORT;
+  } 
+  else 
+  {
+    port = PIC_SLAVE_DATA_PORT;
+    intr -= 8;
+  }
+  value = inb(port) | (1 << intr);
+  outb(port, value);        
+}
+ 
+void pic_unmask(uint8_t intr)
+{
+  uint16_t port;
+  uint8_t value;
+ 
+  if(intr < 8)
+  {
+    port = PIC_MASTER_DATA_PORT;
+  } 
+  else 
+  {
+    port = PIC_SLAVE_DATA_PORT;
+    intr -= 8;
+  }
+  value = inb(port) & ~(1 << intr);
+  outb(port, value);        
+}
+
+static void pic_remap_vectors(void)
+{
+	uint8_t a1, a2;
+ 
+	a1 = read_pic_slave_data();
+	a2 = read_pic_master_data();
+ 
+	pic_master_send_cmd(ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+	io_wait();
+	pic_slave_send_cmd(ICW1_INIT | ICW1_ICW4);
+	io_wait();
+	pic_master_send_dat(0x20);                 // ICW2: Master PIC vector offset
+	io_wait();
+	pic_slave_send_dat(0x28);                 // ICW2: Slave PIC vector offset
+	io_wait();
+	pic_master_send_dat(4);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+	io_wait();
+	pic_slave_send_dat(2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+	io_wait();
+ 
+	pic_master_send_dat(ICW4_8086);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
+	io_wait();
+	pic_slave_send_dat(ICW4_8086);
+	io_wait();
+ 
+	pic_master_send_dat(a1);   // restore saved masks.
+	pic_slave_send_dat(a2);
+  /* UEFI masks these interrupts. I don't know why. */
+  for(int i = 0; i < 42; i++)
+    pic_unmask(i);
 }
 
 void cpu_init(void)

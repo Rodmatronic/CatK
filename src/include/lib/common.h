@@ -34,11 +34,11 @@ void * memset(void * dest, char val, size_t count);
 void * memmove(void * dest, const void * src, size_t n);
 
 /* printf and their siblings */
-int vsnprintf(char * str, size_t len, const char * format, va_list arg);
-int vsprintf(char * str, char * format, va_list arg);
-int vprintf(char * format, va_list arg);
-int sprintf(char * str, char * fmt, ...);
-int snprintf(char * str, size_t len, char * fmt, ...);
+int vsnprintf(char * str, size_t len, const char format[], va_list arg);
+int vsprintf(char * str, const char format[], va_list arg);
+int vprintf(const char format[], va_list arg);
+int sprintf(char * str, const char fmt[], ...);
+int snprintf(char * str, size_t len, const char fmt[], ...);
 
 
 

@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <catk/mem.h>
 #include <catk/printk.h>
-#include <sys/types.h>
+#include <catk/types.h>
 #include <catk/spinlock.h>
 #include <lib/common.h>
 

@@ -7,6 +7,12 @@
 #include <lib/common.h>
 #include <stdint.h>
 
+void syscall_trace(struct pt_regs * regs)
+{
+  printk("%s(): eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n", 
+         __FUNCTION__, regs->orig_eax, regs->ebx, regs->ecx, regs->edx);
+}
+
 static uint32_t _system_call(struct pt_regs * regs)
 {
   uint32_t rc = -ENOSYS;
@@ -29,5 +35,6 @@ static uint32_t _system_call(struct pt_regs * regs)
 
 void system_call(struct pt_regs * regs)
 {
+  syscall_trace(regs);
   regs->eax = _system_call(regs);
 }

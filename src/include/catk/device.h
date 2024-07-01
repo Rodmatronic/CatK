@@ -4,6 +4,7 @@
 #include <catk/bitops.h>
 #include <catk/tty.h>
 #include <catk/types.h>
+#include <catk/fs.h>
 #include <lib/common.h>
 
 #define MAX_BLKDEV 32
@@ -32,7 +33,7 @@
 #define DISKDEV_MASTER    0
 #define DISKDEV_SLAVE     64
 /* tty minors */
-#define TTYDEV_VC         0
+#define TTYDEV_VC         0     // this means its a console device
 #define TTYDEV_SERIAL     64
 /* framebuffer minors are just the amount of framebuffers */
 
@@ -45,14 +46,17 @@ struct tty_struct;
 /* basic device structure */
 struct device
 {
-  const char * init_name;               /* initial name of device */
+  const char * name;                    /* initial name of device */
   uint8_t major;                        /* acts as a type */
   uint8_t minors;                       /* acts as a class / classes */
   bool removable;                       /* can it be removed? */
   struct device * parent;               /* parent of the device (if it has one) */
-  int (*tty_output_intr)(struct tty_struct *, size_t);
+  struct file_operations * fops;
+  void * priv_data;                     /* device's private data */
 };
 
+int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
+int register_blkdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
 void device_init(void);
 
 #endif

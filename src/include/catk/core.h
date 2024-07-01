@@ -52,7 +52,7 @@ struct intr_stack_frame
 };
 
 typedef void (*intr_handler)(struct intr_stack_frame *);
-void interrupt_install(intr_handler handler, int intr);
+void interrupt_install(intr_handler handler, uint8_t intr);
 
 extern void interrupt_0();
 extern void interrupt_1();

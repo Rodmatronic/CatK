@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-int snprintf(char * str, size_t len, char * fmt, ...)
+int snprintf(char * str, size_t len, const char fmt[], ...)
 {
   int rc;
   va_list arg;
@@ -13,7 +13,7 @@ int snprintf(char * str, size_t len, char * fmt, ...)
   return rc;
 }
 
-int sprintf(char * str, char * fmt, ...)
+int sprintf(char * str, const char fmt[], ...)
 {
   int rc;
   va_list arg;
@@ -23,7 +23,7 @@ int sprintf(char * str, char * fmt, ...)
   return rc;
 }
 
-int vprintf(char * format, va_list arg)
+int vprintf(const char format[], va_list arg)
 {
   char buf[256];
   int ret = vsprintf(buf, format, arg);
@@ -31,7 +31,7 @@ int vprintf(char * format, va_list arg)
   return ret;
 }
 
-int vsprintf(char * str, char * format, va_list arg)
+int vsprintf(char * str, const char format[], va_list arg)
 {
   return vsnprintf(str, __INT_MAX__, format, arg);
 }
@@ -50,7 +50,7 @@ int vsprintf(char * str, char * format, va_list arg)
     n++; \
   }
 
-int vsnprintf(char * str, size_t len, const char * format, va_list arg)
+int vsnprintf(char * str, size_t len, const char format[], va_list arg)
 {
   int flags = 0;
   int n = 0;

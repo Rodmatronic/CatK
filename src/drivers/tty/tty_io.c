@@ -58,7 +58,8 @@ size_t tty_read(struct tty_struct * tty, const uint8_t * buf, size_t count)
 
   ring_buffer_read(tty->read_q, (uint8_t *)str, count);
 
-  tty->dev->tty_output_intr(tty, i);
+  int (*tty_output_intr)(struct tty_struct *, size_t) = tty->dev->priv_data;
+  tty_output_intr(tty, i);
   free(str);
   return i;
 }
@@ -87,7 +88,8 @@ size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t count)
   for(i = 0; str[i]; i++)
     ring_buffer_write(tty->write_q, str[i]);
 
-  tty->dev->tty_output_intr(tty, i);
+  int (*tty_output_intr)(struct tty_struct *, size_t) = tty->dev->priv_data;
+  tty_output_intr(tty, i);
   free(str);
   return i;
 }

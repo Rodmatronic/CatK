@@ -5,7 +5,7 @@
 #include <catk/task.h>
 #include <lib/common.h>
 
-static char exceptions[32][32] = {
+static char * exceptions[32] = {
   "Divide Error",
   "Debug",
   "NMI Interrupt",
@@ -46,7 +46,7 @@ intr_handler int_handlers[256] = {NULL};
   intr_handler handler = int_handlers[frame->intr]; \
   handler(frame);
 
-void interrupt_install(void (*handler)(struct intr_stack_frame *), int intr)
+void interrupt_install(void (*handler)(struct intr_stack_frame *), uint8_t intr)
 {
   if(!handler)
     return;

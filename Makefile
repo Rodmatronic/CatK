@@ -20,6 +20,14 @@ all:
 	@$(MAKE) -C src || { echo "Build failed"; exit 1; }
 	@echo "Build successful"
 
+run:
+	@qemu-system-x86_64 \
+		-bios /usr/share/qemu/OVMF.fd \
+		-drive format=raw,media=disk,index=0,cache=none,file=out/catkernel.iso \
+		-cpu host \
+		-enable-kvm \
+		-d int
+
 clean:
 	@$(RM_FORCE) $(OBJ)
 	@$(RM_FORCE) $(OUT)

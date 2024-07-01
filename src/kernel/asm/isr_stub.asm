@@ -23,7 +23,7 @@ early_interrupt_handler:
   mov gs, bx
 
   popa
-  add esp, 0x8
+  add esp, 8
 
   sti
   iretd
@@ -96,6 +96,10 @@ extern system_call
 
 syscall_dispatcher:
   push eax
+  push word gs
+  push word fs
+  push word es
+  push word ds
   push dword 0
   push ebp
   push edi
@@ -113,5 +117,9 @@ syscall_dispatcher:
   pop edi
   pop ebp
   pop eax
+  pop word ds
+  pop word es
+  pop word fs
+  pop word gs
   add esp, 4
   iretd

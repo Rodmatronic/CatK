@@ -3,6 +3,7 @@
 #include <catk/tty.h>
 #include <catk/mem.h>
 #include <catk/errno.h>
+#include <catk/printk.h>
 #include <font/vga8x16.h>
 #include <multiboot2.h>
 #include <lib/common.h>
@@ -25,7 +26,7 @@ static const uint32_t colors[16] = {
   0x0000aa,
   0x7800aa,
   0x00aaaa,
-  0xaaaaaa,
+  0xffffff,
   /* high intensity colors */
   0x6e6e6e,
   0xff5050,
@@ -42,7 +43,9 @@ static uint32_t fbcon_bg = 0;
 
 static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state */
 static int ansi_list_idx = 0;
+
 static struct ansi_list ansi_value[8];
+static struct file_operations fbcon_fops;
 
 void fbcon_putc(char c);
 void fbcon_clear(void);
@@ -50,12 +53,11 @@ void fbcon_color_set(uint8_t fg, uint8_t bg);
 int fbcon_output_intr(struct tty_struct * tty, size_t len);
 
 static struct device fbcon_dev = {
-  .init_name        = "console",
-  .major            = 5,
-  .minors           = 1,
+  .major            = FBDEV_MAJOR,
+  .minors           = 0,  // in a devfs environment, this would be /dev/fb0
   .removable        = false,
   .parent           = NULL,
-  .tty_output_intr  = fbcon_output_intr
+  .priv_data        = fbcon_output_intr
 };
 
 /* startup, and return name */
@@ -72,7 +74,7 @@ static char * fbcon_startup(void)
   cb.con_putc = fbcon_putc;
   cb.con_clear = fbcon_clear;
   cb.con_color_set = fbcon_color_set;
-  return "vga";
+  return "console";
 }
 
 static uint32_t rgb_to_hex(uint8_t r, uint8_t g, uint8_t b)
@@ -324,8 +326,24 @@ void fbcon_clear(void)
 {
 }
 
+int fbcon_dev_write(struct file * file, void * buf, size_t sz)
+{
+  return -ENOSYS; // not implemented
+}
+
+int fbcon_dev_open(struct file * file, void * unused)
+{
+  return 0;
+}
+
+void fbcon_dev_close(struct file * file, void * unused)
+{
+  return;
+}
+
 int fbcon_init(struct console * con, uint32_t addr)
 {
+  int rc;
   struct multiboot_tag_framebuffer_common * grub_fb = (struct multiboot_tag_framebuffer_common *)multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
   if(!grub_fb)
     return -ENODEV;
@@ -337,5 +355,20 @@ int fbcon_init(struct console * con, uint32_t addr)
   con->write = fbcon_write;
   con->data = &c;
   con->dev = &fbcon_dev;
+  rc = register_chrdev(FBDEV_MAJOR, "fb", &fbcon_dev, &fbcon_fops);
+  if(IS_ERR(rc))
+  {
+    printk("Failed to register framebuffer: %d\n", rc);
+    return rc;
+  }
   return 0;
 }
+
+struct file_operations fops = {
+  NULL,               /* read */
+  fbcon_dev_write,    /* write */
+  NULL,               /* readdir */
+  NULL,               /* ioctl */
+  fbcon_dev_open,     /* open */
+  fbcon_dev_close,    /* close */
+};
