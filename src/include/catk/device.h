@@ -57,6 +57,7 @@ struct device
 
 int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
 int register_blkdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
+struct device * get_blkdev(uint8_t major);
 void device_init(void);
 
 #endif

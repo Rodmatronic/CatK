@@ -114,7 +114,6 @@ uint32_t pci_get_bar(uint8_t bus, uint8_t slot, uint8_t func, uint8_t bar)
 {
   uint8_t offset = 0x10 + (bar * 4);
   uint32_t rc = pci_read_dword(bus, slot, func, offset);
-  printk("BAR%d: 0x%x\n", bar, rc);
   return rc;
 }
 

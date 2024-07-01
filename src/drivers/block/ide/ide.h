@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <catk/pci.h>
+#include <catk/io.h>
 
 #define ATA_BUS1_PRIMARY_IO_PORT    0x1f0
 #define ATA_BUS1_SECOND_IO_PORT     0x170
@@ -20,17 +21,19 @@
 /*
 * Status Register Layout
 * Bits:
-* 0    1    2     3    4    5   6    7
+*   0    1    2     3    4   5   6     7
 * [ERR][IDX][CORR][DRQ][SRV][DF][RDY][BSY] <- not sure if the eigth bit is zero or not
 * 
 */
 
-#define ATA_STATUS_ERR  (1 << 0)
-#define ATA_STATUS_DRQ  (1 << 3)
-#define ATA_STATUS_SRV  (1 << 4)
-#define ATA_STATUS_DF   (1 << 5)
-#define ATA_STATUS_RDY  (1 << 6)
-#define ATA_STATUS_BUSY (1 << 7)
+#define ATA_STATUS_ERR  BIT(0)
+#define ATA_STATUS_DRQ  BIT(3)
+#define ATA_STATUS_SRV  BIT(4)
+#define ATA_STATUS_DF   BIT(5)
+#define ATA_STATUS_RDY  BIT(6)
+#define ATA_STATUS_BUSY BIT(7)
+
+#define ATA_WAIT_FOR_STATUS(status) while(inb(ata_channels[disk].base + 7) & status)
 
 // ATA commands
 
@@ -67,11 +70,11 @@
 #define ATA_IDENT_COMMANDSETS  164
 #define ATA_IDENT_MAX_LBA_EXT  200
 
-#define ATA_PRIM_LEGACY (1 << 0)
-#define ATA_SEC_LEGACY  (1 << 2)
+#define ATA_PRIM_LEGACY BIT(0)
+#define ATA_SEC_LEGACY  BIT(2)
 
 // Command set stuff
-#define ATA_48BIT_ADDR (1 << 26)
+#define ATA_48BIT_ADDR BIT(26)
 
 // Drive select
 
@@ -98,6 +101,6 @@ struct ide_drive
   uint8_t name[41];
 };
 
-int ata_finalize_init(struct ide_drive * drv, const struct pci_device * dev);
+int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_t bar1, const uint32_t bar2, const uint32_t bar3, const uint32_t bar4);
 
 #endif

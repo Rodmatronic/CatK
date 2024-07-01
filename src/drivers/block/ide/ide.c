@@ -45,11 +45,11 @@ static int ide_driver_attach(struct pci_device * dev)
   // Because of that, we can use the default bar values.
   if(dev->prog_if & ATA_PRIM_LEGACY)
     printk("Drive is in compatibility mode. Setting defaults...\n");
-  bar0 = (dev->prog_if & ATA_PRIM_LEGACY) ? pci_get_bar(dev->bus, dev->slot, dev->functions, 0) : ATA_BUS1_PRIMARY_IO_PORT;
-  bar1 = (dev->prog_if & ATA_PRIM_LEGACY) ? pci_get_bar(dev->bus, dev->slot, dev->functions, 1) : ATA_BUS1_PRIMARY_CTRL_REG;
-  bar2 = (dev->prog_if & ATA_PRIM_LEGACY) ? pci_get_bar(dev->bus, dev->slot, dev->functions, 2) : ATA_BUS1_SECOND_IO_PORT;
-  bar3 = (dev->prog_if & ATA_PRIM_LEGACY) ? pci_get_bar(dev->bus, dev->slot, dev->functions, 3) : ATA_BUS1_SECONDARY_CTRL_REG;
-  bar4 = pci_get_bar(dev->bus, dev->slot, dev->functions, 4);
+  bar0 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 0) & ~3) : ATA_BUS1_PRIMARY_IO_PORT;
+  bar1 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 1) & ~3) : ATA_BUS1_PRIMARY_CTRL_REG;
+  bar2 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 2) & ~3) : ATA_BUS1_SECOND_IO_PORT;
+  bar3 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 3) & ~3) : ATA_BUS1_SECONDARY_CTRL_REG;
+  bar4 = (pci_get_bar(dev->bus, dev->slot, dev->functions, 4) & ~3);
   pci_enable_busmaster(dev);
   pci_ide = dev;
   return 0;
@@ -82,11 +82,6 @@ static void ide_reset(uint32_t bar)
 static uint8_t ide_read_err(uint32_t bar)
 {
   return inb(bar + 1);
-}
-
-static void atapi_init()
-{
-  
 }
 
 static void ide_init()
@@ -160,7 +155,7 @@ loop:;
     drives[num_drives].name[k] = *(uint16_t *)(init_data + ATA_IDENT_MODEL + k + 1);
     drives[num_drives].name[k + 1] = *(uint16_t *)(init_data + ATA_IDENT_MODEL + k);
   }
-  rc = ata_finalize_init(&drives[num_drives], pci_ide);
+  rc = ata_finalize_init(&drives[num_drives], bar0, bar1, bar2, bar3, bar4);
   if(!IS_ERR(rc))
     printk("Successfully initialized drive: %s\n", drives[num_drives].name);
   num_drives++;

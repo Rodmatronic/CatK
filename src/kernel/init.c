@@ -8,6 +8,7 @@
 #include <catk/task.h>
 #include <catk/debug.h>
 #include <catk/tty.h>
+#include <catk/device.h>
 #include <catk/pci.h>
 #include <lib/ctype.h>
 
@@ -40,8 +41,17 @@ extern int ata_device_probe(void);
 
 void bootstrap2(void)
 {
+  int rc;
   show_bootart();
   pci_init();
+  /*
+  struct device * dev = get_blkdev(DISKDEV_MAJOR);
+  if(!dev)
+    panic("No drive to mount rootfs.\n");
+  rc = -1;
+  if(IS_ERR(rc))
+    panic("Could not mount rootfs on block (%d,%d)\n", dev->major, dev->minors);
+  */
   printk("Nothing left to do. Going idle...\n");
   for(;;);
 }
