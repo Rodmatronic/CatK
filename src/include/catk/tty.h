@@ -95,7 +95,7 @@
 
 #define NR_CONSOLES 8
 
-#define IS_VALID_TTY(tty) (tty->dev->device_type == DEVICE_TYPE_CHAR && tty->dev->device_class == DEVICE_CLASS_CONSOLE)
+#define IS_VALID_TTY(tty) (tty->dev->major == TTYDEV_MAJOR)
 
 struct tty_struct;
 

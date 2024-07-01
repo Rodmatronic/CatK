@@ -22,6 +22,8 @@ CC_FLAGS = \
 	-march=i686 \
 	-fno-exceptions \
 	-Werror=implicit-function-declaration \
+	-nostdlib \
+	-nostartfiles \
 	-O3 \
 
 ifeq ($(DEBUG), 1)

@@ -51,8 +51,8 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len);
 
 static struct device fbcon_dev = {
   .init_name        = "console",
-  .device_type      = DEVICE_TYPE_CHAR,
-  .device_class     = DEVICE_CLASS_CONSOLE,
+  .major            = 5,
+  .minors           = 1,
   .removable        = false,
   .parent           = NULL,
   .tty_output_intr  = fbcon_output_intr
