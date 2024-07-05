@@ -10,4 +10,14 @@ static inline bool isdigit(char c)
   return false;
 }
 
+static inline int index_of(char c, char * str)
+{
+	for(int i = 0; str[i]; i++)
+	{
+		if(str[i] == c)
+			return i;
+	}
+	return strlen(str);
+}
+
 #endif

@@ -138,7 +138,7 @@ int tty_create(int num, struct device * dev)
   tty->ops->write = tty_write;
   tty->dev = dev;
   ttys[num] = tty;
-  debug("[tty_io] created tty%d\n", num);
+  debug("[tty_io] tty%d created\n", num);
   return 0;
 
 ring_mem_err:

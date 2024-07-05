@@ -10,6 +10,7 @@
 #include <catk/tty.h>
 #include <catk/device.h>
 #include <catk/pci.h>
+#include <catk/vfs.h>
 #include <lib/ctype.h>
 
 extern uintptr_t kernel_start;
@@ -37,21 +38,28 @@ void kmain(uint32_t magic, uintptr_t addr)
   panic("Failed to init tasks, kernel left in unreachable state");
 }
 
-extern int ata_device_probe(void);
+extern int ata_find_first_partition(void);
 
 void bootstrap2(void)
 {
+  debug("[kernel] bootstrap2 begin\n");
   int rc;
   show_bootart();
   pci_init();
-  /*
+  /* mount rootfs */
   struct device * dev = get_blkdev(DISKDEV_MAJOR);
   if(!dev)
     panic("No drive to mount rootfs.\n");
-  rc = -1;
+  rc = filesystems_init(ata_find_first_partition()); // this will be set to a dummy value
   if(IS_ERR(rc))
-    panic("Could not mount rootfs on block (%d,%d)\n", dev->major, dev->minors);
-  */
+    panic("Could not initialize filesystems: %d\n", rc);
+  rc = vfs_mount("/", dev);
+  if(IS_ERR(rc))
+    panic("Could not mount rootfs on block (%d,%d): %d\n", dev->major, dev->minors, rc);
+  printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
+  /* test the filesystem */
+  if(IS_ERR(rc))
+    panic("file not found! nooooooo! %d\n", rc);
   printk("Nothing left to do. Going idle...\n");
   for(;;);
 }

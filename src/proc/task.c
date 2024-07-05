@@ -176,7 +176,7 @@ static struct task * create_kernel_task(char * name, uint32_t addr, int priority
 	STACK_PUSH(0x10);
 	STACK_PUSH(0x10);
 	p->esp = (uint32_t)stack;
-    printk("added task %s\n", name);
+  printk("Started task %s (PID %d)\n", name, p->pid);
 	return p;
 }
 

@@ -331,12 +331,12 @@ int fbcon_dev_write(struct file * file, void * buf, size_t sz)
   return -ENOSYS; // not implemented
 }
 
-int fbcon_dev_open(struct file * file, void * unused)
+int fbcon_dev_open(struct file * file)
 {
   return 0;
 }
 
-void fbcon_dev_close(struct file * file, void * unused)
+void fbcon_dev_close(struct file * file)
 {
   return;
 }
@@ -365,6 +365,7 @@ int fbcon_init(struct console * con, uint32_t addr)
 }
 
 struct file_operations fops = {
+  NULL,
   NULL,               /* read */
   fbcon_dev_write,    /* write */
   NULL,               /* readdir */

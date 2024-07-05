@@ -21,12 +21,14 @@ all:
 	@echo "Build successful"
 # 		-icount 4,align=on \
 #       For debugging
+
 run:
 	@qemu-system-x86_64 \
-		-bios /usr/share/qemu/OVMF.fd \
-		-drive format=raw,file=$(OUT)/catkernel.iso \
 		-cpu host \
-		-enable-kvm
+		-enable-kvm \
+		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
+		-cdrom $(OUT)/catkernel.iso \
+		-m 16G
 
 clean:
 	@$(RM_FORCE) $(OBJ)

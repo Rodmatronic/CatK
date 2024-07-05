@@ -35,22 +35,17 @@ int register_blkdev(uint8_t major, const char * name, struct device * dev, struc
 	if (blkdevs[major].fops)
 		return -EBUSY;
   memcpy((void *)&blkdevs[major], dev, sizeof(struct device));
-	blkdevs[major].name = name;
+  strcpy((char *)blkdevs[major].name, name);
 	blkdevs[major].fops = fops;
 	return 0;
 }
 
+/* this stupid function doesn't even get the correct device */
 struct device * get_blkdev(uint8_t major)
 {
-  printk("major: %d\n", major);
 	if (major >= MAX_BLKDEV)
 		return NULL;
-  for(int i = 0; MAX_BLKDEV; i++)
-  {
-    if(blkdevs[i].major == major)
-      return &blkdevs[i];
-  }
-  return NULL;
+  return &blkdevs[major];
 }
 
 void device_init(void)

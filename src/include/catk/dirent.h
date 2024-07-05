@@ -1,6 +1,9 @@
 #ifndef __DIRENT_H
 #define __DIRENT_H
 
+#include <catk/types.h>
+#include <stdint.h>
+
 /* directory entry */
 struct dirent
 {

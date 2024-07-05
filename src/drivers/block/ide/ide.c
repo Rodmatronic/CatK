@@ -116,17 +116,21 @@ loop:;
     }
     else
     {
+      uint8_t sig1 = inb(bar + 4);
+      uint8_t sig2 = inb(bar + 5);
       printk("This drive might be different...\n");
-      if(inb(bar + 4) == 0x14 && inb(bar + 5) == 0xeb)
+      if(sig1 == 0x14 && sig2 == 0xeb)
       {
         printk("Detected ATAPI drive.\n");
         return;
       }
       else
       {
-        if(inb(bar + 4) == 0x3c && inb(bar + 5) == 0xc3)
-        printk("Detected SATA drive.\n");
-        return;
+        if(sig1 == 0x3c && sig2 == 0xc3)
+        {
+          printk("Detected SATA drive.\n");
+          return;
+        }
       }
       return;
     }

@@ -12,9 +12,9 @@ int num_pci = 0;
 
 static struct pci_device devices[32];
 
+/* these are built in the kernel */
 static struct pci_driver * drivers[] =
 {
-  // these are built in the kernel
   &ide_driver,
   NULL
 };

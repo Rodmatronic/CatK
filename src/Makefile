@@ -65,6 +65,9 @@ ifneq ($(SKIP_MB_CHECK), 1)
 else
 	@printf "[ Multiboot2 check skipped ]\n"
 endif
+ifneq ($(DEBUG), 1)
+	@strip --strip-all $(TARGET)
+endif
 
 %.o: %.asm
 	@printf "[ $< ]\n"

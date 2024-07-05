@@ -4,38 +4,101 @@
 #include <catk/limits.h>
 #include <catk/dirent.h>
 #include <catk/types.h>
+#include <catk/device.h>
+#include <catk/fat32.h>
+#include <stdint.h>
+
+#define NR_FILESYSTEMS 4 /* we support only 4 for now. im not sure what those 4 will be.. */
+
+struct fs_mount
+{
+  char mount_path[DEVNAME_MAX];
+  struct device * blkdev;
+  int flags;
+};
+
+#define FS_REQUIRES_DISK    BIT(0)  /* needs to be mounted on a disk */
+#define FS_MOUNT_KERNEL     BIT(1)  /* mounted by the kernel */
+
+struct filesystem
+{
+  const char name[NAME_MAX + 1];
+  struct fs_operations * fsops;
+  struct superblock * sb;
+  struct fs_mount * mount;
+  void * priv_data;
+};
 
 struct file;
 
 struct file_operations
 {
+  int (*lseek)(struct file *, size_t, int);
 	int (*read) (struct file *, void *, size_t);
 	int (*write) (struct file *, void *, size_t);
 	int (*readdir) (struct file *, void *, struct dirent *, int);
 	int (*ioctl) (struct file *, void *, uint16_t, uint32_t);
-	int (*open) (struct file *, void *);
-	void (*close) (struct file *, void *);
+	int (*open) (struct file *);
+	void (*close) (struct file *);
+};
+
+struct inode;
+
+struct fs_operations
+{
+  /* inode operations */
+  int (*lookup)(struct file *, char *);
+	int (*read_inode)(uint32_t, struct inode *);
+	int (*write_inode)(struct file *);
+  /* superblock operations */
+  int (*read_block)(struct filesystem *, void *, uint32_t);
+  int (*mount)(struct filesystem *, struct device *);
+};
+
+struct superblock
+{
+	union /* only one of these values can be set at a time */
+  {
+    struct ext2_superblock * ext2_sb;
+		void * generic_sbp;
+	} u;
 };
 
 struct file
 {
+  char name[NAME_MAX + 1];
   mode_t mode;
+	uid_t uid;
+	gid_t gid;
   off_t pos;
-  uint16_t flags;
-  uint16_t count;
-  const char name[NAME_MAX + 1];
-  const char path[NAME_MAX + 1];
+  uint32_t flags;
+  size_t size;
+  uint32_t inode;
   struct file_operations * ops;
 };
 
-struct filesystem
+struct inode
 {
-  /* 
-  * unions make it so that only one value can be set to a item, not multiple items
-  *
-  * so if i were to set x in a union to 5, and y in the same union to 10, the value of x would be 10
-  *
-  */
+	mode_t mode;
+	uid_t uid;
+	gid_t gid;
+	uint32_t flags;
+	uint32_t inode;
+	uint64_t length;
+  union
+  {
+    struct ext2_inode * ext2_ino;
+    void * generic_ino;
+  } u;
+  struct fs_operations * fsops;
 };
+
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
+int register_filesystem(const char * name, struct fs_operations * fsops, int flags);
+struct filesystem * get_filesystem(const char * name);
+int filesystems_init(int first_partition_lba);
 
 #endif

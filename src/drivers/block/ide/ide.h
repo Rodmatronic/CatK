@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <catk/pci.h>
+#include <catk/printk.h>
 #include <catk/io.h>
 
 #define ATA_BUS1_PRIMARY_IO_PORT    0x1f0

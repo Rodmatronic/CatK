@@ -3,15 +3,14 @@
 #include <catk/printk.h>
 #include <catk/types.h>
 #include <catk/spinlock.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 
 SPINLOCK_INIT(jpalloc_spinlock);
 
-#pragma GCC diagnostic ignored "-Wmultichar" 
-
 // I still dont really got the kernel memory map fully figured out
 //
-// [        2MB        ][                 1MB                 ][                        Reserved for user-mode stuff                        ]
+// [        2MB        ][                 4MB                 ][                        Reserved for user-mode stuff                        ]
 //
 // ^                    ^
 // Kernel Image         Kernel Heap                
@@ -28,9 +27,10 @@ struct heap_block
   struct heap_metadata metadata;
 };
 
-#define KERNEL_HEAP_MAX         0x300000
-#define KERNEL_HEAP_MAGIC       'heap'
+#define KERNEL_HEAP_MAX         0x400000 /* 4mb of heap mem */
+#define KERNEL_HEAP_MAGIC       0xdeadc0de
 #define KERNEL_HEAP_ALIGNMENT   8
+#define KERNEL_HEAP_POISON      0xcafebabe
 
 #define IN_HEAP_RANGE(ptr) ((uintptr_t)&ptr >= heap_start && (uintptr_t)&ptr <= heap_end)
 
@@ -91,16 +91,21 @@ static void * heap_alloc(size_t size)
 {
   spinlock_acquire(&jpalloc_spinlock);
   if(!size)
+  {
+    spinlock_release(&jpalloc_spinlock);
     return NULL;
+  }
   struct heap_block * b = NULL;
   b = heap_get_free(size);
   if(!b)
   {
+    spinlock_release(&jpalloc_spinlock);
     return NULL;
   }
   size_t usage = prev_alloc + size + sizeof(struct heap_block);
   if(usage > heap_end)
   {
+    spinlock_release(&jpalloc_spinlock);
     return NULL;
   }
 
@@ -136,12 +141,14 @@ static void heap_free(void * ptr)
   if(!b->metadata.used)
     return;
 
-  if(!IN_HEAP_RANGE(ptr))
+  if(!IN_HEAP_RANGE(ptr)) /* veritfy that the heap block is in range */
     return;
 
   // update variables
+  spinlock_acquire(&jpalloc_spinlock);
   b->metadata.used = false;
   heap_used -= b->metadata.size + sizeof(struct heap_block);
+  spinlock_release(&jpalloc_spinlock);
 }
 
 static void heap_merge_blocks(void)
