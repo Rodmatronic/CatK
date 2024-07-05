@@ -97,8 +97,6 @@ static void ata_write_single_sector_pio(int disk, uint8_t * buf, int lba)
 
 static void ata_read_single_sector_pio(int disk, uint8_t * buf, int lba)
 {
-  /* the debug message is used to see if this is working correctly */
-  debug("[ata] reading lba %d\n", lba);
   ata_prepare_pio(disk, lba);
 	for(int i = 0; i < 256; i++)
 	{
@@ -152,7 +150,7 @@ int ata_dev_write(struct file * file, void * buf, size_t sz)
   return 0;
 }
 
-int ata_dev_open(struct file * file)
+int ata_dev_open(struct file * file, const char * unused)
 {
   return 0;
 }

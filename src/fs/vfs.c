@@ -9,15 +9,20 @@
 
 struct filesystem * fs = NULL;
 
-int vfs_open(struct file * file, char * path)
+int vfs_open(struct file * filp, const char * file)
 {
-  int rc;
+  return fs->fops->open(filp, file);
+}
+
+int vfs_read(struct file * filp, void * buf, size_t sz)
+{
+  return fs->fops->read(filp, buf, sz);
+}
+
+int vfs_init(void)
+{
   fs = get_filesystem("ext2");
   if(!fs)
     return -ENXIO;
-  rc = fs->fsops->lookup(file, path);
-  if(IS_ERR(rc))
-    return rc;
   return 0;
-  //return _file->ops->open(file);
 }

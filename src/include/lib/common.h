@@ -30,6 +30,7 @@ void substrr(int s, int e, char * src, char * dest);
 char * strtok(char * str, const char * delimiters);
 int strcspn(const char * str, const char * charset);
 size_t strsplit(char * str, const char delim);
+char * strstr(const char * s1, const char * s2);
 
 /* conversion stuff */
 char * itoa(int value, char * str, int radix);

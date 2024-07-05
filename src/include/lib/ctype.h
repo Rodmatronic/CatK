@@ -10,12 +10,19 @@ static inline bool isdigit(char c)
   return false;
 }
 
+static inline bool isspace(char c)
+{
+  return (c == ' ');
+}
+
 static inline int index_of(char c, char * str)
 {
-	for(int i = 0; str[i]; i++)
+	int i = 0;
+	while(str[i] != '\0')
 	{
 		if(str[i] == c)
 			return i;
+		i++;
 	}
 	return strlen(str);
 }

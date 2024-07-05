@@ -331,7 +331,7 @@ int fbcon_dev_write(struct file * file, void * buf, size_t sz)
   return -ENOSYS; // not implemented
 }
 
-int fbcon_dev_open(struct file * file)
+int fbcon_dev_open(struct file * file, const char * unused)
 {
   return 0;
 }

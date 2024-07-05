@@ -61,12 +61,12 @@ int fat32_mount(struct filesystem * fs, struct device * blkdev)
 
 int fat32_init(int partition_lba)
 {
-  fat32_lba_start = partition_lba;
-  return register_filesystem("FAT32", &fat32_ops, FS_REQUIRES_DISK);
+  //fat32_lba_start = partition_lba;
+  //return register_filesystem("FAT32", &fat32_ops, FS_REQUIRES_DISK);
 }
 
 struct fs_operations fat32_ops = {
-  NULL,
+  //NULL,
   NULL,
   NULL,
   NULL,

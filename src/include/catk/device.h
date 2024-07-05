@@ -17,6 +17,7 @@
 #define NULL_MINOR        0
 
 #define MEMDEV_MAJOR      1     // char 
+#define RAMDISK_MAJOR     1     // block
 #define DISKDEV_MAJOR     3     // block
 #define TTYDEV_MAJOR      4     // char
 #define FBDEV_MAJOR       29    // char
@@ -36,6 +37,8 @@
 #define TTYDEV_VC         0     // this means its a console device
 #define TTYDEV_SERIAL     64
 /* framebuffer minors are just the amount of framebuffers */
+/* initial ramdisk minors are mostly just the numbers of ramdisks */
+#define INITRD_MINOR      250
 
 #define SET_MINOR(minors, bit)   ((minors[(bit) / 32]) |= (1 << ((bit) % 32)))
 #define CLEAR_MINOR(minors, bit) ((minors[(bit) / 32]) &= ~(1 << ((bit) % 32)))

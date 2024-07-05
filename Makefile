@@ -17,18 +17,23 @@ export OBJ = $(CATK_ROOT)/obj
 $(shell $(MKDIR) $(OBJ) $(OUT))
 
 all:
-	@$(MAKE) -C src || { echo "Build failed"; exit 1; }
+	@$(MAKE) -C src 	|| { echo "Build failed"; exit 1; }
 	@echo "Build successful"
 # 		-icount 4,align=on \
 #       For debugging
 
+user:
+	@$(MAKE) -C user 	|| { echo "Build failed"; exit 1; }
+	@echo "Build successful"
+
 run:
 	@qemu-system-x86_64 \
+		-bios /usr/share/edk2/x64/OVMF.fd \
 		-cpu host \
 		-enable-kvm \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
-		-m 16G
+		-m 2G
 
 clean:
 	@$(RM_FORCE) $(OBJ)

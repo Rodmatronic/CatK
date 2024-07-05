@@ -10,7 +10,7 @@
 struct filesystem filesystems[NR_FILESYSTEMS];
 int num_fs = 0;
 
-int register_filesystem(const char * name, struct fs_operations * fsops, int flags)
+int register_filesystem(const char * name, struct fs_operations * fsops, struct file_operations * fops, int flags)
 {
   if(!fsops)
     return -EINVAL;
@@ -19,8 +19,9 @@ int register_filesystem(const char * name, struct fs_operations * fsops, int fla
   if(flags & FS_REQUIRES_DISK && flags & FS_MOUNT_KERNEL)
 
   strncpy((char *)filesystems[num_fs].name, name, NAME_MAX); /* memory safety :) */
-  filesystems[num_fs].fsops = fsops;
-  filesystems[num_fs].mount->flags = flags;
+  filesystems[num_fs].fsops         = fsops;
+  filesystems[num_fs].fops          = fops;
+  filesystems[num_fs].mount->flags  = flags;
   /* pro programmer here B^) */
   printk("VFS: Registered filesystem \"%s\"\n", name);
   num_fs++;

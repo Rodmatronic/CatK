@@ -90,7 +90,7 @@ struct ext2_inode
 	uint32_t t_pointer;
 	uint32_t generation_number;
 	uint32_t file_acl;
-  uint32_t size_upper;
+  uint32_t size_high;
 	uint32_t block_address;
 	uint32_t os_specific_2[3];
 }_packed_;

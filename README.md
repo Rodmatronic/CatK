@@ -23,6 +23,11 @@ CatK is also the cat that represents this project.
 
 We love CatK.
 
+### Before you use an Ext2 disk with CatK..
+Before you use an Ext2 disk with CatK, please make sure the inode size
+is 128 bytes. Anything greater than that will break the Ext2 driver.
+A utility for creating Ext2 disk images is in the **/tools/** folder in the CatK source tree.
+
 ## Compiling it
 You'll need:
 - a unix-like system/environment (preferably Linux)

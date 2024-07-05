@@ -1,7 +1,3 @@
-/* BACKUP FOR LATER USES */
-/* Main problem with code: Allocated stuff accesses heap metadata structure */
-
-
 #include <catk/fs.h>
 #include <catk/printk.h>
 #include <catk/errno.h>
@@ -12,7 +8,8 @@
 #include <lib/common.h>
 #include <lib/ctype.h>
 
-struct fs_operations e2fs_ops;
+struct fs_operations ext2_fs_ops;
+struct file_operations ext2_file_ops;
 static struct ext2_superblock * sb = NULL;
 static struct filesystem * e2fs = NULL;
 static struct ext2_priv_data priv_data;
@@ -27,6 +24,16 @@ static inline uint8_t * ext2_block_allocate(void)
 static inline void ext2_block_release(uint8_t * block)
 {
   free((void *)block);
+}
+
+static inline struct ext2_inode * ext2_inode_allocate(void)
+{
+  return (struct ext2_inode *)malloc(sb->inode_size);
+}
+
+static inline void ext2_inode_free(struct ext2_inode * inode)
+{
+  free(inode);
 }
 
 static inline uint32_t ext2_get_block_group(uint32_t inode)
@@ -78,11 +85,8 @@ static int ext2_read_inode(struct ext2_inode * buf, uint32_t inode)
   return 0;
 }
 
-// i think its about time we test this out..
-
-void ext2_list_dir(struct ext2_directory * dir)
+static void ext2_list_dir(struct ext2_directory * dir)
 {
-  debug("[EXT2] Directory name length: %d\n", dir->name_length);
 	uint32_t add = 0;
 	while(dir->inode != 0 && add < priv_data.block_size)
   {
@@ -102,12 +106,12 @@ void ext2_list_dir(struct ext2_directory * dir)
 
 int ext2_read_dir(uint32_t inode)
 {
-  debug("[EXT2] Reading directory...\n");
+  debug("[ext2] Reading directory...\n");
   struct ext2_inode * _inode_buf = (struct ext2_inode *)malloc(priv_data.inode_size);
   ext2_read_inode(_inode_buf, inode);
   if ((_inode_buf->type & 0xf000) != EXT2_S_IFDIR)
   {
-    debug("[EXT2] Inode is not a directory!\n");
+    debug("[ext2] inode is not a directory!\n");
     free(_inode_buf);
     return -ENOTDIR;
   }
@@ -127,8 +131,186 @@ int ext2_read_dir(uint32_t inode)
   return 1;
 }
 
-int ext2_lookup(struct file * filp, char * file)
+static uint32_t ext2_parse_directory(struct ext2_directory * dir, char * path)
 {
+  uint32_t add = 0;
+  while(dir->inode != 0 && add < priv_data.block_size)
+  {
+		char * name = (char *)malloc(dir->name_length + 1);
+		name[dir->name_length] = 0;
+		memcpy(name, &dir->type + 1, dir->name_length);
+    if (strcmp(name, path) == 0)
+    {
+      return dir->inode;
+      break;
+    }
+	  add += dir->size;
+		dir = (struct ext2_directory *)((uint32_t)dir + dir->size);
+    free(name);
+	}
+  return 0;
+}
+
+uint32_t ext2_find_file(char * fn, uint32_t dir_inode, struct ext2_inode * inode)
+{
+	if(fn[0] == '/')
+  {
+		fn++;
+		dir_inode = 2;
+	}
+	uint32_t name_len = strlen(fn);
+	if(name_len == 0) return dir_inode;
+	uint8_t * buf = ext2_block_allocate();
+	char * cfn = (char *)malloc(name_len + 1);
+	while(*fn != 0)
+  {
+		uint32_t strindex = index_of('/', fn);
+		substrr(0, strindex, fn, cfn);
+		fn += strindex+(strindex == strlen(fn) ? 0 : 1);
+		ext2_read_inode(inode, dir_inode);
+		bool found = 0;
+		for(int i = 0; i < 12 && !found; i++)
+    {
+			uint32_t block = inode->block_pointers[i];
+			if (block == 0 || block > sb->total_blocks) break;
+			ext2_read_block(block, buf);
+			struct ext2_directory * dir = (struct ext2_directory *)buf;
+			uint32_t add = 0;
+			while(dir->inode != 0 && add < priv_data.block_size && !found)
+      {
+				char name[dir->name_length + 1];
+        memset(name, '\0', dir->name_length + 1);
+				name[dir->name_length] = '\0';
+				memcpy(name, &dir->type + 1, dir->name_length);
+				if(strcmp(name, cfn) == 0)
+        {
+					dir_inode = dir->inode;
+					ext2_read_inode(inode, dir_inode);
+					found = 1;
+				}
+        debug("name: %s\n", name);
+        debug("name: %s\n", cfn);
+				free(name);
+				add += dir->size;
+				dir = (struct ext2_directory *)((uint32_t)dir + dir->size);
+			}
+		}
+		if(!found)
+    {
+			dir_inode = 0;
+			fn += strlen(fn);
+		}
+	}
+	free(cfn);
+	ext2_block_release(buf);
+	return dir_inode;
+}
+/* convert ext2 inode to vfs file */
+static void ext2_inode2file(struct file * file, struct ext2_inode * inode, uint32_t inode_num)
+{
+  file->inode->uid                        = inode->user_id;
+  file->inode->gid                        = inode->group_id;
+  file->inode->flags                      = inode->flags;
+  file->inode->length                     = priv_data.filesize_qword ? (inode->size_lower << 8) | (inode->size_high) : inode->size_lower;
+  file->inode->inode                      = inode_num;
+  file->inode->u.ext2_ino                 = inode;
+  file->ops                               = &ext2_file_ops;
+  file->inode->fsops                      = &ext2_fs_ops;
+}
+
+int ext2_open(struct file * filp, const char * file)
+{
+  struct ext2_inode * inode = ext2_inode_allocate();
+  if(!inode)
+    return -ENOMEM;
+  uint32_t inode_num = ext2_find_file((char *)file, 2, inode);
+  debug("inode number: %d\n", inode_num);
+  if(!inode_num)
+  {
+    free(inode);
+    return -ENOENT;
+  }
+  ext2_inode2file(filp, inode, inode_num);
+  free(inode);
+  return 0;
+}
+
+static void ext2_read_slink(uint32_t block, uint8_t * buf)
+{
+	uint8_t * bbuf = ext2_block_allocate();
+	ext2_read_block(block, bbuf);
+	uint32_t * blocks = (uint32_t *)bbuf;
+	uint32_t numblocks = priv_data.block_size / sizeof(uint32_t);
+	for(int i = 0; i < numblocks; i++)
+  {
+		if(!blocks[i])
+      break;
+		ext2_read_block(blocks[i], buf + i * priv_data.block_size);
+	}
+	ext2_block_release(bbuf);
+}
+
+static void ext2_read_dlink(uint32_t block, uint8_t * buf)
+{
+	uint8_t * bbuf = ext2_block_allocate();
+	ext2_read_block(block, bbuf);
+	uint32_t * blocks = (uint32_t *)bbuf;
+	uint32_t numblocks = priv_data.block_size / sizeof(uint32_t);
+	uint32_t singsize = numblocks * priv_data.block_size;
+	for(int i = 0; i < numblocks; i++)
+  {
+		if(!blocks[i]) 
+      break;
+		ext2_read_block(blocks[i], buf + i * singsize);
+	}
+	ext2_block_release(bbuf);
+}
+
+static int ext2_read_file(struct file * filp, uint8_t * buf) 
+{
+    if (!filp || !filp->inode->inode) 
+      return -EINVAL;
+    
+    struct ext2_inode * inode = (struct ext2_inode *)malloc(priv_data.block_size);
+    ext2_read_inode(inode, filp->inode->inode);
+
+    // Calculate the total number of blocks required to read
+    uint32_t total_blocks = (inode->size_lower + priv_data.block_size - 1) / priv_data.block_size;
+    uint32_t blocks_read = 0;
+
+    for(int i = 0; i < 12 && blocks_read < total_blocks; i++)
+    {
+        uint32_t block = inode->block_pointers[i];
+        if (block == 0 || block > sb->total_blocks) 
+          break;
+        
+        ext2_read_block(block, buf + blocks_read * priv_data.block_size);
+        blocks_read++;
+    }
+
+    if(inode->s_pointer && blocks_read < total_blocks)
+    {
+        debug("[ext2] reading s-link\n");
+        ext2_read_slink(inode->s_pointer, buf + blocks_read * priv_data.block_size);
+        blocks_read += priv_data.block_size / sizeof(uint32_t);
+    }
+    if(inode->d_pointer && blocks_read < total_blocks)
+    {
+        debug("[ext2] reading d-link\n");
+        ext2_read_dlink(inode->d_pointer, buf + blocks_read * priv_data.block_size);
+        blocks_read += (priv_data.block_size / sizeof(uint32_t)) * (priv_data.block_size / sizeof(uint32_t));
+    }
+    if(inode->t_pointer && blocks_read < total_blocks)
+    {
+      debug("[ext2] t-links are unsupported\n");
+    }
+    free(inode);
+    return 0;
+}
+
+int ext2_read(struct file * filp, void * buf, size_t unused)
+{
+  ext2_read_file(filp, (uint8_t *)buf);
   return 0;
 }
 
@@ -184,12 +366,6 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
   fs->priv_data = (void *)&priv_data;
   fs->mount->blkdev = blkdev;
   e2fs = fs;
-  
-  // Read root inode
-  struct ext2_inode * inode = (struct ext2_inode *)malloc(priv_data.inode_size);
-  rc = ext2_read_inode(inode, EXT2_ROOT_INODE);
-  if(IS_ERR(rc))
-    return rc;
   ext2_read_dir(2);
   return 0;
 }
@@ -197,11 +373,20 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
 int ext2_init(int fp_lba)
 {
   ext2_start_lba = fp_lba;
-  return register_filesystem("ext2", &e2fs_ops, FS_REQUIRES_DISK);
+  return register_filesystem("ext2", &ext2_fs_ops, &ext2_file_ops, FS_REQUIRES_DISK);
 }
 
-struct fs_operations e2fs_ops = {
+struct file_operations ext2_file_ops = {
   NULL,
+  ext2_read,
+  NULL,
+  NULL,
+  NULL,
+  ext2_open,
+  NULL
+};
+
+struct fs_operations ext2_fs_ops = {
   NULL,
   NULL,
   NULL,

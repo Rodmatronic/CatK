@@ -9,12 +9,17 @@
 #include <catk/debug.h>
 #include <catk/tty.h>
 #include <catk/device.h>
+#include <catk/kernel.h>
 #include <catk/pci.h>
 #include <catk/vfs.h>
+#include <catk/initrd.h>
+#include <catk/params.h>
 #include <lib/ctype.h>
 
 extern uintptr_t kernel_start;
 extern uintptr_t kernel_end;
+
+static char * cmdline;
 
 static void show_bootart(void);
 
@@ -30,38 +35,46 @@ void kmain(uint32_t magic, uintptr_t addr)
   int rc = console_init(addr);
   if(IS_ERR(rc))
     return;
+  cmdline = obtain_cmdline(addr);
+  printk("CatK cmdline: %s\n", cmdline);
   rc = tty_create(0, get_console()->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
+  printk("init path: %s\n", get_cmdline_param_val(cmdline, "init"));
   tasking_init();
   /* it is impossible for tasking_init to return */
   panic("Failed to init tasks, kernel left in unreachable state");
 }
 
 extern int ata_find_first_partition(void);
+extern int initrd_find_first_partition(void);
 
 void bootstrap2(void)
 {
-  debug("[kernel] bootstrap2 begin\n");
+  debug("[kernel] %s start\n", __FUNCTION__);
   int rc;
   show_bootart();
   pci_init();
   /* mount rootfs */
-  struct device * dev = get_blkdev(DISKDEV_MAJOR);
+  struct device * dev;
+  dev = get_blkdev(DISKDEV_MAJOR);
   if(!dev)
     panic("No drive to mount rootfs.\n");
-  rc = filesystems_init(ata_find_first_partition()); // this will be set to a dummy value
+  int first_partition_lba = ata_find_first_partition();
+  rc = filesystems_init(first_partition_lba); // this will be set to a dummy value
   if(IS_ERR(rc))
     panic("Could not initialize filesystems: %d\n", rc);
+  vfs_init();
   rc = vfs_mount("/", dev);
   if(IS_ERR(rc))
     panic("Could not mount rootfs on block (%d,%d): %d\n", dev->major, dev->minors, rc);
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
-  /* test the filesystem */
+  /* start init process */
+  rc = start_init();
   if(IS_ERR(rc))
-    panic("file not found! nooooooo! %d\n", rc);
+    panic("Failed when starting init process: %d\n", rc);
   printk("Nothing left to do. Going idle...\n");
-  for(;;);
+  /* fall back to catk_idle (defined in proc/task.c:19)  */
 }
 
 static void show_bootart(void)

@@ -24,6 +24,7 @@ struct filesystem
 {
   const char name[NAME_MAX + 1];
   struct fs_operations * fsops;
+  struct file_operations * fops;
   struct superblock * sb;
   struct fs_mount * mount;
   void * priv_data;
@@ -38,7 +39,7 @@ struct file_operations
 	int (*write) (struct file *, void *, size_t);
 	int (*readdir) (struct file *, void *, struct dirent *, int);
 	int (*ioctl) (struct file *, void *, uint16_t, uint32_t);
-	int (*open) (struct file *);
+	int (*open) (struct file *, const char *);
 	void (*close) (struct file *);
 };
 
@@ -47,7 +48,7 @@ struct inode;
 struct fs_operations
 {
   /* inode operations */
-  int (*lookup)(struct file *, char *);
+  //int (*lookup)(const char *);
 	int (*read_inode)(uint32_t, struct inode *);
 	int (*write_inode)(struct file *);
   /* superblock operations */
@@ -67,13 +68,7 @@ struct superblock
 struct file
 {
   char name[NAME_MAX + 1];
-  mode_t mode;
-	uid_t uid;
-	gid_t gid;
-  off_t pos;
-  uint32_t flags;
-  size_t size;
-  uint32_t inode;
+  struct inode * inode;
   struct file_operations * ops;
 };
 
@@ -85,7 +80,7 @@ struct inode
 	uint32_t flags;
 	uint32_t inode;
 	uint64_t length;
-  union
+  union /* filesystem defined inode structure */
   {
     struct ext2_inode * ext2_ino;
     void * generic_ino;
@@ -97,7 +92,7 @@ struct inode
 #define SEEK_CUR 1
 #define SEEK_END 2
 
-int register_filesystem(const char * name, struct fs_operations * fsops, int flags);
+int register_filesystem(const char * name, struct fs_operations * fsops, struct file_operations * fops, int flags);
 struct filesystem * get_filesystem(const char * name);
 int filesystems_init(int first_partition_lba);
 
