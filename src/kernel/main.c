@@ -12,7 +12,7 @@
 #include <catk/kernel.h>
 #include <catk/pci.h>
 #include <catk/vfs.h>
-#include <catk/initrd.h>
+#include <catk/ramdisk.h>
 #include <catk/params.h>
 #include <lib/ctype.h>
 
@@ -21,6 +21,7 @@ extern uintptr_t kernel_end;
 
 static char * cmdline;
 
+static bool use_hd = false; /* determines if we use a hard-disk or not */
 static void show_bootart(void);
 
 void kmain(uint32_t magic, uintptr_t addr)
@@ -41,33 +42,44 @@ void kmain(uint32_t magic, uintptr_t addr)
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
   printk("init path: %s\n", get_cmdline_param_val(cmdline, "init"));
+  rc = ramdisk_probe(addr);
+  if (IS_ERR(rc))
+  {
+    printk("No ramdisk loaded, defaulting to hard-disk...\n");
+    use_hd = true;
+  }
   tasking_init();
   /* it is impossible for tasking_init to return */
   panic("Failed to init tasks, kernel left in unreachable state");
 }
 
 extern int ata_find_first_partition(void);
-extern int initrd_find_first_partition(void);
+extern int ramdisk_find_first_partition(void);
 
 void bootstrap2(void)
 {
   debug("[kernel] %s start\n", __FUNCTION__);
-  int rc;
+  int rc, attempts;
   show_bootart();
   pci_init();
   /* mount rootfs */
   struct device * dev;
-  dev = get_blkdev(DISKDEV_MAJOR);
+  if(use_hd)
+    dev = get_blkdev(DISKDEV_MAJOR);
+  else
+    dev = get_blkdev(RAMDISK_MAJOR);
   if(!dev)
     panic("No drive to mount rootfs.\n");
-  int first_partition_lba = ata_find_first_partition();
+  int first_partition_lba = use_hd ? ata_find_first_partition() : ramdisk_find_first_partition();
   rc = filesystems_init(first_partition_lba); // this will be set to a dummy value
   if(IS_ERR(rc))
     panic("Could not initialize filesystems: %d\n", rc);
   vfs_init();
   rc = vfs_mount("/", dev);
   if(IS_ERR(rc))
+  {
     panic("Could not mount rootfs on block (%d,%d): %d\n", dev->major, dev->minors, rc);
+  }
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
   /* start init process */
   rc = start_init();

@@ -9,8 +9,8 @@
 
 void syscall_trace(struct pt_regs * regs)
 {
-  printk("%s(): eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n", 
-         __FUNCTION__, regs->orig_eax, regs->ebx, regs->ecx, regs->edx);
+  printk("syscall_trace: orig_eax: 0x%08x, eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n", 
+      regs->orig_eax, regs->eax, regs->ebx, regs->ecx, regs->edx);
 }
 
 static uint32_t _system_call(struct pt_regs * regs)
@@ -20,8 +20,19 @@ static uint32_t _system_call(struct pt_regs * regs)
   {
     case 0x00:
     {
+      rc = 0;
+      break;
+    }
+    case 0x01:
+    {
       /* a task shouldn't return from this, so it wont make sense to give a return code */
       sys_exit((int)regs->ebx);
+      rc = 0;
+      break;
+    }
+    case 0x02:
+    {
+      sys_read((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
       break;
     }
     default:

@@ -2,6 +2,8 @@
 #define __TASK_H
 
 #include <catk/types.h>
+#include <catk/fs.h>
+#include <catk/limits.h>
 #include <lib/common.h>
 #include <stdint.h>
 
@@ -37,6 +39,7 @@ struct task
 	uint32_t stack_top; /* used only when freeing a task */
   uint32_t esp;
   char * cwd;
+  struct file * fd[OPEN_MAX];
 	struct task * next;
   struct task * prev;
 };
@@ -46,7 +49,7 @@ struct task
 void print_tasks(void);
 void schedule(void);
 int is_pid_running(pid_t pid);
-void kill(pid_t pid);
+void kill(struct task * p);
 struct task * get_current_task(void);
 bool tasking_enabled(void);
 int spawn_kernel_task(char * name, uint32_t addr, int priority);

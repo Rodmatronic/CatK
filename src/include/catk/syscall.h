@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <catk/compiler.h>
+#include <catk/types.h>
 
 /* 
 * borrowed from linux source code 
@@ -10,17 +11,10 @@
 */
 struct pt_regs
 {
-  uint32_t ebx;
-  uint32_t ecx;
   uint32_t edx;
-  uint32_t esi;
-  uint32_t edi;
-  uint32_t ebp;
+  uint32_t ecx;
+  uint32_t ebx;
   uint32_t eax;
-  uint16_t ds;
-  uint16_t es;
-  uint16_t fs;
-  uint16_t gs;
   uint32_t orig_eax;
   uint32_t eip;
   uint32_t cs;
@@ -30,5 +24,6 @@ struct pt_regs
 }_packed_;
 
 void sys_exit(int err_code);
+int sys_read(int fd, char * buf, size_t sz);
 
 #endif

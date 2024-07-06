@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-int initrd_probe(uint32_t addr);
+int ramdisk_probe(uint32_t addr);
 
 #endif

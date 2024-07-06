@@ -65,9 +65,9 @@ uint8_t * ext2_read_block(uint32_t block, uint8_t * buf)
 
 static int ext2_read_inode(struct ext2_inode * buf, uint32_t inode)
 {
-  debug("[ext2] reading inode %d\n", inode);
+  //debug("[ext2] reading inode %d\n", inode);
   uint32_t block_group = ext2_get_block_group(inode);
-  debug("[ext2] block group of inode %d is %d\n", inode, block_group);
+  //debug("[ext2] block group of inode %d is %d\n", inode, block_group);
   
   uint8_t * block = ext2_block_allocate();
   if(!block)
@@ -78,7 +78,7 @@ static int ext2_read_inode(struct ext2_inode * buf, uint32_t inode)
   struct ext2_inode * _inode = (struct ext2_inode *)ext2_read_block(inode_block, block);
   
   uint32_t index = ext2_get_inode_index(inode) % (priv_data.block_size / priv_data.inode_size);
-  debug("[ext2] index of inode %d is %d\n", inode, index);
+  //debug("[ext2] index of inode %d is %d\n", inode, index);
   /* copy data to inode */
   memcpy(buf, (void *)&_inode[index], sizeof(struct ext2_inode));
   ext2_block_release(block);
@@ -106,7 +106,6 @@ static void ext2_list_dir(struct ext2_directory * dir)
 
 int ext2_read_dir(uint32_t inode)
 {
-  debug("[ext2] Reading directory...\n");
   struct ext2_inode * _inode_buf = (struct ext2_inode *)malloc(priv_data.inode_size);
   ext2_read_inode(_inode_buf, inode);
   if ((_inode_buf->type & 0xf000) != EXT2_S_IFDIR)
@@ -188,8 +187,6 @@ uint32_t ext2_find_file(char * fn, uint32_t dir_inode, struct ext2_inode * inode
 					ext2_read_inode(inode, dir_inode);
 					found = 1;
 				}
-        debug("name: %s\n", name);
-        debug("name: %s\n", cfn);
 				free(name);
 				add += dir->size;
 				dir = (struct ext2_directory *)((uint32_t)dir + dir->size);
@@ -224,13 +221,13 @@ int ext2_open(struct file * filp, const char * file)
   if(!inode)
     return -ENOMEM;
   uint32_t inode_num = ext2_find_file((char *)file, 2, inode);
-  debug("inode number: %d\n", inode_num);
   if(!inode_num)
   {
     free(inode);
     return -ENOENT;
   }
   ext2_inode2file(filp, inode, inode_num);
+  strncpy(filp->name, file, NAME_MAX);
   free(inode);
   return 0;
 }

@@ -63,6 +63,7 @@ int fat32_init(int partition_lba)
 {
   //fat32_lba_start = partition_lba;
   //return register_filesystem("FAT32", &fat32_ops, FS_REQUIRES_DISK);
+  return 0;
 }
 
 struct fs_operations fat32_ops = {

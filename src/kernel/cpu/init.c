@@ -1,5 +1,6 @@
 #include <catk/core.h>
 #include <catk/io.h>
+#include <catk/virt.h>
 #include <lib/common.h>
 #include <stdint.h>
 
@@ -261,4 +262,5 @@ void cpu_init(void)
   segm_descriptors_init();
   idt_setup();
   timer_init();
+  paging_init();
 }

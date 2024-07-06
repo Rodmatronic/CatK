@@ -121,6 +121,7 @@ void pic_eoi(uint8_t irq);
 /* PIT */
 
 void timer_init(void);
+void msleep(uint32_t ms);
 
 /* Common functions */
 

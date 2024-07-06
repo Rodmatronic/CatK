@@ -5,7 +5,7 @@
 #define _noreturn_    __attribute__((noreturn))
 #define _packed_      __attribute__((packed))
 #define _naked_       __attribute__((naked))
-
+#define _aligned(x)    __attribute__((aligned(x)))
 #define unreachable   __builtin_unreachable()
 
 #endif

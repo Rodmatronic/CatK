@@ -95,31 +95,17 @@ global syscall_dispatcher
 extern system_call
 
 syscall_dispatcher:
-  push eax
-  push word gs
-  push word fs
-  push word es
-  push word ds
-  push dword 0
-  push ebp
-  push edi
-  push esi
-  push edx
-  push ecx
-  push ebx
-  push esp
+  push eax      ; orig_eax
+  push dword 0  ; eax after syscall
+  push ebx      ; ebx
+  push ecx      ; ecx
+  push edx      ; edx
+  push esp      ; push info to system_call()
   call system_call
-  add esp, 4
-  pop ebx
-  pop ecx
-  pop edx
-  pop esi
-  pop edi
-  pop ebp
-  pop eax
-  pop word ds
-  pop word es
-  pop word fs
-  pop word gs
-  add esp, 4
-  iretd
+  add esp, 4    ; skip over esp
+  pop edx       ; edx
+  pop ecx       ; ecx
+  pop ebx       ; ebx
+  pop eax       ; overwrite eax with new eax 
+  add esp, 4    ; skip over orig_eax
+  iretd         ; let the cpu do the rest :)

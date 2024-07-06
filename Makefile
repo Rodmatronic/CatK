@@ -9,6 +9,7 @@ export CC = clang
 export LD = ld
 
 export CATK_ROOT = $(CURDIR)
+export GZ = $(shell which gzip)
 export CONFIG = $(CATK_ROOT)/config
 export OUT = $(CATK_ROOT)/out
 export OBJ = $(CATK_ROOT)/obj
@@ -17,20 +18,15 @@ export OBJ = $(CATK_ROOT)/obj
 $(shell $(MKDIR) $(OBJ) $(OUT))
 
 all:
-	@$(MAKE) -C src 	|| { echo "Build failed"; exit 1; }
+	@$(MAKE) -C $(CATK_ROOT)/src 	|| { echo "Build failed"; exit 1; }
 	@echo "Build successful"
 # 		-icount 4,align=on \
 #       For debugging
 
-user:
-	@$(MAKE) -C user 	|| { echo "Build failed"; exit 1; }
-	@echo "Build successful"
-
 run:
 	@qemu-system-x86_64 \
-		-bios /usr/share/edk2/x64/OVMF.fd \
-		-cpu host \
-		-enable-kvm \
+		-d int \
+		-no-reboot \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G

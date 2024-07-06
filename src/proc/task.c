@@ -6,8 +6,9 @@
 #include <catk/kernel.h>
 #include <catk/debug.h>
 #include <catk/core.h>
-#include <lib/common.h>
+#include <catk/limits.h>
 #include <catk/types.h>
+#include <lib/common.h>
 
 struct task * current;
 struct task * catk_idle_task;
@@ -89,15 +90,11 @@ int is_pid_running(pid_t pid)
 	return 0;
 }
 
-void kill(pid_t pid)
+void kill(struct task * p)
 {
-  struct task * p = get_proc_from_pid(pid);
 	if (!p)
-  {
-    debug("[tasking] invalid pid %d\n", pid);
 	  return;
-  }
-	debug("[tasking] killing \"%s\"\n", p->name);
+  debug("[tasking] killing \"%s\"\n", p->name);
   if(p->pid == 0)
     panic("CatK idle task killed!\n");
 	is_tasking_enabled = false;
@@ -151,6 +148,7 @@ static struct task * create_kernel_task(char * name, uint32_t addr, int priority
       break;
     }
   }
+  memset(p->fd, 0, sizeof(struct file) * OPEN_MAX);
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
 	p->esp = (uint32_t)calloc(4096, 1);

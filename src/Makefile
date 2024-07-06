@@ -49,6 +49,8 @@ ifneq ($(SKIP_ISO), 1)
 	@$(MKDIR) $(ISO_DIR)/boot/grub
 	@$(CP) $(TARGET) $(ISO_DIR)/boot/
 	@$(CP) $(CONFIG)/grub.cfg $(ISO_DIR)/boot/grub/
+	@$(GZ) $(CATK_ROOT)/disk-ext2.img -c >> $(CATK_ROOT)/ramdisk.gz
+	@$(CP) $(CATK_ROOT)/ramdisk.gz $(ISO_DIR)/boot/ramdisk.gz
 	@grub-mkrescue -o $(OUT)/$(TARGET_ISO) $(ISO_DIR)
 	@$(RM) $(TARGET)
 else
@@ -64,9 +66,6 @@ ifneq ($(SKIP_MB_CHECK), 1)
 	@grub-file --is-x86-multiboot2 $(TARGET)
 else
 	@printf "[ Multiboot2 check skipped ]\n"
-endif
-ifneq ($(DEBUG), 1)
-	@strip --strip-all $(TARGET)
 endif
 
 %.o: %.asm
