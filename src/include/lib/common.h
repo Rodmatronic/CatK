@@ -34,6 +34,7 @@ char * strstr(const char * s1, const char * s2);
 
 /* conversion stuff */
 char * itoa(int value, char * str, int radix);
+int atoi(const char * str);
 
 /* memory stuff */
 void * memcpy(void * dest, const void * src, size_t count);

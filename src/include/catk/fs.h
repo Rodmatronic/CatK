@@ -17,8 +17,8 @@ struct fs_mount
   int flags;
 };
 
-#define FS_REQUIRES_DISK    BIT(0)  /* needs to be mounted on a disk */
-#define FS_MOUNT_KERNEL     BIT(1)  /* mounted by the kernel */
+#define FS_REQUIRES_DISK    BIT(0)  /* a real filesystem that needs to be mounted on a disk */
+#define FS_MOUNT_KERNEL     BIT(1)  /* psuedo-filesystem that's mounted by the kernel */
 
 struct filesystem
 {

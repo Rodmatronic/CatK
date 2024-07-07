@@ -1,7 +1,9 @@
 #ifndef __ELF_H
 #define __ELF_H
 
-#define ELF_HEADER_MAGIC 0x7f454c46
+#include <stdint.h>
+
+#define ELF_TYPE_LOAD 1
 
 struct elf_hdr
 {
@@ -32,5 +34,7 @@ struct elf_phdr
 	uint32_t p_flags;
 	uint32_t p_align;
 };
+
+int elf_exec(const char * name, uint8_t * data);
 
 #endif

@@ -32,6 +32,8 @@ struct task
 {
 	char * name;
   pid_t pid;
+  uid_t uid;
+  gid_t gid;
   uint8_t state;
   uint8_t priority;
   uint8_t time_quantum;
@@ -44,8 +46,6 @@ struct task
   struct task * prev;
 };
 
-#define WAIT_FOR_PID(pid) while(is_pid_running(pid));
-
 void print_tasks(void);
 void schedule(void);
 int is_pid_running(pid_t pid);
@@ -53,6 +53,7 @@ void kill(struct task * p);
 struct task * get_current_task(void);
 bool tasking_enabled(void);
 int spawn_kernel_task(char * name, uint32_t addr, int priority);
+int spawn_user_task(char * name, uint32_t addr, int priority);
 pid_t task_add_queue(struct task * p);
 void tasking_init(void);
 

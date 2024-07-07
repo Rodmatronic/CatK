@@ -226,8 +226,8 @@ int ext2_open(struct file * filp, const char * file)
     free(inode);
     return -ENOENT;
   }
-  ext2_inode2file(filp, inode, inode_num);
   strncpy(filp->name, file, NAME_MAX);
+  ext2_inode2file(filp, inode, inode_num);
   free(inode);
   return 0;
 }

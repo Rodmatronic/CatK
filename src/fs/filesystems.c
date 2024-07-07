@@ -16,14 +16,15 @@ int register_filesystem(const char * name, struct fs_operations * fsops, struct 
     return -EINVAL;
   if(num_fs >= NR_FILESYSTEMS)
     return -EAGAIN;
-  if(flags & FS_REQUIRES_DISK && flags & FS_MOUNT_KERNEL)
-
+  if(flags & FS_REQUIRES_DISK && flags & FS_MOUNT_KERNEL) /* two of these flags cannot be set at the same time */
+    return -EINVAL;
   strncpy((char *)filesystems[num_fs].name, name, NAME_MAX); /* memory safety :) */
   filesystems[num_fs].fsops         = fsops;
   filesystems[num_fs].fops          = fops;
   filesystems[num_fs].mount->flags  = flags;
   /* pro programmer here B^) */
   printk("VFS: Registered filesystem \"%s\"\n", name);
+  debug("[vfs] registered \"%s\" as a filesystem\n", name);
   num_fs++;
   return 0;
 }
@@ -32,6 +33,7 @@ struct filesystem * get_filesystem(const char * name)
 {
   for(int i = 0; i < NR_FILESYSTEMS; i++)
   {
+    debug("[fs] looking for %s, found %s\n", name, filesystems[i].name);
     if(!strncmp(filesystems[i].name, name, strlen(filesystems[i].name)))
       return &filesystems[i];
   }
@@ -42,8 +44,11 @@ struct filesystem * get_filesystem(const char * name)
 
 int filesystems_init(int first_partition_lba)
 {
-  memset(&filesystems, 0, sizeof(filesystems));
+  memset(&filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
   int rc = ext2_init(first_partition_lba);
+  if(IS_ERR(rc))
+    return rc;
+  rc = devfs_init();
   if(IS_ERR(rc))
     return rc;
   return 0;

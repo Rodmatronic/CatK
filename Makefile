@@ -25,8 +25,6 @@ all:
 
 run:
 	@qemu-system-x86_64 \
-		-d int \
-		-no-reboot \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G

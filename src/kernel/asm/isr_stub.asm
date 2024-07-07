@@ -95,6 +95,16 @@ global syscall_dispatcher
 extern system_call
 
 syscall_dispatcher:
+  push ds
+  ; go to kernel mode
+  push ax
+  mov ax, 0x10
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+  pop ax
+
   push eax      ; orig_eax
   push dword 0  ; eax after syscall
   push ebx      ; ebx
@@ -108,4 +118,15 @@ syscall_dispatcher:
   pop ebx       ; ebx
   pop eax       ; overwrite eax with new eax 
   add esp, 4    ; skip over orig_eax
-  iretd         ; let the cpu do the rest :)
+  ; exit kernel mode
+  push ax
+  add esp, 4
+  pop ax
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+  sub esp, 4
+  pop ax
+  ; let the cpu do the rest :)
+  iretd

@@ -1,6 +1,7 @@
 section .text
   global gdt_flush
   global idt_flush
+  global tss_install
 
 gdt_flush:
   mov eax, [esp + 4]
@@ -22,4 +23,13 @@ idt_flush:
   mov eax, [esp + 4]
   lidt [eax]
   sti
+  ret
+
+tss_install:
+  pusha
+
+  mov ax, 0x28
+  ltr ax
+
+  popa
   ret

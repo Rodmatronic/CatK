@@ -105,9 +105,6 @@ void kill(struct task * p)
 	is_tasking_enabled = true;
 }
 
-#define STACK_PUSH(item) \
-  *(--stack) = (uint32_t)(item)
-
 static inline void task_release(struct task * p)
 {
   if(p)
@@ -120,7 +117,9 @@ static inline void task_release(struct task * p)
   }
 }
 
-// i guess vims find and replace feature did this lol
+#define STACK_PUSH(item) \
+  *(--stack) = (uint32_t)(item)
+
 static struct task * create_kernel_task(char * name, uint32_t addr, int priority)
 {
 	struct task * p = (struct task *)calloc(sizeof(struct task), 1);
@@ -157,6 +156,7 @@ static struct task * create_kernel_task(char * name, uint32_t addr, int priority
     free(p);
     return NULL;
   }
+  /* the stack grows down, so we go to the top, which is also the bottom */
   p->stack_top = (p->esp + 4096);
 	uint32_t * stack = (uint32_t *)p->stack_top;
 	STACK_PUSH(0x00000202);
@@ -174,9 +174,73 @@ static struct task * create_kernel_task(char * name, uint32_t addr, int priority
 	STACK_PUSH(0x10);
 	STACK_PUSH(0x10);
 	p->esp = (uint32_t)stack;
-  printk("Started task %s (PID %d)\n", name, p->pid);
+  debug("[tasking] created kernel-task %s with eip: 0x%08x\n", name, addr);
+  printk("Started kernel-task %s (PID %d)\n", name, p->pid);
 	return p;
 }
+
+/* the moment we've all been waiting for.. */
+static struct task * create_user_task(char * name, uint32_t addr, int priority)
+{
+	struct task * p = (struct task *)calloc(sizeof(struct task), 1);
+  if(!p)
+    return NULL;
+	p->name = name;
+	p->pid = get_free_pid();
+	p->state = TASK_CREATED;
+  p->priority = priority;
+  switch(p->priority)
+  {
+    case TASK_PRIORITY_HIGH:
+    {
+      p->time_quantum = 10;
+      break;
+    }
+    case TASK_PRIORITY_NORMAL:
+    {
+      p->time_quantum = 5;
+      break;
+    }
+    case TASK_PRIORITY_LOW:
+    {
+      p->time_quantum = 1;
+      break;
+    }
+  }
+  memset(p->fd, 0, sizeof(struct file) * OPEN_MAX);
+  p->ticks_left = p->time_quantum;
+  /* allocate stack for task */
+	p->esp = (uint32_t)calloc(4096, 1);
+  if(!(void *)p->esp)
+  {
+    free(p);
+    return NULL;
+  }
+  /* the stack grows down, so we go to the top, which is also the bottom */
+  p->stack_top = (p->esp + 4096);
+	uint32_t * stack = (uint32_t *)p->stack_top;
+  STACK_PUSH(0x23);
+	STACK_PUSH(0x00000202);
+  STACK_PUSH(0x1b);
+	STACK_PUSH(addr);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(p->stack_top);
+	STACK_PUSH(0x23);
+	STACK_PUSH(0x23);
+	STACK_PUSH(0x23);
+	STACK_PUSH(0x23);
+	p->esp = (uint32_t)stack;
+  debug("[tasking] created user-task %s with eip: 0x%08x\n", name, addr);
+  printk("Started user-task %s (PID %d)\n", name, p->pid);
+	return p;
+}
+
+#undef STACK_PUSH
 
 int spawn_kernel_task(char * name, uint32_t addr, int priority)
 {
@@ -187,7 +251,15 @@ int spawn_kernel_task(char * name, uint32_t addr, int priority)
   return p->pid;
 }
 
-#undef STACK_PUSH
+/* we'll worry about argc and argv in a minute */
+int spawn_user_task(char * name, uint32_t addr, int priority)
+{
+  struct task * p = create_user_task(name, addr, priority);
+  if(!p)
+    return -ENOMEM;
+  task_add_queue(p);
+  return p->pid;
+}
 
 pid_t task_add_queue(struct task * p)
 {

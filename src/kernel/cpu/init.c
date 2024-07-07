@@ -257,10 +257,49 @@ static void pic_remap_vectors(void)
     pic_unmask(i);
 }
 
+/* TSS */
+
+struct tss tss;
+
+extern void tss_install(void);
+
+static void tss_setup(int segment, uint16_t ss0, uint32_t esp0)
+{
+	uint32_t base = (uint32_t)&tss;
+	uint32_t limit = base + sizeof(tss);
+
+  gdt[segment].base_low = (base & 0xffff);
+  gdt[segment].base_mid = (base >> 16) & 0xff;
+  gdt[segment].base_high = (base >> 24) & 0xff;
+  gdt[segment].limit = limit;
+  gdt[segment].access = 0xe9;
+  gdt[segment].flags = 0x00;
+
+	memset(&tss, 0, sizeof(struct tss));
+
+	tss.ss0		= ss0;		// kernel stack segment
+	tss.esp0	= esp0;		// kernel stack pointer
+
+	tss.cs		= 0x0b;
+	tss.ss		= tss.ds = tss.es = tss.fs = tss.gs = 0x13;
+}
+
+void set_tss_stack(uint32_t esp0)
+{
+  tss.esp0 = esp0;
+}
+
+void tss_init(void)
+{
+  tss_setup(5, 0x10, 0);
+  tss_install();
+}
+
 void cpu_init(void)
 {
   segm_descriptors_init();
   idt_setup();
   timer_init();
   paging_init();
+  tss_init();
 }

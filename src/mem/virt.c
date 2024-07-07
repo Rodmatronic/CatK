@@ -1,4 +1,5 @@
 #include <catk/virt.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 #include <stdint.h>
 
@@ -25,7 +26,7 @@ static void setup_page_tables(void)
     page_tables[i].present = 1;
     page_tables[i].read_write = 1;
     page_tables[i].user_mode = 1;
-    page_tables[i].frame = PAGE_ALIGN((i * 0x40000000));
+    page_tables[i].frame = PAGE_ALIGN((i * 0x1000));
   }
   page_dir[0].present = 1;
   page_dir[0].accessed = 0;
@@ -47,6 +48,5 @@ void paging_init(void)
 {
   /*
   setup_page_tables();
-  load_page_directory((struct page_directory *)page_dir);
-  */
+  load_page_directory((struct page_directory *)page_dir); */
 }

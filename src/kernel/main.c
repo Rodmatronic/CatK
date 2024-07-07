@@ -13,7 +13,6 @@
 #include <catk/pci.h>
 #include <catk/vfs.h>
 #include <catk/ramdisk.h>
-#include <catk/params.h>
 #include <lib/ctype.h>
 
 extern uintptr_t kernel_start;
@@ -41,7 +40,6 @@ void kmain(uint32_t magic, uintptr_t addr)
   rc = tty_create(0, get_console()->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
-  printk("init path: %s\n", get_cmdline_param_val(cmdline, "init"));
   rc = ramdisk_probe(addr);
   if (IS_ERR(rc))
   {
@@ -81,8 +79,16 @@ void bootstrap2(void)
     panic("Could not mount rootfs on block (%d,%d): %d\n", dev->major, dev->minors, rc);
   }
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
+  /*
+  rc = vfs_mount("/dev", dev);
+  if(IS_ERR(rc))
+  {
+    panic("Could not mount devfs: %d\n", dev->major, dev->minors, rc);
+  }
+  printk("Successfully mounted devfs on block (%d,%d)\n", dev->major, dev->minors);
+  */
   /* start init process */
-  rc = start_init();
+  rc = start_init(cmdline);
   if(IS_ERR(rc))
     panic("Failed when starting init process: %d\n", rc);
   printk("Nothing left to do. Going idle...\n");

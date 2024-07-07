@@ -16,6 +16,7 @@ struct pt_regs
   uint32_t ebx;
   uint32_t eax;
   uint32_t orig_eax;
+  uint16_t ds;
   uint32_t eip;
   uint32_t cs;
   uint32_t eflags;

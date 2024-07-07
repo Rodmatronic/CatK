@@ -21,15 +21,30 @@ static int do_ext2_mount(char * path, struct device * blkdev)
   return 0;
 }
 
-int vfs_mount(char path[], struct device * blkdev)
+static int do_devfs_mount(char * path, struct device * blkdev)
+{
+  int rc;
+  struct filesystem * devfs = NULL;
+  devfs = get_filesystem("devfs");
+  if(!devfs)
+    return -EAGAIN;
+  strncpy(devfs->mount->mount_path, path, DEVNAME_MAX);
+  rc = devfs->fsops->mount(devfs, blkdev);
+  if(IS_ERR(rc))
+    return rc;
+  return 0;
+}
+
+int vfs_mount(char * path, struct device * blkdev)
 {
   if(blkdev->major != DISKDEV_MAJOR)
   {
     if(blkdev->major != RAMDISK_MAJOR)
       return -EINVAL;
   }
-  if(strcmp("/", path) == 0)
+  if(strncmp("/", path, strlen(path)) == 0)
     return do_ext2_mount(path, blkdev);
-  /* lets leave this for another time */
+  else if(strncmp("/dev", path, strlen(path)) == 0)
+    return do_devfs_mount(path, blkdev);
   return 0;
 }

@@ -21,7 +21,7 @@
 CatK is a kernel taking inspiration from FreeBSD and similar Unix-like systems written almost completely in C.\
 CatK is also the cat that represents this project.
 
-We love CatK.
+We love CatK, just like how cats love catnip.
 
 ### Before you use an Ext2 disk with CatK..
 Before you use an Ext2 disk with CatK, please make sure the inode size
@@ -92,4 +92,4 @@ Currently, the best way to get in touch with the developers, to discuss contribu
 It's quite nice there.
 
 ## Licensing
-CatK is licensed under the GNU General Public License version 3. See LICENSE.
+CatK is licensed under the GNU General Public License version 3. See LICENSE for more info.

@@ -117,7 +117,6 @@ struct tty_struct
   struct ring_buffer * write_q;
 };
 
-size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t count);
 struct tty_struct * tty_lookup(int num);
 int tty_create(int num, struct device * dev);
 
