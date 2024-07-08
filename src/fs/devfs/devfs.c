@@ -21,13 +21,27 @@ static int devfs_mount(struct filesystem * fs, struct device * dev)
   return 0;
 }
 
+int devfs_open(struct file * filp, const char * path)
+{
+  debug("[devfs] haha you cant open \"%s\" because this filesystem isnt even finished!\n", path);
+  /* search for character and block devices for the name */
+   
+  return -ENOSYS;
+}
+
 int devfs_init(void)
 {
   return register_filesystem("devfs", &devfs_ops, &devfs_file_ops, FS_MOUNT_KERNEL);
 }
 
 struct file_operations devfs_file_ops = {
-  
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  devfs_open,
+  NULL
 };
 
 struct fs_operations devfs_ops = {

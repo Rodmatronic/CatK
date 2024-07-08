@@ -299,7 +299,7 @@ static int ext2_read_file(struct file * filp, uint8_t * buf)
     }
     if(inode->t_pointer && blocks_read < total_blocks)
     {
-      debug("[ext2] t-links are unsupported\n");
+      debug("[ext2] t-links are unsupported!\n");
     }
     free(inode);
     return 0;

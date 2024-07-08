@@ -25,14 +25,24 @@ static uint32_t _system_call(struct pt_regs * regs)
     }
     case 0x01:
     {
-      /* a task shouldn't return from this, so it wont make sense to give a return code */
+      /* sometimes a task can return from this.. */
       sys_exit((int)regs->ebx);
       rc = 0;
       break;
     }
     case 0x02:
     {
-      sys_read((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
+      rc = sys_read((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
+      break;
+    }
+    case 0x03:
+    {
+      //rc = sys_write((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
+      break;
+    }
+    case 0x04:
+    {
+      rc = sys_open((const char *)regs->ebx, (int)regs->ecx, (uint16_t)regs->edx);
       break;
     }
     default:

@@ -12,8 +12,6 @@ static struct device blkdevs[MAX_BLKDEV] = {
   NULL
 };
 
-#define MINOR_TO_LETTER(minor) ('a' + minor)
-
 int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops)
 {
   printk("Registering character device \"%s%d\" (major %d)\n", name, dev->minors, major);
@@ -46,6 +44,13 @@ struct device * get_blkdev(uint8_t major)
 	if (major >= MAX_BLKDEV)
 		return NULL;
   return &blkdevs[major];
+}
+
+struct device * get_chrdev(uint8_t major)
+{
+  if(major >= MAX_CHRDEV)
+    return NULL;
+  return &chrdevs[major];
 }
 
 void device_init(void)

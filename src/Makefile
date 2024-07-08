@@ -24,7 +24,7 @@ CC_FLAGS = \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
 	-nostdlib \
-	-O3 \
+	-O3
 
 ifeq ($(DEBUG), 1)
 CC_FLAGS += -g

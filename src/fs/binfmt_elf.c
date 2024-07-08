@@ -17,16 +17,14 @@ static bool elf_verify(uint8_t * data)
 static void elf_debug_print_info(struct elf_hdr * header)
 {
 	debug("[elf] file info:\n");
-	debug(" [+] format: %s\n", header->e_ident[4] ? "32-Bit" : "64-Bit");
-	debug(" [+] endianness: %s\n", header->e_ident[5] ? "Little Endian" : "Big Endian");
+	debug(" [+] format: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
+	debug(" [+] endianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
 	debug(" [+] elf version: %d\n", header->e_ident[6]);
 	debug(" [+] os abi: 0x%x\n", header->e_ident[7]);
 	debug(" [+] object file type: 0x%x\n", header->e_type);
 	debug(" [+] machine: 0x%x\n", header->e_machine);
 	debug(" [+] entry point: 0x%x\n", header->e_entry);
 }
-
-extern void enter_task_from_jmp(uint32_t addr);
 
 int elf_exec(const char * name, uint8_t * data)
 {
@@ -57,7 +55,9 @@ int elf_exec(const char * name, uint8_t * data)
     }
   }
   debug("[elf] load location 0x%08x\n", load_loc + header->e_entry);
-  debug("[elf] entering elf file %s..\n", name);
-  enter_task_from_jmp(load_loc + header->e_entry);
+  debug("[elf] jumping to entry point..\n");
+  void * load = (void *)(load_loc + header->e_entry);
+  spawn_user_task((char *)name, load, TASK_PRIORITY_NORMAL);
+  for(;;);
   return 0;
 }

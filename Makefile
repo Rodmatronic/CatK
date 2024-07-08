@@ -25,6 +25,9 @@ all:
 
 run:
 	@qemu-system-x86_64 \
+		-bios /usr/share/edk2/x64/OVMF.fd \
+		-cpu host \
+		-enable-kvm \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G
