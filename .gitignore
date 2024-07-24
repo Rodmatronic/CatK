@@ -4,7 +4,10 @@
 # iso images
 *.iso
 
+# kernel n stuff
+.elf
+.gz
+
 # vscode stuff
-.elf/
 .vscode/
 .cache/

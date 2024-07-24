@@ -26,7 +26,7 @@ static const uint32_t colors[16] = {
   0x0000aa,
   0xaa00aa,
   0x00aaaa,
-  0xffffff, // 0xaaaaaa
+  0xffffff, // 0xaaaaaa is the true color
   /* high intensity colors */
   0x555555,
   0xff5555,
@@ -334,6 +334,7 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
 
 void fbcon_clear(void)
 {
+  memset((void *)c.vc_screenbuf, 0, (c.vc_rows * c.vc_cols));
 }
 
 int fbcon_dev_write(struct file * file, void * buf, size_t sz)
@@ -351,11 +352,6 @@ void fbcon_dev_close(struct file * file)
   return;
 }
 
-void fbcon_blink(void)
-{
-
-}
-
 int fbcon_init(struct console * con, uint32_t addr)
 {
   int rc;
@@ -370,6 +366,7 @@ int fbcon_init(struct console * con, uint32_t addr)
   con->write = fbcon_write;
   con->data = &c;
   con->dev = &fbcon_dev;
+  fbcon_clear();
   rc = register_chrdev(FBDEV_MAJOR, "fb", &fbcon_dev, &fbcon_fops);
   if(IS_ERR(rc))
   {

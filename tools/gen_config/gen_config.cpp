@@ -89,7 +89,7 @@ int main(int argc, char * argv[])
             }
             else
             {
-                std::cout << " " << options.at(i).value << std::endl;
+                std::cout << " " << options.at(i).value << "\n";
             }
         }
         std::cout << "#endif" << std::endl;
