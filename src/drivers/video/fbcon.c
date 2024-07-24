@@ -21,20 +21,20 @@ static int fbcon_y = 0;
 static const uint32_t colors[16] = {
   0x000000,
   0xaa0000,
-  0x00a000,
-  0xaa7800,
+  0x00aa00,
+  0xaa5500,
   0x0000aa,
-  0x7800aa,
+  0xaa00aa,
   0x00aaaa,
-  0xffffff,
+  0xffffff, // 0xaaaaaa
   /* high intensity colors */
-  0x6e6e6e,
-  0xff5050,
-  0x00ff00,
-  0xffff00,
-  0x0000ff,
-  0xff00ff,
-  0x00ffff,
+  0x555555,
+  0xff5555,
+  0x55ff55,
+  0xffff55,
+  0x5555ff,
+  0xff55ff,
+  0x55ffff,
   0xffffff
 };
 
@@ -287,9 +287,19 @@ static void process_ansi(char ch)
   fbcon_scroll();
 }
 
+static void fbcon_rebase_cursor(int x, int y, int old_x, int old_y)
+{
+  uint8_t * glyph = &c.vc_font.data[219 * 16];
+  fbcon_print_glyph(x, y, glyph);
+}
+
 void fbcon_putc(char ch)
 {
+  int prev_x = fbcon_x, prev_y = fbcon_y; 
+  uint8_t * glyph = &c.vc_font.data[' ' * 16];
+  fbcon_print_glyph(prev_x, prev_y, glyph);
   process_ansi(ch);
+  fbcon_rebase_cursor(fbcon_x, fbcon_y, prev_x, prev_y);
 }
 
 void fbcon_write(const void * buf, size_t len)
@@ -339,6 +349,11 @@ int fbcon_dev_open(struct file * file, const char * unused)
 void fbcon_dev_close(struct file * file)
 {
   return;
+}
+
+void fbcon_blink(void)
+{
+
 }
 
 int fbcon_init(struct console * con, uint32_t addr)

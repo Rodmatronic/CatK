@@ -2,6 +2,7 @@
 #include <catk/errno.h>
 #include <catk/printk.h>
 #include <catk/debug.h>
+#include <catk/mem.h>
 #include <stdint.h>
 
 static struct device chrdevs[MAX_CHRDEV] = {
@@ -11,6 +12,11 @@ static struct device chrdevs[MAX_CHRDEV] = {
 static struct device blkdevs[MAX_BLKDEV] = {
   NULL
 };
+
+struct device * device_struct_alloc(void)
+{
+  return (struct device *)malloc(sizeof(struct device));
+}
 
 int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops)
 {

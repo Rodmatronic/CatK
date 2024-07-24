@@ -5,6 +5,7 @@
 #include <catk/device.h>
 #include <catk/debug.h>
 #include <catk/mem.h>
+#include <config.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
 
@@ -13,6 +14,7 @@ int fat32_lba_start = 0;
 static struct filesystem * fat32 = NULL;
 static struct boot_sector * bs = NULL;
 struct fs_operations fat32_ops;
+struct file_operations fat32_fops;
 struct fs_info * fat32_fsinfo = NULL;
 
 uint64_t fat32_cluster_array;  // clusterheapoffset * sectorsize - 2 * clustersize;
@@ -61,9 +63,12 @@ int fat32_mount(struct filesystem * fs, struct device * blkdev)
 
 int fat32_init(int partition_lba)
 {
-  //fat32_lba_start = partition_lba;
-  //return register_filesystem("FAT32", &fat32_ops, FS_REQUIRES_DISK);
-  return 0;
+#if CATK_EXT2 == 1
+  fat32_lba_start = partition_lba;
+  return register_filesystem("FAT32", &fat32_ops, &fat32_fops, FS_REQUIRES_DISK);
+#else
+  return -ENOSYS;
+#endif
 }
 
 struct fs_operations fat32_ops = {
@@ -72,4 +77,14 @@ struct fs_operations fat32_ops = {
   NULL,
   NULL,
   fat32_mount
+};
+
+struct file_operations fat32_fops = {
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
 };

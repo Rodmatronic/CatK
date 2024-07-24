@@ -47,6 +47,7 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   ata_channels[ATA_PRIMARY].bmide   = bar4;
   ata_channels[ATA_SECONDARY].bmide = bar4 + 8;
   /* ata device stuff */
+  ata_devices[num_ata] = device_struct_alloc();
   ata_devices[num_ata]->removable   = false;
   ata_devices[num_ata]->major       = DISKDEV_MAJOR;
   ata_devices[num_ata]->minors      = num_ata;

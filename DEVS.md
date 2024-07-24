@@ -3,7 +3,7 @@
 Here's how stuff's laid out:
 | Directory                                                                    | Purpose |
 | ---------- | ---------------------------------------------------------------------------- |
-| config               | Linker scripts and GRUB configuration
+| config               | Linker scripts, GRUB configuration, and the CatK kernel configuration
 |                      
 | src/kernel           | The actual kernel                                                                                                             
 |

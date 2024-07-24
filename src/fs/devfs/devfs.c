@@ -4,6 +4,7 @@
 #include <catk/device.h>
 #include <catk/ext2.h>
 #include <catk/debug.h>
+#include <config.h>
 #include <catk/mem.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
@@ -18,6 +19,7 @@ static int devfs_mount(struct filesystem * fs, struct device * dev)
 {
   debug("[devfs] mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, dev->major, dev->minors);
   devfs = fs;
+  blkdev = dev;
   return 0;
 }
 
@@ -25,13 +27,16 @@ int devfs_open(struct file * filp, const char * path)
 {
   debug("[devfs] haha you cant open \"%s\" because this filesystem isnt even finished!\n", path);
   /* search for character and block devices for the name */
-   
   return -ENOSYS;
 }
 
 int devfs_init(void)
 {
+#if CATK_DEVFS == 1
   return register_filesystem("devfs", &devfs_ops, &devfs_file_ops, FS_MOUNT_KERNEL);
+#else
+  return -ENOSYS;
+#endif
 }
 
 struct file_operations devfs_file_ops = {

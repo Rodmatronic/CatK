@@ -4,6 +4,7 @@
 #include <catk/io.h>
 #include <catk/types.h>
 #include <lib/common.h>
+#include <config.h>
 #include <stdint.h>
 
 #define STATUS_REG_THRE BIT(5)
@@ -86,6 +87,7 @@ static int serial_write(int port, const char * str, size_t sz)
 
 void debug(const char * fmt, ...)
 {
+#if CATK_DEBUG_SERIAL == 1
   va_list ap;
   va_start(ap, fmt);
   char * buf = (char *)malloc(256);
@@ -93,4 +95,5 @@ void debug(const char * fmt, ...)
   va_end(ap);
   serial_write(0, buf, strlen(buf));
   free(buf);
+#endif
 }

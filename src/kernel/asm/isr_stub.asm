@@ -2,7 +2,7 @@ section .text
   extern interrupt_handler
 
 early_interrupt_handler:
-  pusha
+  pushad
   mov ax, ds
   push eax
 
@@ -16,13 +16,13 @@ early_interrupt_handler:
   call interrupt_handler
   pop esp
 
-  pop ebx
-  mov ds, bx
-  mov es, bx
-  mov fs, bx
-  mov gs, bx
+  pop eax
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
 
-  popa
+  popad
   add esp, 8
 
   sti
@@ -118,7 +118,7 @@ syscall_dispatcher:
   pop ebx       ; ebx
   pop eax       ; overwrite eax with new eax 
   add esp, 4    ; skip over orig_eax
-  ; exit kernel mode
+  ; exit kernel mode using super cool ninja tactics
   push ax
   add esp, 4
   pop ax

@@ -2,6 +2,7 @@
 #include <catk/task.h>
 #include <catk/io.h>
 #include <catk/printk.h>
+#include <catk/errno.h>
 #include <lib/common.h>
 
 volatile uint32_t jiffies;

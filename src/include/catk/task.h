@@ -40,7 +40,6 @@ struct task
   uint8_t ticks_left;
 	uint32_t stack_top; /* used only when freeing a task */
   uint32_t esp;
-  void * entry_point; /* not really used much */
   bool kernel_mode;
   char * cwd;
   struct file * fd[OPEN_MAX];
@@ -55,7 +54,7 @@ void kill(struct task * p);
 struct task * get_current_task(void);
 bool tasking_enabled(void);
 int spawn_kernel_task(char * name, void * addr, int priority);
-int spawn_user_task(char * name, void * addr, int priority);
+int spawn_user_task(char * name, uint32_t addr, int priority);
 void usermode_switch(void * addr);
 pid_t task_add_queue(struct task * p);
 void tasking_init(void);

@@ -5,6 +5,7 @@
 #include <catk/ext2.h>
 #include <catk/debug.h>
 #include <catk/mem.h>
+#include <config.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
 
@@ -348,9 +349,6 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
   }
   
   printk("Volume size: %d bytes\n", DIV_ROUND_UP(priv_data.block_size * sb->total_blocks, 1024 * 1024));
-  printk("Last mount path: %s\n", sb->last_mount_path);
-  printk("Volume name: %s\n", sb->volume_name);
-  printk("Ext2 inode size: %d bytes\n", sb->inode_size);
   
   priv_data.filesize_qword = false;
   if(sb->ro_features == 0x0002)
@@ -360,17 +358,20 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
   }
   
   priv_data.sectors_per_block = (priv_data.block_size / 512);
-  fs->priv_data = (void *)&priv_data;
+  fs->priv_data = &priv_data;
   fs->mount->blkdev = blkdev;
   e2fs = fs;
-  ext2_read_dir(2);
   return 0;
 }
 
 int ext2_init(int fp_lba)
 {
+#if CATK_EXT2 == 1
   ext2_start_lba = fp_lba;
   return register_filesystem("ext2", &ext2_fs_ops, &ext2_file_ops, FS_REQUIRES_DISK);
+#else
+  return -ENOSYS;
+#endif
 }
 
 struct file_operations ext2_file_ops = {

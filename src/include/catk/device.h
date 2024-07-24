@@ -58,6 +58,7 @@ struct device
   void * priv_data;                     /* device's private data */
 };
 
+struct device * device_struct_alloc(void);
 int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
 int register_blkdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
 struct device * get_blkdev(uint8_t major);

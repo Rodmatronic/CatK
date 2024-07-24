@@ -10,6 +10,7 @@
 #include <catk/params.h>
 #include <catk/elf.h>
 #include <catk/core.h>
+#include <catk/trace.h>
 #include <lib/common.h>
 
 char init_path[NAME_MAX + 1]; /* either set by cmdline or set by the kernel */
@@ -30,9 +31,8 @@ int start_init(const char * cmdline)
   rc = vfs_open(file, init_path);
   if(IS_ERR(rc))
     return rc;
-  uint8_t * program_buffer = (uint8_t *)calloc(file->inode->length, 1);
+  uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
   vfs_read(file, program_buffer, file->inode->length);
-  /* execute raw binary in kernel-mode */
   elf_exec((const char *)init_path, program_buffer);
   return 0;
 }

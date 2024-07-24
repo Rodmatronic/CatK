@@ -13,6 +13,7 @@
 #include <catk/pci.h>
 #include <catk/vfs.h>
 #include <catk/ramdisk.h>
+#include <catk/trace.h>
 #include <lib/ctype.h>
 
 extern uintptr_t kernel_start;
@@ -22,6 +23,15 @@ static char * cmdline;
 
 static bool use_hd = false; /* determines if we use a hard-disk or not */
 static void show_bootart(void);
+
+static void show_boot_banner(void)
+{
+  printk("2023-2024 The CatKernel Project.\n");
+  printk("\tCreated locally in Canada, and California, bring tuques.\n");
+  /* now for the long ass gpl license */
+  printk("\nThis software is licensed under the GNU General Public License v3.0.\n");
+  printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
+}
 
 void kmain(uint32_t magic, uintptr_t addr)
 {
@@ -36,6 +46,7 @@ void kmain(uint32_t magic, uintptr_t addr)
   if(IS_ERR(rc))
     return;
   cmdline = obtain_cmdline(addr);
+  show_boot_banner();
   printk("CatK cmdline: %s\n", cmdline);
   rc = tty_create(0, get_console()->dev);
   if(rc < 0)
@@ -72,21 +83,21 @@ void bootstrap2(void)
   rc = filesystems_init(first_partition_lba); // this will be set to a dummy value
   if(IS_ERR(rc))
     panic("Could not initialize filesystems: %d\n", rc);
-  vfs_init();
+  rc = vfs_init();
+  if(IS_ERR(rc))
+    panic("Could not initialize VFS: %d\n", rc);
   rc = vfs_mount("/", dev);
   if(IS_ERR(rc))
   {
     panic("Could not mount rootfs on block (%d,%d): %d\n", dev->major, dev->minors, rc);
   }
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
-  /*
   rc = vfs_mount("/dev", dev);
   if(IS_ERR(rc))
   {
     panic("Could not mount devfs: %d\n", dev->major, dev->minors, rc);
   }
   printk("Successfully mounted devfs on block (%d,%d)\n", dev->major, dev->minors);
-  */
   /* start init process */
   rc = start_init(cmdline);
   if(IS_ERR(rc))

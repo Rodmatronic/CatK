@@ -10,13 +10,16 @@ SRC = $(CATK_ROOT)/src
 
 # Compiler flags and other stuff
 
-INCLUDE_PATH = $(SRC)/include
-INCLUDE = -I $(INCLUDE_PATH)
+C_INCLUDE_PATH = $(SRC)/include/
+C_INCLUDE = -I $(C_INCLUDE_PATH)
 
-DEBUG := 1
+NASM_INCLUDE_PATH = $(SRC)/include/asm/
+NASM_INCLUDE = -I $(NASM_INCLUDE_PATH)
+
+DEBUG = 1
 
 CC_FLAGS = \
-	$(INCLUDE)  \
+	$(C_INCLUDE)  \
 	-ffreestanding \
 	--target=i686-pc-none-elf \
 	-march=i686 \
@@ -24,6 +27,7 @@ CC_FLAGS = \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
 	-nostdlib \
+	-fno-omit-frame-pointer \
 	-O3
 
 ifeq ($(DEBUG), 1)
@@ -31,7 +35,7 @@ CC_FLAGS += -g
 ASM_FLAGS += -g # NASM also supports debug symbols! :)
 endif
 
-ASM_FLAGS = -f elf32
+ASM_FLAGS = -f elf32 $(NASM_INCLUDE)
 LD_FLAGS = -m elf_i386 -T $(CONFIG)/link.ld -znoexecstack
 
 # source files

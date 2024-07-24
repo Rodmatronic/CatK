@@ -3,7 +3,7 @@
 
 section .bss
 stack_bottom:
-  resb 16384 ; 16 KiB
+  resb 65536 ; 64 KiB i think
 stack_top:
 
 ; The linker script specifies _start as the entry point to the kernel and the
@@ -56,6 +56,7 @@ _start:
   push ebx
   push eax
   ; Call the kernel
+  xor ebp, ebp
 	call kmain
  
   ; To make sure the kernel doesn't execute memory bytes thinking that

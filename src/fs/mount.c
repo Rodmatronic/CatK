@@ -8,7 +8,7 @@
 
 struct filesystem * rootfs = NULL;
 
-static int do_ext2_mount(char * path, struct device * blkdev)
+static int do_ext2_mount(const char * path, struct device * blkdev)
 {
   int rc;
   rootfs = get_filesystem("ext2");
@@ -21,7 +21,7 @@ static int do_ext2_mount(char * path, struct device * blkdev)
   return 0;
 }
 
-static int do_devfs_mount(char * path, struct device * blkdev)
+static int do_devfs_mount(const char * path, struct device * blkdev)
 {
   int rc;
   struct filesystem * devfs = NULL;
@@ -35,7 +35,7 @@ static int do_devfs_mount(char * path, struct device * blkdev)
   return 0;
 }
 
-int vfs_mount(char * path, struct device * blkdev)
+int vfs_mount(const char * path, struct device * blkdev)
 {
   if(blkdev->major != DISKDEV_MAJOR)
   {

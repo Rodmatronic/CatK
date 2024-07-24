@@ -28,7 +28,7 @@ static void elf_debug_print_info(struct elf_hdr * header)
 
 int elf_exec(const char * name, uint8_t * data)
 {
-  uint32_t load_loc, text_section_sz;
+  uint32_t load_loc, text_section_sz = 0;
   if(!elf_verify(data))
     return -ENOEXEC;
   debug("[elf] load start\n");
@@ -54,10 +54,8 @@ int elf_exec(const char * name, uint8_t * data)
       }
     }
   }
-  debug("[elf] load location 0x%08x\n", load_loc + header->e_entry);
-  debug("[elf] jumping to entry point..\n");
-  void * load = (void *)(load_loc + header->e_entry);
-  spawn_user_task((char *)name, load, TASK_PRIORITY_NORMAL);
-  for(;;);
+  if(!load_loc)
+    return -ENOEXEC;
+  spawn_user_task((char *)name, load_loc + header->e_entry, TASK_PRIORITY_NORMAL);
   return 0;
 }

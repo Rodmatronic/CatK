@@ -1,0 +1,35 @@
+# CatK Configuration
+# DO NOT DELETE!
+
+#
+# x86 Settings
+#
+
+CATK_SSE=n
+
+#
+# Kernel Settings
+#
+
+CATK_FOO=y
+
+#
+# Filesystem Settings
+#
+
+CATK_EXT2=y
+CATK_FAT32=n
+CATK_DEVFS=y
+
+#
+# Video Settings
+#
+
+CATK_VIDEO_GENERIC=n
+
+#
+# Kernel Debugging
+#
+
+CATK_DEBUG_SERIAL=y
+CATK_STACK_TRACE=n

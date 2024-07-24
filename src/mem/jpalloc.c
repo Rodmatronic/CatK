@@ -180,12 +180,12 @@ static void heap_merge_blocks(void)
 
 void * malloc(size_t n)
 {
-	return heap_alloc(n);
+  return heap_alloc(n);
 }
 
 void free(void * ptr)
 {
-	heap_free(ptr);
+  heap_free(ptr);
   /* merge free blocks to prevent fragmentation */
   heap_merge_blocks();
 }

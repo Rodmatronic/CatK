@@ -5,6 +5,7 @@
 #include <catk/printk.h>
 #include <catk/errno.h>
 #include <lib/common.h>
+#include <config.h>
 #include <stdint.h>
 
 struct filesystem filesystems[NR_FILESYSTEMS];
@@ -45,11 +46,13 @@ struct filesystem * get_filesystem(const char * name)
 int filesystems_init(int first_partition_lba)
 {
   memset(&filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
+  /* first up are the real filesystems */
   int rc = ext2_init(first_partition_lba);
   if(IS_ERR(rc))
-    return rc;
+    printk("VFS: Warning: Failed to initialize Ext2: %d\n", rc);
+  /* now for the psuedo-filesystems :) */
   rc = devfs_init();
   if(IS_ERR(rc))
-    return rc;
+    printk("VFS: Warning: Failed to initialize devfs: %d\n", rc);
   return 0;
 }
