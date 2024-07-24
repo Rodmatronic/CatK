@@ -24,6 +24,8 @@ static char * cmdline;
 static bool use_hd = false; /* determines if we use a hard-disk or not */
 static void show_bootart(void);
 
+extern int cpudetect();
+
 static void show_boot_banner(void)
 {
   printk("2023-2024 The CatKernel Project.\n");
@@ -31,6 +33,28 @@ static void show_boot_banner(void)
   /* now for the long ass gpl license */
   printk("\nThis software is licensed under the GNU General Public License v3.0.\n");
   printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
+}
+
+void cpuid(uint32_t code, uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d) {
+    __asm__ volatile("cpuid"
+                     : "=a"(*a), "=b"(*b), "=c"(*c), "=d"(*d)
+                     : "a"(code));
+}
+
+int cpuget() {
+  uint32_t eax, ebx, ecx, edx;
+  
+  // Call cpuid with code 0 to get the vendor ID string
+  cpuid(0, &eax, &ebx, &ecx, &edx);
+
+  char vendor[13];
+  *((uint32_t *)vendor) = ebx;
+  *((uint32_t *)(vendor + 4)) = edx;
+  *((uint32_t *)(vendor + 8)) = ecx;
+  vendor[12] = '\0';
+
+  printk("CPUID is: %s\n", vendor);
+  return 1;
 }
 
 void kmain(uint32_t magic, uintptr_t addr)
@@ -48,6 +72,14 @@ void kmain(uint32_t magic, uintptr_t addr)
   cmdline = obtain_cmdline(addr);
   show_boot_banner();
   printk("CatK cmdline: %s\n", cmdline);
+  
+  if (!cpudetect()) {
+      panic("Invalid CPU/could not get CPUID for this hardware!");
+  }
+  /* Check to see if the CPU supports CPUID. If not, panic.*/
+  printk("CPU: CPUID supported\n");
+  /* Read the CPUID, once we know that it is supported.*/
+  cpuget();
   rc = tty_create(0, get_console()->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
