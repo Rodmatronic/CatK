@@ -116,7 +116,7 @@ static void process_ascii(char ch)
     }
     case '\t':
     {
-      vgacon_x += 4;
+      vgacon_x += 2;
       break;
     }
     case 0x08: /* BS (Backspace) */

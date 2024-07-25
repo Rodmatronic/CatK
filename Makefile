@@ -37,6 +37,7 @@ all: clean
 run:
 	@qemu-system-x86_64 \
 		-d int \
+		-cpu core2duo \
 		-no-reboot \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \

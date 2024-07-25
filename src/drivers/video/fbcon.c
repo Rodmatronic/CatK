@@ -151,7 +151,7 @@ static void process_ascii(char ch)
     }
     case '\t':
     {
-      fbcon_x += 4;
+      fbcon_x += 2;
       break;
     }
     case 0x08: /* BS (Backspace) */

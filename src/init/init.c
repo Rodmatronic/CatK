@@ -27,6 +27,9 @@ int start_init(const char * cmdline)
   else
     strncpy(init_path, init_val, NAME_MAX);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
+  printk("ELF files do not work (yet).\n");
+  return 0;
+  /*
   struct file * file = (struct file *)malloc(sizeof(struct file));
   rc = vfs_open(file, init_path);
   if(IS_ERR(rc))
@@ -35,4 +38,5 @@ int start_init(const char * cmdline)
   vfs_read(file, program_buffer, file->inode->length);
   elf_exec((const char *)init_path, program_buffer);
   return 0;
+  */
 }

@@ -159,10 +159,13 @@ struct tss
 void tss_init(void);
 void set_tss_stack(uint32_t esp0);
 
-/* Common functions */
+/* Common CPU related functions */
 
 void critical_enter(void);
 void critical_exit(void);
+
+extern int cpuidcheck(void);
+void cpu_dump_all_info(void);
 
 void cpu_init(void);
 
