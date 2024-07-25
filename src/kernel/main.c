@@ -14,6 +14,7 @@
 #include <catk/vfs.h>
 #include <catk/ramdisk.h>
 #include <catk/trace.h>
+#include <catk/keyboard.h>
 #include <lib/ctype.h>
 
 extern uintptr_t kernel_start;
@@ -60,6 +61,7 @@ void kmain(uint32_t magic, uintptr_t addr)
   rc = tty_create(0, get_console()->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
+  keyboard_init();
   rc = ramdisk_probe(addr);
   if (IS_ERR(rc))
   {
