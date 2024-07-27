@@ -9,7 +9,9 @@
 #include <stdint.h>
 #include <lib/common.h>
 
-static bool elf_verify(uint8_t * data)
+extern void jmp_to_elf(uint32_t addr);
+
+static bool elf_verify(const uint8_t * data)
 {
   return (data[0] == 0x7f && data[1] == 0x45 && data[2] == 0x4c && data[3] == 0x46);
 }
@@ -17,16 +19,16 @@ static bool elf_verify(uint8_t * data)
 static void elf_debug_print_info(struct elf_hdr * header)
 {
 	debug("[elf] file info:\n");
-	debug(" [+] format: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
-	debug(" [+] endianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
-	debug(" [+] elf version: %d\n", header->e_ident[6]);
-	debug(" [+] os abi: 0x%x\n", header->e_ident[7]);
-	debug(" [+] object file type: 0x%x\n", header->e_type);
-	debug(" [+] machine: 0x%x\n", header->e_machine);
-	debug(" [+] entry point: 0x%x\n", header->e_entry);
+	debug(" [->] format: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
+	debug(" [->] endianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
+	debug(" [->] elf version: %d\n", header->e_ident[6]);
+	debug(" [->] os abi: 0x%x\n", header->e_ident[7]);
+	debug(" [->] object file type: 0x%x\n", header->e_type);
+	debug(" [->] machine: 0x%x\n", header->e_machine);
+	debug(" [->] entry point: 0x%x\n", header->e_entry);
 }
 
-int elf_exec(const char * name, uint8_t * data)
+int elf_exec(const char * name, const uint8_t * data)
 {
   uint32_t load_loc, text_section_sz = 0;
   if(!elf_verify(data))
@@ -56,6 +58,7 @@ int elf_exec(const char * name, uint8_t * data)
   }
   if(!load_loc)
     return -ENOEXEC;
-  spawn_user_task((char *)name, load_loc + header->e_entry, TASK_PRIORITY_NORMAL);
+  jmp_to_elf((load_loc + header->e_entry));
+  //spawn_kernel_task((char *)name, (void *)(load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
   return 0;
 }

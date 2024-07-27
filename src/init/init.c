@@ -15,6 +15,24 @@
 
 char init_path[NAME_MAX + 1]; /* either set by cmdline or set by the kernel */
 
+const char possible_inits[][32] = {
+  "/init", "/etc/init", "/sbin/init"
+};
+
+int try_init(const char * path)
+{
+  int rc;
+  printk("%s: trying %s...\n", __FUNCTION__, init_path);
+  struct file * file = (struct file *)malloc(sizeof(struct file));
+  rc = vfs_open(file, init_path);
+  if(IS_ERR(rc))
+    return rc;
+  uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
+  vfs_read(file, program_buffer, file->inode->length);
+  elf_exec((const char *)init_path, program_buffer);
+  return 0;
+}
+
 int start_init(const char * cmdline)
 {
   set_tss_stack(get_current_task()->esp);
@@ -26,17 +44,18 @@ int start_init(const char * cmdline)
     strncpy(init_path, "/init", NAME_MAX);
   else
     strncpy(init_path, init_val, NAME_MAX);
-  printk("%s: trying %s...\n", __FUNCTION__, init_path);
-  printk("ELF files do not work (yet).\n");
-  return 0;
+  vfs_open(NULL, "/dev/fb0");
+  for(;;);
   /*
-  struct file * file = (struct file *)malloc(sizeof(struct file));
-  rc = vfs_open(file, init_path);
-  if(IS_ERR(rc))
-    return rc;
-  uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
-  vfs_read(file, program_buffer, file->inode->length);
-  elf_exec((const char *)init_path, program_buffer);
+  printk("%s: trying %s...\n", __FUNCTION__, init_path);
+  if (try_init(init_path) < 0)
+  {
+    for(int i = 0; i < 3; i++)
+    {
+      printk("%s: trying %s...\n", __FUNCTION__, possible_inits[i]);
+      try_init(possible_inits[i]);
+    }
+  }
   return 0;
   */
 }

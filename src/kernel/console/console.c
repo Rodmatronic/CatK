@@ -5,6 +5,8 @@
 #include <config.h>
 #include <stdint.h>
 
+SPINLOCK_INIT(console_spinlock);
+
 struct console con;
 
 static bool console_enabled = false;

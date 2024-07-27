@@ -1,7 +1,10 @@
 #include <catk/console.h>
+#include <catk/spinlock.h>
 #include <lib/common.h>
 #include <stdarg.h>
 #include <stdint.h>
+
+SPINLOCK_INIT(printf_spinlock);
 
 int snprintf(char * str, size_t len, const char fmt[], ...)
 {
@@ -52,6 +55,7 @@ int vsprintf(char * str, const char format[], va_list arg)
 
 int vsnprintf(char * str, size_t len, const char format[], va_list arg)
 {
+  spinlock_acquire(&printf_spinlock);
   int flags = 0;
   int n = 0;
   int str_i = 0;
@@ -125,5 +129,6 @@ next:
     }
   }
   str[str_i] = '\0';
+  spinlock_release(&printf_spinlock);
   return n;
 }

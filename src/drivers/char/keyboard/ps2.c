@@ -313,6 +313,7 @@ static void keyboard_port1_irq(struct intr_stack_frame * frame)
 
 void keyboard_port2_irq(struct intr_stack_frame * frame)
 {
+
 }
 
 /* write string to tty read queue */

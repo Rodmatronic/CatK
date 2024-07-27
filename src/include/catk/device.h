@@ -40,10 +40,6 @@
 /* initial ramdisk minors are mostly just the numbers of ramdisks */
 #define INITRD_MINOR      250
 
-#define SET_MINOR(minors, bit)   ((minors[(bit) / 32]) |= (1 << ((bit) % 32)))
-#define CLEAR_MINOR(minors, bit) ((minors[(bit) / 32]) &= ~(1 << ((bit) % 32)))
-#define TEST_MINOR(minors, bit)	 ((minors[(bit) / 32]) & (1 << ((bit) % 32)))
-
 struct tty_struct;
 
 /* basic device structure */

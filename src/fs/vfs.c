@@ -14,7 +14,8 @@ static bool is_devfs(const char * path)
 {
   size_t len = strlen(path);
   int tokens = 0;
-  char * str = (char *)malloc(len + 1);
+  // duplicate the string
+  char * str = strdup((char *)path);
   char * token;
   strncpy(str, path, len);
   if(str[0] == '/')
@@ -31,9 +32,13 @@ int vfs_open(struct file * filp, const char * file)
   int rc;
   struct task * p = get_current_task();
   if(is_devfs(file))
+  {
     rc = get_filesystem("devfs")->fops->open(filp, file);
+  }
   else
+  {
     rc = rootfs->fops->open(filp, file);
+  }
   if(IS_ERR(rc))
     return rc;
   return 0;

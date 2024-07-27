@@ -35,6 +35,6 @@ struct elf_phdr
 	uint32_t p_align;
 };
 
-int elf_exec(const char * name, uint8_t * data);
+int elf_exec(const char * name, const uint8_t * data);
 
 #endif

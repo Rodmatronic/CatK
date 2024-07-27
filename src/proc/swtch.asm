@@ -3,5 +3,4 @@ section .text
 
 jmp_to_elf:
   mov eax, [ebp + 8]
-  jmp $ ; breakpoint
   jmp [eax]

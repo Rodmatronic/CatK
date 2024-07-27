@@ -37,7 +37,7 @@ struct file_operations
   int (*lseek)(struct file *, size_t, int);
 	int (*read) (struct file *, void *, size_t);
 	int (*write) (struct file *, void *, size_t);
-	int (*readdir) (struct file *, void *, struct dirent *, int);
+	int (*readdir) (struct file *, struct dirent *, size_t);
 	int (*ioctl) (struct file *, void *, uint16_t, uint32_t);
 	int (*open) (struct file *, const char *);
 	void (*close) (struct file *);

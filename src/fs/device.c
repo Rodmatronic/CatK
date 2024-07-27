@@ -44,7 +44,6 @@ int register_blkdev(uint8_t major, const char * name, struct device * dev, struc
 	return 0;
 }
 
-/* this stupid function doesn't even get the correct device */
 struct device * get_blkdev(uint8_t major)
 {
 	if (major >= MAX_BLKDEV)
