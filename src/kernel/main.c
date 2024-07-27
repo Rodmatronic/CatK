@@ -97,11 +97,28 @@ void bootstrap2(void)
   rc = vfs_init();
   if(IS_ERR(rc))
     panic("Could not initialize VFS: %d\n", rc);
-  rc = vfs_mount("/", dev);
-  if(IS_ERR(rc))
-  {
-    panic("Could not mount rootfs on block (%d,%d): %d\n", dev->major, dev->minors, rc);
+
+  int retries = 5;
+
+  for (int i = 0; i < retries; i++) {
+      rc = vfs_mount("/", dev);
+      if (!IS_ERR(rc)) {
+          break;
+      }
+
+      if (i == 0) {
+          printk("Waiting on root device...\n");
+      } else {
+          printk("Still waiting on root device...\n");
+      }
+
+      msleep(10000); // Wait for 10 seconds
   }
+
+  if (IS_ERR(rc)) {
+    panic("Could not mount rootfs on block (%d,%d): %d, after %d attemps.\n", dev->major, dev->minors, rc, retries);
+  }
+
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
   rc = vfs_mount("/dev", dev);
   if(IS_ERR(rc))

@@ -41,3 +41,12 @@ void timer_init(void)
   timer_configure_hz(1000);
   interrupt_install(timer_irq, 32);
 }
+
+void msleep(uint32_t ms) {
+    uint32_t end = jiffies + ms;
+    while (jiffies < end) {
+        if (tasking_enabled()) {
+            schedule(); // Let other tasks run
+        }
+    }
+}
