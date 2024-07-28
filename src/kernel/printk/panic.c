@@ -2,6 +2,7 @@
 #include <catk/printk.h>
 #include <catk/compiler.h>
 #include <catk/core.h>
+#include <catk/trace.h>
 #include <lib/common.h>
 
 static void die()
@@ -12,6 +13,7 @@ static void die()
 
 void panic(const char format[], ...)
 {
+  trace_stack(8);
   va_list arg;
   va_start(arg, format);
   vprintf(strcat("Panic!: ", format), arg); // combine both strings to make one

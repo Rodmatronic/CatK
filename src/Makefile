@@ -27,7 +27,6 @@ CC_FLAGS = \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
 	-nostdlib \
-	-fno-omit-frame-pointer \
 	-O3
 
 ifeq ($(DEBUG), 1)
