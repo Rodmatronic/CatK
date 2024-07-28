@@ -45,7 +45,6 @@ int start_init(const char * cmdline)
     strncpy(init_path, "/init", NAME_MAX);
   else
     strncpy(init_path, init_val, NAME_MAX);
-  for(;;);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
   if (try_init(init_path) < 0)
   {

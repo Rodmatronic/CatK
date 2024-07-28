@@ -129,6 +129,7 @@ void bootstrap2(void)
       }
 
       if (!i) {
+      if (!i) {
           printk("Waiting on root device...\n");
       } else {
           printk("Still waiting on root device...\n");
