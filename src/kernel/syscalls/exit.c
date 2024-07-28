@@ -7,8 +7,7 @@
 
 void sys_exit(int err_code)
 {
-  debug("[sys_exit] exiting with code: %d\n", err_code);
-  printk("god dammit\n");
+  debug("sys_exit: exiting with code: %d\n", err_code);
   kill(get_current_task());
   for(;;);
 }

@@ -1,6 +1,8 @@
 #ifndef __IO_H
 #define __IO_H
 
+#include <stdint.h>
+
 // write operations
 void outb(uint16_t port, uint8_t data);
 void outw(uint16_t port, uint16_t data);

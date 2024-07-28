@@ -31,7 +31,7 @@ all: clean
 	@$(CATK_ROOT)/tools/gen_config/gen_config $(CONFIG)/config.catk -n | tee $(CATK_ROOT)/src/include/asm/config.inc
 	@$(MAKE) -C $(CATK_ROOT)/src 	|| { echo "Build failed"; exit 1; }
 	@echo "Build successful"
-# 		-icount 4,align=on \
+# 		-icount 6,align=on \
 #       For debugging
 
 run:

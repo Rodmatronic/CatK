@@ -62,5 +62,5 @@ void device_init(void)
 {
   memset(&chrdevs, 0, sizeof(chrdevs));
   memset(&blkdevs, 0, sizeof(blkdevs));
-  debug("[dev] devices can now be registered.\n");
+  debug("dev: devices can now be registered.\n");
 }

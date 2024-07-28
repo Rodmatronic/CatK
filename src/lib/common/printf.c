@@ -97,7 +97,7 @@ next:
         }
         case 'x':
         {
-          uint64_t x = va_arg(arg, uint64_t);
+          uint32_t x = va_arg(arg, uint32_t);
           char xs[32];
           itoa(x, xs, 16);
           if(HAS_FLAG(FLAG_FILL_ZERO))

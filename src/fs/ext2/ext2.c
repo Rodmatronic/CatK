@@ -111,7 +111,7 @@ int ext2_read_dir(uint32_t inode)
   ext2_read_inode(_inode_buf, inode);
   if ((_inode_buf->type & 0xf000) != EXT2_S_IFDIR)
   {
-    debug("[ext2] inode is not a directory!\n");
+    debug("Ext2: Inode is not a directory!\n");
     free(_inode_buf);
     return -ENOTDIR;
   }
@@ -288,19 +288,19 @@ static int ext2_read_file(struct file * filp, uint8_t * buf)
 
     if(inode->s_pointer && blocks_read < total_blocks)
     {
-        debug("[ext2] reading s-link\n");
+        debug("Ext2: Reading s-link\n");
         ext2_read_slink(inode->s_pointer, buf + blocks_read * priv_data.block_size);
         blocks_read += priv_data.block_size / sizeof(uint32_t);
     }
     if(inode->d_pointer && blocks_read < total_blocks)
     {
-        debug("[ext2] reading d-link\n");
+        debug("Ext2: Reading d-link\n");
         ext2_read_dlink(inode->d_pointer, buf + blocks_read * priv_data.block_size);
         blocks_read += (priv_data.block_size / sizeof(uint32_t)) * (priv_data.block_size / sizeof(uint32_t));
     }
     if(inode->t_pointer && blocks_read < total_blocks)
     {
-      debug("[ext2] t-links are unsupported!\n");
+      debug("Ext2: T-links are unsupported!\n");
     }
     free(inode);
     return 0;
@@ -314,7 +314,7 @@ int ext2_read(struct file * filp, void * buf, size_t unused)
 
 int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
 {
-  debug("[ext2] mounting on block %d,%d\n", blkdev->major, blkdev->minors);
+  debug("Ext2: Mounting on block %d,%d\n", blkdev->major, blkdev->minors);
   int rc;
   uint8_t sector_data[1024];
   rc = blkdev->fops->lseek(NULL, ext2_start_lba + 2, SEEK_SET);
@@ -326,16 +326,16 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
   sb = (struct ext2_superblock *)sector_data;
   if(sb->signature != EXT2_SUPER_MAGIC)
   {
-    debug("[ext2] invalid or corrupt superblock! found 0x%04x instead of 0x%04x\n", sb->signature, EXT2_SUPER_MAGIC);
+    debug("Ext2: Invalid or corrupt superblock! found 0x%04x instead of 0x%04x\n", sb->signature, EXT2_SUPER_MAGIC);
     return -EINVAL;
   }
   
   fs->sb->u.ext2_sb = sb;
-  printk("Detected Ext2 version %d.%d\n", sb->version_major, sb->version_minor);
+  printk("Ext2: Detected Ext2 version %d.%d\n", sb->version_major, sb->version_minor);
   
   priv_data.block_size = 1024 << sb->block_size;
   priv_data.fragment_size = 1024 << sb->fragment_size;
-  debug("[ext2] superblock block size: %d\n", priv_data.block_size);
+  debug("Ext2: Superblock block size: %d\n", priv_data.block_size);
   
   priv_data.bgdt_starting_block = (priv_data.block_size > 1024) ? 1 : 2; // Adjusting for block size
   priv_data.inode_size = sb->inode_size;

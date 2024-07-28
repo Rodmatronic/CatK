@@ -46,6 +46,8 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   ata_channels[ATA_SECONDARY].ctrl  = bar3;
   ata_channels[ATA_PRIMARY].bmide   = bar4;
   ata_channels[ATA_SECONDARY].bmide = bar4 + 8;
+  debug("ATA: Primary channel base: 0x%08x\n", ata_channels[ATA_PRIMARY].base);
+  debug("ATA: Secondary channel base: 0x%08x\n", ata_channels[ATA_SECONDARY].base);
   /* ata device stuff */
   ata_devices[num_ata] = device_struct_alloc();
   ata_devices[num_ata]->removable   = false;
@@ -60,6 +62,7 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
     return rc;
   }
   num_ata++;
+  debug("ATA: Installing interrupt handlers..\n");
   interrupt_install(ata_primary_irq, 14);
   interrupt_install(ata_secondary_irq, 15);
   return 0;

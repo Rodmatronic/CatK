@@ -33,8 +33,6 @@ int ramdisk_probe(uint32_t addr)
   register_blkdev(RAMDISK_MAJOR, "ramdisk", ramdisk, &ramdisk_fops);
   uint8_t * buffer = (uint8_t *)malloc(512);
   ramdisk_read_single_sector((uint8_t *)buffer, 2);
-  for(int i = 0; i < 512; i++)
-    debug("%02x\n", buffer[i]);
   return 0;
 }
 

@@ -87,7 +87,7 @@ void interrupt_handler(struct intr_stack_frame * frame)
       if(is_console_enabled())
       {
         printk("Fatal Exception: 0x%02x\n", frame->intr);
-        debug("[exception] received exception 0x%02x\n", frame->intr);
+        debug("Received exception 0x%02x\n", frame->intr);
         register_dump(frame);
         critical_enter();
         for(;;);

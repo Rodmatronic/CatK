@@ -47,7 +47,7 @@ static uint32_t _system_call(struct pt_regs * regs)
     }
     default:
     {
-      debug("[syscall] bad or unsupported system call 0x%x\n", regs->orig_eax);
+      debug("syscall: bad or unsupported system call 0x%x\n", regs->orig_eax);
       break;
     }
   }

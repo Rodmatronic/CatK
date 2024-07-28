@@ -36,9 +36,12 @@ inline bool is_console_enabled(void)
 
 inline int console_puts(char * buf)
 {
-  if(!con.write)
-    return -EIO;
-  con.write(buf, strlen(buf));
+  if(console_enabled)
+  {
+    if(!con.write)
+      return -EIO;
+    con.write(buf, strlen(buf));
+  }
   return 0;
 }
 

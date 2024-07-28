@@ -23,7 +23,6 @@ CC_FLAGS = \
 	-ffreestanding \
 	--target=i686-pc-none-elf \
 	-march=i686 \
-	-fno-exceptions \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
 	-nostdlib \

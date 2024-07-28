@@ -20,7 +20,7 @@ int sys_open(const char * filename, int flags, uint16_t mode)
   */
   if(fd < 0)
   {
-    debug("[sys_open] uh oh: %d\n", fd);
+    debug("sys_open: uh oh: %d\n", fd);
     /* fd contains the error code */
     return fd;
   }
@@ -30,7 +30,7 @@ int sys_open(const char * filename, int flags, uint16_t mode)
   rc = vfs_open(filp, filename);
   if(IS_ERR(rc))
   {
-    debug("[sys_open] oh no! %d\n", rc);
+    debug("sys_open: oh no! %d\n", rc);
     return rc;
   }
   p->fd[fd] = filp;

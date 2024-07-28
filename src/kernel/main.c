@@ -10,14 +10,14 @@
 #include <catk/tty.h>
 #include <catk/device.h>
 #include <catk/kernel.h>
+#include <catk/params.h>
 #include <catk/pci.h>
 #include <catk/vfs.h>
 #include <catk/ramdisk.h>
 #include <catk/trace.h>
 #include <catk/keyboard.h>
 #include <lib/ctype.h>
-
-#define retries 5
+#include <config.h>
 
 extern uintptr_t kernel_start;
 extern uintptr_t kernel_end;
@@ -25,6 +25,8 @@ extern uintptr_t kernel_end;
 static char * cmdline;
 
 static bool use_hd = false; /* determines if we use a hard-disk or not */
+bool kern_verbose = false;  /* set to false by default */
+
 static void show_bootart(void);
 
 static void show_boot_banner(void)
@@ -34,6 +36,18 @@ static void show_boot_banner(void)
   /* now for the long ass gpl license */
   printk("\nThis software is licensed under the GNU General Public License v3.0.\n");
   printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
+}
+
+static void show_mem_info(uintptr_t addr)
+{
+  struct multiboot_tag_basic_meminfo * meminfo;
+  meminfo = multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
+  if(!meminfo)
+    return;
+  /* prints out memory info like unix :) */
+  size_t total_mem = meminfo->mem_upper + meminfo->mem_lower;
+  printk("real mem: %d mb\n", KB_TO_MB(total_mem));
+  printk("avail mem: %d mb\n",  KB_TO_MB(total_mem - heap_get_used()));
 }
 
 void kmain(uint32_t magic, uintptr_t addr)
@@ -49,11 +63,20 @@ void kmain(uint32_t magic, uintptr_t addr)
   if(IS_ERR(rc))
     return;
   cmdline = obtain_cmdline(addr);
+  char * verbosity = get_cmdline_param_val(cmdline, "verbose");
+  if(verbosity)
+  {
+    if(strcmp("true", verbosity) == 0)
+    {
+      debug("Redirecting serial output to console...\n");
+      kern_verbose = true;
+    }
+  }
   show_boot_banner();
-  printk("CatK cmdline: %s\n", cmdline);
-  
+  show_mem_info(addr);
+  panic("test panic: %s\n", "shmunguss");
   if (!cpuidcheck()) {
-      panic("Invalid CPU/could not get CPUID for this hardware!");
+      panic("Could not get CPUID for this hardware!");
   }
   /* Check to see if the CPU supports CPUID. If not, panic.*/
   printk("CPU: CPUID supported\n");
@@ -80,7 +103,6 @@ extern int ramdisk_find_first_partition(void);
 
 void bootstrap2(void)
 {
-  debug("[kernel] %s start\n", __FUNCTION__);
   int rc, attempts;
   show_bootart();
   pci_init();
@@ -100,7 +122,7 @@ void bootstrap2(void)
   if(IS_ERR(rc))
     panic("Could not initialize VFS: %d\n", rc);
 
-  for (int i = 0; i < retries; i++) {
+  for (int i = 0; i < CATK_MOUNT_RETRIES; i++) {
       rc = vfs_mount("/", dev);
       if (!IS_ERR(rc)) {
           break;
@@ -116,7 +138,7 @@ void bootstrap2(void)
   }
 
   if (IS_ERR(rc)) {
-    panic("Could not mount rootfs on block (%d,%d): %d, after %d attempts.\n", dev->major, dev->minors, rc, retries);
+    panic("Could not mount rootfs on block (%d,%d) after %d attempts: %d.\n", dev->major, dev->minors, CATK_MOUNT_RETRIES, rc);
   }
 
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);

@@ -25,7 +25,6 @@ int register_filesystem(const char * name, struct fs_operations * fsops, struct 
   filesystems[num_fs].mount->flags  = flags;
   /* pro programmer here B^) */
   printk("VFS: Registered filesystem \"%s\"\n", name);
-  debug("[vfs] registered \"%s\" as a filesystem\n", name);
   num_fs++;
   return 0;
 }
@@ -34,12 +33,12 @@ struct filesystem * get_filesystem(const char * name)
 {
   for(int i = 0; i < NR_FILESYSTEMS; i++)
   {
-    debug("[fs] looking for %s, found %s\n", name, filesystems[i].name);
     if(!strncmp(filesystems[i].name, name, strlen(filesystems[i].name)))
       return &filesystems[i];
+    debug("Looking for %s, found %s\n", name, filesystems[i].name);
   }
   printk("What kind of filesystem are you looking for!?!?\n");
-  debug("I'm looking for fizzbuzz.\n");
+  debug("VFS: I'm looking for fizzbuzz, he stole my shmunguss.. >:(\n");
   return NULL;
 }
 

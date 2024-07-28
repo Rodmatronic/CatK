@@ -3,6 +3,7 @@
 #include <catk/printk.h>
 #include <catk/io.h>
 #include <catk/types.h>
+#include <catk/kernel.h>
 #include <lib/common.h>
 #include <config.h>
 #include <stdint.h>
@@ -90,10 +91,21 @@ void debug(const char * fmt, ...)
 #if CATK_DEBUG_SERIAL == 1
   va_list ap;
   va_start(ap, fmt);
-  char * buf = (char *)malloc(256);
-  vsprintf(buf, (char *)fmt, ap);
+#if CATK_FORCE_VERBOSE == 0
+  if(!kern_verbose)
+  {
+    char * buf = (char *)malloc(256);
+    vsprintf(buf, (char *)fmt, ap);
+    serial_write(0, buf, strlen(buf));
+    free(buf);
+  }
+  else
+  {
+    vprintf(fmt, ap);
+  }
+#else
+  vprintf(fmt, ap);
+#endif /* CATK_FORCE_VERBOSE */
   va_end(ap);
-  serial_write(0, buf, strlen(buf));
-  free(buf);
-#endif
+#endif /* CATK_DEBUG_SERIAL */
 }

@@ -163,6 +163,7 @@ void set_tss_stack(uint32_t esp0);
 
 void critical_enter(void);
 void critical_exit(void);
+void halt(void);
 
 extern int cpuidcheck(void);
 void cpu_dump_all_info(void);

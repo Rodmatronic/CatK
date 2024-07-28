@@ -95,7 +95,7 @@ void kill(struct task *p)
 {
   if (!p)
     return;
-  debug("[tasking] killing \"%s\"\n", p->name);
+  debug("scheduler: killing \"%s\"\n", p->name);
   if (p->pid == 0)
     panic("CatK idle task killed!\n");
   is_tasking_enabled = false;
@@ -177,7 +177,7 @@ static struct task *create_kernel_task(char *name, void *addr, int priority)
   STACK_PUSH(0x10);
   STACK_PUSH(0x10);
   p->esp = (uint32_t)stack;
-  debug("[tasking] created kernel-task %s with eip: 0x%08x\n", name, addr);
+  debug("scheduler: created kernel-task %s with eip: 0x%08x\n", name, addr);
   printk("Started kernel-task %s (PID %d)\n", name, p->pid);
   return p;
 }
@@ -243,7 +243,7 @@ static struct task *create_user_task(char *name, uint32_t addr, int priority)
   STACK_PUSH(0x23);
   STACK_PUSH(0x23);
   p->esp = (uint32_t)stack;
-  debug("[tasking] setting up user-task %s with eip: 0x%08x\n", name, addr);
+  debug("scheduler: setting up user-task %s with eip: 0x%08x\n", name, addr);
   return p;
 }
 
@@ -276,7 +276,7 @@ pid_t task_add_queue(struct task *p)
   p->prev = current;
   current->next = p;
   is_tasking_enabled = true;
-  debug("[tasking] added pid %d to queue\n", p->pid);
+  debug("scheduler: added pid %d to queue\n", p->pid);
   return p->pid;
 }
 

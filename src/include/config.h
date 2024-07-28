@@ -5,10 +5,12 @@
 
 #define CATK_SSE 0
 #define CATK_FOO 1
+#define CATK_MOUNT_RETRIES 5
 #define CATK_EXT2 1
 #define CATK_FAT32 0
 #define CATK_DEVFS 1
 #define CATK_VIDEO_GENERIC 0
+#define CATK_FORCE_VERBOSE 0
 #define CATK_DEBUG_SERIAL 1
-#define CATK_STACK_TRACE 0
+#define CATK_STACK_TRACE 1
 #endif

@@ -5,6 +5,7 @@
 #include <catk/errno.h>
 #include <catk/printk.h>
 #include <catk/debug.h>
+#include <catk/io.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
 #include <stdint.h>
@@ -46,8 +47,8 @@ static int ansi_list_idx = 0;
 static struct ansi_list ansi_value[8];
 static struct file_operations vgacon_fops;
 
-void vgacon_putc(char c);
-void vgacon_clear(void);
+static inline void vgacon_putc(char c);
+static inline void vgacon_clear(void);
 void vgacon_color_set(uint8_t fg, uint8_t bg);
 int vgacon_output_intr(struct tty_struct * tty, size_t len);
 
@@ -67,7 +68,7 @@ static char * vgacon_startup(void)
   return "console";
 }
 
-static void vgacon_print_glyph(int x, int y, char glyph)
+static inline void _hot_ vgacon_print_glyph(int x, int y, char glyph)
 {
   uint8_t color = (colors[vgacon_bg] << 4) | colors[vgacon_fg];
   uint16_t position = y * c.vc_rows + x;
@@ -75,7 +76,7 @@ static void vgacon_print_glyph(int x, int y, char glyph)
   *where = (uint16_t)glyph | (color << 8);
 }
 
-static void vgacon_scroll(void)
+static inline void _hot_ vgacon_scroll(void)
 {
   if (vgacon_x > (c.vc_rows - 1))
   {
@@ -86,13 +87,22 @@ static void vgacon_scroll(void)
   {
     for (int i = 1; i < c.vc_cols; i++)
     {
-      memcpy((void *)c.vc_screenbuf + (i - 1) * c.vc_rows * 2, (void *)c.vc_screenbuf + i * c.vc_rows * 2, c.vc_rows * 2);
+      memcpy16((void *)c.vc_screenbuf + (i - 1) * c.vc_rows * 2, (void *)c.vc_screenbuf + i * c.vc_rows * 2, c.vc_rows * 2);
     }
-    char * last_row = (void *)c.vc_screenbuf + (c.vc_rows - 1) * c.vc_rows * 2;
-    memset(last_row, 0, c.vc_rows * 2);
+    uint16_t * last_row = (void *)c.vc_screenbuf + (c.vc_rows - 1) * c.vc_rows * 2;
+    memset16(last_row, 0, c.vc_rows * 2);
 
     vgacon_y--;
   }
+}
+
+static void _hot_ vgacon_rebase_cursor(int x, int y)
+{
+  uint16_t pos = y * c.vc_rows + x;
+  outb(0x3d4, 0x0f);
+  outb(0x3d5, (uint8_t)(pos & 0xff));
+  outb(0x3d4, 0x0e);
+  outb(0x3d5, (uint8_t)((pos >> 8) & 0xff));
 }
 
 static inline void bs(void)
@@ -251,12 +261,13 @@ static void process_ansi(char ch)
   vgacon_scroll();
 }
 
-void vgacon_putc(char ch)
+static inline void _hot_ vgacon_putc(char ch)
 {
   process_ansi(ch);
+  vgacon_rebase_cursor(vgacon_x, vgacon_y);
 }
 
-void vgacon_write(const void * buf, size_t len)
+static inline void _hot_ vgacon_write(const void * buf, size_t len)
 {
   char * _buf = (char *)buf;
   for(int i = 0; i < len; i++)
@@ -286,14 +297,9 @@ int vgacon_output_intr(struct tty_struct * tty, size_t len)
   return 0;
 }
 
-void vgacon_clear(void)
+static inline void vgacon_clear(void)
 {
-  char * vmem = (char *)c.vc_screenbuf;
-  for (int i = 0; i < c.vc_rows * c.vc_cols; i++)
-  {
-    *vmem++ = '\0'; // Null character
-    *vmem++ = 0x7;  // Color for the cursor. Without this, it'd be black
-  }
+  memset16((void *)c.vc_screenbuf, 0x0007, c.vc_rows * c.vc_cols);
 }
 
 int vgacon_dev_write(struct file * file, void * buf, size_t sz)

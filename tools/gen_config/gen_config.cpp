@@ -83,9 +83,23 @@ int main(int argc, char * argv[])
             std::cout << "#define " << options.at(i).name;
             if(parser::is_bool(options.at(i).value))
             {
-                char ch = options.at(i).value[0];
-                char outch = (ch == 'y') ? '1' : '0';
-                std::cout << " " << outch << "\n";
+                std::string value = options.at(i).value;
+                if(strcmp(value.c_str(), "y") == 0)
+                {
+                    std::cout << " 1\n";
+                }
+                else
+                {
+                    /* i hate using nested if statements but it is needed here */
+                    if(strcmp(value.c_str(), "n") == 0)
+                    {
+                        std::cout << " 0\n";
+                    }
+                    else
+                    {
+                        std::cout << ' ' << value << "\n";
+                    }
+                }
             }
             else
             {

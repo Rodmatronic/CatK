@@ -22,7 +22,7 @@ static struct inode * devfs_find_device(const char * name)
 
 static int devfs_mount(struct filesystem * fs, struct device * dev)
 {
-  debug("[devfs] mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, dev->major, dev->minors);
+  debug("Mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, dev->major, dev->minors);
   devfs = fs;
   blkdev = dev;
   return 0;

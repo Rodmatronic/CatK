@@ -1,9 +1,11 @@
 #include <catk/console.h>
 #include <catk/device.h>
+#include <catk/compiler.h>
 #include <catk/tty.h>
 #include <catk/mem.h>
 #include <catk/errno.h>
 #include <catk/printk.h>
+#include <catk/spinlock.h>
 #include <font/vga8x16.h>
 #include <multiboot2.h>
 #include <lib/common.h>
@@ -47,7 +49,7 @@ static int ansi_list_idx = 0;
 static struct ansi_list ansi_value[8];
 static struct file_operations fbcon_fops;
 
-void fbcon_putc(char c);
+static inline void fbcon_putc(char c);
 void fbcon_clear(void);
 void fbcon_color_set(uint8_t fg, uint8_t bg);
 int fbcon_output_intr(struct tty_struct * tty, size_t len);
@@ -77,21 +79,16 @@ static char * fbcon_startup(void)
   return "console";
 }
 
-static uint32_t rgb_to_hex(uint8_t r, uint8_t g, uint8_t b)
-{
-  return (uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b;
-}
-
-void fbcon_putpx(int x, int y, uint32_t rgb)
+static void fbcon_putpx(int x, int y, uint32_t rgb)
 {
   uint32_t * buf = (uint32_t *)c.vc_screenbuf;
   uint32_t offset = y * c.vc_rows + x;
-  buf[offset] = (uint32_t)rgb;
+  buf[offset] = rgb;
 }
 
-static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
+static void _hot_ fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 {
-  int x = con_x * 8;
+  int x = con_x * c.vc_font.width;
   int y = con_y * 16;
   for (int dy = 0; dy < 16; dy++) 
   {
@@ -103,26 +100,21 @@ static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
   }
 }
 
-static void fbcon_scroll(void)
+static inline void _hot_ fbcon_scroll(void)
 {
   if (fbcon_x > (c.vc_rows / 8) - 1)
   {
     fbcon_x = 0;
     fbcon_y++;
   }
-  if (fbcon_y > (c.vc_cols / 16) - 1) // Check if the cursor is at the last row
+  /* check if scrolling is needed */
+  if (fbcon_y > (c.vc_cols / 16) - 1)
   {
-    // Calculate the size of a single row in bytes
-    size_t row_size_bytes = c.vc_rows * 4 * 16;
-
-    // Calculate the size of all rows except the last one
-    size_t all_rows_except_last_size = (c.vc_cols / 16) * row_size_bytes;
-
     // Move all rows up by one (excluding the first row)
-    memmove((uint8_t *)c.vc_screenbuf, (uint8_t *)c.vc_screenbuf + row_size_bytes, all_rows_except_last_size);
+    memmove32((uint32_t *)c.vc_screenbuf, ((uint32_t *)c.vc_screenbuf + c.vc_size_row / 4), (c.vc_cols / 16) * c.vc_size_row);
 
     // Clear the last row
-    memset((uint8_t *)c.vc_screenbuf + all_rows_except_last_size, 0, row_size_bytes);
+    memset32((uint32_t *)c.vc_screenbuf + (c.vc_cols / 16) * c.vc_size_row, 0x00000000, c.vc_size_row);
 
     // Move the cursor up by one row
     fbcon_y--;
@@ -213,7 +205,7 @@ static void process_ansi_sgr(size_t elem)
   }
 }
 
-static void process_ansi(char ch)
+static void _hot_ process_ansi(char ch)
 {
   switch(ansi_state)
   {
@@ -293,7 +285,7 @@ static void fbcon_rebase_cursor(int x, int y, int old_x, int old_y)
   fbcon_print_glyph(x, y, glyph);
 }
 
-void fbcon_putc(char ch)
+static inline void _hot_ fbcon_putc(char ch)
 {
   int prev_x = fbcon_x, prev_y = fbcon_y; 
   uint8_t * glyph = &c.vc_font.data[' ' * 16];
@@ -302,7 +294,7 @@ void fbcon_putc(char ch)
   fbcon_rebase_cursor(fbcon_x, fbcon_y, prev_x, prev_y);
 }
 
-void fbcon_write(const void * buf, size_t len)
+static inline void _hot_ fbcon_write(const void * buf, size_t len)
 {
   char * _buf = (char *)buf;
   for(int i = 0; i < len; i++)

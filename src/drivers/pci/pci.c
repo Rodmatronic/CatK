@@ -1,7 +1,8 @@
-#include <stdint.h>
 #include <catk/io.h>
 #include <catk/pci.h>
 #include <catk/printk.h>
+#include <catk/debug.h>
+#include <stdint.h>
 
 #define PCI_CONFIG_ADDR 0xcf8
 #define PCI_CONFIG_DATA 0xcfc
@@ -132,12 +133,13 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
   devices[num_pci].bus = bus;
   devices[num_pci].slot = slot;
   devices[num_pci].functions = func;
+  debug("PCI: Registered PCI device %04x:%04x.\n", 
+    devices[num_pci].ident.ven, devices[num_pci].ident.dev);
   num_pci++;
 }
 
 static void pci_enumerate(void)
 {
-  memset(devices, 0, sizeof(devices));
   for (int bus = 0; bus < 256; bus++)
   {
     for (int slot = 0; slot < 32; slot++)
@@ -154,6 +156,7 @@ static void pci_enumerate(void)
 
 static inline int pci_compare(struct pci_ident ident1, struct pci_ident * ident2)
 {
+  debug("PCI: Comparing %04x:%04x to %04x:%04x\n", ident1.ven, ident1.dev, ident2->ven, ident2->dev);
   return (ident1.ven == ident2->ven && ident1.dev == ident2->dev);
 }
 
@@ -166,13 +169,14 @@ static int pci_driver_attach(struct pci_device * dev, struct pci_driver * drv)
   return rc;
 }
 
-static void pci_driver_init(struct pci_device * dev)
+static inline void pci_driver_init(struct pci_device * dev)
 {
   dev->driver->init_driver();
 }
 
 static void pci_drivers_find(void) /* i hate this coding this damn function */
 {
+  printk("Finding PCI drivers..\n");
   int rc;
   for(int i = 0; i < num_pci; i++)
   {
@@ -202,6 +206,7 @@ static void pci_drivers_find(void) /* i hate this coding this damn function */
 
 void pci_init(void)
 {
+  memset(devices, 0, sizeof(struct pci_device) * 32);
   printk("Initializing PCI device subsystem...\n");
   pci_enumerate();
   pci_drivers_find();

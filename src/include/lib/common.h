@@ -17,6 +17,8 @@ typedef enum
 #define NULL ((void *)0)
 #endif
 
+#define KB_TO_MB(kb) ((kb) / 1000)
+
 /* string stuff */
 void strncpy(char * dest, const char * src, size_t n);
 size_t strlen(const char * str);
@@ -38,8 +40,14 @@ int atoi(const char * str);
 
 /* memory stuff */
 void * memcpy(void * dest, const void * src, size_t count);
+void * memcpy16(void * dest, const void * src, size_t count);
+void * memcpy32(void * dest, const void * src, size_t count);
 void * memset(void * dest, char val, size_t count);
+void * memset16(void * dest, uint16_t val, size_t count);
+void * memset32(void * dest, uint32_t val, size_t count);
 void * memmove(void * dest, const void * src, size_t n);
+void * memmove16(void * dest, const void * src, size_t n);
+void * memmove32(void * dest, const void * src, size_t n);
 int memcmp(const void * mem1, const void * mem2, size_t n);
 
 /* printf and their siblings */

@@ -27,9 +27,11 @@ int try_init(const char * path)
   rc = vfs_open(file, init_path);
   if(IS_ERR(rc))
     return rc;
+  /*
   uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
   vfs_read(file, program_buffer, file->inode->length);
   elf_exec((const char *)init_path, program_buffer);
+  */
   return 0;
 }
 
@@ -37,15 +39,13 @@ int start_init(const char * cmdline)
 {
   set_tss_stack(get_current_task()->esp);
   int rc;
-  debug("[kernel] %s start. be ready for every (possible) last minute bug.\n", __FUNCTION__);
   printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
   char * init_val = get_cmdline_param_val((char *)cmdline, "init");
   if(!init_val)
     strncpy(init_path, "/init", NAME_MAX);
   else
     strncpy(init_path, init_val, NAME_MAX);
-  vfs_open(NULL, "/dev/fb0");
-  
+  for(;;);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
   if (try_init(init_path) < 0)
   {

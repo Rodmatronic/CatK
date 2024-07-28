@@ -28,7 +28,7 @@ static bool is_devfs(const char * path)
 
 int vfs_open(struct file * filp, const char * file)
 {
-  debug("[vfs] opening file %s\n", file);
+  debug("VFS: Opening file %s\n", file);
   int rc;
   struct task * p = get_current_task();
   if(is_devfs(file))
@@ -46,7 +46,7 @@ int vfs_open(struct file * filp, const char * file)
 
 int vfs_read(struct file * filp, void * buf, size_t sz)
 {
-  debug("[vfs] reading file %s\n", filp->name);
+  debug("VFS: Reading file %s\n", filp->name);
   return rootfs->fops->read(filp, buf, sz);
 }
 

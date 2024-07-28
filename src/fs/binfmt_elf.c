@@ -18,14 +18,14 @@ static bool elf_verify(const uint8_t * data)
 
 static void elf_debug_print_info(struct elf_hdr * header)
 {
-	debug("[elf] file info:\n");
-	debug(" [->] format: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
-	debug(" [->] endianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
-	debug(" [->] elf version: %d\n", header->e_ident[6]);
-	debug(" [->] os abi: 0x%x\n", header->e_ident[7]);
-	debug(" [->] object file type: 0x%x\n", header->e_type);
-	debug(" [->] machine: 0x%x\n", header->e_machine);
-	debug(" [->] entry point: 0x%x\n", header->e_entry);
+	debug("elf header info:\n");
+	debug(" format: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
+	debug(" endianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
+	debug(" elf version: %d\n", header->e_ident[6]);
+	debug(" os abi: 0x%x\n", header->e_ident[7]);
+	debug(" object file type: 0x%x\n", header->e_type);
+	debug(" machine: 0x%x\n", header->e_machine);
+	debug(" entry point: 0x%x\n", header->e_entry);
 }
 
 int elf_exec(const char * name, const uint8_t * data)
@@ -33,12 +33,12 @@ int elf_exec(const char * name, const uint8_t * data)
   uint32_t load_loc, text_section_sz = 0;
   if(!elf_verify(data))
     return -ENOEXEC;
-  debug("[elf] load start\n");
-  debug("[elf] elf data start: 0x%08x\n", data);
+  debug("elf load start\n");
+  debug("elf data start: 0x%08x\n", data);
   struct elf_hdr * header = (struct elf_hdr *)data;
   elf_debug_print_info(header);
   struct elf_phdr * prghdr = (struct elf_phdr *)(data + header->e_phoff);
-  debug("[elf] section .text size: %d bytes\n", prghdr->p_filesz);
+  debug("section .text size: %d bytes\n", prghdr->p_filesz);
   text_section_sz = prghdr->p_filesz;
   for(int i = 0; i < header->e_phnum; i++, prghdr++)
   {
@@ -46,7 +46,7 @@ int elf_exec(const char * name, const uint8_t * data)
     {
       case ELF_TYPE_LOAD:
       {
-        debug("[elf] load offest 0x%08x..\n", prghdr->p_offset);
+        debug("elf file load offest 0x%08x..\n", prghdr->p_offset);
         load_loc = (uint32_t)data + prghdr->p_offset;
         break;
       }
@@ -58,7 +58,6 @@ int elf_exec(const char * name, const uint8_t * data)
   }
   if(!load_loc)
     return -ENOEXEC;
-  jmp_to_elf((load_loc + header->e_entry));
   //spawn_kernel_task((char *)name, (void *)(load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
   return 0;
 }

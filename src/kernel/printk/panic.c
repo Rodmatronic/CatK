@@ -3,19 +3,30 @@
 #include <catk/compiler.h>
 #include <catk/core.h>
 #include <catk/trace.h>
+#include <catk/debug.h>
+#include <catk/kernel.h>
+#include <catk/mem.h>
 #include <lib/common.h>
 
-static void die()
+static void _cold_ die()
 {
   critical_enter();
-  for(;;);
+  halt();
 }
 
-void panic(const char format[], ...)
+void _cold_ panic(const char format[], ...)
 {
   trace_stack(8);
   va_list arg;
   va_start(arg, format);
+  if(kern_verbose)
+  {
+    /* this is a bad idea */
+    char * buf = (char *)malloc(256);
+    vsprintf(buf, format, arg);
+    debug(buf);
+    free(buf);
+  }
   vprintf(strcat("Panic!: ", format), arg); // combine both strings to make one
   va_end(arg);
   die();

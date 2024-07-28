@@ -223,7 +223,7 @@ static void keyboard_test_print_err(uint8_t err)
     }
     default:
     {
-      printk("PS2-Port: Error: received unknown error code\n");
+      printk("PS2-Port: Error: received unknown error code: 0x%02x\n", err);
       break;
     }
   }
@@ -306,8 +306,8 @@ static void keyboard_port1_irq(struct intr_stack_frame * frame)
   int ch = keymap[scancode & 0x7f];
   if(!(scancode & KEYBOARD_KEYPRESS_STOP))
   {
-    printk("%c", ch);
-    //putc(ch);
+    /* stores character in tty read queue */
+    putc(ch);
   }
 }
 
@@ -350,6 +350,7 @@ int keyboard_init(void)
   {
     /* not to be confused with the PlayStation 2 :) */
     printk("PS2-Controller: Error: controller test failed\n");
+    critical_exit();
     return -EIO;
   }
   rc = keyboard_first_port_test();
@@ -357,6 +358,7 @@ int keyboard_init(void)
   if(rc != KEYBOARD_FISRT_PORT_TEST_PASS)
   {
     keyboard_test_print_err((uint8_t)rc);
+    critical_exit();
     return -EIO;
   }
   keyboard_channel_test();

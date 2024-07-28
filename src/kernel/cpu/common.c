@@ -13,6 +13,11 @@ inline void critical_exit(void)
   asm volatile("sti");
 }
 
+inline void halt(void)
+{
+  asm volatile("hlt");
+}
+
 static void cpuid(uint32_t code, uint32_t * a, uint32_t * b, uint32_t * c, uint32_t * d) 
 {
   asm volatile("cpuid"

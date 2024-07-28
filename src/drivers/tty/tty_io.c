@@ -50,7 +50,7 @@ static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t cou
 
   if(!tty->dev)
   {
-    debug("[tty_io] writing to a non-existent tty struct\n");
+    debug("tty: writing to a non-existent tty struct\n");
     return -ENODEV; 
   }
 
@@ -97,7 +97,7 @@ static void tty_release(struct tty_struct * tty)
 {
   if(!tty)
   {
-    debug("[tty_io] releasing a tty struct that is null??\n");
+    debug("tty: releasing a tty struct that is null??\n");
     return;
   }
   ring_buffer_release(tty->write_q);
@@ -114,7 +114,7 @@ int tty_create(int num, struct device * dev)
     return -ENOMEM;
   if(ttys[num])
   {
-    debug("[tty_io] tty%d device already exists, and is in use\n", num);
+    debug("tty: tty%d device already exists, and is in use\n", num);
     return -EBUSY;
   }
   struct tty_struct * tty = (struct tty_struct *)malloc(sizeof(struct tty_struct));
@@ -147,7 +147,7 @@ int tty_create(int num, struct device * dev)
   tty_dev->minors    = num;
   tty_dev->priv_data = tty;
   register_chrdev(TTYDEV_MAJOR, "tty", tty_dev, &tty_fops);
-  debug("[tty_io] tty%d created\n", num);
+  debug("tty: tty%d created\n", num);
   return 0;
 
 ring_mem_err:
