@@ -27,16 +27,14 @@ int try_init(const char * path)
   rc = vfs_open(file, init_path);
   if(IS_ERR(rc))
     return rc;
-  /*
   uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
   vfs_read(file, program_buffer, file->inode->length);
-  elf_exec((const char *)init_path, program_buffer);
-  */
-  return 0;
+  return elf_exec((const char *)init_path, program_buffer);
 }
 
 int start_init(const char * cmdline)
 {
+  //panic("They stole my shmunguss..\n");
   set_tss_stack(get_current_task()->esp);
   int rc;
   printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
@@ -51,13 +49,16 @@ int start_init(const char * cmdline)
     for(int i = 0; i < 8; i++)
     {
       printk("%s: trying %s...\n", __FUNCTION__, possible_inits[i]);
-      try_init(possible_inits[i]);
+      if (try_init(possible_inits[i]) == 0)
+        return 0;
     }
+    // R.I.P usleep function, you shall be missed 
+    // No valid init found. Filesystems have already been waited on, no point in staying up.
+    panic("No valid init process found. Tried all possible init's");
   }
-
-  // R.I.P usleep function, you shall be missed 
-
-  // No valid init found. Filesystems have already been waited on, no point in staying up.
-  panic("No valid init process found. Tried: %s %s %s %s %s %s %s %s", possible_inits[0], possible_inits[1], possible_inits[2], possible_inits[3], possible_inits[4], possible_inits[5], possible_inits[6], possible_inits[7]);
-  return 0;
+  else
+  {
+    return 0;
+  }
+  unreachable;
 }

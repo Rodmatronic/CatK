@@ -39,6 +39,7 @@ struct task
   uint8_t time_quantum;
   uint8_t ticks_left;
 	uint32_t stack_top; /* used only when freeing a task */
+  uint32_t entry_point;
   uint32_t esp;
   bool kernel_mode;
   char * cwd;

@@ -97,7 +97,7 @@ retry:;
   rc = ide_read_status(bar);
   if(!rc)
   {
-    printk("Failed to initialize IDE controller. %s\n");
+    printk("Failed to initialize IDE controller.\n");
     if(retry == 1)
       return;
     retry = 1;

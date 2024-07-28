@@ -26,6 +26,7 @@ CC_FLAGS = \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
 	-nostdlib \
+	-fstack-protector-strong \
 	-O3
 
 ifeq ($(DEBUG), 1)

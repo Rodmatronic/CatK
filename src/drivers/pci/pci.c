@@ -133,13 +133,14 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
   devices[num_pci].bus = bus;
   devices[num_pci].slot = slot;
   devices[num_pci].functions = func;
-  debug("%s:\n       VEN    DEV\n  PCI: %04x : %04x\n", __FUNCTION__, 
+  debug("  PCI = %04x : %04x\n", __FUNCTION__, 
     devices[num_pci].ident.ven, devices[num_pci].ident.dev);
   num_pci++;
 }
 
 static void pci_enumerate(void)
 {
+  debug("pci_register_device:\n        VEN      DEV\n");
   for (int bus = 0; bus < 256; bus++)
   {
     for (int slot = 0; slot < 32; slot++)
@@ -156,7 +157,7 @@ static void pci_enumerate(void)
 
 static inline int pci_compare(struct pci_ident ident1, struct pci_ident * ident2)
 {
-  debug("%s:\n             VEN    DEV\n  Comparing: %04x : %04x to %04x:%04x\n", __FUNCTION__, ident1.ven, ident1.dev, ident2->ven, ident2->dev);
+  debug("  Comparing = %04x : %04x to %04x:%04x\n", ident1.ven, ident1.dev, ident2->ven, ident2->dev);
   return (ident1.ven == ident2->ven && ident1.dev == ident2->dev);
 }
 
@@ -166,6 +167,7 @@ static int pci_driver_attach(struct pci_device * dev, struct pci_driver * drv)
   printk("Attaching driver \"%s\"...\n", drv->name);
   dev->driver = drv;
   rc = dev->driver->attach_driver(dev);
+  debug("  drv = %d\n  rc = %d\n", drv, rc);
   return rc;
 }
 
@@ -178,6 +180,7 @@ static void pci_drivers_find(void) /* i hate this coding this damn function */
 {
   printk("Finding PCI drivers..\n");
   int rc;
+  debug("pci_compare:\n");
   for(int i = 0; i < num_pci; i++)
   {
     struct pci_device d = devices[i];
@@ -207,7 +210,6 @@ static void pci_drivers_find(void) /* i hate this coding this damn function */
 void pci_init(void)
 {
   memset(devices, 0, sizeof(struct pci_device) * 32);
-  printk("Initializing PCI device subsystem...\n");
   pci_enumerate();
   pci_drivers_find();
 }

@@ -19,13 +19,13 @@ static bool elf_verify(const uint8_t * data)
 static void elf_debug_print_info(struct elf_hdr * header)
 {
 	debug("elf header info:\n");
-	debug(" format: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
-	debug(" endianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
-	debug(" elf version: %d\n", header->e_ident[6]);
-	debug(" os abi: 0x%x\n", header->e_ident[7]);
-	debug(" object file type: 0x%x\n", header->e_type);
-	debug(" machine: 0x%x\n", header->e_machine);
-	debug(" entry point: 0x%x\n", header->e_entry);
+	debug("\tformat: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
+	debug("\tendianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
+	debug("\telf version: %d\n", header->e_ident[6]);
+	debug("\tos abi: 0x%x\n", header->e_ident[7]);
+	debug("\tobject file type: 0x%x\n", header->e_type);
+	debug("\tmachine: 0x%x\n", header->e_machine);
+	debug("\tentry point: 0x%x\n", header->e_entry);
 }
 
 int elf_exec(const char * name, const uint8_t * data)
@@ -47,7 +47,7 @@ int elf_exec(const char * name, const uint8_t * data)
       case ELF_TYPE_LOAD:
       {
         debug("elf file load offest 0x%08x..\n", prghdr->p_offset);
-        load_loc = (uint32_t)data + prghdr->p_offset;
+        load_loc = (uint32_t)(data + prghdr->p_offset);
         break;
       }
       default:
@@ -58,6 +58,7 @@ int elf_exec(const char * name, const uint8_t * data)
   }
   if(!load_loc)
     return -ENOEXEC;
-  //spawn_kernel_task((char *)name, (void *)(load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
+  //spawn_user_task((char *)name, (load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
+  asm volatile ("jmp *%0" :: "r"(load_loc + header->e_entry) : "eax");
   return 0;
 }

@@ -182,69 +182,62 @@ static struct task *create_kernel_task(char *name, void *addr, int priority)
   return p;
 }
 
-extern void jmp_to_elf(uint32_t addr);
-
 /* the moment we've all been waiting for.. */
-static struct task *create_user_task(char *name, uint32_t addr, int priority)
+static struct task * create_user_task(char * name, uint32_t addr, int priority)
 {
-  struct task *p = (struct task *)calloc(sizeof(struct task), 1);
-  if (!p)
+	struct task * p = (struct task *)calloc(sizeof(struct task), 1);
+  if(!p)
     return NULL;
-  p->name = name;
-  p->pid = get_free_pid();
-  p->state = TASK_CREATED;
+	p->name = name;
+	p->pid = get_free_pid();
+	p->state = TASK_CREATED;
   p->priority = priority;
-  switch (p->priority)
+  switch(p->priority)
   {
-  case TASK_PRIORITY_HIGH:
-  {
-    p->time_quantum = 10;
-    break;
-  }
-  case TASK_PRIORITY_NORMAL:
-  {
-    p->time_quantum = 5;
-    break;
-  }
-  case TASK_PRIORITY_LOW:
-  {
-    p->time_quantum = 1;
-    break;
-  }
+    case TASK_PRIORITY_HIGH:
+    {
+      p->time_quantum = 10;
+      break;
+    }
+    case TASK_PRIORITY_NORMAL:
+    {
+      p->time_quantum = 5;
+      break;
+    }
+    case TASK_PRIORITY_LOW:
+    {
+      p->time_quantum = 1;
+      break;
+    }
   }
   memset(p->fd, 0, sizeof(struct file) * OPEN_MAX);
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
-  p->esp = (uint32_t)calloc(4096, 1);
-  if (!(void *)p->esp)
+	p->esp = (uint32_t)calloc(4096, 1);
+  if(!(void *)p->esp)
   {
     free(p);
     return NULL;
   }
   /* the stack grows down, so we go to the top, which is also the bottom */
   p->stack_top = (p->esp + 4096);
-  // register uint32_t val __asm__ ("eax"); i feel like i had needed this before so im gonna keep it here
-  uint32_t *stack = (uint32_t *)p->stack_top;
-  STACK_PUSH(addr); // this will be where the elf file starts
-  STACK_PUSH(0x23);
-  STACK_PUSH(p->stack_top);
-  STACK_PUSH(0x200);
-  STACK_PUSH(0x1b);
-  STACK_PUSH(addr); // this goes to 0x002197d0 instead
-  STACK_PUSH(0);
-  STACK_PUSH(0);
-  STACK_PUSH(0);
-  STACK_PUSH(0);
-  STACK_PUSH(0);
-  STACK_PUSH(0);
-  STACK_PUSH(p->stack_top);
-  STACK_PUSH(0x23);
-  STACK_PUSH(0x23);
-  STACK_PUSH(0x23);
-  STACK_PUSH(0x23);
-  p->esp = (uint32_t)stack;
-  debug("scheduler: setting up user-task %s with eip: 0x%08x\n", name, addr);
-  return p;
+	uint32_t * stack = (uint32_t *)p->stack_top;
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(0);
+	STACK_PUSH(p->stack_top);
+	STACK_PUSH(0x23);
+	STACK_PUSH(0x23);
+	STACK_PUSH(0x23);
+	STACK_PUSH(0x23);
+	p->esp = (uint32_t)stack;
+  p->entry_point = addr;
+  debug("[tasking] created user-task %s with eip: 0x%08x\n", name, addr);
+  printk("Started user-task %s (PID %d)\n", name, p->pid);
+	return p;
 }
 
 #undef STACK_PUSH
@@ -258,7 +251,6 @@ int spawn_kernel_task(char *name, void *addr, int priority)
   return p->pid;
 }
 
-/* we'll worry about argc and argv in a minute */
 int spawn_user_task(char *name, uint32_t addr, int priority)
 {
   struct task *p = create_user_task(name, addr, priority);
@@ -298,6 +290,24 @@ static void exec_task(void)
   asm volatile("iretl");
 }
 
+static void user_exec_task(void)
+{
+  current->state = TASK_ALIVE;
+	asm volatile("mov %%eax, %%esp" :: "a"(current->esp));
+	asm volatile("pop %gs");
+	asm volatile("pop %es");
+	asm volatile("pop %fs");
+	asm volatile("pop %ds");
+	asm volatile("pop %ebp");
+	asm volatile("pop %edi");
+	asm volatile("pop %esi");
+	asm volatile("pop %edx");
+	asm volatile("pop %ecx");
+	asm volatile("pop %ebx");
+	asm volatile("pop %eax");
+  usermode_switch((void *)current->entry_point);
+}
+
 static struct task *find_next_task(void)
 {
   struct task *p = current->next;
@@ -331,7 +341,10 @@ void schedule(void)
   current = find_next_task();
   if (current->state == TASK_CREATED)
   {
-    exec_task();
+    if(current->kernel_mode)
+      exec_task();
+    else
+      user_exec_task();
   }
   asm volatile("mov %%eax, %%esp" ::"a"(current->esp));
   asm volatile("pop %ss");

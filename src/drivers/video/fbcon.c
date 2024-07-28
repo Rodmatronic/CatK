@@ -79,7 +79,7 @@ static char * fbcon_startup(void)
   return "console";
 }
 
-static void fbcon_putpx(int x, int y, uint32_t rgb)
+static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
 {
   uint32_t * buf = (uint32_t *)c.vc_screenbuf;
   uint32_t offset = y * c.vc_rows + x;
@@ -89,10 +89,10 @@ static void fbcon_putpx(int x, int y, uint32_t rgb)
 static void _hot_ fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 {
   int x = con_x * c.vc_font.width;
-  int y = con_y * 16;
-  for (int dy = 0; dy < 16; dy++) 
+  int y = con_y * c.vc_font.height;
+  for (int dy = 0; dy < c.vc_font.height; dy++) 
   {
-    for (int dx = 0; dx < 8; dx++)
+    for (int dx = 0; dx < c.vc_font.width; dx++)
     {
       int color = (glyph[dy] >> (7 - dx)) & 1;
       fbcon_putpx(x + dx, y + dy, color ? colors[fbcon_fg] : colors[fbcon_bg]);
@@ -102,23 +102,14 @@ static void _hot_ fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 
 static inline void _hot_ fbcon_scroll(void)
 {
-  if (fbcon_x > (c.vc_rows / 8) - 1)
+  if (fbcon_x > (c.vc_rows / c.vc_font.width) - 1)
   {
     fbcon_x = 0;
     fbcon_y++;
   }
-  /* check if scrolling is needed */
-  if (fbcon_y > (c.vc_cols / 16) - 1)
-  {
-    // Move all rows up by one (excluding the first row)
-    memmove32((uint32_t *)c.vc_screenbuf, ((uint32_t *)c.vc_screenbuf + c.vc_size_row / 4), (c.vc_cols / 16) * c.vc_size_row);
-
-    // Clear the last row
-    memset32((uint32_t *)c.vc_screenbuf + (c.vc_cols / 16) * c.vc_size_row, 0x00000000, c.vc_size_row);
-
-    // Move the cursor up by one row
-    fbcon_y--;
-  }
+  memcpy32((void *)c.vc_screenbuf, (void *)(c.vc_screenbuf + c.vc_size_row), (c.vc_cols / c.vc_font.height) * c.vc_size_row);
+  memset32((void *)c.vc_screenbuf + (c.vc_cols / c.vc_font.height) * c.vc_size_row, 0x00000000, c.vc_size_row);
+  fbcon_y--;
 }
 
 static inline void bs(void)
@@ -276,7 +267,8 @@ static void _hot_ process_ansi(char ch)
       ansi_state = ANSI_STATE_ESC;
     }
   }
-  fbcon_scroll();
+  if (fbcon_y > (c.vc_cols / 16) - 1)
+    fbcon_scroll();
 }
 
 static void fbcon_rebase_cursor(int x, int y, int old_x, int old_y)

@@ -49,7 +49,7 @@ struct intr_stack_frame
   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; 
   uint32_t intr, err_code;
   uint32_t eip, cs, eflags, useresp, ss;
-};
+}_packed_;
 
 typedef void (*intr_handler)(struct intr_stack_frame *);
 void interrupt_install(intr_handler handler, uint8_t intr);

@@ -27,7 +27,6 @@ static uint32_t _system_call(struct pt_regs * regs)
     {
       /* sometimes a task can return from this.. */
       sys_exit((int)regs->ebx);
-      rc = 0;
       break;
     }
     case 0x02:

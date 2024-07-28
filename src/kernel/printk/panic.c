@@ -19,14 +19,6 @@ void _cold_ panic(const char format[], ...)
   trace_stack(8);
   va_list arg;
   va_start(arg, format);
-  if(kern_verbose)
-  {
-    /* this is a bad idea */
-    char * buf = (char *)malloc(256);
-    vsprintf(buf, format, arg);
-    debug(buf);
-    free(buf);
-  }
   vprintf(strcat("Panic!: ", format), arg); // combine both strings to make one
   va_end(arg);
   die();

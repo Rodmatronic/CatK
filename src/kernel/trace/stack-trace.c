@@ -13,12 +13,13 @@ struct stack_frame
 void trace_stack(int frames)
 {
 #if CATK_STACK_TRACE == 1
+    printk("stack backtrace:\n");
     struct stack_frame * stack;
-    asm volatile("movl %%ebp, %0" : "=r"(stack) ::);
-    for(int i = 0; stack && i < frames; ++i)
+    asm volatile("movl %%ebp, %0" : "=r"(stack));
+    for(int i = 0; stack && i < frames; i++)
     {
-        printk("frame %d: 0x%08x : [0x%08x]\n", i, stack->ip, stack->bp);
-        struct stack_frame * stack = stack->bp;
+        printk("\t#%d: 0x%08x : [0x%08x]\n", i, stack->ip, stack->bp);
+        stack = stack->bp;
     }
 #endif
 }
