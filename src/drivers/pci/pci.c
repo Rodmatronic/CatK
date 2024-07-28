@@ -133,7 +133,7 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
   devices[num_pci].bus = bus;
   devices[num_pci].slot = slot;
   devices[num_pci].functions = func;
-  debug("PCI: Registered PCI device %04x:%04x.\n", 
+  debug("%s:\n       VEN    DEV\n  PCI: %04x : %04x\n", __FUNCTION__, 
     devices[num_pci].ident.ven, devices[num_pci].ident.dev);
   num_pci++;
 }
@@ -156,7 +156,7 @@ static void pci_enumerate(void)
 
 static inline int pci_compare(struct pci_ident ident1, struct pci_ident * ident2)
 {
-  debug("PCI: Comparing %04x:%04x to %04x:%04x\n", ident1.ven, ident1.dev, ident2->ven, ident2->dev);
+  debug("%s:\n             VEN    DEV\n  Comparing: %04x : %04x to %04x:%04x\n", __FUNCTION__, ident1.ven, ident1.dev, ident2->ven, ident2->dev);
   return (ident1.ven == ident2->ven && ident1.dev == ident2->dev);
 }
 

@@ -38,7 +38,6 @@ struct filesystem * get_filesystem(const char * name)
     debug("Looking for %s, found %s\n", name, filesystems[i].name);
   }
   printk("What kind of filesystem are you looking for!?!?\n");
-  debug("VFS: I'm looking for fizzbuzz, he stole my shmunguss.. >:(\n");
   return NULL;
 }
 

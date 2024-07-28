@@ -74,7 +74,6 @@ void kmain(uint32_t magic, uintptr_t addr)
   }
   show_boot_banner();
   show_mem_info(addr);
-  panic("test panic: %s\n", "shmunguss");
   if (!cpuidcheck()) {
       panic("Could not get CPUID for this hardware!");
   }
