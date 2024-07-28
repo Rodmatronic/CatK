@@ -17,6 +17,8 @@
 #include <catk/keyboard.h>
 #include <lib/ctype.h>
 
+#define retries 5
+
 extern uintptr_t kernel_start;
 extern uintptr_t kernel_end;
 
@@ -98,15 +100,13 @@ void bootstrap2(void)
   if(IS_ERR(rc))
     panic("Could not initialize VFS: %d\n", rc);
 
-  int retries = 5;
-
   for (int i = 0; i < retries; i++) {
       rc = vfs_mount("/", dev);
       if (!IS_ERR(rc)) {
           break;
       }
 
-      if (i == 0) {
+      if (!i) {
           printk("Waiting on root device...\n");
       } else {
           printk("Still waiting on root device...\n");
@@ -116,7 +116,7 @@ void bootstrap2(void)
   }
 
   if (IS_ERR(rc)) {
-    panic("Could not mount rootfs on block (%d,%d): %d, after %d attemps.\n", dev->major, dev->minors, rc, retries);
+    panic("Could not mount rootfs on block (%d,%d): %d, after %d attempts.\n", dev->major, dev->minors, rc, retries);
   }
 
   printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);

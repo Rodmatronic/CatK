@@ -15,14 +15,14 @@
 
 char init_path[NAME_MAX + 1]; /* either set by cmdline or set by the kernel */
 
-const char possible_inits[][32] = {
-  "/init", "/etc/init", "/sbin/init"
+const char possible_inits[][128] = {
+  // /init is already tried, no point in trying it again
+  "/bin/init", "/etc/init", "/etc/initrc", "/sbin/init", "/boot/init", "/usr/bin/init", "/usr/sbin/init", "/usr/local/bin/init"
 };
 
 int try_init(const char * path)
 {
   int rc;
-  printk("%s: trying %s...\n", __FUNCTION__, init_path);
   struct file * file = (struct file *)malloc(sizeof(struct file));
   rc = vfs_open(file, init_path);
   if(IS_ERR(rc))
@@ -45,17 +45,20 @@ int start_init(const char * cmdline)
   else
     strncpy(init_path, init_val, NAME_MAX);
   vfs_open(NULL, "/dev/fb0");
-  for(;;);
-  /*
+  
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
   if (try_init(init_path) < 0)
   {
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < 8; i++)
     {
       printk("%s: trying %s...\n", __FUNCTION__, possible_inits[i]);
       try_init(possible_inits[i]);
     }
   }
+
+  // R.I.P usleep function, you shall be missed 
+
+  // No valid init found. Filesystems have already been waited on, no point in staying up.
+  panic("No valid init process found. Tried: %s %s %s %s %s %s %s %s", possible_inits[0], possible_inits[1], possible_inits[2], possible_inits[3], possible_inits[4], possible_inits[5], possible_inits[6], possible_inits[7]);
   return 0;
-  */
 }
