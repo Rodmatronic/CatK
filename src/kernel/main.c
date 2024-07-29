@@ -5,6 +5,7 @@
 #include <catk/core.h>
 #include <catk/errno.h>
 #include <catk/printk.h>
+#include <catk/io.h>
 #include <catk/task.h>
 #include <catk/debug.h>
 #include <catk/tty.h>
@@ -59,6 +60,7 @@ void kmain(uint32_t magic, uintptr_t addr)
   serial_init();
   debug(" kernel!\n");
   device_init();
+  beep();
   int rc = console_init(addr);
   if(IS_ERR(rc))
     return;

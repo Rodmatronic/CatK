@@ -122,6 +122,9 @@ void pic_eoi(uint8_t irq);
 
 void timer_init(void);
 void msleep(uint32_t ms);
+void beep();
+static void nosound();
+static void play_sound(uint32_t nFrequence);
 
 /* TSS */
 
