@@ -16,6 +16,11 @@ static void _cold_ die()
 
 void _cold_ panic(const char format[], ...)
 {
+  beep(50);
+  msleep(50);
+  beep(50);
+  msleep(50);
+  beep(50);
   trace_stack(8);
   va_list arg;
   va_start(arg, format);

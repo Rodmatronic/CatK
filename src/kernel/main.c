@@ -60,7 +60,7 @@ void kmain(uint32_t magic, uintptr_t addr)
   serial_init();
   debug(" kernel!\n");
   device_init();
-  beep();
+  beep(10);
   int rc = console_init(addr);
   if(IS_ERR(rc))
     return;

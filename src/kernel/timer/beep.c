@@ -27,9 +27,9 @@
  }
  
  //Make a beep
- void beep() {
+ void beep(int ms) {
  	 play_sound(1000);
- 	 msleep(10);
+ 	 msleep(ms);
  	 nosound();
           //set_PIT_2(old_frequency);
  }
