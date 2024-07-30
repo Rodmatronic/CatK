@@ -48,7 +48,7 @@ void print_tasks(void)
   }
 }
 
-static pid_t get_free_pid()
+static pid_t get_free_pid(void)
 {
   struct task *p = catk_idle_task;
   for (pid_t pid = 0; pid < NPROC; pid++)

@@ -102,7 +102,7 @@ extern void interrupt_44();
 extern void interrupt_45();
 extern void interrupt_46();
 extern void interrupt_47();
-extern void syscall_dispatcher();
+extern void interrupt_128();
 
 /* PIC */
 
@@ -120,11 +120,11 @@ void pic_eoi(uint8_t irq);
 
 /* PIT */
 
+#define PIT_FREQ_DIVISOR 1193180
+
 void timer_init(void);
 void msleep(uint32_t ms);
-void beep();
-static void nosound();
-static void play_sound(uint32_t nFrequence);
+void beep(int ms);
 
 /* TSS */
 

@@ -90,43 +90,4 @@ DEFINE_INT_HANDLER 44, 1
 DEFINE_INT_HANDLER 45, 1
 DEFINE_INT_HANDLER 46, 1
 DEFINE_INT_HANDLER 47, 1
-
-global syscall_dispatcher
-extern system_call
-
-syscall_dispatcher:
-  push ds
-  ; go to kernel mode
-  push ax
-  mov ax, 0x10
-  mov ds, ax
-  mov es, ax
-  mov fs, ax
-  mov gs, ax
-  pop ax
-
-  push eax      ; orig_eax
-  push dword 0  ; eax after syscall
-  push ebx      ; ebx
-  push ecx      ; ecx
-  push edx      ; edx
-  push esp      ; push info to system_call()
-  call system_call
-  add esp, 4    ; skip over esp
-  pop edx       ; edx
-  pop ecx       ; ecx
-  pop ebx       ; ebx
-  pop eax       ; overwrite eax with new eax 
-  add esp, 4    ; skip over orig_eax
-  ; exit kernel mode using super cool ninja tactics
-  push ax
-  add esp, 4
-  pop ax
-  mov ds, ax
-  mov es, ax
-  mov fs, ax
-  mov gs, ax
-  sub esp, 4
-  pop ax
-  ; let the cpu do the rest :)
-  iretd
+DEFINE_INT_HANDLER 128, 1

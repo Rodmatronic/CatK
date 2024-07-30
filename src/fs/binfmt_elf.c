@@ -16,7 +16,7 @@ static bool elf_verify(const uint8_t * data)
   return (data[0] == 0x7f && data[1] == 0x45 && data[2] == 0x4c && data[3] == 0x46);
 }
 
-static void elf_debug_print_info(struct elf_hdr * header)
+static void debug_print_info(struct elf_hdr * header)
 {
 	debug("elf header info:\n");
 	debug("\tformat: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
@@ -28,6 +28,59 @@ static void elf_debug_print_info(struct elf_hdr * header)
 	debug("\tentry point: 0x%x\n", header->e_entry);
 }
 
+/*
+
+static inline struct elf_section * elf_get_section_header(struct elf_hdr * header)
+{
+  return (struct elf_section *)((uint32_t)header + header->e_shoff);
+}
+
+static inline struct elf_section * elf_get_section(int idx, struct elf_hdr * header)
+{
+  return &elf_get_section_header(header)[idx];
+}
+
+static inline char * elf_get_string_table(struct elf_hdr * hdr)
+{
+	if(!hdr->e_shstrndx)
+    return NULL;
+	return (char *)hdr + elf_get_section(hdr->e_shstrndx, hdr)->sh_offset;
+}
+
+static inline char * elf_string_lookup(struct elf_hdr * hdr, int offset)
+{
+	char * strtab = elf_get_string_table(hdr);
+	if(!strtab)
+    return NULL;
+	return strtab + offset;
+}
+static uint32_t elf_get_symval(struct elf_hdr * hdr, int table, int idx) 
+{
+	if(!table || !idx) 
+    return -1;
+	struct elf_section * symtab = elf_get_section(table, hdr);
+	uint32_t symtab_entries = symtab->sh_size / symtab->sh_entsize;
+	if(idx >= symtab_entries)
+  {
+    debug("elf: index is out of range. given index: %d, max index: %d\n", idx, symtab_entries);
+		return -1;
+	}
+	int symaddr = (int)hdr + symtab->sh_offset;
+	struct elf_symbol * symbol = &((struct elf_symbol *)symaddr)[idx];
+  if(!symbol->st_shndx) 
+  {
+    debug("elf: external symbols are not supported");
+    return -1;
+  }
+  else
+  {
+    debug("elf: symbol is defined :D");
+  }
+  return 0;
+}
+
+*/
+
 int elf_exec(const char * name, const uint8_t * data)
 {
   uint32_t load_loc, text_section_sz = 0;
@@ -36,7 +89,7 @@ int elf_exec(const char * name, const uint8_t * data)
   debug("elf load start\n");
   debug("elf data start: 0x%08x\n", data);
   struct elf_hdr * header = (struct elf_hdr *)data;
-  elf_debug_print_info(header);
+  debug_print_info(header);
   struct elf_phdr * prghdr = (struct elf_phdr *)(data + header->e_phoff);
   debug("section .text size: %d bytes\n", prghdr->p_filesz);
   text_section_sz = prghdr->p_filesz;

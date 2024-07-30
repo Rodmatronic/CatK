@@ -35,6 +35,31 @@ struct elf_phdr
 	uint32_t p_align;
 };
 
+struct elf_section
+{
+	uint16_t	sh_name;
+	uint16_t	sh_type;
+	uint16_t	sh_flags;
+	uint32_t	sh_addr;
+	uint32_t	sh_offset;
+	uint16_t	sh_size;
+	uint16_t	sh_link;
+	uint16_t	sh_info;
+	uint16_t	sh_addralign;
+	uint16_t	sh_entsize;
+};
+
+struct elf_symbol
+{
+	uint16_t		st_name;
+	uint32_t		st_value;
+	uint16_t		st_size;
+	uint8_t			st_info;
+	uint8_t			st_other;
+	uint16_t		st_shndx;
+};
+
 int elf_exec(const char * name, const uint8_t * data);
+char * elf_get_kernel_function_symbol(uint32_t kernel_start, uint32_t eip);
 
 #endif

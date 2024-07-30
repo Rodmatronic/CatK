@@ -9,6 +9,7 @@ export CC = clang
 export LD = ld
 
 export CATK_ROOT = $(CURDIR)
+export TOOLS = $(CATK_ROOT)/tools
 export GZ = $(shell which gzip)
 export CONFIG = $(CATK_ROOT)/config
 export OUT = $(CATK_ROOT)/out
@@ -24,11 +25,11 @@ $(shell $(MKDIR) $(OBJ) $(OUT))
 # would not update with the new configuration. A very simple workaround
 # is to recompile all files with the new configurations.
 all: clean
-	@$(MAKE) -C $(CATK_ROOT)/tools/gen_config || { echo "Build failed"; exit 1; }
+	@$(MAKE) -C $(TOOLS)/gen_config/ || { echo "Build failed"; exit 1; }
 # generate c header file
-	@$(CATK_ROOT)/tools/gen_config/gen_config $(CONFIG)/config.catk | tee $(CATK_ROOT)/src/include/config.h
+	@$(TOOLS)/gen_config/gen_config $(CONFIG)/config.catk | tee $(CATK_ROOT)/src/include/config.h
 # generate nasm include file
-	@$(CATK_ROOT)/tools/gen_config/gen_config $(CONFIG)/config.catk -n | tee $(CATK_ROOT)/src/include/asm/config.inc
+	@$(TOOLS)/gen_config/gen_config $(CONFIG)/config.catk -n | tee $(CATK_ROOT)/src/include/asm/config.inc
 	@$(MAKE) -C $(CATK_ROOT)/src 	|| { echo "Build failed"; exit 1; }
 	@echo "Build successful"
 # 		-icount 6,align=on \
@@ -44,4 +45,5 @@ run:
 clean:
 	@$(RM_FORCE) $(OBJ)
 	@$(RM_FORCE) $(OUT)
+	@$(RM_FORCE) $(SRC)/symlist.c
 	@$(RM_FORCE) $(shell find . -type f -name "*.o")

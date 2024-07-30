@@ -9,7 +9,7 @@ volatile uint32_t jiffies;
 
 static void timer_configure_hz(uint16_t hz)
 { 
-  int divisor = 1193180 / hz;  
+  int divisor = PIT_FREQ_DIVISOR / hz;  
   outb(0x43, 0x36); 
   outb(0x40, divisor & 0xff);
   outb(0x40, divisor >> 8);

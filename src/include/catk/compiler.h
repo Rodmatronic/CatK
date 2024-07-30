@@ -8,5 +8,7 @@
 #define _naked_       __attribute__((naked))        /* doesnt set up stack frame */
 #define _aligned(x)    __attribute__((aligned(x)))  /* align something by x bytes */
 #define unreachable   __builtin_unreachable()       /* code shouldn't be reached */
+#define _no_return_   __attribute__((noreturn))     /* function shouldn't return */
+#define _weak_        __attribute__((weak))         /* linker wont check for definition of something */
 
 #endif

@@ -1,4 +1,5 @@
 #include <catk/printk.h>
+#include <catk/compiler.h>
 #include <stdint.h>
 
 #if UINT32_MAX == UINTPTR_MAX
@@ -9,14 +10,13 @@
 
 uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
  
-__attribute__((noreturn)) void __stack_chk_fail(void)
+void _no_return_ __stack_chk_fail(void)
 {
-	printk("stack smashing detected\n");
-  asm volatile("cli");
-  for(;;);
+	oops("Stack smashing detected. Report this to the CatK GitHub repository at https://github.com/Rodmatronic/CatK/issues\n");
+  for(;;); /* wait for our inevitable death */
 }
 
-__attribute__((noreturn)) void __stack_chk_fail_local(void)
+void _no_return_ __stack_chk_fail_local(void)
 {
   __stack_chk_fail();
 }

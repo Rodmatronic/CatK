@@ -1,5 +1,6 @@
 # Target files to create
 TARGET = catkernel.elf
+TARGET_TMP = catkernel.tmp.o
 TARGET_ISO = catkernel.iso
 
 ISO_DIR = $(OUT)/isodir
@@ -60,10 +61,17 @@ else
 	@printf "[ Build ISO skipped ]\n"
 endif
 
+$(TARGET_TMP): $(ASM_OBJ) $(C_OBJ)
+	@$(LD) $(LD_FLAGS) -o $(TARGET_TMP) -r $^
+	@printf "[ Generating kernel symbols... ]\n"
+	@$(TOOLS)/gen_syms.sh $(TARGET_TMP) $(SRC)/symlist.c
+	@$(CC) -c symlist.c -o symlist.o $(CC_FLAGS)
 
-$(TARGET): $(ASM_OBJ) $(C_OBJ)
+
+
+$(TARGET): $(TARGET_TMP)
 	@printf "[ Linking kernel.. ]\n"
-	@$(LD) $(LD_FLAGS) -o $(TARGET) $^
+	@$(LD) $(LD_FLAGS) -o $(TARGET) $(TARGET_TMP) symlist.o
 	@printf "[ Validating Multiboot2 signature... ]\n"
 ifneq ($(SKIP_MB_CHECK), 1)
 	@grub-file --is-x86-multiboot2 $(TARGET)

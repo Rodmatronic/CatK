@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <lib/common.h>
 
+extern uintptr_t kernel_start;
+extern uintptr_t kernel_end;
+
 extern bool kern_verbose;
 
 char * obtain_cmdline(uint32_t addr);

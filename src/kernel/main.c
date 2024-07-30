@@ -20,9 +20,6 @@
 #include <lib/ctype.h>
 #include <config.h>
 
-extern uintptr_t kernel_start;
-extern uintptr_t kernel_end;
-
 static char * cmdline;
 
 static bool use_hd = false; /* determines if we use a hard-disk or not */
@@ -47,8 +44,8 @@ static void show_mem_info(uintptr_t addr)
     return;
   /* prints out memory info like unix :) */
   size_t total_mem = meminfo->mem_upper + meminfo->mem_lower;
-  printk("real mem: %d mb\n", KB_TO_MB(total_mem));
-  printk("avail mem: %d mb\n",  KB_TO_MB(total_mem - heap_get_used()));
+  printk("real mem: %d kb\n", total_mem);
+  printk("avail mem: %d kb\n",  total_mem - heap_get_used());
 }
 
 void kmain(uint32_t magic, uintptr_t addr)

@@ -1,6 +1,9 @@
 #include <catk/core.h>
 #include <catk/trace.h>
 #include <catk/printk.h>
+#include <catk/kernel.h>
+#include <catk/elf.h>
+#include <catk/compiler.h>
 #include <config.h>
 #include <stdint.h>
 
@@ -10,6 +13,23 @@ struct stack_frame
     uint32_t ip;
 };
 
+extern struct kern_syms symlist[];
+
+static char * trace_ret_addr(uint32_t * offset, uint32_t eip)
+{
+    for(uint32_t i = 0;; i++)
+    {
+        if(i > (kernel_end - kernel_start))
+            break;
+        if(symlist[i].addr >= eip)
+        {
+            *offset = eip - symlist[i - 1].addr;
+            return symlist[i - 1].name;
+        }
+    }
+    return NULL;
+}
+
 void trace_stack(int frames)
 {
 #if CATK_STACK_TRACE == 1
@@ -18,7 +38,12 @@ void trace_stack(int frames)
     asm volatile("movl %%ebp, %0" : "=r"(stack));
     for(int i = 0; stack && i < frames; i++)
     {
-        printk("\t#%d: 0x%08x : [0x%08x]\n", i, stack->ip, stack->bp);
+        uint32_t offset;
+        printk("\t#%d: 0x%08x : [0x%08x] ", i, stack->ip, stack->bp);
+        if(stack->ip)
+            printk("%s+0x%08x\n", trace_ret_addr(&offset, stack->ip), offset);
+        else
+            printk("\n");
         stack = stack->bp;
     }
 #endif

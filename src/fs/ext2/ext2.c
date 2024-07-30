@@ -315,12 +315,13 @@ int ext2_read(struct file * filp, void * buf, size_t unused)
 int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
 {
   debug("Ext2: Mounting on block %d,%d\n", blkdev->major, blkdev->minors);
+  debug("First partition LBA: %d\n", ext2_start_lba);
   int rc;
-  uint8_t sector_data[1024];
+  uint8_t * sector_data = (uint8_t *)calloc(1024, 1);
   rc = blkdev->fops->lseek(NULL, ext2_start_lba + 2, SEEK_SET);
   if(IS_ERR(rc))
     return rc;
-  rc = blkdev->fops->read(NULL, (uint8_t *)&sector_data, 1);
+  rc = blkdev->fops->read(NULL, sector_data, 1);
   if(IS_ERR(rc))
     return rc;
   sb = (struct ext2_superblock *)sector_data;

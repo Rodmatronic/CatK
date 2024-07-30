@@ -107,9 +107,12 @@ static inline void _hot_ fbcon_scroll(void)
     fbcon_x = 0;
     fbcon_y++;
   }
-  memcpy32((void *)c.vc_screenbuf, (void *)(c.vc_screenbuf + c.vc_size_row), (c.vc_cols / c.vc_font.height) * c.vc_size_row);
-  memset32((void *)c.vc_screenbuf + (c.vc_cols / c.vc_font.height) * c.vc_size_row, 0x00000000, c.vc_size_row);
-  fbcon_y--;
+  if (fbcon_y > (c.vc_cols / 16) - 1)
+  {
+    memcpy32((void *)c.vc_screenbuf, (void *)(c.vc_screenbuf + c.vc_size_row), (c.vc_cols / c.vc_font.height) * c.vc_size_row);
+    memset32((void *)c.vc_screenbuf + (c.vc_cols / c.vc_font.height) * c.vc_size_row, 0x00000000, c.vc_size_row);
+    fbcon_y--;
+  }
 }
 
 static inline void bs(void)
@@ -267,8 +270,7 @@ static void _hot_ process_ansi(char ch)
       ansi_state = ANSI_STATE_ESC;
     }
   }
-  if (fbcon_y > (c.vc_cols / 16) - 1)
-    fbcon_scroll();
+  fbcon_scroll();
 }
 
 static void fbcon_rebase_cursor(int x, int y, int old_x, int old_y)

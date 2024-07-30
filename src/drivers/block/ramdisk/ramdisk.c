@@ -8,7 +8,7 @@
 #include <multiboot2.h>
 #include <lib/common.h>
 
-void * ramdisk_start, * ramdisk_end;
+uint32_t * ramdisk_start, * ramdisk_end;
 struct file_operations ramdisk_fops;
 struct device * ramdisk;
 
@@ -24,32 +24,27 @@ int ramdisk_probe(uint32_t addr)
     return -ENODEV;
   ramdisk_start = (void *)mod->mod_start;
   ramdisk_end   = (void *)mod->mod_end;
-  printk("ramdisk [0x%08x - 0x%08x]\n", ramdisk_start, ramdisk_end);
-  printk("ramdisk size: %d MiB\n", DIV_ROUND_UP(((uint32_t)ramdisk_end - (uint32_t)ramdisk_start), 1048576));
+  printk("Ramdisk info:\n");
+  printk("\tAddress\t[0x%08x - 0x%08x]\n", ramdisk_start, ramdisk_end);
+  printk("\tSize:  \t%d MiB\n", DIV_ROUND_UP(((uint32_t)ramdisk_end - (uint32_t)ramdisk_start), 1048576));
   ramdisk->major      = RAMDISK_MAJOR;
   ramdisk->minors     = 0; /* /dev/ramdisk0 */
   ramdisk->removable  = false;
   ramdisk->priv_data  = (void *)mod;
-  register_blkdev(RAMDISK_MAJOR, "ramdisk", ramdisk, &ramdisk_fops);
-  uint8_t * buffer = (uint8_t *)malloc(512);
-  ramdisk_read_single_sector((uint8_t *)buffer, 2);
-  return 0;
+  return register_blkdev(RAMDISK_MAJOR, "ramdisk", ramdisk, &ramdisk_fops);
 }
 
 static void ramdisk_write_single_sector(uint8_t * buf, int lba)
 {
   uint32_t offset = lba * 512;
-  uint8_t * mem = (uint8_t *)((uint32_t)ramdisk_start + offset);
-  for(int i = 0 ; i < 512; i++)
-  {
-    *(mem++) = buf[i];
-  }
+  uint8_t * mem = (uint8_t *)(ramdisk_start + offset);
+  memcpy(mem, buf, 512);
 }
 
 static void ramdisk_read_single_sector(uint8_t * buf, int lba)
 {
   uint32_t offset = lba * 512;
-  uint8_t * mem = (uint8_t *)((uint32_t)ramdisk_start + offset);
+  uint8_t * mem = (uint8_t *)(ramdisk_start + offset);
   memcpy(buf, mem, 512);
 }
 
@@ -71,7 +66,7 @@ static void ramdisk_write_sectors(uint8_t * buf, int lba, size_t sectors)
 
 int ramdisk_find_first_partition(void)
 {
-  return 2;
+  return 0;
 }
 
 int ramdisk_dev_read(struct file * file, void * buf, size_t sz)

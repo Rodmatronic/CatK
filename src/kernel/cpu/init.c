@@ -1,6 +1,7 @@
 #include <catk/core.h>
 #include <catk/io.h>
 #include <catk/virt.h>
+#include <catk/syscall.h>
 #include <lib/common.h>
 #include <stdint.h>
 
@@ -110,22 +111,22 @@ static void idt_setup(void)
   idt_set_vector(30, (uint32_t)interrupt_30, 0x08, 0x8e);
   idt_set_vector(31, (uint32_t)interrupt_31, 0x08, 0x8e);
   idt_set_vector(32, (uint32_t)interrupt_32, 0x08, 0x8e);
-  idt_set_vector(33, (uint32_t)interrupt_33, 0x08, 0x8e);
-  idt_set_vector(34, (uint32_t)interrupt_34, 0x08, 0x8e);
-  idt_set_vector(35, (uint32_t)interrupt_35, 0x08, 0x8e);
-  idt_set_vector(36, (uint32_t)interrupt_36, 0x08, 0x8e);
-  idt_set_vector(37, (uint32_t)interrupt_37, 0x08, 0x8e);
-  idt_set_vector(38, (uint32_t)interrupt_38, 0x08, 0x8e);
-  idt_set_vector(39, (uint32_t)interrupt_39, 0x08, 0x8e);
-  idt_set_vector(40, (uint32_t)interrupt_40, 0x08, 0x8e);
-  idt_set_vector(41, (uint32_t)interrupt_41, 0x08, 0x8e);
-  idt_set_vector(42, (uint32_t)interrupt_42, 0x08, 0x8e);
-  idt_set_vector(43, (uint32_t)interrupt_43, 0x08, 0x8e);
-  idt_set_vector(44, (uint32_t)interrupt_44, 0x08, 0x8e);
-  idt_set_vector(45, (uint32_t)interrupt_45, 0x08, 0x8e);
-  idt_set_vector(46, (uint32_t)interrupt_46, 0x08, 0x8e);
-  idt_set_vector(47, (uint32_t)interrupt_47, 0x08, 0x8e);
-  idt_set_vector(128, (uint32_t)syscall_dispatcher, 0x08, 0x8e); /* syscall interrupt vector */
+  idt_set_vector(33, (uint32_t)interrupt_33, 0x08, 0x8f);
+  idt_set_vector(34, (uint32_t)interrupt_34, 0x08, 0x8f);
+  idt_set_vector(35, (uint32_t)interrupt_35, 0x08, 0x8f);
+  idt_set_vector(36, (uint32_t)interrupt_36, 0x08, 0x8f);
+  idt_set_vector(37, (uint32_t)interrupt_37, 0x08, 0x8f);
+  idt_set_vector(38, (uint32_t)interrupt_38, 0x08, 0x8f);
+  idt_set_vector(39, (uint32_t)interrupt_39, 0x08, 0x8f);
+  idt_set_vector(40, (uint32_t)interrupt_40, 0x08, 0x8f);
+  idt_set_vector(41, (uint32_t)interrupt_41, 0x08, 0x8f);
+  idt_set_vector(42, (uint32_t)interrupt_42, 0x08, 0x8f);
+  idt_set_vector(43, (uint32_t)interrupt_43, 0x08, 0x8f);
+  idt_set_vector(44, (uint32_t)interrupt_44, 0x08, 0x8f);
+  idt_set_vector(45, (uint32_t)interrupt_45, 0x08, 0x8f);
+  idt_set_vector(46, (uint32_t)interrupt_46, 0x08, 0x8f);
+  idt_set_vector(47, (uint32_t)interrupt_47, 0x08, 0x8f);
+  idt_set_vector(128, (uint32_t)interrupt_128, 0x08, 0x8f); /* syscall interrupt vector */
   idt_flush((uint32_t)&idtr);
 }
 
@@ -302,4 +303,5 @@ void cpu_init(void)
   timer_init();
   paging_init();
   tss_init();
+  syscall_install();
 }

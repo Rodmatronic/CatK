@@ -41,7 +41,8 @@ static uintptr_t prev_alloc = 0;
 
 void heap_init(uintptr_t * start)
 {
-  heap_start = (uintptr_t)start;
+  // hopefully this will skip some things..
+  heap_start = (uintptr_t)((uintptr_t)start + 0x100000);
   prev_alloc = (uintptr_t)heap_start;
   heap_end = (uintptr_t)(heap_start + KERNEL_HEAP_MAX);
   memset((char *)heap_start, 0, heap_end - heap_start);
@@ -185,6 +186,8 @@ void * malloc(size_t n)
 
 void free(void * ptr)
 {
+  // im probably overwriting the memory ;-;
+  // 0x0021ef38
   heap_free(ptr);
   /* merge free blocks to prevent fragmentation */
   heap_merge_blocks();
