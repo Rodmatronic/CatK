@@ -50,7 +50,7 @@ struct device
   uint8_t minors;                       /* acts as a class / classes */
   bool removable;                       /* can it be removed? */
   struct device * parent;               /* parent of the device (if it has one) */
-  struct file_operations * fops;
+  struct file_operations * fops;        /* file operations for devfs */
   void * priv_data;                     /* device's private data */
 };
 
@@ -59,6 +59,8 @@ int register_chrdev(uint8_t major, const char * name, struct device * dev, struc
 int register_blkdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
 struct device * get_blkdev(uint8_t major);
 struct device * get_chrdev(uint8_t major);
+int get_chrdevs_registered(void);
+int get_blkdevs_registered(void);
 void device_init(void);
 int devfs_init(void);
 

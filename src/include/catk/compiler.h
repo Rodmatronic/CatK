@@ -10,5 +10,6 @@
 #define unreachable   __builtin_unreachable()       /* code shouldn't be reached */
 #define _no_return_   __attribute__((noreturn))     /* function shouldn't return */
 #define _weak_        __attribute__((weak))         /* linker wont check for definition of something */
+#define _unused_      __attribute__((unused))       /* variable is unused current file */
 
 #endif

@@ -33,6 +33,7 @@ char * strtok(char * str, const char * delimiters);
 int strcspn(const char * str, const char * charset);
 size_t strsplit(char * str, const char delim);
 char * strstr(const char * s1, const char * s2);
+char * strchr(const char * str, int ch);
 
 /* conversion stuff */
 char * itoa(int value, char * str, int radix);
@@ -56,8 +57,7 @@ int vsprintf(char * str, const char format[], va_list arg);
 int vprintf(const char format[], va_list arg);
 int sprintf(char * str, const char fmt[], ...);
 int snprintf(char * str, size_t len, const char fmt[], ...);
-
-
-
+/* random number generation */
+int rand(int range);
 
 #endif

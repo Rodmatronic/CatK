@@ -17,6 +17,7 @@
 #include <catk/ramdisk.h>
 #include <catk/trace.h>
 #include <catk/keyboard.h>
+#include <catk/rand.h>
 #include <lib/ctype.h>
 #include <config.h>
 
@@ -101,9 +102,10 @@ extern int ramdisk_find_first_partition(void);
 
 void bootstrap2(void)
 {
-  int rc, attempts;
+  int rc;
   show_bootart();
   pci_init();
+  random_init();
   /* mount rootfs */
   struct device * dev;
   if(use_hd)

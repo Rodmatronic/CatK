@@ -143,7 +143,7 @@ static inline void keyboard_second_disable(void)
   SEND_CMD(KEYBOARD_CMD_SECOND_DISABLE);
 }
 
-static inline uint8_t keyboard_ctrl_read_out(void)
+static inline uint8_t _unused_ keyboard_ctrl_read_out(void)
 {
   SEND_CMD(KEYBOARD_CMD_CTRL_PORT_READ);
   return READ_DATA;
@@ -161,7 +161,7 @@ static inline uint8_t keyboard_first_port_test(void)
   return READ_DATA;
 }
 
-static inline uint8_t keyboard_second_port_test(void)
+static inline uint8_t _unused_ keyboard_second_port_test(void)
 {
   SEND_CMD(KEYBOARD_CMD_SECOND_PORT_TEST);
   return READ_DATA;

@@ -38,7 +38,7 @@ static void termios_init(struct termios * termios)
   termios->c_cc[VTIME] = 0;
 }
 
-static size_t tty_read(struct tty_struct * tty, const uint8_t * buf, size_t count)
+static size_t _unused_ tty_read(struct tty_struct * tty, const uint8_t * buf, size_t count)
 {
   return -ENOSYS;
 }

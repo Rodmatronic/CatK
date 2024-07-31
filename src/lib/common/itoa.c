@@ -1,5 +1,6 @@
-#include <lib/common.h>
 #include <catk/types.h>
+#include <catk/compiler.h>
+#include <lib/common.h>
 
 void reverse(char * str, size_t sz)
 {
@@ -20,7 +21,7 @@ char * itoa(int value, char * str, int radix)
   int temp = value;
   char * rc;
   char * ptr;
-  char * low;
+  char _unused_ * low;
   if (radix < 2 || radix > 36)
   {
     *str = '\0';

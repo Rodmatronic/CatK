@@ -1,4 +1,5 @@
 #include <catk/console.h>
+#include <catk/compiler.h>
 #include <catk/device.h>
 #include <catk/tty.h>
 #include <catk/mem.h>
@@ -45,7 +46,7 @@ static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state 
 static int ansi_list_idx = 0;
 
 static struct ansi_list ansi_value[8];
-static struct file_operations vgacon_fops;
+static struct file_operations _unused_ vgacon_fops;
 
 static inline void vgacon_putc(char c);
 static inline void vgacon_clear(void);
@@ -331,7 +332,7 @@ int vgacon_init(struct console * con, uint32_t addr)
   return 0;
 }
 
-static struct file_operations fops = {
+static struct file_operations _unused_ fops = {
   NULL,
   NULL,               /* read */
   vgacon_dev_write,    /* write */

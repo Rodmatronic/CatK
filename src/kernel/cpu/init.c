@@ -54,7 +54,6 @@ static void segm_descriptors_init(void)
 
 /* IDT */
 
-static void pic_init(void);
 extern void idt_flush(uint32_t idtr);
 
 static struct idt_vector idt[IDT_NUM_ENTRIES];

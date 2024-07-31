@@ -32,11 +32,6 @@ static inline struct ext2_inode * ext2_inode_allocate(void)
   return (struct ext2_inode *)malloc(sb->inode_size);
 }
 
-static inline void ext2_inode_free(struct ext2_inode * inode)
-{
-  free(inode);
-}
-
 static inline uint32_t ext2_get_block_group(uint32_t inode)
 {
   return (inode - 1) / sb->inodes_per_group;
@@ -131,7 +126,7 @@ int ext2_read_dir(uint32_t inode)
   return 1;
 }
 
-static uint32_t ext2_parse_directory(struct ext2_directory * dir, char * path)
+static uint32_t _unused_ ext2_parse_directory(struct ext2_directory * dir, char * path)
 {
   uint32_t add = 0;
   while(dir->inode != 0 && add < priv_data.block_size)

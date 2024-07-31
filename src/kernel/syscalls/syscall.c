@@ -10,7 +10,7 @@
 
 void syscall_trace(struct intr_stack_frame * regs)
 {
-  printk("syscall_trace: eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n", 
+  printk("-------------\nsyscall_trace: eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n-------------\n", 
       regs->eax, regs->ebx, regs->ecx, regs->edx);
 }
 
@@ -57,7 +57,7 @@ static uint32_t _system_call(struct intr_stack_frame * regs)
 
 void system_call(struct intr_stack_frame * regs)
 {
-  //syscall_trace(regs);
+  syscall_trace(regs);
   regs->eax = _system_call(regs);
 }
 

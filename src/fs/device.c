@@ -6,11 +6,11 @@
 #include <stdint.h>
 
 static struct device chrdevs[MAX_CHRDEV] = {
-  NULL
+  {NULL}
 };
 
 static struct device blkdevs[MAX_BLKDEV] = {
-  NULL
+  {NULL}
 };
 
 struct device * device_struct_alloc(void)
@@ -20,7 +20,10 @@ struct device * device_struct_alloc(void)
 
 int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops)
 {
-  printk("Registering character device \"%s%d\" (major %d)\n", name, dev->minors, major);
+  if(major != MEMDEV_MAJOR)
+    printk("Registering character device \"%s%d\" (major %d)\n", name, dev->minors, major);
+  else
+    printk("Registering character device \"%s\" (major %d)\n", name, dev->minors, major);
   if(major >= MAX_CHRDEV)
     return -EINVAL;
   if(chrdevs[major].fops)
@@ -56,6 +59,17 @@ struct device * get_chrdev(uint8_t major)
   if(major >= MAX_CHRDEV)
     return NULL;
   return &chrdevs[major];
+}
+
+void dev2inode(struct inode * node, struct device * dev)
+{
+  //node->mode = 
+}
+
+void dev2file(struct file * file, struct device * dev)
+{
+  file->ops = dev->fops;
+  //file->inode
 }
 
 void device_init(void)

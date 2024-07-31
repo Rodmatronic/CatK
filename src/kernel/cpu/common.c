@@ -25,6 +25,12 @@ static void cpuid(uint32_t code, uint32_t * a, uint32_t * b, uint32_t * c, uint3
                      : "a"(code));
 }
 
+int entropy(void) {
+  uint32_t lo, hi;
+  asm volatile ("rdtsc" : "=a"(lo), "=d"(hi));
+  return ((uint64_t)hi << 32) | lo;
+}
+
 static int cpugetbrand(void);
 static void cpugetvendor(void);
 
@@ -39,9 +45,8 @@ static int cpugetbrand(void)
 {
   uint32_t reg_values[12];
   char brand_string[49];
-  uint32_t eax, ebx, ecx, edx;
   cpuid(0x80000000, &reg_values[0], &reg_values[1], &reg_values[2], &reg_values[3]);
-  if (eax < 0x80000004)
+  if (reg_values[0] < 0x80000004)
     return 0;
   cpuid(0x80000002, &reg_values[0], &reg_values[1], &reg_values[2], &reg_values[3]);
   cpuid(0x80000003, &reg_values[4], &reg_values[5], &reg_values[6], &reg_values[7]);

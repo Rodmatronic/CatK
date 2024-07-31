@@ -20,11 +20,6 @@ static struct ide_channel ata_channels[2];
 struct file_operations ata_fops;
 
 static int lseek = 0;
-/* assume its an empty disk */
-static int partitions = 0;
-
-static void ata_read_single_sector_pio(int disk, uint8_t * buf, int lba);
-static int get_first_partition(int disk);
 
 static void ata_primary_irq(struct intr_stack_frame * frame)
 {

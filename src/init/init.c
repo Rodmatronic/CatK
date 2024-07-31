@@ -36,7 +36,6 @@ int start_init(const char * cmdline)
 {
   //panic("They stole my shmunguss..\n");
   set_tss_stack(get_current_task()->esp);
-  int rc;
   printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
   char * init_val = get_cmdline_param_val((char *)cmdline, "init");
   if(!init_val)
@@ -44,6 +43,9 @@ int start_init(const char * cmdline)
   else
     strncpy(init_path, init_val, NAME_MAX);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
+  struct file * file = (struct file *)malloc(sizeof(struct file));
+  vfs_open(file, "/dev/tty0");
+  for(;;);
   if (try_init(init_path) < 0)
   {
     for(int i = 0; i < 8; i++)

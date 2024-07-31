@@ -29,9 +29,9 @@ multiboot2_fb_tag_start:
   ; Tag length
   dd multiboot2_fb_tag_end - multiboot2_fb_tag_start
   ; Width
-  dd 800
+  dd 1280
   ; Height
-  dd 600
+  dd 720
   ; Bits Per Pixel (BPP)
   dd 32
 multiboot2_fb_tag_end:

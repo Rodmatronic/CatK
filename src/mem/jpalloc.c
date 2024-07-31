@@ -1,10 +1,11 @@
-#include <stdint.h>
 #include <catk/mem.h>
 #include <catk/printk.h>
 #include <catk/types.h>
 #include <catk/spinlock.h>
 #include <catk/debug.h>
+#include <catk/compiler.h>
 #include <lib/common.h>
+#include <stdint.h>
 
 SPINLOCK_INIT(jpalloc_spinlock);
 
@@ -34,7 +35,7 @@ struct heap_block
 
 #define IN_HEAP_RANGE(ptr) ((uintptr_t)&ptr >= heap_start && (uintptr_t)&ptr <= heap_end)
 
-static bool heap_initialized = false;
+static bool _unused_ heap_initialized = false;
 static uintptr_t heap_start = 0;
 static uintptr_t heap_end, heap_used = 0;
 static uintptr_t prev_alloc = 0;

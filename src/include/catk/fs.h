@@ -12,7 +12,7 @@
 
 struct fs_mount
 {
-  char mount_path[DEVNAME_MAX];
+  char * mount_path;
   struct device * blkdev;
   int flags;
 };
@@ -22,7 +22,7 @@ struct fs_mount
 
 struct filesystem
 {
-  const char name[NAME_MAX + 1];
+  char name[NAME_MAX + 1];
   struct fs_operations * fsops;
   struct file_operations * fops;
   struct superblock * sb;
@@ -79,7 +79,7 @@ struct inode
 	gid_t gid;
 	uint32_t flags;
 	uint32_t inode;
-	uint64_t length;
+	uint32_t length;
   union /* filesystem defined inode structure */
   {
     struct ext2_inode * ext2_ino;

@@ -83,7 +83,7 @@ static uint32_t elf_get_symval(struct elf_hdr * hdr, int table, int idx)
 
 int elf_exec(const char * name, const uint8_t * data)
 {
-  uint32_t load_loc, text_section_sz = 0;
+  uint32_t load_loc = 0;
   if(!elf_verify(data))
     return -ENOEXEC;
   debug("elf load start\n");
@@ -91,8 +91,6 @@ int elf_exec(const char * name, const uint8_t * data)
   struct elf_hdr * header = (struct elf_hdr *)data;
   debug_print_info(header);
   struct elf_phdr * prghdr = (struct elf_phdr *)(data + header->e_phoff);
-  debug("section .text size: %d bytes\n", prghdr->p_filesz);
-  text_section_sz = prghdr->p_filesz;
   for(int i = 0; i < header->e_phnum; i++, prghdr++)
   {
     switch(prghdr->p_type)

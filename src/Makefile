@@ -25,6 +25,8 @@ CC_FLAGS = \
 	--target=i686-pc-none-elf \
 	-march=i686 \
 	-Werror=implicit-function-declaration \
+	-Wall \
+	-Werror \
 	-nodefaultlibs \
 	-nostdlib \
 	-fstack-protector-strong \

@@ -21,7 +21,7 @@ void _cold_ panic(const char format[], ...)
   beep(50);
   msleep(50);
   beep(50);
-  trace_stack(8);
+  trace_stack(16);
   va_list arg;
   va_start(arg, format);
   vprintf(strcat("Panic!: ", format), arg); // combine both strings to make one

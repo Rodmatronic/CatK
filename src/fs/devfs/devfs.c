@@ -9,16 +9,13 @@
 #include <lib/ctype.h>
 #include <config.h>
 
+#include "internal.h"
+
 static struct filesystem * devfs = NULL;
 static struct device * blkdev;
 
 struct fs_operations devfs_ops;
 struct file_operations devfs_file_ops;
-
-static struct inode * devfs_find_device(const char * name)
-{
-  return NULL;
-}
 
 static int devfs_mount(struct filesystem * fs, struct device * dev)
 {
@@ -30,7 +27,16 @@ static int devfs_mount(struct filesystem * fs, struct device * dev)
 
 struct device * devfs_find_node_by_name(const char * name)
 {
-  return NULL; /* we'll return null for now */
+  for(int i = 0; i < 32; i++)
+  {
+    struct device * dev = get_chrdev(i);
+    if(!strcmp(dev->name, name))
+      return dev;
+    dev = get_blkdev(i);
+    if(!strcmp(dev->name, name))
+      return dev;
+  }
+  return NULL;
 }
 
 int devfs_open(struct file * filp, const char * path)
@@ -48,10 +54,20 @@ int devfs_open(struct file * filp, const char * path)
     dev = devfs_find_node_by_name(token);
     if(!dev)
       return -ENOENT;  
-    
   }
+  
   free(fn);
   return 0;
+}
+
+int devfs_read(struct file * filp, void * buf, size_t sz)
+{
+  return filp->ops->read(filp, buf, sz);
+}
+
+int devfs_write(struct file * filp, void * buf, size_t sz)
+{
+  return filp->ops->write(filp, buf, sz);
 }
 
 int devfs_readdir(struct file * filp, struct dirent * dirp, size_t count)
@@ -71,8 +87,8 @@ int devfs_init(void)
 
 struct file_operations devfs_file_ops = {
   NULL,
-  NULL,
-  NULL,
+  devfs_read,
+  devfs_write,
   devfs_readdir,
   NULL,
   devfs_open,

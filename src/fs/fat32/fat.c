@@ -17,15 +17,6 @@ struct fs_operations fat32_ops;
 struct file_operations fat32_fops;
 struct fs_info * fat32_fsinfo = NULL;
 
-uint64_t fat32_cluster_array;  // clusterheapoffset * sectorsize - 2 * clustersize;
-uint64_t fatOffset;  // fatoffset * sectorsize;
-uint64_t usablespace; // clustercount * clustersize;
-
-static int fat32_cluster2sector(uint32_t cluster)
-{
-  return FAT32_FIRST_CLUSTER + cluster + bs->bpb.sect_per_clust - (2 * bs->bpb.sect_per_clust);
-}
-
 static bool fsinfo_verify_signatures(void)
 {
   /*

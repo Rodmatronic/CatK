@@ -42,7 +42,6 @@ static void pci_config_write(uint8_t bus, uint8_t slot, uint8_t func, uint8_t of
   uint32_t lbus  = (uint32_t)bus;
   uint32_t lslot = (uint32_t)slot;
   uint32_t lfunc = (uint32_t)func;
-  uint16_t tmp = 0;
 
   address = (uint32_t)((lbus << 16) | (lslot << 11) |
     (lfunc << 8) | (offset & 0xfc) | ((uint32_t)0x80000000));
@@ -99,17 +98,22 @@ static uint8_t pci_get_progif(uint8_t bus, uint8_t slot, uint8_t func)
   return (progif & ~0x00ff) >> 8;
 }
 
+/*
+
 static uint8_t pci_get_revision(uint8_t bus, uint8_t slot, uint8_t func)
 {
   uint32_t revision = pci_config_read_word(bus, slot, func, 8);
   return (revision & ~0xff00);
 }
 
+
 static uint8_t pci_get_header(uint8_t bus, uint8_t slot, uint8_t func)
 {
   uint32_t header = pci_config_read_word(bus, slot, func, 14);
   return (header & 0xff);
 }
+
+*/
 
 uint32_t pci_get_bar(uint8_t bus, uint8_t slot, uint8_t func, uint8_t bar)
 {

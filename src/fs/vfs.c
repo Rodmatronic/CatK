@@ -13,7 +13,6 @@ static struct filesystem * rootfs = NULL;
 static bool is_devfs(const char * path)
 {
   size_t len = strlen(path);
-  int tokens = 0;
   // duplicate the string
   char * str = strdup((char *)path);
   char * token;
@@ -21,7 +20,8 @@ static bool is_devfs(const char * path)
   if(str[0] == '/')
     str++; /* skip over '/' */
   token = strtok(str, "/");
-  if(!strcmp(token, "dev"))
+  char * prefix = (char *)strchr(get_filesystem("devfs")->mount->mount_path, '/');
+  if(!strcmp(token, prefix))
     return true;
   return false;
 }
@@ -30,7 +30,6 @@ int vfs_open(struct file * filp, const char * file)
 {
   debug("VFS: Opening file %s\n", file);
   int rc;
-  struct task * p = get_current_task();
   if(is_devfs(file))
   {
     rc = get_filesystem("devfs")->fops->open(filp, file);

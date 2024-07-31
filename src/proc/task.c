@@ -62,6 +62,7 @@ static pid_t get_free_pid(void)
   return -1;
 }
 
+/*
 static struct task *get_proc_from_pid(pid_t pid)
 {
   struct task *current = current;
@@ -73,6 +74,7 @@ static struct task *get_proc_from_pid(pid_t pid)
   }
   return NULL;
 }
+*/
 
 int is_pid_running(pid_t pid)
 {
