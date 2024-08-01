@@ -1,7 +1,7 @@
 #include <catk/core.h>
 #include <lib/common.h>
 
-int rand(int range)
+int rand(void)
 {
-  return entropy() % range;
+  return gen_random();
 }

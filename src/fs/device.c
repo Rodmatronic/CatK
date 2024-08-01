@@ -29,7 +29,7 @@ int register_chrdev(uint8_t major, const char * name, struct device * dev, struc
   if(chrdevs[major].fops)
     return -EBUSY;
   chrdevs[major] = *dev;
-  chrdevs[major].name = name;
+  strcpy((char *)chrdevs[major].name, name);
 	chrdevs[major].fops = fops;
   return 0;
 }
@@ -41,7 +41,7 @@ int register_blkdev(uint8_t major, const char * name, struct device * dev, struc
 		return -EINVAL;
 	if (blkdevs[major].fops)
 		return -EBUSY;
-  memcpy((void *)&blkdevs[major], dev, sizeof(struct device));
+  blkdevs[major] = *dev;
   strcpy((char *)blkdevs[major].name, name);
 	blkdevs[major].fops = fops;
 	return 0;
@@ -51,30 +51,30 @@ struct device * get_blkdev(uint8_t major)
 {
 	if (major >= MAX_BLKDEV)
 		return NULL;
-  return &blkdevs[major];
+  struct device * dev = &blkdevs[major];
+  if(!dev)
+    return NULL;
+  return dev;
 }
 
 struct device * get_chrdev(uint8_t major)
 {
   if(major >= MAX_CHRDEV)
     return NULL;
-  return &chrdevs[major];
+  struct device * dev = &chrdevs[major];
+  if(!dev)
+    return NULL;
+  return dev;
 }
 
-void dev2inode(struct inode * node, struct device * dev)
-{
-  //node->mode = 
-}
-
-void dev2file(struct file * file, struct device * dev)
-{
-  file->ops = dev->fops;
-  //file->inode
+void device_dump(void) {
+  for(int i = 0; i < MAX_CHRDEV; i++) {
+    printk("%s\n", chrdevs[i].name);
+  }
 }
 
 void device_init(void)
 {
-  memset(&chrdevs, 0, sizeof(chrdevs));
-  memset(&blkdevs, 0, sizeof(blkdevs));
-  debug("dev: devices can now be registered.\n");
+  memset((void *)chrdevs, 0, sizeof(struct device) * MAX_CHRDEV);
+  memset((void *)blkdevs, 0, sizeof(struct device) * MAX_BLKDEV);
 }

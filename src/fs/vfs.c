@@ -1,4 +1,5 @@
 #include <catk/fs.h>
+#include <catk/vfs.h>
 #include <catk/debug.h>
 #include <catk/printk.h>
 #include <catk/device.h>
@@ -45,8 +46,16 @@ int vfs_open(struct file * filp, const char * file)
 
 int vfs_read(struct file * filp, void * buf, size_t sz)
 {
-  debug("VFS: Reading file %s\n", filp->name);
-  return rootfs->fops->read(filp, buf, sz);
+  if(!filp->ops->read)
+    return -ENXIO;
+  return filp->ops->read(filp, buf, sz);
+}
+
+int vfs_write(struct file * filp, void * buf, size_t sz)
+{
+  if(!filp->ops->write)
+    return -ENXIO;
+  return filp->ops->write(filp, buf, sz);
 }
 
 int vfs_init(void)

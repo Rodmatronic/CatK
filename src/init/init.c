@@ -34,7 +34,6 @@ int try_init(const char * path)
 
 int start_init(const char * cmdline)
 {
-  //panic("They stole my shmunguss..\n");
   set_tss_stack(get_current_task()->esp);
   printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
   char * init_val = get_cmdline_param_val((char *)cmdline, "init");
@@ -42,9 +41,16 @@ int start_init(const char * cmdline)
     strncpy(init_path, "/init", NAME_MAX);
   else
     strncpy(init_path, init_val, NAME_MAX);
+  device_dump();
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
   struct file * file = (struct file *)malloc(sizeof(struct file));
-  vfs_open(file, "/dev/tty0");
+  int rc;
+  rc = vfs_open(file, "/dev/urandom");
+  if(IS_ERR(rc))
+    printk("1# shmunguss: %d\n", rc);
+  rc = vfs_write(file, (void *)("Hi"), 2);
+  if(IS_ERR(rc))
+    printk("2# shmunguss: %d\n", rc);
   for(;;);
   if (try_init(init_path) < 0)
   {

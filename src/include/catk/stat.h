@@ -1,7 +1,6 @@
 #ifndef __STAT_H
 #define __STAT_H
 
-/* modes */
 #define S_IFMT  00170000
 #define S_IFSOCK 0140000
 #define S_IFLNK	 0120000

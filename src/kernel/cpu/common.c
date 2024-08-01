@@ -25,7 +25,7 @@ static void cpuid(uint32_t code, uint32_t * a, uint32_t * b, uint32_t * c, uint3
                      : "a"(code));
 }
 
-int entropy(void) {
+int gen_random(void) {
   uint32_t lo, hi;
   asm volatile ("rdtsc" : "=a"(lo), "=d"(hi));
   return ((uint64_t)hi << 32) | lo;

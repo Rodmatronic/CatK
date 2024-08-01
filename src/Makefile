@@ -69,8 +69,6 @@ $(TARGET_TMP): $(ASM_OBJ) $(C_OBJ)
 	@$(TOOLS)/gen_syms.sh $(TARGET_TMP) $(SRC)/symlist.c
 	@$(CC) -c symlist.c -o symlist.o $(CC_FLAGS)
 
-
-
 $(TARGET): $(TARGET_TMP)
 	@printf "[ Linking kernel.. ]\n"
 	@$(LD) $(LD_FLAGS) -o $(TARGET) $(TARGET_TMP) symlist.o

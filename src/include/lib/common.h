@@ -58,6 +58,6 @@ int vprintf(const char format[], va_list arg);
 int sprintf(char * str, const char fmt[], ...);
 int snprintf(char * str, size_t len, const char fmt[], ...);
 /* random number generation */
-int rand(int range);
+int rand(void);
 
 #endif

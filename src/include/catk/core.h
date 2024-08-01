@@ -164,7 +164,7 @@ void set_tss_stack(uint32_t esp0);
 
 /* Common CPU related functions */
 
-int entropy(void);
+int gen_random(void);
 void critical_enter(void);
 void critical_exit(void);
 void halt(void);

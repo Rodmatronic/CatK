@@ -5,9 +5,10 @@
 #include <catk/ext2.h>
 #include <catk/debug.h>
 #include <catk/mem.h>
-#include <config.h>
+#include <catk/math.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
+#include <config.h>
 
 struct fs_operations ext2_fs_ops;
 struct file_operations ext2_file_ops;

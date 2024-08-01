@@ -105,7 +105,7 @@ void bootstrap2(void)
   int rc;
   show_bootart();
   pci_init();
-  random_init();
+  urandom_init();
   /* mount rootfs */
   struct device * dev;
   if(use_hd)

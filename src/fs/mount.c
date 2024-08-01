@@ -37,10 +37,9 @@ static int do_devfs_mount(const char * path, struct device * blkdev)
 
 int vfs_mount(const char * path, struct device * blkdev)
 {
-  if(blkdev->major != DISKDEV_MAJOR)
+  if(blkdev->major != DISKDEV_MAJOR && blkdev->major != RAMDISK_MAJOR)
   {
-    if(blkdev->major != RAMDISK_MAJOR)
-      return -EINVAL;
+    return -EINVAL;
   }
   if(strncmp("/", path, strlen(path)) == 0)
     return do_ext2_mount(path, blkdev);

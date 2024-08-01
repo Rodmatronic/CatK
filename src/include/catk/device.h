@@ -1,7 +1,6 @@
 #ifndef __DEVICE_H
 #define __DEVICE_H
 
-#include <catk/bitops.h>
 #include <catk/tty.h>
 #include <catk/types.h>
 #include <catk/fs.h>
@@ -62,6 +61,7 @@ struct device * get_chrdev(uint8_t major);
 int get_chrdevs_registered(void);
 int get_blkdevs_registered(void);
 void device_init(void);
+void device_dump(void);
 int devfs_init(void);
 
 #endif
