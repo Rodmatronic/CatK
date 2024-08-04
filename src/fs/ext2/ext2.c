@@ -207,7 +207,7 @@ static void ext2_inode2file(struct file * file, struct ext2_inode * inode, uint3
   file->inode->flags                      = inode->flags;
   file->inode->length                     = priv_data.filesize_qword ? (inode->size_lower << 8) | (inode->size_high) : inode->size_lower;
   file->inode->inode                      = inode_num;
-  file->inode->u.ext2_ino                 = inode;
+  file->inode->u.ext2_ino                 = *inode;
   file->ops                               = &ext2_file_ops;
   file->inode->fsops                      = &ext2_fs_ops;
 }
@@ -327,7 +327,7 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
     return -EINVAL;
   }
   
-  fs->sb->u.ext2_sb = sb;
+  fs->sb->u.ext2_sb = *sb;
   printk("Ext2: Detected Ext2 version %d.%d\n", sb->version_major, sb->version_minor);
   
   priv_data.block_size = 1024 << sb->block_size;

@@ -41,16 +41,17 @@ int start_init(const char * cmdline)
     strncpy(init_path, "/init", NAME_MAX);
   else
     strncpy(init_path, init_val, NAME_MAX);
-  device_dump();
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
   struct file * file = (struct file *)malloc(sizeof(struct file));
-  int rc;
-  rc = vfs_open(file, "/dev/urandom");
-  if(IS_ERR(rc))
-    printk("1# shmunguss: %d\n", rc);
-  rc = vfs_write(file, (void *)("Hi"), 2);
-  if(IS_ERR(rc))
-    printk("2# shmunguss: %d\n", rc);
+  // EXPLANATION
+  // open /dev/random
+  vfs_open(file, "/dev/random");
+  // create buffer to store the read data
+  uint8_t * random_buf = (uint8_t *)malloc(1024);
+  // read from /dev/random
+  vfs_read(file, random_buf, 1024);
+  // pass it to debug() and type convert it to 'char *'
+  debug((char *)random_buf);
   for(;;);
   if (try_init(init_path) < 0)
   {
@@ -62,7 +63,7 @@ int start_init(const char * cmdline)
     }
     // R.I.P usleep function, you shall be missed 
     // No valid init found. Filesystems have already been waited on, no point in staying up.
-    panic("No valid init process found. Tried all possible init's");
+    panic("No possible init programs");
   }
   else
   {

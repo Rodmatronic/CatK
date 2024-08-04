@@ -25,6 +25,8 @@ int register_filesystem(const char * name, struct fs_operations * fsops, struct 
   filesystems[num_fs].mount->flags  = flags;
   /* pro programmer here B^) */
   printk("VFS: Registered filesystem \"%s\"\n", name);
+  debug("\tname: %s\n", filesystems[num_fs].name);
+  debug("\tflags: 0x%02x\n", flags);
   num_fs++;
   return 0;
 }
@@ -35,15 +37,14 @@ struct filesystem * get_filesystem(const char * name)
   {
     if(!strncmp(filesystems[i].name, name, strlen(filesystems[i].name)))
       return &filesystems[i];
-    debug("Looking for %s, found %s\n", name, filesystems[i].name);
   }
-  printk("What kind of filesystem are you looking for!?!?\n");
+  debug("What kind of filesystem are you looking for!?!?\n");
   return NULL;
 }
 
 int filesystems_init(int first_partition_lba)
 {
-  memset(&filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
+  memset((void *)filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
   /* first up are the real filesystems */
   int rc = ext2_init(first_partition_lba);
   if(IS_ERR(rc))

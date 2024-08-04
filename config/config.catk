@@ -5,13 +5,13 @@
 # x86 Settings
 #
 
-CATK_SSE=n
+CATK_64BIT=n
 
 #
 # Kernel Settings
 #
 
-CATK_FOO=y
+CATK_LOGO=y
 
 #
 # Filesystem Settings

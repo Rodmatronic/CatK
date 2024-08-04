@@ -6,6 +6,7 @@
 #include <catk/types.h>
 #include <catk/device.h>
 #include <catk/fat32.h>
+#include <catk/ext2.h>
 #include <stdint.h>
 
 #define NR_FILESYSTEMS 4 /* we support only 4 for now. im not sure what those 4 will be.. */
@@ -60,7 +61,7 @@ struct superblock
 {
 	union /* only one of these values can be set at a time */
   {
-    struct ext2_superblock * ext2_sb;
+    struct ext2_superblock ext2_sb;
 		void * generic_sbp;
 	} u;
 };
@@ -82,7 +83,7 @@ struct inode
 	uint32_t length;
   union /* filesystem defined inode structure */
   {
-    struct ext2_inode * ext2_ino;
+    struct ext2_inode ext2_ino;
     void * generic_ino;
   } u;
   struct fs_operations * fsops;

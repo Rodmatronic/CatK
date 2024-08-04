@@ -54,9 +54,6 @@ static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t cou
     return -ENODEV; 
   }
 
-  if(!IS_VALID_TTY(tty))
-    return -ENOTTY; /* its not a tty device */
-
   char * str = (char *)malloc(count + 1);
   size_t i;
 
@@ -70,7 +67,7 @@ static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t cou
   int (*tty_output_intr)(struct tty_struct *, size_t) = tty->dev->priv_data;
   tty_output_intr(tty, i);
   free(str);
-  return i;
+  return 0;
 }
 
 static int tty_dev_read(struct file * filp, void * buf, size_t sz)
@@ -80,7 +77,8 @@ static int tty_dev_read(struct file * filp, void * buf, size_t sz)
 
 static int tty_dev_write(struct file * filp, void * buf, size_t sz)
 {
-  return -ENOSYS;
+  struct tty_struct * tty = tty_lookup(0);
+  return tty_write(tty, (uint8_t *)buf, sz);
 }
 
 static int tty_dev_open(struct file * filp, const char * file)
@@ -123,8 +121,6 @@ int tty_create(int num, struct device * dev)
     tty_release(tty);
     return -ENOMEM;
   }
-  memset((void *)tty, 0, sizeof(struct tty_struct));
-  memset((void *)&tty->termios, 0, sizeof(struct termios));
   termios_init(&tty->termios);
   if (ring_buffer_init(tty->write_q, TTY_BUF_SIZE) < 0)
   {
@@ -152,7 +148,6 @@ int tty_create(int num, struct device * dev)
 
 ring_mem_err:
   tty_release(tty);
-  tty_dev_open(NULL, "tty0");
   return -ENOMEM;
 }
 

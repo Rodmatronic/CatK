@@ -10,6 +10,7 @@ export LD = ld
 
 export CATK_ROOT = $(CURDIR)
 export TOOLS = $(CATK_ROOT)/tools
+export USER = $(CATK_ROOT)/user
 export GZ = $(shell which gzip)
 export CONFIG = $(CATK_ROOT)/config
 export OUT = $(CATK_ROOT)/out
@@ -34,6 +35,9 @@ all: clean
 	@echo "Build successful"
 # 		-icount 6,align=on \
 #       For debugging
+
+init:
+	@$(MAKE) -C $(USER)/ || { echo "Build failed"; exit 1; }
 
 run:
 	@qemu-system-x86_64 \

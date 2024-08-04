@@ -1,3 +1,15 @@
+/*
+
+  catk/src/drivers/video/fbcon.c
+
+  The CatK Project 2023 - 2024
+  Author: Foo Bar
+
+  Description:
+    Default console driver for framebuffer modes (incompatible with some computers).
+
+*/
+
 #include <catk/console.h>
 #include <catk/device.h>
 #include <catk/compiler.h>
@@ -349,6 +361,7 @@ int fbcon_init(struct console * con, uint32_t addr)
   c.vc_screenbuf = (uintptr_t)grub_fb->framebuffer_addr;
   cb.con_startup = fbcon_startup;
   strncpy(con->name, cb.con_startup(), sizeof(con->name));
+  strncpy((char *)fbcon_dev.name, con->name, sizeof(con->name));
   con->write = fbcon_write;
   con->data = &c;
   con->dev = &fbcon_dev;

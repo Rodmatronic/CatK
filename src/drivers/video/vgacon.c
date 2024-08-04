@@ -1,3 +1,15 @@
+/*
+
+  catk/src/drivers/video/fbcon.c
+
+  The CatK Project 2023 - 2024
+  Author: Foo Bar
+
+  Description:
+    Default console driver for framebuffer modes (incompatible with some computers).
+
+*/
+
 #include <catk/console.h>
 #include <catk/compiler.h>
 #include <catk/device.h>

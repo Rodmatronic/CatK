@@ -26,8 +26,6 @@ static char * cmdline;
 static bool use_hd = false; /* determines if we use a hard-disk or not */
 bool kern_verbose = false;  /* set to false by default */
 
-static void show_bootart(void);
-
 static void show_boot_banner(void)
 {
   printk("2023-2024 The CatKernel Project.\n");
@@ -60,8 +58,10 @@ void kmain(uint32_t magic, uintptr_t addr)
   device_init();
   beep(10);
   int rc = console_init(addr);
-  if(IS_ERR(rc))
+  if(IS_ERR(rc)) {
+    debug("Failed to initialize console: %d\n", rc);
     return;
+  }
   cmdline = obtain_cmdline(addr);
   char * verbosity = get_cmdline_param_val(cmdline, "verbose");
   if(verbosity)
@@ -97,21 +97,48 @@ void kmain(uint32_t magic, uintptr_t addr)
   panic("Failed to init tasks, kernel left in unreachable state");
 }
 
+#if CATK_LOGO == 1
+static void show_bootart(void)
+{
+  /* CatK splash screen */
+  printk("\n\033[1;37m           __           __             \n");
+  printk("          /  \\         /  \\        \n");
+  printk("\033[36m         / /\\ \\       / /\\ \\       \n");
+  printk("\033[36m        / /  \\ \\     / /  \\ \\      \n");
+  printk("\033[36m       / /      \\___/      \\ \\      \033[1;37m   _______   _____   _______  ___   _\n");
+  printk("\033[36m      /                       \\       \033[1;37m|   ____| /  _  \\ |       ||   | | |\n");
+  printk("\033[36m     |        |      |         |      \033[36m|  |     |  | |  ||_     _||   |_| |\n");
+  printk("\033[36m   ---        |      |         ---    |  |     |  |_|  |  |   |  |      _|\n");
+  printk("     |                         |      |  |     |       |  |   |  |     |_ \n");
+  printk("\033[1;36m   ---   //      ^       //    ---    \033[1;36m|  |____ |   _   |  |   |  |    _  |\n");
+  printk("      \\         \\/\\/          /       \033[1;36m|_______||__| |__|  |___|  |___| |_|\033[1;36m\n");
+  printk("\033[1;36m       \\                     /      Written from scratch by the CatK team! :3\n");
+  printk("        \\___________________/      \n");
+  printk("\033[1;31m         ===================       \n");
+  printk("\033[1;31m        =========");
+  printk("\033[1;33m\\/\033[1;31m");
+  printk("==========      \n");
+  printk("\033[1;33m                /  \\               \n");
+  printk("               |CatK|              \n");
+  printk("                \\__/               \033[1;0m\n");
+  printk("\nCatK(mascot) was created by Rodmatronics\n");
+}
+#endif
+
 extern int ata_find_first_partition(void);
 extern int ramdisk_find_first_partition(void);
 
 void bootstrap2(void)
 {
   int rc;
+#if CATK_LOGO == 1
   show_bootart();
+#endif
   pci_init();
-  urandom_init();
+  random_init();
   /* mount rootfs */
   struct device * dev;
-  if(use_hd)
-    dev = get_blkdev(DISKDEV_MAJOR);
-  else
-    dev = get_blkdev(RAMDISK_MAJOR);
+  dev = get_blkdev(use_hd ? DISKDEV_MAJOR : RAMDISK_MAJOR);
   if(!dev)
     panic("No drive to mount rootfs.\n");
   int first_partition_lba = use_hd ? ata_find_first_partition() : ramdisk_find_first_partition();
@@ -154,30 +181,4 @@ void bootstrap2(void)
     panic("Failed when starting init process: %d\n", rc);
   printk("Nothing left to do. Going idle...\n");
   /* fall back to catk_idle (defined in proc/task.c:19)  */
-}
-
-static void show_bootart(void)
-{
-  /* CatK splash screen */
-  printk("\n\033[1;37m           __           __             \n");
-  printk("          /  \\         /  \\        \n");
-  printk("\033[36m         / /\\ \\       / /\\ \\       \n");
-  printk("\033[36m        / /  \\ \\     / /  \\ \\      \n");
-  printk("\033[36m       / /      \\___/      \\ \\      \033[1;37m   _______   _____   _______  ___   _\n");
-  printk("\033[36m      /                       \\       \033[1;37m|   ____| /  _  \\ |       ||   | | |\n");
-  printk("\033[36m     |        |      |         |      \033[36m|  |     |  | |  ||_     _||   |_| |\n");
-  printk("\033[36m   ---        |      |         ---    |  |     |  |_|  |  |   |  |      _|\n");
-  printk("     |                         |      |  |     |       |  |   |  |     |_ \n");
-  printk("\033[1;36m   ---   //      ^       //    ---    \033[1;36m|  |____ |   _   |  |   |  |    _  |\n");
-  printk("      \\         \\/\\/          /       \033[1;36m|_______||__| |__|  |___|  |___| |_|\033[1;36m\n");
-  printk("\033[1;36m       \\                     /      Written from scratch by the CatK team! :3\n");
-  printk("        \\___________________/      \n");
-  printk("\033[1;31m         ===================       \n");
-  printk("\033[1;31m        =========");
-  printk("\033[1;33m\\/\033[1;31m");
-  printk("==========      \n");
-  printk("\033[1;33m                /  \\               \n");
-  printk("               |CatK|              \n");
-  printk("                \\__/               \033[1;0m\n");
-  printk("\nCatK(mascot) was created by Rodmatronics\n");
 }

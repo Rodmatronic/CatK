@@ -37,14 +37,6 @@
 #define ERANGE        34    /* Math result not representable */
 #define ENOSYS        35    /* No such system call */
 
-#define ENOTSOCK      88    /* Socket operation on non-socket */
-#define EAFNOSUPPORT  97    /* Address family not supported by protocol */
-#define EADDRINUSE    98    /* Address already in use */
-#define ECONNRESET    104   /* Connection reset by peer */
-#define ENOTCONN      107   /* Transport endpoint is not connected */
-#define ETIMEDOUT     110   /* Connection timed out */
-#define ECONNREFUSED  111   /* Connection refused */
-
 #define MAX_ERRNO 4095
 
 static inline const char * errno_str(int code)
@@ -90,13 +82,8 @@ static inline const char * errno_str(int code)
     case EDOM:          return "EDOM";
     case ERANGE:        return "ERANGE";
     case ENOSYS:        return "ENOSYS";
-    case EADDRINUSE:    return "EADDRINUSE";
-    case ETIMEDOUT:     return "ETIMEDOUT";
-    case ECONNREFUSED:  return "ECONNREFUSED";
-    case ENOTCONN:      return "ENOTCONN";
-    case ECONNRESET:    return "ECONNRESET";
   }
-  return "UNKNOWN";
+  return "UNDEFINED";
 }
 
 #define PTR_ERR(errno) ((void *)errno)

@@ -15,7 +15,7 @@
 char * strchr(const char * str, int ch) {
   while(*str) {
     if(*str == ch)
-      return (char *)(str - 1);
+      return (char *)str;
     str++;
   }
   return NULL;

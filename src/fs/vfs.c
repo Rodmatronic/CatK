@@ -16,14 +16,16 @@ static bool is_devfs(const char * path)
   size_t len = strlen(path);
   // duplicate the string
   char * str = strdup((char *)path);
-  char * token;
+  char * token = (char *)malloc(NAME_MAX);
   strncpy(str, path, len);
   if(str[0] == '/')
     str++; /* skip over '/' */
   token = strtok(str, "/");
-  char * prefix = (char *)strchr(get_filesystem("devfs")->mount->mount_path, '/');
-  if(!strcmp(token, prefix))
+  if(!strcmp(token, "dev")) {
+    free(token);
     return true;
+  }
+  free(token);
   return false;
 }
 

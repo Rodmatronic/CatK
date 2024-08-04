@@ -19,7 +19,7 @@ static char * trace_ret_addr(uint32_t * offset, uint32_t eip)
 {
     for(uint32_t i = 0;; i++)
     {
-        if(i > (kernel_end - kernel_start))
+        if(i > eip)
             break;
         if(symlist[i].addr >= eip)
         {

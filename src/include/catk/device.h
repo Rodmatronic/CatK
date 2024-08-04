@@ -44,7 +44,7 @@ struct tty_struct;
 /* basic device structure */
 struct device
 {
-  const char * name;                    /* initial name of device */
+  const char name[NAME_MAX];            /* initial name of device */
   uint8_t major;                        /* acts as a type */
   uint8_t minors;                       /* acts as a class / classes */
   bool removable;                       /* can it be removed? */
@@ -61,7 +61,6 @@ struct device * get_chrdev(uint8_t major);
 int get_chrdevs_registered(void);
 int get_blkdevs_registered(void);
 void device_init(void);
-void device_dump(void);
 int devfs_init(void);
 
 #endif
