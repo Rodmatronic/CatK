@@ -143,43 +143,57 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
   // Print a message based on the type of PCI device
   switch (devices[num_pci].class) {
     case 0x01: // Mass Storage Controllers
+    {
       switch (devices[num_pci].subclass) {
-        case 0x01: printk("  class 0x%02x subclass 0x%02x - SATA Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
-        case 0x00: printk("  class 0x%02x subclass 0x%02x - IDE Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
-        case 0x06: printk("  class 0x%02x subclass 0x%02x - SCSI Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x06: printk("  class 0x%02x subclass 0x%02x - SATA Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x01: printk("  class 0x%02x subclass 0x%02x - IDE Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x00: printk("  class 0x%02x subclass 0x%02x - SCSI Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
         default: printk("  class 0x%02x subclass 0x%02x - Mass Storage Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
       }
       break;
+    }
     case 0x03: // Display Controllers
+    {
       printk("  class 0x%02x subclass NONE - Graphics Card found\n", devices[num_pci].subclass);
       break;
+    }
     case 0x04: // Multimedia Devices
+    {
       switch (devices[num_pci].subclass) {
         case 0x01: printk("  class 0x%02x subclass 0x%02x - Audio Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
-        case 0x02: printk("  class 0x%02x subclass 0x%02x - Video Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x00: printk("  class 0x%02x subclass 0x%02x - Video Controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
         default: printk("  class 0x%02x subclass 0x%02x - Multimedia Device found\n", devices[num_pci].class, devices[num_pci].subclass); break;
       }
       break;
+    }
     case 0x05: // Memory Controllers
+    {
       printk("  class 0x%02x subclass NONE - Memory Controller found\n", devices[num_pci].class);
       break;
+    }
     case 0x06: // Bridge Devices
+    {
       switch (devices[num_pci].subclass) {
-        case 0x00: printk("  class 0x%02x subclass 0x%02x - PCI-to-PCI Bridge found\n"); break;
+        case 0x04: printk("  class 0x%02x subclass 0x%02x - PCI-to-PCI Bridge found\n"); break;
         case 0x01: printk("  class 0x%02x subclass 0x%02x - ISA Bridge found\n", devices[num_pci].class, devices[num_pci].subclass); break;
         default: printk("  class 0x%02x subclass 0x%02x - Bridge Device found\n", devices[num_pci].class, devices[num_pci].subclass); break;
       }
       break;
+    }
     case 0x02: // Network Controllers
+    {
       if (devices[num_pci].subclass == 0x00) {
         printk("  class 0x%02x subclass 0x%02x - Ethernet Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
       } else {
         printk("  class 0x%02x subclass 0x%02x - Network Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
       }
       break;
+    }
     default:
+    {
       printk("  class 0x%02x subclass NONE - Unknown PCI device found\n", devices[num_pci].class);
       break;
+    }
   }
 
   num_pci++;

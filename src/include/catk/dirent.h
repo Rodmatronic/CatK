@@ -8,7 +8,7 @@
 /* directory entry */
 struct dirent
 {
-	uintptr_t d_ino;
+	uint32_t d_ino;
 	off_t d_off;
 	uint16_t d_reclen;
 	char d_name[NAME_MAX + 1];

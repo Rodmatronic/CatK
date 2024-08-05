@@ -31,16 +31,6 @@ int gen_random(void) {
   return ((uint64_t)hi << 32) | lo;
 }
 
-static int cpugetbrand(void);
-static void cpugetvendor(void);
-
-// This will display a very BSD-like CPU dump 'n stuff.
-void cpu_dump_all_info(void)
-{
-  cpugetbrand();
-  cpugetvendor();
-}
-
 static int cpugetbrand(void)
 {
   uint32_t reg_values[12];
@@ -72,4 +62,30 @@ static void cpugetvendor(void)
   vendor[12] = '\0';
 
   printk("CPU Origin: %s\n", vendor);
+}
+
+static void cpugetcores(void) {
+  uint32_t eax, ebx, ecx, edx;
+  cpuid(1, &eax, &ebx, &ecx, &edx);
+  int cores = (ebx >> 16) & 0xff;
+  if (cores == 0) {
+    // If the number of cores is reported as 0, we need to check if hyper-threading is enabled
+    cores = (ebx >> 28) & 0x0f;
+    if (cores > 0) {
+      // Hyper-threading is enabled, so the actual number of cores is half the number of logical processors
+      cores *= 2;
+    } else {
+      // Hyper-threading is not enabled, so the number of cores remains 1
+      cores = 1;
+    }
+  }
+  printk("CPU Cores: %d\n", cores);
+}
+
+// This will display a very BSD-like CPU dump 'n stuff.
+void cpu_dump_all_info(void)
+{
+  cpugetbrand();
+  cpugetvendor();
+  cpugetcores();
 }

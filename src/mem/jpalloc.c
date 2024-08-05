@@ -28,7 +28,7 @@ struct heap_block
   struct heap_metadata metadata;
 };
 
-#define KERNEL_HEAP_MAX         0x400000 /* 4mb of heap mem */
+#define KERNEL_HEAP_MAX         0xa00000 /* 4mb of heap mem */
 #define KERNEL_HEAP_MAGIC       0xdeadc0de
 #define KERNEL_HEAP_ALIGNMENT   8
 #define KERNEL_HEAP_POISON      0xcafebabe

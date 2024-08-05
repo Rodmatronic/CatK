@@ -8,6 +8,10 @@ export ASM = nasm
 export CC = clang
 export LD = ld
 
+ifeq ($(UNAME_S), Darwin)
+override LD = ld.lld
+endif
+
 export CATK_ROOT = $(CURDIR)
 export TOOLS = $(CATK_ROOT)/tools
 export USER = $(CATK_ROOT)/user

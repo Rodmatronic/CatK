@@ -62,14 +62,23 @@ static void devfs_add_inode(struct inode * inode) {
   superblock.total_inodes++;
 }
 
+static void devfs_create_root_inode(void) {
+  struct inode * root_inode = devfs_new_inode(S_IFDIR, 0, 0);
+  struct device * dev = device_struct_alloc();
+  /* stupid dummy device struct */
+  strcpy((char *)dev->name, ".");
+  dev->fops = NULL;
+  ((struct devfs_inode *)root_inode->u.generic_ino)->dev = dev;
+  devfs_add_inode(root_inode);
+}
+
 static int devfs_mount(struct filesystem * fs, struct device * dev) {
   debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, dev->major, dev->minors);
   devfs = fs;
   blkdev = dev;
   fs->sb->u.generic_sbp = ((void *)&superblock);
   /* create root inode */
-  struct inode * root_inode = devfs_new_inode(S_IFDIR, 0, 0);
-  devfs_add_inode(root_inode);
+  devfs_create_root_inode();
   for(int i = 0; i < MAX_BLKDEV; i++) {
     struct device * dev = get_blkdev(i);
     if(!dev) {
@@ -103,6 +112,16 @@ static struct device * devfs_find_node_by_name(const char * name) {
     }
   }
   return NULL;
+}
+
+void devfs_ls(void) {
+  for(int i = 0; i < CATK_DEVFS_INODES_MAX; i++) {
+    if(!inodes[i]) {
+      continue;
+    }
+    struct devfs_inode * dnode = ((struct devfs_inode *)inodes[i]->u.generic_ino);
+    printk("%s ", dnode->dev->name);
+  }
 }
 
 static void dev2file(struct device * dev, struct file * file) {

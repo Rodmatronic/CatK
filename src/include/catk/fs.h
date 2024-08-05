@@ -96,5 +96,6 @@ struct inode
 int register_filesystem(const char * name, struct fs_operations * fsops, struct file_operations * fops, int flags);
 struct filesystem * get_filesystem(const char * name);
 int filesystems_init(int first_partition_lba);
+void devfs_ls(void);
 
 #endif

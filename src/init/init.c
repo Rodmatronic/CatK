@@ -43,15 +43,17 @@ int start_init(const char * cmdline)
     strncpy(init_path, init_val, NAME_MAX);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
   struct file * file = (struct file *)malloc(sizeof(struct file));
+  struct file * file2 = (struct file *)malloc(sizeof(struct file));
   // EXPLANATION
   // open /dev/random
   vfs_open(file, "/dev/random");
   // create buffer to store the read data
-  uint8_t * random_buf = (uint8_t *)malloc(1024);
+  uint8_t * random_buf = (uint8_t *)malloc(9830400);
   // read from /dev/random
-  vfs_read(file, random_buf, 1024);
-  // pass it to debug() and type convert it to 'char *'
-  debug((char *)random_buf);
+  vfs_read(file, random_buf, 9830400);
+  vfs_open(file2, "/dev/fb");
+  vfs_write(file2, random_buf, 9830400);
+  printk("Done! :)\n");
   for(;;);
   if (try_init(init_path) < 0)
   {

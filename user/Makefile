@@ -23,7 +23,6 @@ ASM_OBJ := $(patsubst %.asm, %.o, $(ASM_SRC))
 all: $(TARGET)
 
 $(TARGET): $(C_OBJ) $(ASM_OBJ)
-	@printf "[ Building Init.. ]\n"
 	@$(LD) $(LD_FLAGS) -o $(TARGET) $^
 
 %.o: %.asm

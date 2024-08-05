@@ -24,7 +24,7 @@ int register_chrdev(uint8_t major, const char * name, struct device * dev, struc
   if(chrdevs[major].fops)
     return -EBUSY;
   memcpy(&chrdevs[major], dev, sizeof(struct device));
-  strcpy((char *)chrdevs[major].name, name);
+  strncpy((char *)chrdevs[major].name, name, NAME_MAX - 1);
   chrdevs[major].major = major;
 	chrdevs[major].fops = fops;
   return 0;

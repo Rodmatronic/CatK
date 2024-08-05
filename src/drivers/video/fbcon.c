@@ -59,7 +59,7 @@ static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state 
 static int ansi_list_idx = 0;
 
 static struct ansi_list ansi_value[8];
-static struct file_operations fbcon_fops;
+struct file_operations fbcon_fops;
 
 static inline void fbcon_putc(char c);
 void fbcon_clear(void);
@@ -335,9 +335,12 @@ void fbcon_clear(void)
   memset((void *)c.vc_screenbuf, 0, (c.vc_rows * c.vc_cols));
 }
 
+// static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
+
 int fbcon_dev_write(struct file * file, void * buf, size_t sz)
 {
-  return -ENOSYS; // not implemented
+  memcpy((void *)c.vc_screenbuf, buf, sz);
+  return 0; // not implemented
 }
 
 int fbcon_dev_open(struct file * file, const char * unused)
@@ -375,7 +378,7 @@ int fbcon_init(struct console * con, uint32_t addr)
   return 0;
 }
 
-struct file_operations fops = {
+struct file_operations fbcon_fops = {
   NULL,
   NULL,               /* read */
   fbcon_dev_write,    /* write */

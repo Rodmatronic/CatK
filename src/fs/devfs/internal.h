@@ -16,6 +16,13 @@ struct devfs_sb {
   uint16_t max_inodes;
 };
 
+/* only used if inode bit 2 is set in inode flags */
+
+struct devfs_alt_inode {
+  const char name[NAME_MAX];
+  struct file_operations * fops;
+};
+
 /* super simple devfs inode */
 
 struct devfs_inode {
