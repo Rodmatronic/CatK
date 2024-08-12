@@ -49,7 +49,7 @@ struct inode;
 struct fs_operations
 {
   /* inode operations */
-  //int (*lookup)(const char *);
+  struct inode * (*namei)(const char *);
 	int (*read_inode)(uint32_t, struct inode *);
 	int (*write_inode)(struct file *);
   /* superblock operations */
@@ -96,6 +96,7 @@ struct inode
 int register_filesystem(const char * name, struct fs_operations * fsops, struct file_operations * fops, int flags);
 struct filesystem * get_filesystem(const char * name);
 int filesystems_init(int first_partition_lba);
+bool is_devfs(const char * path);
 void devfs_ls(void);
 
 #endif

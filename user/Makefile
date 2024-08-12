@@ -2,13 +2,16 @@ TARGET = init
 
 SRC = $(CATK_ROOT)/user
 
+C_INCLUDE_PATH := $(SRC)/include
+
 CC_FLAGS = \
+	-I $(C_INCLUDE_PATH)	\
 	-ffreestanding \
 	--target=i686-pc-none-elf \
 	-march=i686 \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
-	-nostdlib \
+	-nostdlib
 
 ASM_FLAGS = -f elf32
 LD_FLAGS = -m elf_i386 -T $(SRC)/link.ld -znoexecstack
@@ -24,6 +27,7 @@ all: $(TARGET)
 
 $(TARGET): $(C_OBJ) $(ASM_OBJ)
 	@$(LD) $(LD_FLAGS) -o $(TARGET) $^
+	cp $(SRC)/init $(CATK_ROOT)/skeleton/
 
 %.o: %.asm
 	@printf "[ $< ]\n"

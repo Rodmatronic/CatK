@@ -6,15 +6,20 @@
 #include <catk/errno.h>
 #include <catk/tty.h>
 #include <lib/common.h>
+#include <config.h>
 #include <stdint.h>
+
+#if CATK_SYSCALL_TRACE == 1
 
 void syscall_trace(struct intr_stack_frame * regs)
 {
-  printk("-------------\nsyscall_trace: eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n-------------\n", 
+  printk("-------------syscall_trace: eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x-------------\n", 
       regs->eax, regs->ebx, regs->ecx, regs->edx);
 }
 
-static uint32_t _system_call(struct intr_stack_frame * regs)
+#endif
+
+static uint32_t do_system_call(struct intr_stack_frame * regs)
 {
   uint32_t rc = -ENOSYS;
   switch(regs->eax)
@@ -26,7 +31,6 @@ static uint32_t _system_call(struct intr_stack_frame * regs)
     }
     case 0x01:
     {
-      /* sometimes a task can return from this.. */
       sys_exit((int)regs->ebx);
       break;
     }
@@ -37,8 +41,8 @@ static uint32_t _system_call(struct intr_stack_frame * regs)
     }
     case 0x03:
     {
-      printk((char *)regs->ebx);
-      rc = 0;
+      
+      //rc = sys_write((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
       break;
     }
     case 0x04:
@@ -46,9 +50,34 @@ static uint32_t _system_call(struct intr_stack_frame * regs)
       rc = sys_open((const char *)regs->ebx, (int)regs->ecx, (uint16_t)regs->edx);
       break;
     }
+    case 0x05: {
+      rc = sys_fork();
+      break; 
+    }
+    case 0x06: {
+      rc = sys_access((const char *)regs->ebx, (int)regs->ecx);
+      break; 
+    }
+    case 0x07: {
+      rc = sys_wait((int *)regs->ebx);
+      break; 
+    }
+    case 0x08: {
+      rc = sys_chdir((const char *)regs->ebx);
+      break; 
+    }
+    case 0x09: {
+      rc = sys_execve((const char *)regs->ebx, (char ** const)regs->ecx, (char ** const)regs->edx);
+      break; 
+    }
+    case 0x0a: {
+      sys_beep((int)regs->ebx);
+      rc = 0;
+      break;
+    }
     default:
     {
-      debug("syscall: bad or unsupported system call 0x%x\n", regs->eax);
+      debug("Received bad or unsupported system call 0x%x\n", regs->eax);
       break;
     }
   }
@@ -57,12 +86,13 @@ static uint32_t _system_call(struct intr_stack_frame * regs)
 
 void system_call(struct intr_stack_frame * regs)
 {
+#if CATK_SYSCALL_TRACE == 1
   syscall_trace(regs);
-  regs->eax = _system_call(regs);
+#endif
+  regs->eax = do_system_call(regs);
 }
 
 void syscall_install(void)
 {
-  debug("syscall: syscalls enabled.\n");
   interrupt_install(system_call, 128);
 }

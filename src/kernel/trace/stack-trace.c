@@ -10,7 +10,7 @@
 struct stack_frame
 {
     struct stack_frame * bp;
-    uint32_t ip;
+    uintptr_t ip;
 };
 
 extern struct kern_syms symlist[];
@@ -35,7 +35,9 @@ void trace_stack(int frames)
 #if CATK_STACK_TRACE == 1
     printk("stack backtrace:\n");
     struct stack_frame * stack;
+#if CATK_64BIT == 1
     asm volatile("movl %%ebp, %0" : "=r"(stack));
+#endif /* CATK_64BIT */
     for(int i = 0; stack && i < frames; i++)
     {
         uint32_t offset;

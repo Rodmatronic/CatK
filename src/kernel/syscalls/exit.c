@@ -7,7 +7,9 @@
 
 void sys_exit(int err_code)
 {
+  struct task * p = get_current_task();
   debug("sys_exit: exiting with code: %d\n", err_code);
-  kill(get_current_task());
+  p->error_code = err_code;
+  kill(p);
   for(;;);
 }

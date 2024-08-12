@@ -21,6 +21,10 @@
 #include <lib/ctype.h>
 #include <config.h>
 
+#ifndef __GNUC__
+#error "GCC or Clang please! :)"
+#endif
+
 static char * cmdline;
 
 static bool use_hd = false; /* determines if we use a hard-disk or not */
@@ -41,7 +45,7 @@ static void show_mem_info(uintptr_t addr)
   meminfo = multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
   if(!meminfo)
     return;
-  /* prints out memory info like unix :) */
+  /* prints out memory info, just like unix :) */
   size_t total_mem = meminfo->mem_upper + meminfo->mem_lower;
   printk("real mem: %d kb\n", total_mem);
   printk("avail mem: %d kb\n",  total_mem - heap_get_used());
@@ -51,8 +55,8 @@ void kmain(uint32_t magic, uintptr_t addr)
 {
   if(!multiboot2_validate_args(magic, addr))
     return; /* return into the infinite halt state */
-  cpu_init();
-  heap_init(&kernel_end);
+  cpu_init(addr);
+  heap_init();
   serial_init();
   debug(" kernel!\n");
   device_init();
@@ -63,10 +67,10 @@ void kmain(uint32_t magic, uintptr_t addr)
     return;
   }
   cmdline = obtain_cmdline(addr);
-  char * verbosity = get_cmdline_param_val(cmdline, "verbose");
-  if(verbosity)
+  char * verbose = get_cmdline_param_val(cmdline, "verbose");
+  if(verbose)
   {
-    if(strcmp("true", verbosity) == 0)
+    if(strcmp("true", verbose) == 0)
     {
       debug("Redirecting serial output to console...\n");
       kern_verbose = true;
@@ -75,7 +79,7 @@ void kmain(uint32_t magic, uintptr_t addr)
   show_boot_banner();
   show_mem_info(addr);
   if (!cpuidcheck()) {
-      panic("Could not get CPUID for this hardware!");
+    panic("Could not get CPUID for this hardware!");
   }
   /* Check to see if the CPU supports CPUID. If not, panic.*/
   printk("CPU: CPUID supported\n");

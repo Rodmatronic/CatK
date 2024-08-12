@@ -63,7 +63,7 @@ int fat32_init(int partition_lba)
 }
 
 struct fs_operations fat32_ops = {
-  //NULL,
+  NULL,
   NULL,
   NULL,
   NULL,

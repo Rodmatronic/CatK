@@ -8,10 +8,14 @@
 #include <catk/core.h>
 #include <catk/limits.h>
 #include <catk/types.h>
+#include <catk/vfs.h>
+#include <catk/virt.h>
 #include <lib/common.h>
 
-struct task *current;
-struct task *catk_idle_task;
+struct task * current;
+struct task * catk_idle_task;
+
+struct task * wait_queue[4] = {NULL};
 
 static bool is_tasking_enabled = false;
 
@@ -21,8 +25,7 @@ void catk_idle(void)
 {
   is_tasking_enabled = true;
   bootstrap2();
-  for (;;)
-    ;
+  for (;;);
 }
 
 bool tasking_enabled(void)
@@ -30,7 +33,7 @@ bool tasking_enabled(void)
   return is_tasking_enabled;
 }
 
-inline struct task *get_current_task(void)
+inline struct task * get_current_task(void)
 {
   return current;
 }
@@ -62,8 +65,7 @@ static pid_t get_free_pid(void)
   return -1;
 }
 
-/*
-static struct task *get_proc_from_pid(pid_t pid)
+struct task * get_task_from_pid(pid_t pid)
 {
   struct task *current = current;
   while (current != catk_idle_task)
@@ -74,7 +76,6 @@ static struct task *get_proc_from_pid(pid_t pid)
   }
   return NULL;
 }
-*/
 
 int is_pid_running(pid_t pid)
 {
@@ -120,11 +121,15 @@ static inline void task_release(struct task *p)
   }
 }
 
+static void setup_file_descriptors(struct task * p) {
+  return;
+}
+
 #define STACK_PUSH(item) *(--stack) = (uint32_t)item
 
-static struct task *create_kernel_task(char *name, void *addr, int priority)
+struct task * create_kernel_task(char * name, void * addr, int priority)
 {
-  struct task *p = (struct task *)calloc(sizeof(struct task), 1);
+  struct task * p = (struct task *)calloc(sizeof(struct task), 1);
   if (!p)
     return NULL;
   p->name = name;
@@ -134,6 +139,7 @@ static struct task *create_kernel_task(char *name, void *addr, int priority)
   p->kernel_mode = true;
   p->state = TASK_CREATED;
   p->priority = priority;
+  p->error_code = 0;
   switch (p->priority)
   {
   case TASK_PRIORITY_HIGH:
@@ -152,10 +158,11 @@ static struct task *create_kernel_task(char *name, void *addr, int priority)
     break;
   }
   }
-  memset(p->fd, 0, sizeof(struct file) * OPEN_MAX);
+  setup_file_descriptors(p);
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
   p->esp = (uint32_t)calloc(4096, 1);
+  p->cr3 = (uint32_t *)get_kernel_pgd();
   if (!(void *)p->esp)
   {
     free(p);
@@ -163,7 +170,7 @@ static struct task *create_kernel_task(char *name, void *addr, int priority)
   }
   /* the stack grows down, so we go to the top, which is also the bottom */
   p->stack_top = (p->esp + 4096);
-  uint32_t *stack = (uint32_t *)p->stack_top;
+  uint32_t * stack = (uint32_t *)p->stack_top;
   STACK_PUSH(0x200);
   STACK_PUSH(0x08);
   STACK_PUSH(addr);
@@ -185,7 +192,7 @@ static struct task *create_kernel_task(char *name, void *addr, int priority)
 }
 
 /* the moment we've all been waiting for.. */
-static struct task * create_user_task(char * name, uint32_t addr, int priority)
+struct task * create_user_task(char * name, uint32_t addr, int priority)
 {
 	struct task * p = (struct task *)calloc(sizeof(struct task), 1);
   if(!p)
@@ -194,6 +201,7 @@ static struct task * create_user_task(char * name, uint32_t addr, int priority)
 	p->pid = get_free_pid();
 	p->state = TASK_CREATED;
   p->priority = priority;
+  p->error_code = 0;
   switch(p->priority)
   {
     case TASK_PRIORITY_HIGH:
@@ -212,10 +220,13 @@ static struct task * create_user_task(char * name, uint32_t addr, int priority)
       break;
     }
   }
+  setup_file_descriptors(p);
   memset(p->fd, 0, sizeof(struct file) * OPEN_MAX);
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
 	p->esp = (uint32_t)calloc(4096, 1);
+  p->cr3 = create_new_pgd();
+  uvm_map((uint32_t)p->cr3, p->esp, p->esp);
   if(!(void *)p->esp)
   {
     free(p);
@@ -262,7 +273,22 @@ int spawn_user_task(char *name, uint32_t addr, int priority)
   return p->pid;
 }
 
-pid_t task_add_queue(struct task *p)
+struct task * task_find_child(pid_t parent) {
+  struct task * p = current;
+  while(p != catk_idle_task) {
+    if(p->ppid == current->pid) {
+      return p;
+    }
+    p = p->next;
+  }
+  return NULL;
+}
+
+bool task_has_children(void) {
+  return (task_find_child(current->pid) != NULL);
+}
+
+pid_t task_add_queue(struct task * p)
 {
   is_tasking_enabled = false;
   p->next = current->next;
@@ -272,6 +298,29 @@ pid_t task_add_queue(struct task *p)
   is_tasking_enabled = true;
   debug("scheduler: added pid %d to queue\n", p->pid);
   return p->pid;
+}
+
+int wait_queue_add(struct task * p) {
+  for(int i = 0; i < 4; i++) {
+    if (!wait_queue[i]) {
+      wait_queue[i] = p;
+      return 0;
+    }
+  }
+  return -1;
+}
+
+pid_t sleep(void) {
+  if (wait_queue_add(current) < 0) {
+    return -EAGAIN;
+  }
+  current->state = TASK_BLOCKED;
+  while(current->state == TASK_BLOCKED);
+  return task_find_child(current->pid)->pid;
+}
+
+void wakeup(pid_t pid) {
+  get_task_from_pid(pid)->state = TASK_ALIVE;
 }
 
 static void exec_task(void)
@@ -307,20 +356,35 @@ static void user_exec_task(void)
 	asm volatile("pop %ecx");
 	asm volatile("pop %ebx");
 	asm volatile("pop %eax");
-  usermode_switch((void *)current->entry_point);
+  //usermode_switch((void *)current->entry_point);
 }
 
-static struct task *find_next_task(void)
+static struct task * find_next_task(void)
 {
-  struct task *p = current->next;
-  while (1)
+  struct task * p = current->next;
+  /* TODO: Add infinite-loop detection */
+  while(1)
   {
-    /* This makes sure we dont schedule any blocked tasks */
-    if (p->state == TASK_ALIVE || p->state == TASK_CREATED)
-    {
-      return p;
+    switch(p->state) {
+      case TASK_ALIVE: {
+        /* fall through */
+      }
+      case TASK_CREATED: {
+        return p;
+      }
+      case TASK_BLOCKED: {
+        if(task_has_children()) {
+          struct task * child = task_find_child(p->pid);
+          if(child->state == TASK_DEAD) {
+            p->state = TASK_ALIVE;
+            return p;
+          }
+        }
+      }
+      default: {
+        p = p->next;
+      }
     }
-    p = p->next;
   }
 }
 
@@ -364,12 +428,13 @@ void schedule(void)
   critical_exit();
 }
 
-void tasking_init(void)
+void _noreturn_ tasking_init(void)
 {
+  memset(wait_queue, 0, sizeof(struct task) * 4);
   catk_idle_task = create_kernel_task("catk-idle", catk_idle, TASK_PRIORITY_HIGH);
   catk_idle_task->next = catk_idle_task;
   catk_idle_task->prev = catk_idle_task;
   current = catk_idle_task;
   exec_task();
-  panic("Failed to exec task, kernel left in unreachable state");
+  for(;;);
 }

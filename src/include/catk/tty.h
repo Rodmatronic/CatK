@@ -102,7 +102,7 @@ struct tty_struct;
 /* interface between driver and tty */
 struct tty_operations
 {
-  size_t (*read)(struct tty_struct * tty, const uint8_t * buf, size_t count);
+  size_t (*read)(struct tty_struct * tty, uint8_t * buf, size_t count);
   size_t (*write)(struct tty_struct * tty, const uint8_t * buf, size_t count);
 };
 
@@ -119,5 +119,6 @@ struct tty_struct
 
 struct tty_struct * tty_lookup(int num);
 int tty_create(int num, struct device * dev);
+void tty_handle_input(struct tty_struct * tty, int ch);
 
 #endif

@@ -5,7 +5,7 @@
 #include <stdarg.h>
 
 #define BIT(bit) (1 << bit)
-#define ALIGN(align, num) (num + align - 1) & ~(align - 1)
+#define ALIGN(align, num) ((num + align - 1) & ~(align - 1))
 
 typedef enum
 {
@@ -49,7 +49,8 @@ void * memset32(void * dest, uint32_t val, size_t count);
 void * memmove(void * dest, const void * src, size_t n);
 void * memmove16(void * dest, const void * src, size_t n);
 void * memmove32(void * dest, const void * src, size_t n);
-int memcmp(const void * mem1, const void * mem2, size_t n);
+int memcmp(const void * addr1, const void * addr2, size_t count);
+void hexdump(const void * ptr, size_t len);
 
 /* printf and their siblings */
 int vsnprintf(char * str, size_t len, const char format[], va_list arg);

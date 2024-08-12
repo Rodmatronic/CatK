@@ -6,30 +6,61 @@
 
 /* For more info about good old paging, download the Intel Software Developer Manual at https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html */
 
-/* Page Directory Entry (PDE) values */
-#define PDE_PRESENT         BIT(0)
-#define PDE_RW              BIT(1)
-#define PDE_USERMODE        BIT(2)
-#define PDE_WRITETHROUGH    BIT(3)
-#define PDE_CACHING         BIT(4)
-#define PDE_ACCESSED        BIT(5)
-#define PDE_DIRTY           BIT(6)
-#define PDE_PAGESIZE        BIT(7)
-#define PDE_IGNORED         (~(BIT(9) | BIT(10) | BIT(11)))
-/* Page Table Entry (PTE) values */
-#define PTE_PRESENT         PDE_PRESENT
-#define PTE_RW              PDE_RW
-#define PTE_USERMODE        PDE_USERMODE
-#define PTE_WRITETHROUGH    PDE_WRITETHROUGH
-#define PTE_CACHING         PDE_CACHING
-#define PTE_ACCESSED        PDE_ACCESSED
-#define PTE_DIRTY           PDE_DIRTY
-#define PTE_PAT             BIT(7)
-#define PTE_GLOBAL          BIT(8)
+/* We use 4MB page directory :) */
+
+#define PDE_PRESENT_SHIFT   0
+#define PDE_RW_SHIFT        1
+#define PDE_USERMODE_SHIFT  2
+#define PDE_PWT_SHIFT       3
+#define PDE_NOCACHE_SHIFT   4
+#define PDE_ACCESSED_SHIFT  5
+#define PDE_DIRTY_SHIFT     6
+#define PDE_PAGESIZE_SHIFT  7
+#define PDE_GLOBAL_SHIFT    8
+#define PDE_IGNORED         (~BIT(9) | ~BIT(10) | ~BIT(11))
+
+#define PAGE_ALIGNMENT      0x1000
+#define PAGE_SIZE           PAGE_ALIGNMENT
+
+#define PTE_PRESENT_SHIFT   0
+#define PTE_RW_SHIFT        1
+#define PTE_USERMODE_SHIFT  2
+#define PTE_PWT_SHIFT       3
+#define PTE_NOCACHE_SHIFT   4
+#define PTE_ACCESSED_SHIFT  5
+#define PTE_DIRTY_SHIFT     6
+#define PTE_PAT_SHIFT       7
+#define PTE_GLOBAL_SHIFT    8
 #define PTE_IGNORED         PDE_IGNORED
 
-#define PAGE_ADDR(addr)     (addr << 12)
+#define FRAMEBUFFER_VIRT_ADDR 0x800000
 
-void paging_init(void);
+static inline int pde_is_present(uint32_t pde) {
+  return (pde & 1 << PDE_PRESENT_SHIFT);
+}
+
+static inline int pte_is_present(uint32_t pte) {
+  return pde_is_present(pte);
+}
+
+static inline uint32_t pde_index(uint32_t v_addr) {
+  return ((uint32_t)v_addr >> 12 & (PAGE_SIZE - 1));
+}
+
+static inline uint32_t pte_index(uint32_t v_addr) {
+  return ((uint32_t)v_addr >> 22);
+}
+
+static inline uint32_t extract_pte(uint32_t pde) {
+  return ((pde) & ~(PAGE_SIZE - 1));
+}
+
+/* page operations */
+uint32_t get_kernel_pd(void);
+void paging_init(uint32_t addr);
+void kvm_map(uint32_t phys_addr, uint32_t virt_addr);
+void uvm_map(uint32_t pd, uint32_t phys_addr, uint32_t virt_addr);
+uint32_t * create_new_pgd(void);
+uint32_t get_kernel_pgd(void);
 
 #endif

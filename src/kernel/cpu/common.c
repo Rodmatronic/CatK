@@ -25,10 +25,37 @@ static void cpuid(uint32_t code, uint32_t * a, uint32_t * b, uint32_t * c, uint3
                      : "a"(code));
 }
 
+static uint32_t xorshift32(uint32_t state) {
+    // Simple xorshift PRNG
+    state ^= (state << 13);
+    state ^= (state >> 17);
+    state ^= (state << 5);
+    return state;
+}
+
 int gen_random(void) {
-  uint32_t lo, hi;
-  asm volatile ("rdtsc" : "=a"(lo), "=d"(hi));
-  return ((uint64_t)hi << 32) | lo;
+  uint32_t lo1, hi1, lo2, hi2;
+  uint32_t entropy1, entropy2;
+
+  // Read time-stamp counter once
+  asm volatile ("rdtsc" : "=a"(lo1), "=d"(hi1));
+
+  // Looks dumb, but read time-stamp counter again with a slight delay
+  asm volatile ("rdtsc" : "=a"(lo2), "=d"(hi2));
+  uint64_t ts_combined = ((uint64_t)hi1 << 32) | lo1;
+  uint64_t ts_combined2 = ((uint64_t)hi2 << 32) | lo2;
+  uint64_t combined_result = ts_combined ^ ts_combined2;
+
+  // Extract a 32-bit value
+  entropy1 = (uint32_t)(combined_result & 0xFFFFFFFF);
+  asm volatile ("rdtsc" : "=a"(lo1), "=d"(hi1));
+  entropy2 = (uint32_t)(hi1 ^ lo1);
+
+  // Combine the two sources of entropy
+  uint32_t mixed_entropy = xorshift32(entropy1 ^ entropy2);
+
+  return (int)(mixed_entropy);
+
 }
 
 static int cpugetbrand(void)

@@ -19,6 +19,7 @@ export GZ = $(shell which gzip)
 export CONFIG = $(CATK_ROOT)/config
 export OUT = $(CATK_ROOT)/out
 export OBJ = $(CATK_ROOT)/obj
+export QEMU_SOUND = 0
 
 .PHONY: all
 
@@ -43,9 +44,22 @@ all: clean
 init:
 	@$(MAKE) -C $(USER)/ || { echo "Build failed"; exit 1; }
 
-run:
+debug:
 	@qemu-system-x86_64 \
 		-d int \
+		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
+		-cdrom $(OUT)/catkernel.iso \
+		-m 2G \
+		-no-reboot
+
+disk:
+	@$(TOOLS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
+
+# use this for pulse-audio 	-audiodev pa,id=snd0 -machine pcspk-audiodev=snd0 \
+# use this for alsa 				-audiodev alsa,id=snd0 -machine pcspk-audiodev=snd0 \
+
+run:
+	@qemu-system-x86_64 \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G

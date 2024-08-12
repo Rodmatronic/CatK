@@ -32,6 +32,7 @@ struct task
 {
 	char * name;
   pid_t pid;
+  pid_t ppid;
   uid_t uid;
   gid_t gid;
   uint8_t state;
@@ -40,7 +41,9 @@ struct task
   uint8_t ticks_left;
 	uint32_t stack_top; /* used only when freeing a task */
   uint32_t entry_point;
+  uint32_t error_code;
   uint32_t esp;
+  uint32_t * cr3;
   bool kernel_mode;
   char * cwd;
   struct file * fd[OPEN_MAX];
@@ -56,8 +59,14 @@ struct task * get_current_task(void);
 bool tasking_enabled(void);
 int spawn_kernel_task(char * name, void * addr, int priority);
 int spawn_user_task(char * name, uint32_t addr, int priority);
+struct task * create_kernel_task(char * name, void * addr, int priority);
+struct task * create_user_task(char * name, uint32_t addr, int priority);
 void usermode_switch(void * addr);
 pid_t task_add_queue(struct task * p);
 void tasking_init(void);
+bool task_has_children(void);
+struct task * task_find_child(pid_t parent);
+struct task * get_task_from_pid(pid_t pid);
+pid_t sleep(void);
 
 #endif

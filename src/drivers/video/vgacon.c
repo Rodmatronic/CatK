@@ -100,10 +100,10 @@ static inline void _hot_ vgacon_scroll(void)
   {
     for (int i = 1; i < c.vc_cols; i++)
     {
-      memcpy16((void *)c.vc_screenbuf + (i - 1) * c.vc_rows * 2, (void *)c.vc_screenbuf + i * c.vc_rows * 2, c.vc_rows * 2);
+      memcpy((void *)c.vc_screenbuf + (i - 1) * c.vc_rows * 2, (void *)c.vc_screenbuf + i * c.vc_rows * 2, c.vc_rows * 2);
     }
-    uint16_t * last_row = (void *)c.vc_screenbuf + (c.vc_rows - 1) * c.vc_rows * 2;
-    memset16(last_row, 0, c.vc_rows * 2);
+    uint16_t * last_row = (void *)c.vc_screenbuf + (c.vc_cols - 1) * c.vc_rows * 2;
+    memset(last_row, 0, c.vc_rows * 2);
 
     vgacon_y--;
   }
@@ -310,6 +310,13 @@ int vgacon_output_intr(struct tty_struct * tty, size_t len)
   return 0;
 }
 
+static void vgacon_enable_cursor(void) {
+  outb(0x3D4, 0x0A);
+  outb(0x3D5, (inb(0x3D5) & 0xC0) | 0);
+  outb(0x3D4, 0x0B);
+  outb(0x3D5, (inb(0x3D5) & 0xE0) | 0x0E);
+}
+
 static inline void vgacon_clear(void)
 {
   memset16((void *)c.vc_screenbuf, 0x0007, c.vc_rows * c.vc_cols);
@@ -317,7 +324,8 @@ static inline void vgacon_clear(void)
 
 int vgacon_dev_write(struct file * file, void * buf, size_t sz)
 {
-  return -ENOSYS; // not implemented
+  memcpy((void *)c.vc_screenbuf, buf, sz);
+  return 0;
 }
 
 int vgacon_dev_open(struct file * file, const char * unused)
@@ -340,6 +348,7 @@ int vgacon_init(struct console * con, uint32_t addr)
   con->write = vgacon_write;
   con->data = &c;
   con->dev = NULL;
+  vgacon_enable_cursor();
   vgacon_clear();
   return 0;
 }

@@ -1,10 +1,12 @@
 #include <catk/core.h>
+#include <catk/compiler.h>
 #include <catk/device.h>
 #include <catk/tty.h>
 #include <catk/printk.h>
 #include <catk/errno.h>
 #include <catk/console.h>
 #include <catk/io.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 
 #define KEYBOARD_PORT1_IRQ              33
@@ -120,8 +122,6 @@ static bool is_dual_channel = false;
 static uint8_t keyboard_flags;
 
 static struct tty_struct * tty = NULL;
-
-static void putc(int ch);
 
 static inline void keyboard_first_enable(void)
 {
@@ -255,7 +255,10 @@ static uint8_t keyboard_get_scancode_flag(char scancode)
     {
       return KEYBOARD_FLAG_ALT;
     }
-    case KEYBOARD_KEY_LSHIFT: /* fall through */
+    case KEYBOARD_KEY_LSHIFT:
+    {
+      /* fall through */
+    }
     case KEYBOARD_KEY_RSHIFT:
     {
       return KEYBOARD_FLAG_SHIFT;
@@ -268,7 +271,7 @@ static uint8_t keyboard_get_scancode_flag(char scancode)
   }
 }
 
-static void keyboard_port1_irq(struct intr_stack_frame * frame)
+static void _hot_ keyboard_port1_irq(struct intr_stack_frame * frame)
 {
   /* this is required to be set */
   if(!(READ_CMD & KEYBOARD_STATUS_OUTPUT))
@@ -304,24 +307,22 @@ static void keyboard_port1_irq(struct intr_stack_frame * frame)
   }
   uint8_t * keymap = (keyboard_flags & KEYBOARD_FLAG_SHIFT) ? shift_map : keyboard_map;
   int ch = keymap[scancode & 0x7f];
+  if(keyboard_flags & KEYBOARD_FLAG_CTRL) {
+    for(int i = 1; i < 12; i++) {
+      if(ch == ((tty->termios.c_cc[i] + 64) & 0x7f)) {
+        ch = tty->termios.c_cc[i];
+      }
+    }
+  }
   if(!(scancode & KEYBOARD_KEYPRESS_STOP))
   {
-    /* stores character in tty read queue */
-    putc(ch);
+    tty_handle_input(tty, ch);
   }
 }
 
 void keyboard_port2_irq(struct intr_stack_frame * frame)
 {
 
-}
-
-/* write string to tty read queue */
-static void putc(int ch)
-{
-  if(!tty)
-    return;
-  ring_buffer_write(tty->read_q, ch);
 }
 
 int keyboard_assign_tty(struct tty_struct * tty_new)

@@ -16,9 +16,9 @@ struct device * device_struct_alloc(void)
 int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops)
 {
   if(major != MEMDEV_MAJOR)
-    printk("Registering character device \"%s%d\" (major %d)\n", name, dev->minors, major);
+    debug("Registering character device \"%s%d\" (major %d)\n", name, dev->minors, major);
   else
-    printk("Registering character device \"%s\" (major %d)\n", name, dev->minors, major);
+    debug("Registering character device \"%s\" (major %d)\n", name, dev->minors, major);
   if(major >= MAX_CHRDEV)
     return -EINVAL;
   if(chrdevs[major].fops)
@@ -32,7 +32,7 @@ int register_chrdev(uint8_t major, const char * name, struct device * dev, struc
 
 int register_blkdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops)
 {
-  printk("Registering block device \"%s%d\" (major %d)\n", name, dev->minors, major);
+  debug("Registering block device \"%s%d\" (major %d)\n", name, dev->minors, major);
 	if (major >= MAX_BLKDEV)
 		return -EINVAL;
 	if (blkdevs[major].fops)

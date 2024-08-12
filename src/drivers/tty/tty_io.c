@@ -25,29 +25,21 @@ static void termios_init(struct termios * termios)
   termios->c_cflag = CREAD | CS8 | HUPCL;
   termios->c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE;
 #define CONTROL(char) (((char) - 64) & 0x7f)
-  termios->c_cc[VEOF] = CONTROL('D');
+  termios->c_cc[VEOF] = CONTROL('d');
   termios->c_cc[VEOL] = CONTROL('?');
   termios->c_cc[VERASE] = '\b';
-  termios->c_cc[VINTR] = CONTROL('C');
-  termios->c_cc[VKILL] = CONTROL('U');
+  termios->c_cc[VINTR] = CONTROL('c');
+  termios->c_cc[VKILL] = CONTROL('u');
   termios->c_cc[VMIN] = 1;
   termios->c_cc[VQUIT] = CONTROL('\\');
-  termios->c_cc[VSTART] = CONTROL('Q');
-  termios->c_cc[VSTOP] = CONTROL('S');
-  termios->c_cc[VSUSP] = CONTROL('Z');
+  termios->c_cc[VSTART] = CONTROL('q');
+  termios->c_cc[VSTOP] = CONTROL('s');
+  termios->c_cc[VSUSP] = CONTROL('z');
   termios->c_cc[VTIME] = 0;
-}
-
-static size_t _unused_ tty_read(struct tty_struct * tty, const uint8_t * buf, size_t count)
-{
-  return -ENOSYS;
 }
 
 static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t count)
 {
-  if(!tty->ops->write)
-    return -ENXIO;
-
   if(!tty->dev)
   {
     debug("tty: writing to a non-existent tty struct\n");
@@ -70,20 +62,28 @@ static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t cou
   return 0;
 }
 
+static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count)
+{
+  /* TODO: add proper tty input reading */
+  return 0;
+}
+
 static int tty_dev_read(struct file * filp, void * buf, size_t sz)
 {
-  return -ENOSYS;
+  printk("tty read called\n");
+  struct tty_struct * tty = tty_lookup(0);
+  return tty_read(tty, (uint8_t *)buf, sz);
 }
 
 static int tty_dev_write(struct file * filp, void * buf, size_t sz)
 {
   struct tty_struct * tty = tty_lookup(0);
-  return tty_write(tty, (uint8_t *)buf, sz);
+  return tty_write(tty, (const uint8_t *)buf, sz);
 }
 
 static int tty_dev_open(struct file * filp, const char * file)
 {
-  return -ENOSYS;
+  return 0;
 }
 
 static void tty_dev_close(struct file * filp)
@@ -102,6 +102,24 @@ static void tty_release(struct tty_struct * tty)
   ring_buffer_release(tty->read_q);
   free(tty);
   memset((void *)tty, 0, sizeof(struct tty_struct));
+}
+
+static inline void tty_buf_putc(struct ring_buffer * buf, struct tty_struct * tty, int ch) {
+  ring_buffer_write(buf, ch);
+  if(tty->termios.c_lflag & ECHO) {
+    int (*tty_output_intr)(struct tty_struct *, size_t) = tty->dev->priv_data;
+    tty_output_intr(tty, 1);
+  }
+}
+
+/* handles tty input */
+void tty_handle_input(struct tty_struct * tty, int ch) {
+  if(ch == tty->termios.c_cc[VINTR]) {
+    /* TODO: implement signals */
+    debug("lets pretend a signal was dispatched\n");
+    return;
+  }
+  tty_buf_putc(tty->read_q, tty, ch);
 }
 
 /* creates a tty device and binds console device */
@@ -135,6 +153,7 @@ int tty_create(int num, struct device * dev)
   tty->winsize.ws_xpixel = 0;
   tty->winsize.ws_ypixel = 0;
   tty->ops->write = tty_write;
+  tty->ops->read = tty_read;
   tty->dev = dev; /* console device */
   ttys[num] = tty;
   /* now create the character device */

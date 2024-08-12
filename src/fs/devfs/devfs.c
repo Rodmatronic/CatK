@@ -103,8 +103,7 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
   }
   return 0;
 }
-
-static struct device * devfs_find_node_by_name(const char * name) {
+ struct device * devfs_find_node_by_name(const char * name) {
   for(int i = 0; i < CATK_DEVFS_INODES_MAX; i++) {
     struct devfs_inode * dnode = ((struct devfs_inode *)inodes[i]->u.generic_ino);
     if(!strncmp(dnode->dev->name, name, strlen(name))) {
@@ -122,6 +121,39 @@ void devfs_ls(void) {
     struct devfs_inode * dnode = ((struct devfs_inode *)inodes[i]->u.generic_ino);
     printk("%s ", dnode->dev->name);
   }
+}
+
+struct inode * _devfs_namei(const char * name) {
+  for(int i = 0; i < CATK_DEVFS_INODES_MAX; i++) {
+    struct devfs_inode * dnode = ((struct devfs_inode *)inodes[i]->u.generic_ino);
+    if(!strncmp(dnode->dev->name, name, strlen(name))) {
+      return inodes[i];
+    }
+  }
+  return NULL;
+}
+
+struct inode * devfs_namei(const char * pathname) {
+  char * fn = strdup(pathname);
+  struct inode * inode = NULL;
+  if(fn[0] == '/') {
+    fn++;
+  }
+  fn = strchr(fn, '/');
+  while(fn) {
+    if(fn[0] == '/') {
+      fn++;
+    }
+    inode = _devfs_namei(fn);
+    if(inode) {
+      break;
+    } else {
+      free(fn);
+      return NULL;
+    }
+    fn = strchr(fn + 1, '/');
+  }
+  return inode;
 }
 
 static void dev2file(struct device * dev, struct file * file) {
@@ -156,7 +188,7 @@ static int devfs_open(struct file * filp, const char * path) {
 }
 
 static void _unused_ devfs_close(struct file * filp) {
-  free(filp->inode);
+  return;
 }
 
 int devfs_read(struct file * filp, void * buf, size_t sz)
@@ -195,6 +227,7 @@ struct file_operations devfs_file_ops = {
 };
 
 struct fs_operations devfs_ops = {
+  devfs_namei,
   NULL,
   NULL,
   NULL,

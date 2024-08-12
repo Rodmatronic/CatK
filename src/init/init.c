@@ -28,12 +28,16 @@ int try_init(const char * path)
   if(IS_ERR(rc))
     return rc;
   uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
-  vfs_read(file, program_buffer, file->inode->length);
+  rc = vfs_read(file, program_buffer, file->inode->length);
+  if(IS_ERR(rc)) {
+    return rc;
+  }
   return elf_exec((const char *)init_path, program_buffer);
 }
 
 int start_init(const char * cmdline)
 {
+  int rc;
   set_tss_stack(get_current_task()->esp);
   printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
   char * init_val = get_cmdline_param_val((char *)cmdline, "init");
@@ -42,19 +46,7 @@ int start_init(const char * cmdline)
   else
     strncpy(init_path, init_val, NAME_MAX);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
-  struct file * file = (struct file *)malloc(sizeof(struct file));
-  struct file * file2 = (struct file *)malloc(sizeof(struct file));
-  // EXPLANATION
-  // open /dev/random
-  vfs_open(file, "/dev/random");
-  // create buffer to store the read data
-  uint8_t * random_buf = (uint8_t *)malloc(9830400);
-  // read from /dev/random
-  vfs_read(file, random_buf, 9830400);
-  vfs_open(file2, "/dev/fb");
-  vfs_write(file2, random_buf, 9830400);
-  printk("Done! :)\n");
-  for(;;);
+  /* before i continue fixing things, i want to test the kernel heap poisoning */
   if (try_init(init_path) < 0)
   {
     for(int i = 0; i < 8; i++)
@@ -62,6 +54,7 @@ int start_init(const char * cmdline)
       printk("%s: trying %s...\n", __FUNCTION__, possible_inits[i]);
       if (try_init(possible_inits[i]) == 0)
         return 0;
+      printk("Hiss.. that didn't work..\n");
     }
     // R.I.P usleep function, you shall be missed 
     // No valid init found. Filesystems have already been waited on, no point in staying up.

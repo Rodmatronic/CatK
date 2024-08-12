@@ -37,7 +37,11 @@ int parser::parse_config_line(const char * line, std::vector<struct cfg_option>&
     std::string name(strtok((char *)line, "="));
     line += index + 1;
     std::string value(line);
-    list.push_back({.name = name, .value = value});
+    struct cfg_option cfg = {
+        .name = name,
+        .value = value
+    };
+    list.push_back(cfg);
     return 0;
 }
 

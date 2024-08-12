@@ -295,12 +295,12 @@ void tss_init(void)
   tss_install();
 }
 
-void cpu_init(void)
+void cpu_init(uint32_t addr)
 {
   segm_descriptors_init();
   idt_setup();
   timer_init();
-  paging_init();
+  paging_init(addr);
   tss_init();
   syscall_install();
 }

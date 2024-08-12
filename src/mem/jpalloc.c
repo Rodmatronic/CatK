@@ -2,16 +2,19 @@
 #include <catk/printk.h>
 #include <catk/types.h>
 #include <catk/spinlock.h>
+#include <catk/virt.h>
 #include <catk/debug.h>
 #include <catk/compiler.h>
+#include <catk/kernel.h>
 #include <lib/common.h>
+#include <config.h>
 #include <stdint.h>
 
 SPINLOCK_INIT(jpalloc_spinlock);
 
 // I still dont really got the kernel memory map fully figured out
 //
-// [        2MB        ][                 4MB                 ][                        Reserved for user-mode stuff                        ]
+// [        2MB        ][                 2MB                 ][                        Reserved for user-mode stuff                        ]
 //
 // ^                    ^
 // Kernel Image         Kernel Heap                
@@ -28,25 +31,30 @@ struct heap_block
   struct heap_metadata metadata;
 };
 
-#define KERNEL_HEAP_MAX         0xa00000 /* 4mb of heap mem */
+#define KERNEL_HEAP_MAX         0x200000 /* 2mb of heap mem */
 #define KERNEL_HEAP_MAGIC       0xdeadc0de
 #define KERNEL_HEAP_ALIGNMENT   8
 #define KERNEL_HEAP_POISON      0xcafebabe
 
-#define IN_HEAP_RANGE(ptr) ((uintptr_t)&ptr >= heap_start && (uintptr_t)&ptr <= heap_end)
+#define IN_HEAP_RANGE(ptr) ((uintptr_t)ptr >= heap_start && (uintptr_t)ptr <= heap_end)
 
-static bool _unused_ heap_initialized = false;
-static uintptr_t heap_start = 0;
-static uintptr_t heap_end, heap_used = 0;
-static uintptr_t prev_alloc = 0;
+static uintptr_t heap_start = 0, heap_end = 0, heap_used = 0;
 
-void heap_init(uintptr_t * start)
+/* NEED TODO: Switch to virtual memory for extra security and to prevent memory corruption */
+void heap_init(void)
 {
-  // hopefully this will skip some things..
-  heap_start = (uintptr_t)((uintptr_t)start + 0x100000);
-  prev_alloc = (uintptr_t)heap_start;
-  heap_end = (uintptr_t)(heap_start + KERNEL_HEAP_MAX);
-  memset((char *)heap_start, 0, heap_end - heap_start);
+  /* This really isn't memory safe now that I think about it. */
+  heap_start =  (uintptr_t)((uintptr_t)&kernel_start + 0x100000);
+  heap_end   =  (uintptr_t)(heap_start + KERNEL_HEAP_MAX);
+  memset((void *)heap_start, 0, heap_end - heap_start);
+}
+
+uintptr_t get_heap_start(void) {
+  return ((uintptr_t)&kernel_start + 0x100000);
+}
+
+uintptr_t get_heap_end(void) {
+  return (((uintptr_t)&kernel_start + 0x100000) + KERNEL_HEAP_MAX);
 }
 
 uintptr_t heap_get_used(void)
@@ -68,7 +76,7 @@ static void * heap_get_free(size_t size)
   // if this is our first alloc, return the start of the kernel heap
   if (heap_used == 0)
   {
-    return (void *)prev_alloc;
+    return (void *)heap_start;
   }
 
   while ((uintptr_t)mem < heap_end)
@@ -104,7 +112,7 @@ static void * heap_alloc(size_t size)
     spinlock_release(&jpalloc_spinlock);
     return NULL;
   }
-  size_t usage = prev_alloc + size + sizeof(struct heap_block);
+  size_t usage = heap_used + size + sizeof(struct heap_block);
   if(usage > heap_end)
   {
     spinlock_release(&jpalloc_spinlock);
@@ -113,8 +121,6 @@ static void * heap_alloc(size_t size)
 
   // update variables
   
-  prev_alloc += size + sizeof(struct heap_block);
-
   heap_used += size + sizeof(struct heap_block);
   // update header
   b->magic = KERNEL_HEAP_MAGIC;
@@ -137,15 +143,14 @@ static void heap_free(void * ptr)
 
   struct heap_block * b = get_header_from_ptr(ptr);
 
-  if(b->magic != KERNEL_HEAP_MAGIC)
-    return;
-  
+  assert(b->magic == KERNEL_HEAP_MAGIC);
+
   if(!b->metadata.used)
     return;
 
-  if(!IN_HEAP_RANGE(ptr)) /* veritfy that the heap block is in range */
-    return;
-
+#if CATK_HEAP_FOREIGN != 1
+  assert(IN_HEAP_RANGE(ptr));
+#endif
   // update variables
   spinlock_acquire(&jpalloc_spinlock);
   b->metadata.used = false;
@@ -187,9 +192,8 @@ void * malloc(size_t n)
 
 void free(void * ptr)
 {
-  // im probably overwriting the memory ;-;
-  // 0x0021ef38
   heap_free(ptr);
+  ptr = (void *)KERNEL_HEAP_POISON; /* anything that writes to the pointer after being freed will page fault and die */
   /* merge free blocks to prevent fragmentation */
   heap_merge_blocks();
 }

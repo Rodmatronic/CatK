@@ -15,6 +15,7 @@ struct file_operations ext2_file_ops;
 static struct ext2_superblock * sb = NULL;
 static struct filesystem * e2fs = NULL;
 static struct ext2_priv_data priv_data;
+static struct device * blkdev = NULL;
 
 static int ext2_start_lba = 0;
 
@@ -55,8 +56,8 @@ static inline uint32_t ext2_block_to_sector(uint32_t block)
 
 uint8_t * ext2_read_block(uint32_t block, uint8_t * buf)
 {
-  e2fs->mount->blkdev->fops->lseek(NULL, ext2_block_to_sector(block), SEEK_SET);
-  e2fs->mount->blkdev->fops->read(0, buf, priv_data.sectors_per_block);
+  blkdev->fops->lseek(NULL, ext2_block_to_sector(block), SEEK_SET);
+  blkdev->fops->read(0, buf, priv_data.sectors_per_block);
   return buf;
 }
 
@@ -147,7 +148,7 @@ static uint32_t _unused_ ext2_parse_directory(struct ext2_directory * dir, char 
   return 0;
 }
 
-uint32_t ext2_find_file(char * fn, uint32_t dir_inode, struct ext2_inode * inode)
+static uint32_t _ext2_namei(char * fn, uint32_t dir_inode, struct ext2_inode * inode)
 {
 	if(fn[0] == '/')
   {
@@ -212,12 +213,35 @@ static void ext2_inode2file(struct file * file, struct ext2_inode * inode, uint3
   file->inode->fsops                      = &ext2_fs_ops;
 }
 
+static void ext2_inode2vfs(struct inode * vfs, struct ext2_inode * inode, uint32_t inode_num) {
+  vfs->mode = inode->type;
+  vfs->uid = inode->user_id;
+  vfs->gid = inode->group_id;
+  vfs->flags = inode->flags;
+  vfs->inode = inode_num;
+  vfs->length = priv_data.filesize_qword ? (inode->size_lower << 8) | (inode->size_high) : inode->size_lower;
+  vfs->u.ext2_ino = *inode;
+  vfs->fsops = &ext2_fs_ops;
+}
+
+struct inode * ext2_namei(const char * pathname) {
+  struct ext2_inode * inode = ext2_inode_allocate();
+  uint32_t inode_num = _ext2_namei((char *)pathname, 2, inode);
+  if(!inode_num) {
+    free(inode);
+    return NULL;
+  }
+  struct inode * _inode = (struct inode *)malloc(sizeof(struct inode));
+  ext2_inode2vfs(_inode, inode, inode_num);
+  return _inode;
+}
+
 int ext2_open(struct file * filp, const char * file)
 {
   struct ext2_inode * inode = ext2_inode_allocate();
   if(!inode)
     return -ENOMEM;
-  uint32_t inode_num = ext2_find_file((char *)file, 2, inode);
+  uint32_t inode_num = _ext2_namei((char *)file, 2, inode);
   if(!inode_num)
   {
     free(inode);
@@ -308,16 +332,16 @@ int ext2_read(struct file * filp, void * buf, size_t unused)
   return 0;
 }
 
-int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
+int ext2_mount_fs(struct filesystem * fs, struct device * dev)
 {
   debug("Ext2: Mounting on block %d,%d\n", blkdev->major, blkdev->minors);
   debug("First partition LBA: %d\n", ext2_start_lba);
   int rc;
   uint8_t * sector_data = (uint8_t *)calloc(1024, 1);
-  rc = blkdev->fops->lseek(NULL, ext2_start_lba + 2, SEEK_SET);
+  rc = dev->fops->lseek(NULL, ext2_start_lba + 2, SEEK_SET);
   if(IS_ERR(rc))
     return rc;
-  rc = blkdev->fops->read(NULL, sector_data, 1);
+  rc = dev->fops->read(NULL, sector_data, 1);
   if(IS_ERR(rc))
     return rc;
   sb = (struct ext2_superblock *)sector_data;
@@ -356,6 +380,7 @@ int ext2_mount_fs(struct filesystem * fs, struct device * blkdev)
   
   priv_data.sectors_per_block = (priv_data.block_size / 512);
   fs->priv_data = &priv_data;
+  blkdev = dev;
   fs->mount->blkdev = blkdev;
   e2fs = fs;
   return 0;
@@ -382,6 +407,7 @@ struct file_operations ext2_file_ops = {
 };
 
 struct fs_operations ext2_fs_ops = {
+  ext2_namei,
   NULL,
   NULL,
   NULL,

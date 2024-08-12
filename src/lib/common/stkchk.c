@@ -10,13 +10,13 @@
 
 uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
  
-void _no_return_ __stack_chk_fail(void)
+void _noreturn_ __stack_chk_fail(void)
 {
 	oops("Stack smashing detected. Report this to the CatK GitHub repository at https://github.com/Rodmatronic/CatK/issues\n");
   for(;;); /* wait for our inevitable death */
 }
 
-void _no_return_ __stack_chk_fail_local(void)
+void _noreturn_ __stack_chk_fail_local(void)
 {
   __stack_chk_fail();
 }

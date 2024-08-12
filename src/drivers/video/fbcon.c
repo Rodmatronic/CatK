@@ -18,6 +18,7 @@
 #include <catk/errno.h>
 #include <catk/printk.h>
 #include <catk/spinlock.h>
+#include <catk/virt.h>
 #include <font/vga8x16.h>
 #include <multiboot2.h>
 #include <lib/common.h>
@@ -340,7 +341,7 @@ void fbcon_clear(void)
 int fbcon_dev_write(struct file * file, void * buf, size_t sz)
 {
   memcpy((void *)c.vc_screenbuf, buf, sz);
-  return 0; // not implemented
+  return 0;
 }
 
 int fbcon_dev_open(struct file * file, const char * unused)
@@ -361,7 +362,7 @@ int fbcon_init(struct console * con, uint32_t addr)
     return -ENODEV;
   c.vc_rows = grub_fb->framebuffer_width;
   c.vc_cols = grub_fb->framebuffer_height;
-  c.vc_screenbuf = (uintptr_t)grub_fb->framebuffer_addr;
+  c.vc_screenbuf = (uintptr_t)FRAMEBUFFER_VIRT_ADDR;
   cb.con_startup = fbcon_startup;
   strncpy(con->name, cb.con_startup(), sizeof(con->name));
   strncpy((char *)fbcon_dev.name, con->name, sizeof(con->name));
@@ -372,7 +373,7 @@ int fbcon_init(struct console * con, uint32_t addr)
   rc = register_chrdev(FBDEV_MAJOR, "fb", &fbcon_dev, &fbcon_fops);
   if(IS_ERR(rc))
   {
-    printk("Failed to register framebuffer: %d\n", rc);
+    printk("Failed to register framebuffer device: %d\n", rc);
     return rc;
   }
   return 0;

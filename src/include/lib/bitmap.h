@@ -3,7 +3,7 @@
 
 #include <catk/bitops.h>
 
-#define CREATE_BITMAP(name, bits) \
-  uint32_t name[BITS_TO_U64(bits)]
+#define BITMAP(bits) \
+  BITS_TO_U32(bits)
 
 #endif

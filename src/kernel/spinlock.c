@@ -7,7 +7,7 @@ void spinlock_acquire(struct spinlock * s)
 {
   critical_enter();
   struct task * current = get_current_task();
-  while( atomic_flag_test_and_set_explicit(&s->value, memory_order_acquire))
+  while(atomic_flag_test_and_set_explicit(&s->value, memory_order_acquire))
   {
     __builtin_ia32_pause();
   }

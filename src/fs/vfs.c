@@ -11,12 +11,12 @@
 
 static struct filesystem * rootfs = NULL;
 
-static bool is_devfs(const char * path)
+bool is_devfs(const char * path)
 {
   size_t len = strlen(path);
   // duplicate the string
   char * str = strdup((char *)path);
-  char * token = (char *)malloc(NAME_MAX);
+  char * token = (char *)malloc(NAME_MAX + 1);
   strncpy(str, path, len);
   if(str[0] == '/')
     str++; /* skip over '/' */
@@ -26,6 +26,7 @@ static bool is_devfs(const char * path)
     return true;
   }
   free(token);
+  free(str);
   return false;
 }
 

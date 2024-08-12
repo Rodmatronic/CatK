@@ -28,7 +28,7 @@ Before you use an Ext2 disk with CatK, please make sure the inode size
 is 128 bytes. Anything greater than that will break the Ext2 driver.
 A utility for creating Ext2 disk images is in the **/tools/** folder in the CatK source tree.
 
-## Compiling it
+## Compiling the kernel
 You'll need:
 - a unix-like system/environment (preferably Linux)
   - compiling on Windows is possible provided a unix-style environment (uutils, mingw, etc). you cannot build any ISOs however (credit [@Ruthenic](https://github.com/Ruthenic))
@@ -46,6 +46,11 @@ You can skip ISO building and multiboot signature checking by using `SKIP_ISO=1 
 These are implied and forced on Windows, as they cannot be performed.
 
 If you prefer, you can compile with multiple threads with `make -j$(nproc)`. This will use as many threads as your CPU has available.
+
+# Compiling the Init binary
+You'll need the same things for compiling the kernel. :) 
+
+Anyways, compiling the Init binary is simple. All you need to do is run `make init` in the root of the source tree, and the Init binary will be ready for you.
 
 ## Running it
 You can use essentially any virtualizer you have. We prefer QEMU or VirtualBox.

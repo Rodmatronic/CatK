@@ -44,3 +44,20 @@ void ring_buffer_release(struct ring_buffer * ring)
     }
   }
 }
+
+static void wait(struct ring_buffer * ring) {
+  int prev_tail = ring->tail;
+  while(prev_tail == ring->tail) {
+    if(ring->tail != prev_tail) {
+      break;
+    }
+    prev_tail = ring->tail;
+  }
+}
+
+void ring_buffer_read_and_wait(struct ring_buffer * ring, uint8_t * buf, size_t len) {
+  for(int i = 0; i < len; i++) {
+    wait(ring);
+    ring_buffer_read(ring, buf, 1);
+  }
+}

@@ -2,6 +2,7 @@ section .text
   global gdt_flush
   global idt_flush
   global tss_install
+  global get_eip
 
 gdt_flush:
   mov eax, [esp + 4]
@@ -18,6 +19,10 @@ gdt_flush:
 
 .end:
   ret
+
+get_eip:
+  pop eax ; pop return address from CALL instruction
+  jmp eax ; jump to eax (which contains the return address)
 
 idt_flush:
   mov eax, [esp + 4]

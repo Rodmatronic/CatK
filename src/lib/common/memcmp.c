@@ -1,12 +1,10 @@
 #include <lib/common.h>
-#include <stdint.h>
 
-int memcmp(const void * mem1, const void * mem2, size_t n) 
-{
-  char * m1 = (char *)mem1;
-  char * m2 = (char *)mem2;
+int memcmp(const void * addr1, const void * addr2, size_t count) {
+  char * m1 = (char *)addr1;
+  char * m2 = (char *)addr2;
   size_t ret = 0;
-  for(int i = 0; i < n; i++)
+  for(int i = 0; i < count; i++)
     ret += (m1[i] != m2[i]);
   return ret;
 }
