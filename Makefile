@@ -60,6 +60,7 @@ disk:
 
 run:
 	@qemu-system-x86_64 \
+		-bios /usr/share/ovmf/OVMF.fd \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G

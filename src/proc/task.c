@@ -448,7 +448,6 @@ void schedule(void)
 
 void _noreturn_ tasking_init(void)
 {
-  memset(wait_queue, 0, sizeof(struct task) * 4);
   catk_idle_task = create_kernel_task("catk-idle", catk_idle, TASK_PRIORITY_HIGH);
   catk_idle_task->next = catk_idle_task;
   catk_idle_task->prev = catk_idle_task;

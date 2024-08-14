@@ -333,7 +333,7 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
 
 void fbcon_clear(void)
 {
-  memset32((void *)c.vc_screenbuf, 0x172149, (c.vc_rows * c.vc_cols));
+  memset32((void *)c.vc_screenbuf, colors[0], (c.vc_rows * c.vc_cols));
 }
 
 // static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
