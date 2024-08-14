@@ -27,11 +27,10 @@ int ramdisk_probe(uint32_t addr)
   printk("Ramdisk info:\n");
   printk("\tAddress\t[0x%08x - 0x%08x]\n", ramdisk_start, ramdisk_end);
   printk("\tSize:  \t%d MiB\n", DIV_ROUND_UP(((uint32_t)ramdisk_end - (uint32_t)ramdisk_start), 1048576));
-  ramdisk->major      = RAMDISK_MAJOR;
-  ramdisk->minors     = 0; /* /dev/ramdisk0 */
+  ramdisk->dev        = MKDEV(RAMDISK_MAJOR, 0);
   ramdisk->removable  = false;
   ramdisk->priv_data  = (void *)mod;
-  return register_blkdev(RAMDISK_MAJOR, "ramdisk", ramdisk, &ramdisk_fops);
+  return register_blkdev("ramdisk", ramdisk, &ramdisk_fops);
 }
 
 static void ramdisk_write_single_sector(uint8_t * buf, int lba)

@@ -73,7 +73,7 @@ static void devfs_create_root_inode(void) {
 }
 
 static int devfs_mount(struct filesystem * fs, struct device * dev) {
-  debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, dev->major, dev->minors);
+  debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, MAJOR(dev->dev), MINOR(dev->dev));
   devfs = fs;
   blkdev = dev;
   fs->sb->u.generic_sbp = ((void *)&superblock);

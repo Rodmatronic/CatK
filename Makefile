@@ -53,7 +53,7 @@ debug:
 		-no-reboot
 
 disk:
-	@$(TOOLS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
+	@bash $(TOOLS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
 
 # use this for pulse-audio 	-audiodev pa,id=snd0 -machine pcspk-audiodev=snd0 \
 # use this for alsa 				-audiodev alsa,id=snd0 -machine pcspk-audiodev=snd0 \

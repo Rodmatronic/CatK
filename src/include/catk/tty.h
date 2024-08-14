@@ -95,7 +95,7 @@
 
 #define NR_CONSOLES 8
 
-#define IS_VALID_TTY(tty) (tty->dev->major == TTYDEV_MAJOR)
+#define IS_VALID_TTY(tty) (MAJOR(tty->dev->dev) == TTYDEV_MAJOR)
 
 struct tty_struct;
 

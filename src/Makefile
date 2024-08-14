@@ -64,7 +64,7 @@ endif
 $(TARGET_TMP): $(ASM_OBJ) $(C_OBJ)
 	@$(LD) $(LD_FLAGS) -o $(TARGET_TMP) -r $^
 	@printf "[ Generating kernel symbols... ]\n"
-	@$(TOOLS)/gen_syms.sh $(TARGET_TMP) $(SRC)/symlist.c
+	@bash $(TOOLS)/gen_syms.sh $(TARGET_TMP) $(SRC)/symlist.c
 	@$(CC) -c symlist.c -o symlist.o $(CC_FLAGS)
 
 $(TARGET): $(TARGET_TMP)

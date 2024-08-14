@@ -35,11 +35,10 @@ int random_init(void) {
   if(!rand_dev) {
     return -ENOMEM;
   }
-  rand_dev->major = MEMDEV_MAJOR;
-  rand_dev->minors = MEMDEV_RANDOM;
+  rand_dev->dev = MKDEV(MEMDEV_MAJOR, MEMDEV_RANDOM);
   rand_dev->removable = false;
   rand_dev->priv_data = NULL;
-  rc = register_chrdev(MEMDEV_MAJOR, "random", rand_dev, &random_fops);
+  rc = register_chrdev("random", rand_dev, &random_fops);
   if(IS_ERR(rc)) {
     printk("Failed to register random: %d\n", rc);
     return rc;

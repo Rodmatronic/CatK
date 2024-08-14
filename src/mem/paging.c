@@ -19,12 +19,14 @@
 #include <catk/kernel.h>
 #include <catk/debug.h>
 #include <catk/task.h>
+#include <catk/ipc.h>
 #include <lib/common.h>
 #include <stdint.h>
 
 /* page tables */
 static uint32_t page_table[1024] _aligned(PAGE_ALIGNMENT);
 static uint32_t heap_page_table[1024] _aligned(PAGE_ALIGNMENT);
+static uint32_t heap_page_table2[1024] _aligned(PAGE_ALIGNMENT);
 static uint32_t framebuffer_page_table[1024] _aligned(PAGE_ALIGNMENT);
 /* page directories */
 static uint32_t kernel_page_dir[1024] _aligned(PAGE_ALIGNMENT);
@@ -80,9 +82,18 @@ static void page_fault_handler(struct intr_stack_frame * regs) {
   printk("Important registers:\n");
   printk("\tEIP: 0x%08x, EFLAGS: 0x%08x, ESP: 0x%08x, EBP: 0x%08x\n", regs->eip, regs->eflags, regs->esp, regs->ebp);
   printk("\tCR2: (Fault address): 0x%08x\n", get_fault_addr());
+  printk("Causes:\n");
+  printk("\t%s, %s, and the fault %s\n", 
+          regs->err_code & BIT(0) ? "Page protection fault" : "Page not present",
+          regs->err_code & BIT(1) ? "write access" : "read access",
+          regs->err_code & BIT(2) ? "occured in user mode" : "occured in kernel mode"
+  );
+  printk("Error code: 0x%08x\n", regs->err_code);
   printk("----------[ end of dump ]-----------\n");
   if(task->kernel_mode) {
     panic("Page fault while in kernel mode\n");
+  } else {
+    dispatch_signal(SIGSEGV);
   }
   kill(task);
 }
@@ -128,6 +139,8 @@ void paging_init(uint32_t addr)
   /* clear page stuff */
   memset(&kernel_page_dir, 0, PAGE_SIZE);
   memset(&page_table, 0, PAGE_SIZE);
+  memset(&heap_page_table, 0, PAGE_SIZE);
+  memset(&heap_page_table2, 0, PAGE_SIZE);
   memset(&framebuffer_page_table, 0, PAGE_SIZE);
   /* initialize the physical memory manager for allocating page frames */
   physmem_init(addr);
@@ -143,6 +156,10 @@ void paging_init(uint32_t addr)
   for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
     heap_page_table[i] = create_pte(p_addr, 0, 1);
   }
+  size = 0x400000;
+  for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
+    heap_page_table2[i] = create_pte(p_addr, 0, 1);
+  }
   p_addr = 0xfd000000;
   size = 0x400000;
   for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
@@ -150,7 +167,8 @@ void paging_init(uint32_t addr)
   }
   kernel_page_dir[0] = create_pde((uint32_t)page_table, 0, 1);
   kernel_page_dir[1] = create_pde((uint32_t)heap_page_table, 0, 1);
-  kernel_page_dir[2] = create_pde((uint32_t)framebuffer_page_table, 0, 1);
+  kernel_page_dir[2] = create_pde((uint32_t)heap_page_table2, 0, 1);
+  kernel_page_dir[3] = create_pde((uint32_t)framebuffer_page_table, 0, 1);
   load_page_directory((uint32_t)kernel_page_dir);
   paging_enable();
   interrupt_install(page_fault_handler, 0x0e);

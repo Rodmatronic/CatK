@@ -49,11 +49,10 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
     return -ENOMEM;
   }
   ata_devices[num_ata]->removable   = false;
-  ata_devices[num_ata]->major       = DISKDEV_MAJOR;
-  ata_devices[num_ata]->minors      = num_ata;
+  ata_devices[num_ata]->dev         = MKDEV(DISKDEV_MAJOR, num_ata);
   ata_devices[num_ata]->priv_data   = drv;
   //partitions = ata_count_partitions();
-  rc = register_blkdev(DISKDEV_MAJOR, "hda", ata_devices[num_ata], &ata_fops);
+  rc = register_blkdev("hda", ata_devices[num_ata], &ata_fops);
   if(IS_ERR(rc))
   {
     printk("Failed to register hard-disk: %d\n", rc);

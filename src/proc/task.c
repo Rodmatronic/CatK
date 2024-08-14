@@ -10,6 +10,7 @@
 #include <catk/types.h>
 #include <catk/vfs.h>
 #include <catk/virt.h>
+#include <catk/ipc.h>
 #include <lib/common.h>
 
 struct task * current;
@@ -125,6 +126,21 @@ static void setup_file_descriptors(struct task * p) {
   return;
 }
 
+static int task_signal(int signal) {
+  switch(signal) {
+    case SIGINT: {
+      debug("%s: received SIGINT!\n", current->name);
+      break;
+    }
+    default: {
+      debug("Who are you??\n");
+      debug("\033[1;31mI am fizzbuzz..\033[1;0m");
+      break;
+    }
+  }
+  return 0;
+}
+
 #define STACK_PUSH(item) *(--stack) = (uint32_t)item
 
 struct task * create_kernel_task(char * name, void * addr, int priority)
@@ -140,6 +156,7 @@ struct task * create_kernel_task(char * name, void * addr, int priority)
   p->state = TASK_CREATED;
   p->priority = priority;
   p->error_code = 0;
+  p->handle_signal = task_signal;
   switch (p->priority)
   {
   case TASK_PRIORITY_HIGH:
@@ -202,6 +219,7 @@ struct task * create_user_task(char * name, uint32_t addr, int priority)
 	p->state = TASK_CREATED;
   p->priority = priority;
   p->error_code = 0;
+  p->handle_signal = task_signal;
   switch(p->priority)
   {
     case TASK_PRIORITY_HIGH:

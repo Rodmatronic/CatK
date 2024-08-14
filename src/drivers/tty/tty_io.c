@@ -6,6 +6,7 @@
 #include <catk/debug.h>
 #include <lib/common.h>
 #include <catk/types.h>
+#include <catk/ipc.h>
 #include <lib/ctype.h>
 
 struct tty_struct * ttys[NR_CONSOLES] = {NULL};
@@ -24,7 +25,7 @@ static void termios_init(struct termios * termios)
   termios->c_oflag = OPOST | ONLCR;
   termios->c_cflag = CREAD | CS8 | HUPCL;
   termios->c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE;
-#define CONTROL(char) (((char) - 64) & 0x7f)
+#define CONTROL(char) (((char) - 32) & 0x7f)
   termios->c_cc[VEOF] = CONTROL('d');
   termios->c_cc[VEOL] = CONTROL('?');
   termios->c_cc[VERASE] = '\b';
@@ -70,7 +71,6 @@ static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count)
 
 static int tty_dev_read(struct file * filp, void * buf, size_t sz)
 {
-  printk("tty read called\n");
   struct tty_struct * tty = tty_lookup(0);
   return tty_read(tty, (uint8_t *)buf, sz);
 }
@@ -114,9 +114,13 @@ static inline void tty_buf_putc(struct ring_buffer * buf, struct tty_struct * tt
 
 /* handles tty input */
 void tty_handle_input(struct tty_struct * tty, int ch) {
-  if(ch == tty->termios.c_cc[VINTR]) {
+  if(tty->termios.c_lflag & ISIG && ch == tty->termios.c_cc[VINTR]) {
+    if(tty->termios.c_lflag & ECHOCTL) { /* print ctrl character */
+      tty_buf_putc(tty->write_q, tty, '^');
+      tty_buf_putc(tty->write_q, tty, tty->termios.c_cc[VINTR] + 32);
+    }
     /* TODO: implement signals */
-    debug("lets pretend a signal was dispatched\n");
+    dispatch_signal(SIGINT);
     return;
   }
   tty_buf_putc(tty->read_q, tty, ch);
@@ -158,10 +162,9 @@ int tty_create(int num, struct device * dev)
   ttys[num] = tty;
   /* now create the character device */
   tty_dev->removable = true;
-  tty_dev->major     = TTYDEV_MAJOR;
-  tty_dev->minors    = num;
+  tty_dev->dev       = MKDEV(TTYDEV_MAJOR, num);
   tty_dev->priv_data = tty;
-  register_chrdev(TTYDEV_MAJOR, "tty", tty_dev, &tty_fops);
+  register_chrdev("tty", tty_dev, &tty_fops);
   debug("tty: tty%d created\n", num);
   return 0;
 

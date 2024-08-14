@@ -39,14 +39,18 @@
 /* initial ramdisk minors are mostly just the numbers of ramdisks */
 #define INITRD_MINOR      250
 
+#define MAJOR(dev) ((uint8_t)((dev >> 8) & 0xff))
+#define MINOR(dev) ((uint8_t)((dev) & 0xff))
+
+#define MKDEV(major, minor) ((uint16_t)((major << 8) | (minor & 0xff)))
+
 struct tty_struct;
 
 /* basic device structure */
 struct device
 {
   const char name[NAME_MAX];            /* initial name of device */
-  uint8_t major;                        /* acts as a type */
-  uint8_t minors;                       /* acts as a class / classes */
+  uint16_t dev;                         /* tells the major, and minor */
   bool removable;                       /* can it be removed? */
   struct device * parent;               /* parent of the device (if it has one) */
   struct file_operations * fops;        /* file operations for devfs */
@@ -54,8 +58,8 @@ struct device
 };
 
 struct device * device_struct_alloc(void);
-int register_chrdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
-int register_blkdev(uint8_t major, const char * name, struct device * dev, struct file_operations * fops);
+int register_chrdev(const char * name, struct device * dev, struct file_operations * fops);
+int register_blkdev(const char * name, struct device * dev, struct file_operations * fops);
 struct device * get_blkdev(uint8_t major);
 struct device * get_chrdev(uint8_t major);
 int get_chrdevs_registered(void);

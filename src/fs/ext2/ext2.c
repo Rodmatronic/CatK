@@ -334,7 +334,7 @@ int ext2_read(struct file * filp, void * buf, size_t unused)
 
 int ext2_mount_fs(struct filesystem * fs, struct device * dev)
 {
-  debug("Ext2: Mounting on block %d,%d\n", blkdev->major, blkdev->minors);
+  debug("Ext2: Mounting on block %d,%d\n", MAJOR(blkdev->dev), MINOR(blkdev->dev));
   debug("First partition LBA: %d\n", ext2_start_lba);
   int rc;
   uint8_t * sector_data = (uint8_t *)calloc(1024, 1);

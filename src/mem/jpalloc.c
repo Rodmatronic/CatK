@@ -91,7 +91,6 @@ static void * heap_get_free(size_t size)
     {
       return mem;
     }
-
     mem += (block->metadata.size + sizeof(struct heap_block)) / sizeof(uintptr_t);
   }
   return NULL;

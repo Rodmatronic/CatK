@@ -33,7 +33,7 @@
 #define PTE_GLOBAL_SHIFT    8
 #define PTE_IGNORED         PDE_IGNORED
 
-#define FRAMEBUFFER_VIRT_ADDR 0x800000
+#define FRAMEBUFFER_VIRT_ADDR 0xc00000
 
 static inline int pde_is_present(uint32_t pde) {
   return (pde & 1 << PDE_PRESENT_SHIFT);
@@ -49,6 +49,14 @@ static inline uint32_t pde_index(uint32_t v_addr) {
 
 static inline uint32_t pte_index(uint32_t v_addr) {
   return ((uint32_t)v_addr >> 22);
+}
+
+static inline int pde_virt(int index) {
+  return (index << 22);
+}
+
+static inline int pte_virt(int index) {
+  return (index << 12);
 }
 
 static inline uint32_t extract_pte(uint32_t pde) {

@@ -19,6 +19,7 @@
 #include <catk/printk.h>
 #include <catk/spinlock.h>
 #include <catk/virt.h>
+#include <catk/math.h>
 #include <font/vga8x16.h>
 #include <multiboot2.h>
 #include <lib/common.h>
@@ -34,7 +35,7 @@ static int fbcon_x = 0;
 static int fbcon_y = 0;
 
 static const uint32_t colors[16] = {
-  0x000000,
+  0x172149,
   0xaa0000,
   0x00aa00,
   0xaa5500,
@@ -50,7 +51,7 @@ static const uint32_t colors[16] = {
   0x5555ff,
   0xff55ff,
   0x55ffff,
-  0xffffff
+  0xbbd3ff
 };
 
 static uint32_t fbcon_fg = 7;
@@ -68,8 +69,7 @@ void fbcon_color_set(uint8_t fg, uint8_t bg);
 int fbcon_output_intr(struct tty_struct * tty, size_t len);
 
 static struct device fbcon_dev = {
-  .major            = FBDEV_MAJOR,
-  .minors           = 0,  // in a devfs environment, this would be /dev/fb0
+  .dev              = MKDEV(FBDEV_MAJOR, 0), // in a devfs environment, this would be /dev/fb0
   .removable        = false,
   .parent           = NULL,
   .priv_data        = fbcon_output_intr
@@ -123,7 +123,7 @@ static inline void _hot_ fbcon_scroll(void)
   if (fbcon_y > (c.vc_cols / 16) - 1)
   {
     memcpy32((void *)c.vc_screenbuf, (void *)(c.vc_screenbuf + c.vc_size_row), (c.vc_cols / c.vc_font.height) * c.vc_size_row);
-    memset32((void *)c.vc_screenbuf + (c.vc_cols / c.vc_font.height) * c.vc_size_row, 0x00000000, c.vc_size_row);
+    memset32((void *)c.vc_screenbuf + (c.vc_cols / c.vc_font.height) * c.vc_size_row, colors[0], c.vc_size_row);
     fbcon_y--;
   }
 }
@@ -333,7 +333,7 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
 
 void fbcon_clear(void)
 {
-  memset((void *)c.vc_screenbuf, 0, (c.vc_rows * c.vc_cols));
+  memset32((void *)c.vc_screenbuf, 0x172149, (c.vc_rows * c.vc_cols));
 }
 
 // static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
@@ -370,7 +370,7 @@ int fbcon_init(struct console * con, uint32_t addr)
   con->data = &c;
   con->dev = &fbcon_dev;
   fbcon_clear();
-  rc = register_chrdev(FBDEV_MAJOR, "fb", &fbcon_dev, &fbcon_fops);
+  rc = register_chrdev("fb", &fbcon_dev, &fbcon_fops);
   if(IS_ERR(rc))
   {
     printk("Failed to register framebuffer device: %d\n", rc);

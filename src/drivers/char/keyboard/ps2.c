@@ -309,7 +309,7 @@ static void _hot_ keyboard_port1_irq(struct intr_stack_frame * frame)
   int ch = keymap[scancode & 0x7f];
   if(keyboard_flags & KEYBOARD_FLAG_CTRL) {
     for(int i = 1; i < 12; i++) {
-      if(ch == ((tty->termios.c_cc[i] + 64) & 0x7f)) {
+      if(ch == ((tty->termios.c_cc[i] + 32) & 0x7f)) {
         ch = tty->termios.c_cc[i];
       }
     }

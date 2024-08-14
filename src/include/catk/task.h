@@ -46,6 +46,7 @@ struct task
   uint32_t * cr3;
   bool kernel_mode;
   char * cwd;
+  int (*handle_signal)(int); /* each task can handle a signal differently */
   struct file * fd[OPEN_MAX];
 	struct task * next;
   struct task * prev;

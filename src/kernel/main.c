@@ -169,16 +169,16 @@ void bootstrap2(void)
   }
 
   if (IS_ERR(rc)) {
-    panic("Could not mount rootfs on block (%d,%d) after %d attempts: %d.\n", dev->major, dev->minors, CATK_MOUNT_RETRIES, rc);
+    panic("Could not mount rootfs on block (%d,%d) after %d attempts: %d.\n", MAJOR(dev->dev), MINOR(dev->dev), CATK_MOUNT_RETRIES, rc);
   }
 
-  printk("Successfully mounted rootfs on block (%d,%d)\n", dev->major, dev->minors);
+  printk("Successfully mounted rootfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   rc = vfs_mount("/dev", dev);
   if(IS_ERR(rc))
   {
-    panic("Could not mount devfs: %d\n", dev->major, dev->minors, rc);
+    panic("Could not mount devfs: %d\n", MAJOR(dev->dev), MINOR(dev->dev), rc);
   }
-  printk("Successfully mounted devfs on block (%d,%d)\n", dev->major, dev->minors);
+  printk("Successfully mounted devfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   /* start init process */
   rc = start_init(cmdline);
   if(IS_ERR(rc))
