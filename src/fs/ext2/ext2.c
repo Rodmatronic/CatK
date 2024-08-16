@@ -155,10 +155,10 @@ static uint32_t _ext2_namei(char * fn, uint32_t dir_inode, struct ext2_inode * i
 		fn++;
 		dir_inode = 2;
 	}
-	uint32_t name_len = strlen(fn);
-	if(name_len == 0) return dir_inode;
+	if(strlen(fn) == 0) 
+    return dir_inode;
 	uint8_t * buf = ext2_block_allocate();
-	char * cfn = (char *)malloc(name_len + 1);
+	char * cfn = (char *)malloc(strlen(fn) + 1);
 	while(*fn != 0)
   {
 		uint32_t strindex = index_of('/', fn);
@@ -176,8 +176,7 @@ static uint32_t _ext2_namei(char * fn, uint32_t dir_inode, struct ext2_inode * i
 			while(dir->inode != 0 && add < priv_data.block_size && !found)
       {
 				char name[dir->name_length + 1];
-        memset(name, '\0', dir->name_length + 1);
-				name[dir->name_length] = '\0';
+        memset(name, 0, dir->name_length + 1);
 				memcpy(name, &dir->type + 1, dir->name_length);
 				if(strcmp(name, cfn) == 0)
         {
@@ -185,7 +184,6 @@ static uint32_t _ext2_namei(char * fn, uint32_t dir_inode, struct ext2_inode * i
 					ext2_read_inode(inode, dir_inode);
 					found = 1;
 				}
-				free(name);
 				add += dir->size;
 				dir = (struct ext2_directory *)((uint32_t)dir + dir->size);
 			}

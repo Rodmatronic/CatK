@@ -25,6 +25,7 @@ int register_filesystem(const char * name, struct fs_operations * fsops, struct 
   filesystems[num_fs].mount->flags  = flags;
   /* pro programmer here B^) */
   printk("VFS: Registered filesystem \"%s\"\n", name);
+  debug("VFS: Filesystem info:\n");
   debug("\tname: %s\n", filesystems[num_fs].name);
   debug("\tflags: 0x%02x\n", flags);
   num_fs++;

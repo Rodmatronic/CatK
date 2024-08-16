@@ -282,15 +282,6 @@ int spawn_kernel_task(char *name, void *addr, int priority)
   return p->pid;
 }
 
-int spawn_user_task(char *name, uint32_t addr, int priority)
-{
-  struct task *p = create_user_task(name, addr, priority);
-  if (!p)
-    return -ENOMEM;
-  task_add_queue(p);
-  return p->pid;
-}
-
 struct task * task_find_child(pid_t parent) {
   struct task * p = current;
   while(p != catk_idle_task) {

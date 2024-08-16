@@ -30,5 +30,10 @@ SECTIONS
 		*(.bss)
     bss_end = .;
 	}
+  /DISCARD/ : {
+    *(.comment)
+    *(.eh_frame)
+    *(.rel.eh_frame)
+  }
   kernel_end = .;
 }

@@ -13,21 +13,9 @@ static struct filesystem * rootfs = NULL;
 
 bool is_devfs(const char * path)
 {
-  size_t len = strlen(path);
-  // duplicate the string
-  char * str = strdup((char *)path);
-  char * token = (char *)malloc(NAME_MAX + 1);
-  strncpy(str, path, len);
-  if(str[0] == '/')
-    str++; /* skip over '/' */
-  token = strtok(str, "/");
-  if(!strcmp(token, "dev")) {
-    free(token);
-    return true;
-  }
-  free(token);
-  free(str);
-  return false;
+  if(path[0] == '/')
+    path++;
+  return (strncmp(path, "dev", 3) == 0);
 }
 
 int vfs_open(struct file * filp, const char * file)

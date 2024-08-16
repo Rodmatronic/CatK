@@ -20,38 +20,40 @@
 #include <catk/spinlock.h>
 #include <catk/virt.h>
 #include <catk/math.h>
+#include <catk/logo.h>
 #include <font/vga8x16.h>
 #include <multiboot2.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
 #include <stdint.h>
+#include <config.h>
 
 #include "ansi.h"
 
 static struct vc_data c;
 static struct consw cb;
 
-static int fbcon_x = 0;
-static int fbcon_y = 0;
+static int fbcon_x;
+static int fbcon_y;
 
 static const uint32_t colors[16] = {
   0x172149,
-  0xaa0000,
+  0xd75151,
   0x00aa00,
   0xaa5500,
   0x0000aa,
   0xaa00aa,
-  0x00aaaa,
-  0xffffff, // 0xaaaaaa is the true color
+  0x87abab,
+  0xbbd3ff, // 0xaaaaaa is the true color
   /* high intensity colors */
   0x555555,
-  0xff5555,
+  0xff6a6a,
   0x55ff55,
-  0xffff55,
+  0xffde8e,
   0x5555ff,
   0xff55ff,
-  0x55ffff,
-  0xbbd3ff
+  0x99f0f0,
+  0xffffff
 };
 
 static uint32_t fbcon_fg = 7;
@@ -92,11 +94,10 @@ static char * fbcon_startup(void)
   return "console";
 }
 
-static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
+static void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
 {
   uint32_t * buf = (uint32_t *)c.vc_screenbuf;
-  uint32_t offset = y * c.vc_rows + x;
-  buf[offset] = rgb;
+  buf[y * c.vc_rows + x] = rgb;
 }
 
 static void _hot_ fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
@@ -113,7 +114,7 @@ static void _hot_ fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
   }
 }
 
-static inline void _hot_ fbcon_scroll(void)
+static void _hot_ fbcon_scroll(void)
 {
   if (fbcon_x > (c.vc_rows / c.vc_font.width) - 1)
   {
@@ -354,6 +355,20 @@ void fbcon_dev_close(struct file * file)
   return;
 }
 
+#if CATK_VIDEO_GENERIC != 1
+uint32_t fbcon_locate_framebuffer(uint32_t addr) {
+  struct multiboot_tag_framebuffer_common * grub_fb = (struct multiboot_tag_framebuffer_common *)multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
+  return (uint32_t)grub_fb->framebuffer_addr;
+}
+#endif
+
+static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {
+    return ((uint32_t)byte1 << 24) |
+        ((uint32_t)byte2 << 16) |
+        ((uint32_t)byte3 << 8)  |
+        (uint32_t)byte4;
+}
+
 int fbcon_init(struct console * con, uint32_t addr)
 {
   int rc;
@@ -369,6 +384,8 @@ int fbcon_init(struct console * con, uint32_t addr)
   con->write = fbcon_write;
   con->data = &c;
   con->dev = &fbcon_dev;
+  fbcon_x = (c.vc_pos >> 8) & 0xff;
+  fbcon_y = c.vc_pos & 0xff;
   fbcon_clear();
   rc = register_chrdev("fb", &fbcon_dev, &fbcon_fops);
   if(IS_ERR(rc))

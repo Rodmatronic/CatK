@@ -60,7 +60,6 @@ disk:
 
 run:
 	@qemu-system-x86_64 \
-		-bios /usr/share/ovmf/OVMF.fd \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G
@@ -68,5 +67,5 @@ run:
 clean:
 	@$(RM_FORCE) $(OBJ)
 	@$(RM_FORCE) $(OUT)
-	@$(RM_FORCE) $(SRC)/symlist.c
+	@$(RM_FORCE) $(CATK_ROOT)/src/symlist.c
 	@$(RM_FORCE) $(shell find . -type f -name "*.o")

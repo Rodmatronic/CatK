@@ -62,23 +62,35 @@ static void devfs_add_inode(struct inode * inode) {
   superblock.total_inodes++;
 }
 
-static void devfs_create_root_inode(void) {
+static int devfs_create_root_inode(void) {
   struct inode * root_inode = devfs_new_inode(S_IFDIR, 0, 0);
+  if(!root_inode) {
+    return -ENOMEM;
+  }
   struct device * dev = device_struct_alloc();
+  if(!dev) {
+    return -ENOMEM;
+  }
   /* stupid dummy device struct */
   strcpy((char *)dev->name, ".");
   dev->fops = NULL;
-  ((struct devfs_inode *)root_inode->u.generic_ino)->dev = dev;
+  struct devfs_inode * dnode = (struct devfs_inode *)root_inode->u.generic_ino;
+  dnode->dev = dev;
   devfs_add_inode(root_inode);
+  return 0;
 }
 
 static int devfs_mount(struct filesystem * fs, struct device * dev) {
+  int rc;
   debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, MAJOR(dev->dev), MINOR(dev->dev));
   devfs = fs;
   blkdev = dev;
   fs->sb->u.generic_sbp = ((void *)&superblock);
   /* create root inode */
-  devfs_create_root_inode();
+  rc = devfs_create_root_inode();
+  if(IS_ERR(rc)) {
+    return rc;
+  }
   for(int i = 0; i < MAX_BLKDEV; i++) {
     struct device * dev = get_blkdev(i);
     if(!dev) {
@@ -86,6 +98,8 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
     }
     struct inode * inode = devfs_new_inode(S_IFBLK, 0, 0);
     inode->u.generic_ino = malloc(sizeof(struct devfs_inode));
+    if(!inode->u.generic_ino)
+      return -ENOMEM;
     ((struct devfs_inode *)inode->u.generic_ino)->dev = dev;
     ((struct devfs_inode *)inode->u.generic_ino)->flags = 0;
     devfs_add_inode(inode);
@@ -97,6 +111,8 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
     }
     struct inode * inode = devfs_new_inode(S_IFCHR, 0, 0);
     inode->u.generic_ino = malloc(sizeof(struct devfs_inode));
+    if(!inode->u.generic_ino)
+      return -ENOMEM;
     ((struct devfs_inode *)inode->u.generic_ino)->dev = dev;
     ((struct devfs_inode *)inode->u.generic_ino)->flags = 0;
     devfs_add_inode(inode);

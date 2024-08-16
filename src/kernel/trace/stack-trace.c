@@ -33,20 +33,18 @@ static char * trace_ret_addr(uint32_t * offset, uint32_t eip)
 void trace_stack(int frames)
 {
 #if CATK_STACK_TRACE == 1
-    printk("stack backtrace:\n");
-    struct stack_frame * stack;
-#if CATK_64BIT == 1
-    asm volatile("movl %%ebp, %0" : "=r"(stack));
-#endif /* CATK_64BIT */
-    for(int i = 0; stack && i < frames; i++)
-    {
-        uint32_t offset;
-        printk("\t#%d: 0x%08x : [0x%08x] ", i, stack->ip, stack->bp);
-        if(stack->ip)
-            printk("%s+0x%08x\n", trace_ret_addr(&offset, stack->ip), offset);
-        else
-            printk("\n");
-        stack = stack->bp;
-    }
+  printk("stack backtrace:\n");
+  struct stack_frame * stack;
+  asm volatile("movl %%ebp, %0" : "=r"(stack));
+  for(int i = 0; stack && i < frames; i++)
+  {
+    uint32_t offset;
+    printk("\t#%d: 0x%08x : [0x%08x] ", i, stack->ip, stack->bp);
+    if(stack->ip)
+      printk("%s+0x%08x\n", trace_ret_addr(&offset, stack->ip), offset);
+    else
+      printk("\n");
+    stack = stack->bp;
+  }
 #endif
 }

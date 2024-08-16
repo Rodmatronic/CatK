@@ -87,19 +87,12 @@ void interrupt_handler(struct intr_stack_frame * frame)
       if(is_console_enabled())
       {
         register_dump(frame);
-        if(get_current_task()->kernel_mode == false)
+        if(get_current_task()->kernel_mode == false) {
           printk("Fatal trap %d: %s while in user mode\n", frame->intr, exceptions[frame->intr]);
-        else
-        {
-          if(get_current_task()->pid > 0)
-          {
-            printk("Fatal trap %d: %s while in kernel mode\n", frame->intr, exceptions[frame->intr]);
-            goto kill_task;
-          }
-          panic("Fatal trap %d: %s while in kernel mode, and idle task\n", frame->intr, exceptions[frame->intr]);
+        } else {
+          panic("Fatal trap %d: %s while in kernel mode\n", frame->intr, exceptions[frame->intr]);
         }
         if(tasking_enabled())
-kill_task:
           kill(get_current_task());
       }
     }

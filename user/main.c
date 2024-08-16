@@ -59,6 +59,7 @@ extern void do_test(void);
 
 int main() {
     do_test();
+    for(;;);
     char input[MAX_INPUT];
     beep(100);
     while (1) {

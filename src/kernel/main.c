@@ -104,25 +104,27 @@ void kmain(uint32_t magic, uintptr_t addr)
 #if CATK_LOGO == 1
 static void show_bootart(void)
 {
- /* CatK splash screen */
-  printk("             __           __\n");
-  printk("            /  \\         /  \\\n");
-  printk("           / /\\ \\       / /\\ \\\n");
-  printk("          / /  \\ \\     / /  \\ \\\n");
-  printk("         / /      \\___/      \\ \\         _______   _____   _______  ___   _\n");
-  printk("        /                       \\       |   ____| /  _  \\ |       ||   | | |\n");
-  printk("       |        |      |         |      |  |     |  | |  ||_     _||   |_| |\n");
-  printk("     ---        |      |         ---    |  |     |  |_|  |  |   |  |      _|\n");
-  printk("       |                         |      |  |     |       |  |   |  |     |_ \n");
-  printk("     ---   //      ^       //    ---    |  |____ |   _   |  |   |  |    _  |\n");
-  printk("        \\         \\/\\/          /       |_______||__| |__|  |___|  |___| |_|\n");
-  printk("         \\                     /      Written from scratch by the CatK team! :3\n");
-  printk("          \\___________________/\n");
-  printk("           ===================\n");
-  printk("          =========\\/==========\n");
-  printk("                  /  \\\n");
-  printk("                 |CatK|\n");
-  printk("                  \\__/\n");
+  /* CatK splash screen */
+  printk("\n\033[1;37m           __           __             \n");
+  printk("          /  \\         /  \\        \n");
+  printk("\033[36m         / /\\ \\       / /\\ \\       \n");
+  printk("\033[36m        / /  \\ \\     / /  \\ \\      \n");
+  printk("\033[36m       / /      \\___/      \\ \\      \033[1;37m   _______   _____   _______  ___   _\n");
+  printk("\033[36m      /                       \\       \033[1;37m|   ____| /  _  \\ |       ||   | | |\n");
+  printk("\033[36m     |        |      |         |      \033[36m|  |     |  | |  ||_     _||   |_| |\n");
+  printk("\033[36m   ---        |      |         ---    |  |     |  |_|  |  |   |  |      _|\n");
+  printk("     |                         |      |  |     |       |  |   |  |     |_ \n");
+  printk("\033[1;36m   ---   //      ^       //    ---    \033[1;36m|  |____ |   _   |  |   |  |    _  |\n");
+  printk("      \\         \\/\\/          /       \033[1;36m|_______||__| |__|  |___|  |___| |_|\033[1;36m\n");
+  printk("\033[1;36m       \\                     /      Written from scratch by the CatK team! :3\n");
+  printk("        \\___________________/      \n");
+  printk("\033[1;31m         ===================       \n");
+  printk("\033[1;31m        =========");
+  printk("\033[1;33m\\/\033[1;31m");
+  printk("==========      \n");
+  printk("\033[1;33m                /  \\               \n");
+  printk("               |CatK|              \n");
+  printk("                \\__/               \033[1;0m\n");
   printk("\nCatK(mascot) was created by Rodmatronics\n");
 }
 #endif

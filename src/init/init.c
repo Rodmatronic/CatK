@@ -27,7 +27,7 @@ int try_init(const char * path)
   rc = vfs_open(file, init_path);
   if(IS_ERR(rc))
     return rc;
-  uint8_t * program_buffer = (uint8_t *)malloc(file->inode->length);
+  uint8_t * program_buffer;
   rc = vfs_read(file, program_buffer, file->inode->length);
   if(IS_ERR(rc)) {
     return rc;

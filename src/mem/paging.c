@@ -22,12 +22,15 @@
 #include <catk/ipc.h>
 #include <lib/common.h>
 #include <stdint.h>
+#include <config.h>
 
 /* page tables */
 static uint32_t page_table[1024] _aligned(PAGE_ALIGNMENT);
 static uint32_t heap_page_table[1024] _aligned(PAGE_ALIGNMENT);
 static uint32_t heap_page_table2[1024] _aligned(PAGE_ALIGNMENT);
+#if CATK_VIDEO_GENERIC != 1
 static uint32_t framebuffer_page_table[1024] _aligned(PAGE_ALIGNMENT);
+#endif
 /* page directories */
 static uint32_t kernel_page_dir[1024] _aligned(PAGE_ALIGNMENT);
 
@@ -141,7 +144,9 @@ void paging_init(uint32_t addr)
   memset(&page_table, 0, PAGE_SIZE);
   memset(&heap_page_table, 0, PAGE_SIZE);
   memset(&heap_page_table2, 0, PAGE_SIZE);
+#if CATK_VIDEO_GENERIC != 1
   memset(&framebuffer_page_table, 0, PAGE_SIZE);
+#endif
   /* initialize the physical memory manager for allocating page frames */
   physmem_init(addr);
   /* do identity paging */
@@ -160,15 +165,19 @@ void paging_init(uint32_t addr)
   for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
     heap_page_table2[i] = create_pte(p_addr, 0, 1);
   }
-  p_addr = 0xfd000000;
+#if CATK_VIDEO_GENERIC != 1
+  p_addr = fbcon_locate_framebuffer(addr);
   size = 0x400000;
   for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
     framebuffer_page_table[i] = create_pte(p_addr, 0, 1);
   }
+#endif
   kernel_page_dir[0] = create_pde((uint32_t)page_table, 0, 1);
   kernel_page_dir[1] = create_pde((uint32_t)heap_page_table, 0, 1);
   kernel_page_dir[2] = create_pde((uint32_t)heap_page_table2, 0, 1);
+#if CATK_VIDEO_GENERIC != 1
   kernel_page_dir[3] = create_pde((uint32_t)framebuffer_page_table, 0, 1);
+#endif
   load_page_directory((uint32_t)kernel_page_dir);
   paging_enable();
   interrupt_install(page_fault_handler, 0x0e);

@@ -6,6 +6,7 @@
 #include <catk/errno.h>
 #include <catk/debug.h>
 #include <catk/printk.h>
+#include <catk/virt.h>
 #include <stdint.h>
 #include <lib/common.h>
 
@@ -28,59 +29,6 @@ static void debug_print_info(struct elf_hdr * header)
 	debug("\tentry point: 0x%x\n", header->e_entry);
 }
 
-/*
-
-static inline struct elf_section * elf_get_section_header(struct elf_hdr * header)
-{
-  return (struct elf_section *)((uint32_t)header + header->e_shoff);
-}
-
-static inline struct elf_section * elf_get_section(int idx, struct elf_hdr * header)
-{
-  return &elf_get_section_header(header)[idx];
-}
-
-static inline char * elf_get_string_table(struct elf_hdr * hdr)
-{
-	if(!hdr->e_shstrndx)
-    return NULL;
-	return (char *)hdr + elf_get_section(hdr->e_shstrndx, hdr)->sh_offset;
-}
-
-static inline char * elf_string_lookup(struct elf_hdr * hdr, int offset)
-{
-	char * strtab = elf_get_string_table(hdr);
-	if(!strtab)
-    return NULL;
-	return strtab + offset;
-}
-static uint32_t elf_get_symval(struct elf_hdr * hdr, int table, int idx) 
-{
-	if(!table || !idx) 
-    return -1;
-	struct elf_section * symtab = elf_get_section(table, hdr);
-	uint32_t symtab_entries = symtab->sh_size / symtab->sh_entsize;
-	if(idx >= symtab_entries)
-  {
-    debug("elf: index is out of range. given index: %d, max index: %d\n", idx, symtab_entries);
-		return -1;
-	}
-	int symaddr = (int)hdr + symtab->sh_offset;
-	struct elf_symbol * symbol = &((struct elf_symbol *)symaddr)[idx];
-  if(!symbol->st_shndx) 
-  {
-    debug("elf: external symbols are not supported");
-    return -1;
-  }
-  else
-  {
-    debug("elf: symbol is defined :D");
-  }
-  return 0;
-}
-
-*/
-
 int elf_exec(const char * name, const uint8_t * data)
 {
   uint32_t load_loc = 0;
@@ -91,6 +39,7 @@ int elf_exec(const char * name, const uint8_t * data)
   struct elf_hdr * header = (struct elf_hdr *)data;
   debug_print_info(header);
   struct elf_phdr * prghdr = (struct elf_phdr *)(data + header->e_phoff);
+  struct task * p = NULL;
   for(int i = 0; i < header->e_phnum; i++, prghdr++)
   {
     switch(prghdr->p_type)
@@ -99,6 +48,13 @@ int elf_exec(const char * name, const uint8_t * data)
       {
         debug("elf file load offest 0x%08x..\n", prghdr->p_offset);
         load_loc = (uint32_t)(data + prghdr->p_offset);
+        uint32_t p_addr = load_loc, size = ALIGN(PAGE_ALIGNMENT, prghdr->p_filesz);
+        p = create_user_task((char *)name, (load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
+        if(!p)
+          return -ENOMEM;
+        for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
+          uvm_map((uint32_t)p->cr3, i * PAGE_SIZE, p_addr);
+        }
         break;
       }
       default:
@@ -109,7 +65,7 @@ int elf_exec(const char * name, const uint8_t * data)
   }
   if(!load_loc)
     return -ENOEXEC;
-  //spawn_user_task((char *)name, (load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
-  asm volatile ("jmp *%0" :: "r"(load_loc + header->e_entry) : "eax");
+  task_add_queue(p);
+  //asm volatile ("jmp *%0" :: "r"(load_loc + header->e_entry) : "eax");
   return 0;
 }

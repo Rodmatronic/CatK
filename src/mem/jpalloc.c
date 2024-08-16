@@ -21,13 +21,13 @@ SPINLOCK_INIT(jpalloc_spinlock);
 
 struct heap_metadata
 {
-  uintptr_t size;
+  size_t size;
   bool used;
 };
 
 struct heap_block
 {
-  uintptr_t magic;
+  uint32_t magic;
   struct heap_metadata metadata;
 };
 
@@ -40,21 +40,21 @@ struct heap_block
 
 static uintptr_t heap_start = 0, heap_end = 0, heap_used = 0;
 
-/* NEED TODO: Switch to virtual memory for extra security and to prevent memory corruption */
 void heap_init(void)
 {
   /* This really isn't memory safe now that I think about it. */
-  heap_start =  (uintptr_t)((uintptr_t)&kernel_start + 0x100000);
+  heap_start =  (uintptr_t)((uintptr_t)&kernel_end + 0x100000);
   heap_end   =  (uintptr_t)(heap_start + KERNEL_HEAP_MAX);
   memset((void *)heap_start, 0, heap_end - heap_start);
+  debug("heap: [0x%08x - 0x%08x]\n", heap_start, heap_end);
 }
 
 uintptr_t get_heap_start(void) {
-  return ((uintptr_t)&kernel_start + 0x100000);
+  return ((uintptr_t)&kernel_end + 0x100000);
 }
 
 uintptr_t get_heap_end(void) {
-  return (((uintptr_t)&kernel_start + 0x100000) + KERNEL_HEAP_MAX);
+  return (((uintptr_t)&kernel_end + 0x100000) + KERNEL_HEAP_MAX);
 }
 
 uintptr_t heap_get_used(void)
@@ -104,8 +104,7 @@ static void * heap_alloc(size_t size)
     spinlock_release(&jpalloc_spinlock);
     return NULL;
   }
-  struct heap_block * b = NULL;
-  b = heap_get_free(size);
+  struct heap_block * b = heap_get_free(size);
   if(!b)
   {
     spinlock_release(&jpalloc_spinlock);

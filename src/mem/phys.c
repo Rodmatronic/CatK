@@ -79,5 +79,6 @@ void physmem_block_free(uint32_t addr) {
 uint32_t physmem_block_alloc(void) {
   /* pop into 'addr' */
   uint32_t addr = physmem_stack_pop();
+  debug("PMM: 0x%08x\n", addr);
   return addr;
 }
