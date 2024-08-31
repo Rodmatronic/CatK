@@ -7,3 +7,4 @@ Here's how stuff's laid out:
 | src/kernel | The actual kernel                                                                                                             
 | src/lib    | Some libs for the kernel to use
 | skeleton   | The skeleton for the system root directory, for when we move to having a filesystem driver
+| target     | Contains the a bootable ISO, and GRUB ISO structure 
