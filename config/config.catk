@@ -7,6 +7,7 @@
 
 CATK_64BIT=n
 CATK_APIC=n
+CATK_MMU=n
 
 #
 # Kernel Settings
@@ -36,7 +37,7 @@ CATK_VIDEO_GENERIC=n
 # Kernel Security
 #
 
-CATK_HEAP_FOREIGN=n
+CATK_HEAP_FOREIGN=y
 
 #
 # Kernel Debugging

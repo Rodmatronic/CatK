@@ -21,6 +21,7 @@
 #include <catk/virt.h>
 #include <catk/math.h>
 #include <catk/logo.h>
+#include <catk/platform.h>
 #include <font/vga8x16.h>
 #include <multiboot2.h>
 #include <lib/common.h>
@@ -44,7 +45,7 @@ static const uint32_t colors[16] = {
   0x0000aa,
   0xaa00aa,
   0x87abab,
-  0xbbd3ff, // 0xaaaaaa is the true color
+  0xbbd3ff,
   /* high intensity colors */
   0x555555,
   0xff6a6a,
@@ -91,7 +92,7 @@ static char * fbcon_startup(void)
   cb.con_putc = fbcon_putc;
   cb.con_clear = fbcon_clear;
   cb.con_color_set = fbcon_color_set;
-  return "console";
+  return "fbcon";
 }
 
 static void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
@@ -321,14 +322,6 @@ void fbcon_color_set(uint8_t fg, uint8_t bg)
 
 int fbcon_output_intr(struct tty_struct * tty, size_t len)
 {
-  if(!tty)
-    return -EINVAL;
-  char * str = (char *)malloc(len);
-  if(!str)
-    return -ENOMEM;
-  ring_buffer_read(tty->write_q, (uint8_t *)str, len);
-  fbcon_write(str, len);
-  free(str);
   return 0;
 }
 
@@ -336,8 +329,6 @@ void fbcon_clear(void)
 {
   memset32((void *)c.vc_screenbuf, colors[0], (c.vc_rows * c.vc_cols));
 }
-
-// static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
 
 int fbcon_dev_write(struct file * file, void * buf, size_t sz)
 {
@@ -355,20 +346,6 @@ void fbcon_dev_close(struct file * file)
   return;
 }
 
-#if CATK_VIDEO_GENERIC != 1
-uint32_t fbcon_locate_framebuffer(uint32_t addr) {
-  struct multiboot_tag_framebuffer_common * grub_fb = (struct multiboot_tag_framebuffer_common *)multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
-  return (uint32_t)grub_fb->framebuffer_addr;
-}
-#endif
-
-static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {
-    return ((uint32_t)byte1 << 24) |
-        ((uint32_t)byte2 << 16) |
-        ((uint32_t)byte3 << 8)  |
-        (uint32_t)byte4;
-}
-
 int fbcon_init(struct console * con, uint32_t addr)
 {
   int rc;
@@ -377,7 +354,7 @@ int fbcon_init(struct console * con, uint32_t addr)
     return -ENODEV;
   c.vc_rows = grub_fb->framebuffer_width;
   c.vc_cols = grub_fb->framebuffer_height;
-  c.vc_screenbuf = (uintptr_t)FRAMEBUFFER_VIRT_ADDR;
+  c.vc_screenbuf = grub_fb->framebuffer_addr;
   cb.con_startup = fbcon_startup;
   strncpy(con->name, cb.con_startup(), sizeof(con->name));
   strncpy((char *)fbcon_dev.name, con->name, sizeof(con->name));
@@ -388,9 +365,7 @@ int fbcon_init(struct console * con, uint32_t addr)
   fbcon_y = c.vc_pos & 0xff;
   fbcon_clear();
   rc = register_chrdev("fb", &fbcon_dev, &fbcon_fops);
-  if(IS_ERR(rc))
-  {
-    printk("Failed to register framebuffer device: %d\n", rc);
+  if(IS_ERR(rc)) {
     return rc;
   }
   return 0;

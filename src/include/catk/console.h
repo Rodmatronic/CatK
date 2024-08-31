@@ -49,6 +49,7 @@ struct console
 {
   char name[NAME_MAX + 1];
   void (*write)(const void * buf, size_t len);
+  void (*map)(void);
   struct device * dev;
   struct vc_data * data;
 };
@@ -63,9 +64,5 @@ int console_init(uintptr_t addr);
 int console_puts(char * buf);
 int console_putc(char c);
 int console_color_set(uint8_t fb, uint8_t bg);
-
-#if CATK_VIDEO_GENERIC != 1
-uint32_t fbcon_locate_framebuffer(uint32_t addr);
-#endif
 
 #endif

@@ -14,36 +14,44 @@ SRC = $(CATK_ROOT)/src
 C_INCLUDE_PATH = $(SRC)/include/
 C_INCLUDE = -I $(C_INCLUDE_PATH)
 
-NASM_INCLUDE_PATH = $(SRC)/include/asm/
-NASM_INCLUDE = -I $(NASM_INCLUDE_PATH)
+ASM_INCLUDE = $(C_INCLUDE)
 
 DEBUG = 1
 
 CC_FLAGS = \
 	$(C_INCLUDE)  \
+	-fno-exceptions \
 	-ffreestanding \
 	--target=i686-pc-none-elf \
 	-march=i686 \
 	-Werror=implicit-function-declaration \
-	-Werror \
 	-nodefaultlibs \
 	-nostdlib \
-	-fstack-protector-strong
+	-fstack-protector-strong \
+	-fno-pie \
+	-O2
+
+ASM_FLAGS = \
+	$(ASM_INCLUDE)  \
+	-ffreestanding \
+	--target=i686-pc-none-elf \
+	-march=i686 \
+	-nodefaultlibs \
+	-nostdlib
 
 ifeq ($(DEBUG), 1)
 CC_FLAGS += -g
-ASM_FLAGS += -g # NASM also supports debug symbols! :)
+ASM_FLAGS += -g
 endif
 
-ASM_FLAGS = -f elf32 $(NASM_INCLUDE)
-LD_FLAGS = -m elf_i386 -T $(CONFIG)/link.ld -znoexecstack
+LD_FLAGS = -m elf_i386 -T $(CONFIG)/link.ld -z noexecstack -nostdlib -static
 
 # source files
 C_SRC := $(shell find . -type f -name "*.c")
-ASM_SRC := $(shell find . -type f -name "*.asm")
+ASM_SRC := $(shell find . -type f -name "*.S")
 # object files
 C_OBJ := $(patsubst %.c, %.o, $(C_SRC))
-ASM_OBJ := $(patsubst %.asm, %.o, $(ASM_SRC))
+ASM_OBJ := $(patsubst %.S, %.o, $(ASM_SRC))
 
 all: $(TARGET_ISO)
 
@@ -53,23 +61,14 @@ ifneq ($(SKIP_ISO), 1)
 	@$(MKDIR) $(ISO_DIR)/boot/grub
 	@$(CP) $(TARGET) $(ISO_DIR)/boot/
 	@$(CP) $(CONFIG)/grub.cfg $(ISO_DIR)/boot/grub/
-	@$(GZ) $(CATK_ROOT)/disk-ext2.img -c >> $(CATK_ROOT)/ramdisk.gz
-	@$(CP) $(CATK_ROOT)/ramdisk.gz $(ISO_DIR)/boot/ramdisk.gz
 	@grub-mkrescue -o $(OUT)/$(TARGET_ISO) $(ISO_DIR)
-	@$(RM) $(TARGET)
 else
 	@printf "[ Build ISO skipped ]\n"
 endif
 
-$(TARGET_TMP): $(ASM_OBJ) $(C_OBJ)
-	@$(LD) $(LD_FLAGS) -o $(TARGET_TMP) -r $^
-	@printf "[ Generating kernel symbols... ]\n"
-	@bash $(TOOLS)/gen_syms.sh $(TARGET_TMP) $(SRC)/symlist.c
-	@$(CC) -c symlist.c -o symlist.o $(CC_FLAGS)
-
-$(TARGET): $(TARGET_TMP)
+$(TARGET): $(ASM_OBJ) $(C_OBJ)
 	@printf "[ Linking kernel.. ]\n"
-	@$(LD) $(LD_FLAGS) -o $(TARGET) $(TARGET_TMP) symlist.o
+	@$(LD) $(LD_FLAGS) $^ -o $(TARGET)
 	@printf "[ Validating Multiboot2 signature... ]\n"
 ifneq ($(SKIP_MB_CHECK), 1)
 	@grub-file --is-x86-multiboot2 $(TARGET)
@@ -77,9 +76,9 @@ else
 	@printf "[ Multiboot2 check skipped ]\n"
 endif
 
-%.o: %.asm
+%.o: %.S
 	@printf "[ $< ]\n"
-	@$(ASM) $(ASM_FLAGS) $< -o $@
+	@$(ASM) $(ASM_FLAGS) -c $< -o $@
 
 %.o: %.c
 	@printf "[ $< ]\n"

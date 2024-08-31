@@ -5,6 +5,7 @@
 #include <stdarg.h>
 
 #define BIT(bit) (1 << bit)
+#define ZEROBIT(bit) (0 << bit)
 #define ALIGN(align, num) ((num + align - 1) & ~(align - 1))
 
 typedef enum
@@ -16,8 +17,6 @@ typedef enum
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
-
-#define KB_TO_MB(kb) ((kb) / 1000)
 
 /* string stuff */
 void strncpy(char * dest, const char * src, size_t n);

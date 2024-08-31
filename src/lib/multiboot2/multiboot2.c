@@ -2,13 +2,11 @@
 #include <lib/common.h>
 #include <stdint.h>
 
-int multiboot2_validate_args(uint32_t magic, uint32_t addr)
+#define MBI_UNALIGNED(mbi) (mbi & 7)
+
+int multiboot2_validate(uint32_t magic, uint32_t addr)
 {
-  if(magic != MULTIBOOT2_BOOTLOADER_MAGIC)
-    return 0; /* why even bother continuing if we aren't being loaded by GRUB?? */
-  if(addr & 7)
-    return 0; /* the address is unaligned. never use an unaligned address given by GRUB */
-  return 1;
+  return (magic == MULTIBOOT2_BOOTLOADER_MAGIC && !MBI_UNALIGNED(addr));
 }
 
 void * multiboot2_locate_tag(uintptr_t addr, int type)

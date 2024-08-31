@@ -1,7 +1,6 @@
 #include <stdarg.h>
 #include <catk/printk.h>
 #include <catk/compiler.h>
-#include <catk/core.h>
 #include <lib/common.h>
 
 int _hot_ printk(const char format[], ...)

@@ -7,10 +7,10 @@ C_INCLUDE_PATH := $(SRC)/include
 CC_FLAGS = \
 	-I $(C_INCLUDE_PATH)	\
 	-ffreestanding \
-	--target=i686-pc-none-elf \
-	-march=i686 \
+	-m32 \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
+	-no-pie \
 	-nostdlib
 
 ASM_FLAGS = -f elf32
@@ -35,4 +35,4 @@ $(TARGET): $(C_OBJ) $(ASM_OBJ)
 
 %.o: %.c
 	@printf "[ $< ]\n"
-	@$(CC) -c $< -o $@ $(CC_FLAGS)
+	@gcc -c $< -o $@ $(CC_FLAGS)
