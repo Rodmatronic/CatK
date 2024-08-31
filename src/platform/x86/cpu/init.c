@@ -174,5 +174,5 @@ void early_platform_init(void) {
   global_descriptors_init();
   interrupt_descriptors_init();
   exceptions_install();
-  setup_paging();
+  //setup_paging();
 }

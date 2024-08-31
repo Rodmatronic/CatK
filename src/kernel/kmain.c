@@ -47,13 +47,13 @@ void kmain(uint32_t magic, uintptr_t mbi) {
     return;
   }
   console_puts("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
-  physmem_init(mbi);
   early_platform_init();
-  printk("PHYSICAL MEMORY ALLOCATION TEST!\n");
-  void * spungbub = physmem_alloc_block();
-  printk("RESULT IS %s: 0x%08x\n", (spungbub == NULL) ? "FAIL" : "PASS", spungbub);
-  for(;;);
+  physmem_init(mbi);
   show_boot_banner();
   printk("Early platform has been initialized\n");
   draw_logo();
+  /* physmem test */
+  printk("PHYSICAL MEMORY ALLOCATION TEST!\n");
+  void * spungbub = physmem_alloc_block();
+  printk("RESULT IS %s: 0x%08x\n", (spungbub == NULL) ? "FAIL" : "PASS", spungbub);
 }

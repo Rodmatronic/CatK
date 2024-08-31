@@ -2,13 +2,13 @@ ENTRY(kentry)
 
 SECTIONS
 {
-  . = 2M;
+  . = 1M;
   kstart = .;
   /* Code */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
-		*(.multiboot)
     ktext_start = .;
+		*(.multiboot)
 		*(.text)
     ktext_end = .;
 	}
