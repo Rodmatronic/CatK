@@ -32,10 +32,6 @@ static inline uint32_t get_fault_addr(void) {
 }
 
 static void page_fault_handler(struct intr_stack_frame * regs) {
-  if(!is_console_enabled()) {
-    critical_enter();
-    halt();
-  }
   printk("CatK paging bug report:\n");
   printk("------------[ cut here ]------------\n");
   printk("Important registers:\n");
@@ -92,9 +88,6 @@ void setup_paging(void)
   /* clear page stuff */
   memset(&kernel_page_dir, 0, PAGE_SIZE);
   memset(&page_table, 0, PAGE_SIZE);
-  memset(&heap_page_table, 0, PAGE_SIZE);
-  memset(&heap_page_table2, 0, PAGE_SIZE);
-  memset(&fbcon_page_table, 0, PAGE_SIZE);
   /* do identity paging */
   for(int i = 0; i < 1024; i++) {
     kernel_page_dir[i] = create_pde(0x00000000, 0, 1) & ~(1 << PDE_PRESENT_SHIFT); /* not present */
@@ -103,26 +96,10 @@ void setup_paging(void)
   for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
     page_table[i] = create_pte(p_addr, 0, 1);
   }
-  size = 0x400000;
-  for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
-    heap_page_table[i] = create_pte(p_addr, 0, 1);
-  }
-  size = 0x400000;
-  for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
-    heap_page_table2[i] = create_pte(p_addr, 0, 1);
-  }
-  p_addr = get_console()->data->vc_screenbuf;
-  size = 0x400000;
-  for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
-    fbcon_page_table[i] = create_pte(p_addr, 0, 1);
-  }
   kernel_page_dir[0] = create_pde((uint32_t)page_table, 0, 1);
-  kernel_page_dir[1] = create_pde((uint32_t)heap_page_table, 0, 1);
-  kernel_page_dir[2] = create_pde((uint32_t)heap_page_table2, 0, 1);
-  kernel_page_dir[3] = create_pde((uint32_t)fbcon_page_table, 0, 1);
   native_load_pagedir((uint32_t)kernel_page_dir);
   native_enable_paging();
-  get_console()->data->vc_screenbuf = 0xc00000;
+  console_disable();
   intr_add_handler(0x0e, page_fault_handler);
 }
 
@@ -135,17 +112,19 @@ static void native_map_virtual(uint32_t page_dir, uint32_t phys_addr, uint32_t v
     uint32_t page_frame_addr = (uint32_t)physmem_alloc_block();
     memset((void *)page_frame_addr, 0, PAGE_SIZE);
     pde[pd_index] = create_pde(page_frame_addr, user, rw);
-    tlb_flush(virt_addr);
+
+    tlb_flush(page_frame_addr);
   }
   uint32_t * pte = (uint32_t *)extract_pte(pde[pd_index]);
   pte[pt_index] = create_pte(phys_addr, user, rw);
-  tlb_flush(virt_addr);
+
+  tlb_flush(phys_addr);
 }
 
-void platform_kmap(uint32_t phys, uint32_t virt, int usermode, int rw) {
-  native_map_virtual(get_kernel_pgd(), phys, virt, usermode, rw);
+void platform_kmap(uint32_t phys, uint32_t virt, int rw) {
+  native_map_virtual(get_kernel_pgd(), phys, virt, 0, rw);
 }
 
-void platform_umap(uint32_t cr3, uint32_t phys, uint32_t virt, int usermode, int rw) {
-  native_map_virtual(cr3, phys, virt, usermode, rw);
+void platform_umap(uint32_t pgd, uint32_t phys, uint32_t virt, int rw) {
+  native_map_virtual(pgd, phys, virt, 1, rw);
 }

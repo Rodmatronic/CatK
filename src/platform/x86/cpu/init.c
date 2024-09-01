@@ -113,7 +113,7 @@ static inline void idt_setup_descriptor(int gate, uint32_t addr, uint8_t flags) 
   idt[gate].flags = flags;
 }
 
-static const void * intr_stub_list[33] = {
+static const void * intr_stub_list[46] = {
   intr_stub_0,
   intr_stub_1,
   intr_stub_2,
@@ -146,7 +146,20 @@ static const void * intr_stub_list[33] = {
   intr_stub_29,
   intr_stub_30,
   intr_stub_31,
-  intr_stub_32
+  intr_stub_32,
+  intr_stub_33,
+  intr_stub_34,
+  intr_stub_35,
+  intr_stub_36,
+  intr_stub_37,
+  intr_stub_38,
+  intr_stub_39,
+  intr_stub_40,
+  intr_stub_41,
+  intr_stub_42,
+  intr_stub_43,
+  intr_stub_44,
+  intr_stub_45,
 };
 
 static void set_intr_gate(int gate, const void * addr) {
@@ -161,11 +174,8 @@ static inline void invalidate_intr_gate(int trapnr) {
 static void interrupt_descriptors_init(void) {
   int i = 0;
   i8259_remap_vectors(0x20, 0x28);
-  for(; i < 33; i++) {
+  for(; i < 45; i++) {
     set_intr_gate(i, intr_stub_list[i]);
-  }
-  for(; i < 256; i++) {
-    set_intr_gate(i, intr_stub_ignore);
   }
   native_idt_load((uint32_t)&idtr);
 }

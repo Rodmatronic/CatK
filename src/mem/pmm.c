@@ -3,13 +3,14 @@
 #include <catk/debug.h>
 #include <catk/kernel.h>
 #include <catk/bitops.h>
+#include <catk/platform.h>
 #include <multiboot2.h>
 #include <lib/common.h>
 #include <lib/bitmap.h>
 #include <stdint.h>
 
 /* 
-* We can forget about the using linear allocation for the PMM..
+* We can forget about the using a linear allocator for the PMM..
 * Using a bitmap allocator is the way to go.
 */
 
@@ -42,13 +43,15 @@ void physmem_init(uintptr_t mbi) {
     }
   }
   assert(pmm_bitmap_start != 0);
-  printk("PMM start: 0x%08x\n", pmm_bitmap_start);
-  printk("PMM total blocks: %d\n", pmm_max_blocks);
   /* all memory is unallocated */
   memset(pmm_bitmap, 0, pmm_max_blocks * sizeof(uint32_t));
+  for(int i = 0; i < (pmm_max_blocks * sizeof(uint32_t)) / 4096; ++i) {
+    uint32_t offset = i * PHYSMEM_BLOCK_SIZE;
+    platform_kmap((uint32_t)&pmm_bitmap[pmm_max_blocks] + i, (uint32_t)&pmm_bitmap[pmm_max_blocks] + i, 1);
+  }
 }
 
-
+/* not quite sure on how to allocate multiple blocks.. */
 
 void * physmem_alloc_block(void) {
   /* Variable I = PMM bitmap index */
@@ -67,8 +70,8 @@ void * physmem_alloc_block(void) {
   return NULL;
 }
 
-void physmem_free_block(void * block) {
-  int n = ((uint32_t)block / PHYSMEM_BLOCK_SIZE) % 32;
-  if(bitmap_test(pmm_bitmap, n) == 1)
-    bitmap_unset(pmm_bitmap, n);
+void physmem_free_block(void * addr) {
+  uint32_t block = (uint32_t)addr - (uint32_t)&pmm_bitmap[pmm_max_blocks];
+  int n = block / PHYSMEM_BLOCK_SIZE; 
+  bitmap_unset(pmm_bitmap, n);
 }

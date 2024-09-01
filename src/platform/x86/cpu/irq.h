@@ -34,8 +34,19 @@ extern void intr_stub_29(void);
 extern void intr_stub_30(void);
 extern void intr_stub_31(void);
 extern void intr_stub_32(void);
-
-extern void intr_stub_ignore();
+extern void intr_stub_33(void);
+extern void intr_stub_34(void);
+extern void intr_stub_35(void);
+extern void intr_stub_36(void);
+extern void intr_stub_37(void);
+extern void intr_stub_38(void);
+extern void intr_stub_39(void);
+extern void intr_stub_40(void);
+extern void intr_stub_41(void);
+extern void intr_stub_42(void);
+extern void intr_stub_43(void);
+extern void intr_stub_44(void);
+extern void intr_stub_45(void);
 
 void exceptions_install(void);
 

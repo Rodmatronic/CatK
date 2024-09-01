@@ -31,6 +31,10 @@ bool is_console_enabled(void)
   return console_enabled;
 }
 
+void console_disable(void) {
+  console_enabled = false;
+}
+
 int console_puts(char * buf)
 {
   if(console_enabled)

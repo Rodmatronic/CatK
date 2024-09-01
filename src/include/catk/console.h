@@ -64,5 +64,6 @@ int console_init(uintptr_t addr);
 int console_puts(char * buf);
 int console_putc(char c);
 int console_color_set(uint8_t fb, uint8_t bg);
+void console_disable(void);
 
 #endif

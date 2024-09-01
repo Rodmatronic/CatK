@@ -21,6 +21,24 @@
 #define ICW4_BUF_MASTER	0x0C	      /* Buffered mode/master */
 #define ICW4_SFNM	      0x10		    /* Special fully nested (not) */
 
+static void i8259_unmask(uint8_t intr)
+{
+  uint16_t port;
+  uint8_t value;
+ 
+  if(intr < 8)
+  {
+    port = PIC_MASTER_DATA_PORT;
+  } 
+  else 
+  {
+    port = PIC_SLAVE_DATA_PORT;
+    intr -= 8;
+  }
+  value = inb(port) & ~(1 << intr);
+  outb(port, value);        
+}
+
 void i8259_remap_vectors(uint8_t master_offset, uint8_t slave_offset) {
 	uint8_t slave_mask_cache, master_mask_cache;
 	
@@ -47,6 +65,8 @@ void i8259_remap_vectors(uint8_t master_offset, uint8_t slave_offset) {
 	
 	outb(PIC_MASTER_DATA_PORT, master_mask_cache);
 	outb(PIC_SLAVE_DATA_PORT, slave_mask_cache);
+  for(int i = 0; i < 42; i++)
+    i8259_unmask(i);
 }
 
 void i8259_send_eoi(uint8_t trapnr)
