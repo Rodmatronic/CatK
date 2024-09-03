@@ -327,7 +327,8 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
 
 void fbcon_clear(void)
 {
-  memset32((void *)c.vc_screenbuf, colors[0], (c.vc_rows * c.vc_cols));
+  /* thank you rodmatronics for the help! :) */
+  memset32((void *)c.vc_screenbuf, colors[0], (c.vc_rows * c.vc_cols * 1.2));
 }
 
 int fbcon_dev_write(struct file * file, void * buf, size_t sz)

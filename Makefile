@@ -4,7 +4,7 @@ export RM = rm
 export RM_FORCE = rm -rf
 export MOVE = mv
 
-# assemblerdir 
+# assembler
 export ASM = clang
 export CC = clang
 export LD = ld
@@ -26,11 +26,18 @@ $(shell $(MKDIR) $(OUT))
 # would not update with the new configuration. A very simple workaround
 # is to recompile all files with the new configurations.
 all: clean
+	sed -i.bak '/CATK_BUILD_DATE/d' ./config/config.catk
+	sed -i.bak '/CATK_COMPILED_WITH/d' ./config/config.catk
+	echo 'CATK_COMPILED_WITH="$(CC)"' >> ./config/config.catk
+	echo -n 'CATK_BUILD_DATE="' >> ./config/config.catk
+	date +"%a %d %b %Y %T %Z" | tr -d '\n' >> ./config/config.catk
+	echo '"' >> ./config/config.catk
+
 	@$(MAKE) -C $(UTILS)/gen_config/ || { echo "Build failed"; exit 1; }
 	@$(UTILS)/gen_config/gen_config $(CONFIG)/config.catk | tee $(CATK_ROOT)/src/include/config.h
-	@$(MAKE) -C $(CATK_ROOT)/src 	|| { echo "Build failed"; exit 1; }
+	@$(MAKE) -C $(CATK_ROOT)/src     || { echo "Build failed"; exit 1; }
 	@echo "Build successful"
-# 		-icount 6,align=on \
+#         -icount 6,align=on \
 #       For debugging
 
 init:
@@ -52,7 +59,8 @@ disk:
 run:
 	@qemu-system-x86_64 \
 		-cdrom $(OUT)/catkernel.iso \
-		-m 2G
+		-m 2G \
+		-debugcon stdio
 
 clean:
 	@$(RM_FORCE) $(OUT)

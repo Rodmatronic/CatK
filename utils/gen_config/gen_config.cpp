@@ -110,7 +110,7 @@ int main(int argc, char * argv[])
                 std::cout << " " << options.at(i).value << std::endl;
             }
         }
-        std::cout << "#endif\n";
+        std::cout << "\n#endif\n";
     }
     else
     {

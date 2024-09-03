@@ -28,8 +28,7 @@ CC_FLAGS = \
 	-nodefaultlibs \
 	-nostdlib \
 	-fstack-protector-strong \
-	-fno-pie \
-	-O2
+	-fno-pie
 
 ASM_FLAGS = \
 	$(ASM_INCLUDE)  \

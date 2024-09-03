@@ -8,5 +8,7 @@
 
 void physmem_init(uintptr_t mbi);
 void * physmem_alloc_block(void);
+void * physmem_first_free(void);
+void * physmem_alloc_start(void);
 
 #endif

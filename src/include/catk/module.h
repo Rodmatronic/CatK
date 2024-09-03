@@ -3,6 +3,5 @@
 
 #define DEFINE_MODULE(name) static const char * __module_name__ = name
 #define MODULE_NAME __module_name__
-#define MODULE_INIT(init) static const void * __initcall__ = (void *)init
 
 #endif

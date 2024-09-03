@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <catk/platform.h>
 #include <catk/printk.h>
+#include <catk/console.h>
 #include <lib/common.h>
 
 #include "irq.h"
@@ -50,15 +51,15 @@
 /* Linux does this, but better */
 struct segm_descriptor gdt[8] = {
   // null segment descriptor
-  DEFINE_SEGM_DESC(0, 0, 0, 0),
+  { DEFINE_SEGM_DESC(0, 0x0000, 0x00, 0x00) },
   // kernel code segment descriptor (32-bit)
-  DEFINE_SEGM_DESC(0, 0xffff, GDT_KERNEL_CODE, GDT_IA32_FLAGS),
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_KERNEL_CODE, GDT_IA32_FLAGS) },
   // kernel data segment descriptor (32-bit)
-  DEFINE_SEGM_DESC(0, 0xffff, GDT_KERNEL_DATA, GDT_IA32_FLAGS),
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_KERNEL_DATA, GDT_IA32_FLAGS) },
   // user code segment descriptor (32-bit) 
-  DEFINE_SEGM_DESC(0, 0xffff, GDT_USER_CODE, GDT_IA32_FLAGS),
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_USER_CODE, GDT_IA32_FLAGS) },
   // user data segment descriptor (32-bit)
-  DEFINE_SEGM_DESC(0, 0xffff, GDT_USER_DATA, GDT_IA32_FLAGS)
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_USER_DATA, GDT_IA32_FLAGS) }
 };
 
 extern void native_gdt_load(uint32_t gdtr);
@@ -95,6 +96,8 @@ static void global_descriptors_init(void) {
 #define IDT_FLAGS_RING0       (ZEROBIT(5) | ZEROBIT(6))
 
 #define IDT_FLAGS_PRESENT     BIT(7)
+
+static bool idt_loaded = false;
 
 struct interrupt_vector idt[256];
 
@@ -180,9 +183,13 @@ static void interrupt_descriptors_init(void) {
   native_idt_load((uint32_t)&idtr);
 }
 
+bool is_idt_loaded(void) {
+  return idt_loaded;
+}
+
 void early_platform_init(void) {
   global_descriptors_init();
   interrupt_descriptors_init();
   exceptions_install();
-  //setup_paging();
+  setup_paging();
 }

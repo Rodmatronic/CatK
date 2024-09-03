@@ -6,6 +6,7 @@
 #include <catk/debug.h>
 #include <catk/kernel.h>
 #include <catk/mem.h>
+#include <catk/console.h>
 #include <lib/common.h>
 
 static void _cold_ die()

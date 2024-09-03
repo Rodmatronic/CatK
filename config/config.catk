@@ -2,6 +2,12 @@
 # DO NOT DELETE!
 
 #
+# Kernel Version / General config
+#
+
+CATK_VERSION_STRING="Meow"
+
+#
 # CPU Settings
 #
 
@@ -28,3 +34,9 @@ CATK_VIDEO_GENERIC=n
 
 CATK_STACK_TRACE=y
 CATK_SYSCALL_TRACE=y
+
+#
+# Compiler (autofilled by Makefile)
+#
+CATK_COMPILED_WITH="clang"
+CATK_BUILD_DATE="Tue 03 Sep 2024 00:36:19 PDT"

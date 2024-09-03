@@ -1,6 +1,7 @@
 #include <catk/console.h>
 #include <catk/errno.h>
 #include <catk/spinlock.h>
+#include <catk/platform.h>
 #include <lib/common.h>
 #include <config.h>
 #include <stdint.h>
@@ -35,7 +36,7 @@ void console_disable(void) {
   console_enabled = false;
 }
 
-int console_puts(char * buf)
+int console_puts(const char * buf)
 {
   if(console_enabled)
   {
@@ -46,7 +47,7 @@ int console_puts(char * buf)
   return 0;
 }
 
-int console_putc(char c)
+int console_putc(const char c)
 {
   if(console_enabled)
   {
@@ -63,6 +64,15 @@ int console_color_set(uint8_t fb, uint8_t bg)
     return -EIO;
   con.data->vc_sw->con_color_set(fb, bg);
   return 0;
+}
+
+void console_map_virt(void) {
+  uint32_t phys = con.data->vc_screenbuf;
+  size_t needed_bytes = con.data->vc_cols * con.data->vc_rows * 32;
+  for(int i = 0; i < needed_bytes / 4096; ++i) {
+    size_t off = i * 4096;
+    platform_kmap(phys + off, phys + off, 1);
+  }
 }
 
 int console_init(uint32_t addr)

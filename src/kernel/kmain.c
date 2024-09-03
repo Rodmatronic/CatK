@@ -7,6 +7,9 @@
 #include <catk/mem.h>
 #include <catk/kernel.h>
 #include <catk/keyb.h>
+#include <catk/version.h>
+#include <catk/utsname.h>
+#include <config.h>
 
 #ifndef __GNUC__
 #error "Compile with GCC or Clang please! :)"
@@ -49,10 +52,21 @@ void kmain(uint32_t magic, uintptr_t mbi) {
   if(IS_ERR(rc)) {
     return;
   }
+  printk(catk_boot_banner, UTS_RELEASE, CATK_VERSION_STRING, CATK_COMPILED_WITH, CATK_BUILD_DATE);
   console_puts("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
-  early_platform_init();
-  keyb_init();
+  console_puts("Initializing early platform..\n");
   physmem_init(mbi);
+  early_platform_init();
+  /* 
+  * the console should be disabled in src/platform/x86/boot/mmu.c since it isn't mapped into virtual memory.
+  * we'll map it in a jiffy :)
+  */
+  console_map_virt();
+  /*
+  * now we can reenable the console now :)
+  */
+  //console_enable();
+  keyb_init();
   show_boot_banner();
   printk("Early platform has been initialized\n");
   draw_logo();

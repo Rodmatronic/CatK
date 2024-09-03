@@ -61,9 +61,10 @@ struct console * get_console(void);
 bool is_console_enabled(void);
 
 int console_init(uintptr_t addr);
-int console_puts(char * buf);
-int console_putc(char c);
+int console_puts(const char * buf);
+int console_putc(const char c);
 int console_color_set(uint8_t fb, uint8_t bg);
 void console_disable(void);
+void console_map_virt(void);
 
 #endif

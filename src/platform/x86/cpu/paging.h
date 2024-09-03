@@ -51,11 +51,11 @@ static inline int pte_is_present(uint32_t pte) {
   return pde_is_present(pte);
 }
 
-static inline int pd_virt(int index) {
+static inline int pde_virt(int index) {
   return (index << 22);
 }
 
-static inline int pt_virt(int index) {
+static inline int pte_virt(int index) {
   return (index << 12);
 }
 

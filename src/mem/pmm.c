@@ -51,7 +51,37 @@ void physmem_init(uintptr_t mbi) {
   }
 }
 
-/* not quite sure on how to allocate multiple blocks.. */
+/* gets first free bit, but doesn't set it */
+void * physmem_alloc_start(void) {
+  return &pmm_bitmap[pmm_max_blocks];
+}
+
+void * physmem_alloc_blocks(size_t sz) {
+  int goodies = 0;
+  /* Variable I = PMM bitmap index */
+  /* Variable J = Bit of bitmap[i] */
+  for(int i = 0; i < pmm_max_blocks; i++) {
+    if(pmm_bitmap[i] != PHYSMEM_BLOCK_USED) {
+      /* check for free block */
+      for(int j = 0; j < 32; j++) {
+        if((pmm_bitmap[i] & BIT(j)) == 0) {
+          /* check if the rest of the bits are  */
+          for(int k = j; k < (32 - j); k++) {
+            if((pmm_bitmap[i] & BIT(k)) != 0) {
+              goodies = 0;
+            } else {
+              goodies++;
+            }
+            if(goodies == sz) {
+              return (void *)(((i * 32 + j) * PHYSMEM_BLOCK_SIZE) + (uint32_t)&pmm_bitmap[pmm_max_blocks]);
+            }
+          }
+        }
+      }
+    }
+  }
+  return NULL;
+}
 
 void * physmem_alloc_block(void) {
   /* Variable I = PMM bitmap index */
@@ -74,4 +104,12 @@ void physmem_free_block(void * addr) {
   uint32_t block = (uint32_t)addr - (uint32_t)&pmm_bitmap[pmm_max_blocks];
   int n = block / PHYSMEM_BLOCK_SIZE; 
   bitmap_unset(pmm_bitmap, n);
+}
+
+void physmem_free_blocks(void * addr, size_t sz) {
+  uint32_t block = (uint32_t)addr - (uint32_t)&pmm_bitmap[pmm_max_blocks];
+  int n = block / PHYSMEM_BLOCK_SIZE;
+  for(int i = 0; i < sz; i++) {
+    bitmap_unset(pmm_bitmap, n + i);
+  }
 }
