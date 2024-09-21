@@ -66,5 +66,5 @@ void kmain(uint32_t magic, uintptr_t mbi) {
   cpu_dump_all_info();
   keyb_init();
   show_boot_banner();
-  //sched_init();
+  
 }

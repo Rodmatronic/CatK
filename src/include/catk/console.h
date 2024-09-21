@@ -49,7 +49,7 @@ struct console {
 };
 
 int console_register(struct console * c);
-struct console * console_get(void);
+struct console * console_get(int num);
 int console_clear(void);
 int console_print(const char * str);
 int console_putc(const char c);

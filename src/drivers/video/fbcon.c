@@ -62,7 +62,7 @@ static int fbcon_y = 0;
 static void fbcon_putpx(int x, int y, uint32_t rgb)
 {
   uint32_t * buf = (uint32_t *)fbcon_struct.data.vc_screenbuf;
-  uint32_t offset = y * (fbcon_struct.data.vc_pitch / 4) + x;
+  uint32_t offset = y * fbcon_struct.data.vc_rows + x;
   buf[offset] = rgb;
 }
 
@@ -86,7 +86,7 @@ static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 
 static void fbcon_scroll(void)
 {
-  if (fbcon_x > ((grub_fb->framebuffer_pitch / 4) / fbcon_struct.data.vc_font.width) - 1)
+  if (fbcon_x > ((grub_fb->framebuffer_width) / fbcon_struct.data.vc_font.width) - 1)
   {
     fbcon_x = 0;
     fbcon_y++;
@@ -314,7 +314,7 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
 void fbcon_clear(void)
 {
   /* thank you rodmatronics for the help! :) */
-  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height * 1.2));
+  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_width) * grub_fb->framebuffer_height * 1.2));
 }
 
 static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {

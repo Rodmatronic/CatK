@@ -8,8 +8,11 @@
 #include <config.h>
 #include <stdint.h>
 
-static struct console * con = NULL;
+#define MAX_CONSOLES 3
+
+static struct console * consoles[MAX_CONSOLES];
 static bool console_enabled = false;
+static int current_console = 0;
 
 extern int fbcon_init(void);
 
@@ -17,42 +20,39 @@ int console_register(struct console * c) {
   if(!c) {
     return -EINVAL;
   }
-  con = c;
+  consoles[c->data.vc_num] = c;
   debug("%s registered as console %d\n", c->name, c->data.vc_num);
   return 0;
 }
 
-struct console * console_get(void)
+struct console * console_get(int num)
 {
-  return con;
+  return consoles[num];
 }
 
 int console_clear(void) {
-  if(!con->data.vc_sw.clear) {
+  if(!consoles[current_console]->data.vc_sw.clear) {
     /* how dare you.. you forgot to bind a clear function to the console!! */
     return -ENXIO;
   }
-  if(console_enabled)
-    con->data.vc_sw.clear();
+  consoles[current_console]->data.vc_sw.clear();
 }
 
 int console_print(const char * str) {
-  if(!con->data.vc_sw.print) {
+  if(!consoles[current_console]->data.vc_sw.print) {
     /* the dummy who registered the console didnt even bind a print function! */
     return -ENXIO;
   }
-  if(console_enabled)
-    con->data.vc_sw.print(str);
+  consoles[current_console]->data.vc_sw.print(str);
   return 0;
 }
 
 int console_putc(const char c) {
-  if(!con->data.vc_sw.putc) {
+  if(!consoles[current_console]->data.vc_sw.putc) {
     /* the dummy who registered the console didnt even bind a putc function! */
     return -ENXIO;
   }
-  if(console_enabled)
-    con->data.vc_sw.putc(c);
+  consoles[current_console]->data.vc_sw.putc(c);
   return 0;
 }
 

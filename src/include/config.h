@@ -14,6 +14,6 @@
 #define CATK_SYSCALL_TRACE 1
 #define CATK_COMPILED_WITH "clang"
 #define CATK_VERSION_STRING "0.1"
-#define CATK_BUILD_DATE "Sat 21 Sep 2024 13:19:32 PDT"
+#define CATK_BUILD_DATE "Sat 21 Sep 2024 16:11:02 PDT"
 
 #endif
