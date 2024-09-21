@@ -86,7 +86,7 @@ static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 
 static void fbcon_scroll(void)
 {
-  if (fbcon_x > (fbcon_struct.data.vc_rows / fbcon_struct.data.vc_font.width) - 1)
+  if (fbcon_x > ((grub_fb->framebuffer_pitch / 4) / fbcon_struct.data.vc_font.width) - 1)
   {
     fbcon_x = 0;
     fbcon_y++;
@@ -94,13 +94,13 @@ static void fbcon_scroll(void)
   if (fbcon_y > (fbcon_struct.data.vc_cols / fbcon_struct.data.vc_font.height) - 1) // Check if the cursor is at the last row
   {
     // Calculate the size of a single row in bytes
-    size_t row_size_bytes = fbcon_struct.data.vc_rows * 4 * fbcon_struct.data.vc_font.height;
+    size_t row_size_bytes = grub_fb->framebuffer_pitch * fbcon_struct.data.vc_font.height;
 
     // Calculate the size of all rows except the last one
     size_t all_rows_except_last_size = (fbcon_struct.data.vc_cols / fbcon_struct.data.vc_font.height) * row_size_bytes;
 
     // Move all rows up by one (excluding the first row)
-    memcpy((uint8_t *)fbcon_struct.data.vc_screenbuf, (uint8_t *)fbcon_struct.data.vc_screenbuf + row_size_bytes, all_rows_except_last_size);
+    memcpy32((uint8_t *)fbcon_struct.data.vc_screenbuf, (uint8_t *)fbcon_struct.data.vc_screenbuf + row_size_bytes, all_rows_except_last_size);
 
     // Clear the last row
     memset32((uint8_t *)fbcon_struct.data.vc_screenbuf + all_rows_except_last_size, colors[0], row_size_bytes);
@@ -274,14 +274,14 @@ static void _hot_ process_ansi(char ch)
 
 static void fbcon_rebase_cursor(int x, int y, int old_x, int old_y)
 {
-  uint8_t * glyph = &fbcon_struct.data.vc_font.data[219 * 16];
+  uint8_t * glyph = &fbcon_struct.data.vc_font.data[219 * fbcon_struct.data.vc_font.height];
   fbcon_print_glyph(x, y, glyph);
 }
 
 void fbcon_putc(char ch)
 {
   int prev_x = fbcon_x, prev_y = fbcon_y; 
-  uint8_t * glyph = &fbcon_struct.data.vc_font.data[' ' * 16];
+  uint8_t * glyph = &fbcon_struct.data.vc_font.data[' ' * fbcon_struct.data.vc_font.height];
   fbcon_print_glyph(prev_x, prev_y, glyph);
   process_ansi(ch);
   fbcon_rebase_cursor(fbcon_x, fbcon_y, prev_x, prev_y);
@@ -314,7 +314,7 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
 void fbcon_clear(void)
 {
   /* thank you rodmatronics for the help! :) */
-  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], (grub_fb->framebuffer_width * grub_fb->framebuffer_height * 1.2));
+  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height * 1.2));
 }
 
 static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {

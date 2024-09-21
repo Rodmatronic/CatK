@@ -63,7 +63,8 @@ void kmain(uint32_t magic, uintptr_t mbi) {
   }
   printk("CatKernel Version %s %s%s(%s): %s\n", UTS_RELEASE, CATK_VERSION_CODENAME, is_debug ? " DEBUG!! " : " ", CATK_COMPILED_WITH, CATK_BUILD_DATE);
   console_print("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
+  cpu_dump_all_info();
   keyb_init();
   show_boot_banner();
-  sched_init();
+  //sched_init();
 }

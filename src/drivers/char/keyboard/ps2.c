@@ -9,6 +9,8 @@
 #include <config.h>
 #include <catk/keyb.h>
 
+#define IRQ 0x21
+
 // PS/2 KEYBOARD DRIVERS
 // Based on pritamzope's PS/2 Driver code
 
@@ -138,7 +140,6 @@ void keyboard_handler(struct intr_stack_frame *frame) {
 
 
 void keyb_init() {
-    int IRQ = 0x21;
     printk("keyb init - IRQ %x\n", IRQ);
     intr_add_handler(IRQ, keyboard_handler);
 }
