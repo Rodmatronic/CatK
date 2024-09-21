@@ -17,8 +17,8 @@ multiboot2_framebuffer_tag_start:
   .short MULTIBOOT_HEADER_TAG_FRAMEBUFFER
   .short 0
   .long multiboot2_framebuffer_tag_end - multiboot2_framebuffer_tag_start
+  .long 800
   .long 600
-  .long 480
   .long 32
 multiboot2_framebuffer_tag_end:
 multiboot2_end_tag:
