@@ -7,8 +7,9 @@
 #include <catk/mem.h>
 #include <catk/kernel.h>
 #include <catk/keyb.h>
-#include <catk/version.h>
 #include <catk/utsname.h>
+#include <catk/debug.h>
+#include <lib/common.h>
 #include <config.h>
 
 #ifndef __GNUC__
@@ -23,6 +24,7 @@ static void show_boot_banner(void)
   printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
 }
 
+/*
 static inline void draw_logo(void) {
   printk("\n\033[1;37m          /\\      /\\            \033[1;37m_____       _______ _  __\n");
   printk("\033[36m         //\\\\    //\\\\          \033[1;37m/ ____|   /\\|__   __| |/ /\n");
@@ -38,36 +40,30 @@ static inline void draw_logo(void) {
   printk("\033[1;33m            /'  '\\*\n");
   printk("           | CatK |\n");
   printk("           *\\,__,/\033[1;0m\n\n");
-}
-
-extern int keyboard_init(void);
+}*/
 
 void kmain(uint32_t magic, uintptr_t mbi) {
+  bool is_debug = false;
+#ifdef CATK_DEBUG_BUILD
+  is_debug = true;
+  qemu_debugcon_printf("CatKernel debug log format:\n  Source file name - Message\n");
+#endif
   int rc = multiboot2_validate(magic, mbi);
   if(rc < 1) {
+    debug("Bootloader sent us with a bad multiboot2 information. Off to the kitty void, we go! :)\n");
     return;
   }
-  /* enable console for early debugging */
-  rc = console_init(mbi);
+  multiboot2_set_mbi(mbi);
+  /* early init gets the framebuffer address and other things */
+  physmem_init();
+  early_platform_init();
+  rc = console_init();
   if(IS_ERR(rc)) {
     return;
   }
-  printk(catk_boot_banner, UTS_RELEASE, CATK_VERSION_STRING, CATK_COMPILED_WITH, CATK_BUILD_DATE);
-  console_puts("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
-  console_puts("Initializing early platform..\n");
-  physmem_init(mbi);
-  early_platform_init();
-  /* 
-  * the console should be disabled in src/platform/x86/boot/mmu.c since it isn't mapped into virtual memory.
-  * we'll map it in a jiffy :)
-  */
-  console_map_virt();
-  /*
-  * now we can reenable the console now :)
-  */
-  //console_enable();
+  printk("CatKernel Version %s %s%s(%s): %s\n", UTS_RELEASE, CATK_VERSION_CODENAME, is_debug ? " DEBUG!! " : " ", CATK_COMPILED_WITH, CATK_BUILD_DATE);
+  console_print("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
   keyb_init();
   show_boot_banner();
-  printk("Early platform has been initialized\n");
-  draw_logo();
+  sched_init();
 }

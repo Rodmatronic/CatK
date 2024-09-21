@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <catk/platform.h>
 #include <catk/printk.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 
 #include "segm.h"
@@ -91,6 +92,7 @@ static void display_register_dump(struct intr_stack_frame * regs) {
 
 void intr_handler(struct intr_stack_frame * regs) {
   if(regs->trapnr < 32) {
+    debug("FATAL INTERRUPT %d\n", regs->trapnr);
     /* this is a trap interrupt, so we gotta end off with an IRETL / IRETD */
     int rc = call_handler(regs);
     if(rc < 0) {

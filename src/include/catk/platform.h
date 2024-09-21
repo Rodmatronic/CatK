@@ -70,9 +70,6 @@ void critical_exit(void);
 void halt(void);
 
 void cpu_dump_all_info(void);
-
 void early_platform_init(void);
-void platform_umap(uint32_t pgd, uint32_t phys, uint32_t virt, int rw);
-void platform_kmap(uint32_t phys, uint32_t virt, int rw);
 
 #endif

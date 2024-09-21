@@ -2,6 +2,7 @@
 #include <catk/platform.h>
 #include <catk/printk.h>
 #include <catk/console.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 
 #include "irq.h"
@@ -83,6 +84,7 @@ void segment_dump(uint16_t segm) {
 }
 
 static void global_descriptors_init(void) {
+  debug("Loading Global Descriptor Table at 0x%08x\n", (uint32_t)&gdtr);
   native_gdt_load((uint32_t)&gdtr);
 }
 
@@ -176,10 +178,12 @@ static inline void invalidate_intr_gate(int trapnr) {
 
 static void interrupt_descriptors_init(void) {
   int i = 0;
+  debug("Remapping i8259 vectors..\n");
   i8259_remap_vectors(0x20, 0x28);
   for(; i < 45; i++) {
     set_intr_gate(i, intr_stub_list[i]);
   }
+  debug("Loading Interrupt Descriptor Table at 0x%08x\n", (uint32_t)&idtr);
   native_idt_load((uint32_t)&idtr);
 }
 
@@ -188,8 +192,8 @@ bool is_idt_loaded(void) {
 }
 
 void early_platform_init(void) {
+  debug("x86 platform initializing..\n");
   global_descriptors_init();
   interrupt_descriptors_init();
   exceptions_install();
-  setup_paging();
 }

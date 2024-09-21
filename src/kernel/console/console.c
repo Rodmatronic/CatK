@@ -2,85 +2,67 @@
 #include <catk/errno.h>
 #include <catk/spinlock.h>
 #include <catk/platform.h>
+#include <catk/math.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 #include <config.h>
 #include <stdint.h>
 
-static struct console con;
-
+static struct console * con = NULL;
 static bool console_enabled = false;
 
-extern int fbcon_init(struct console * con, uint32_t addr);
+extern int fbcon_init(void);
 
-uint32_t console_get_rows(void)
-{
-  return con.data->vc_rows;
+int console_register(struct console * c) {
+  if(!c) {
+    return -EINVAL;
+  }
+  con = c;
+  debug("%s registered as console %d\n", c->name, c->data.vc_num);
+  return 0;
 }
 
-uint32_t console_get_cols(void)
+struct console * console_get(void)
 {
-  return con.data->vc_cols;
+  return con;
 }
 
-struct console * get_console(void)
-{
-  return &con;
-}
-
-bool is_console_enabled(void)
-{
-  return console_enabled;
-}
-
-void console_disable(void) {
-  console_enabled = false;
-}
-
-int console_puts(const char * buf)
-{
+int console_clear(void) {
+  if(!con->data.vc_sw.clear) {
+    /* how dare you.. you forgot to bind a clear function to the console!! */
+    return -ENXIO;
+  }
   if(console_enabled)
-  {
-    if(!con.write)
-      return -EIO;
-    con.write(buf, strlen(buf));
-  }
-  return 0;
+    con->data.vc_sw.clear();
 }
 
-int console_putc(const char c)
-{
+int console_print(const char * str) {
+  if(!con->data.vc_sw.print) {
+    /* the dummy who registered the console didnt even bind a print function! */
+    return -ENXIO;
+  }
   if(console_enabled)
-  {
-    if(!con.data->vc_sw->con_putc)
-      return -EIO;
-    con.data->vc_sw->con_putc(c);
-  }
+    con->data.vc_sw.print(str);
   return 0;
 }
 
-int console_color_set(uint8_t fb, uint8_t bg)
-{
-  if(!con.data->vc_sw->con_color_set)
-    return -EIO;
-  con.data->vc_sw->con_color_set(fb, bg);
+int console_putc(const char c) {
+  if(!con->data.vc_sw.putc) {
+    /* the dummy who registered the console didnt even bind a putc function! */
+    return -ENXIO;
+  }
+  if(console_enabled)
+    con->data.vc_sw.putc(c);
   return 0;
 }
 
-void console_map_virt(void) {
-  uint32_t phys = con.data->vc_screenbuf;
-  size_t needed_bytes = con.data->vc_cols * con.data->vc_rows * 32;
-  for(int i = 0; i < needed_bytes / 4096; ++i) {
-    size_t off = i * 4096;
-    platform_kmap(phys + off, phys + off, 1);
-  }
-}
-
-int console_init(uint32_t addr)
+int console_init(void)
 {
   int rc;
-  rc = fbcon_init(&con, addr);
-  if(IS_ERR(rc))
+  rc = fbcon_init();
+  if(IS_ERR(rc)) {
     return rc;
+  }
   console_enabled = true;
   return 0;
 }

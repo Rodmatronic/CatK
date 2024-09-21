@@ -2,6 +2,8 @@
 #include <lib/common.h>
 #include <stdint.h>
 
+uintptr_t info_ptr = 0;
+
 #define MBI_UNALIGNED(mbi) (mbi & 7)
 
 int multiboot2_validate(uint32_t magic, uint32_t addr)
@@ -22,4 +24,12 @@ void * multiboot2_locate_tag(uintptr_t addr, int type)
 
     tag = (struct multiboot_header_tag *)((uint8_t *) tag + ((tag->size + 7) & ~7));
   }
+}
+
+void multiboot2_set_mbi(uintptr_t mbi) {
+  info_ptr = mbi;
+}
+
+uintptr_t multiboot2_get_mbi(void) {
+  return info_ptr;
 }

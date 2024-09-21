@@ -1,35 +1,37 @@
-# CatK Configuration
+% CatK Configuration, press Q to quit
+# Please edit this file with the config shell script.
 # DO NOT DELETE!
 
 #
-# Kernel Version / General config
+% Kernel Version / General config ⌄
 #
 
-CATK_VERSION_STRING="Meow"
+CATK_VERSION_CODENAME="Meow"
+CATK_DEBUG_BUILD=y
 
 #
-# CPU Settings
+% CPU Settings ⌄
 #
 
 CATK_ARCH_X86=y
 
 #
-# Filesystem Settings
+% Filesystem Settings ⌄
 #
 
-CATK_MOUNT_RETRIES=2
+CATK_MOUNT_RETRIES=5
 CATK_EXT2=y
 CATK_DEVFS=y
 CATK_DEVFS_INODES_MAX=128
 
 #
-# Video Settings
+% Video Settings ⌄
 #
 
 CATK_VIDEO_GENERIC=n
 
 #
-# Kernel Debugging
+% Kernel Debugging ⌄
 #
 
 CATK_STACK_TRACE=y
@@ -39,4 +41,5 @@ CATK_SYSCALL_TRACE=y
 # Compiler (autofilled by Makefile)
 #
 CATK_COMPILED_WITH="clang"
-CATK_BUILD_DATE="Tue 03 Sep 2024 00:36:19 PDT"
+CATK_VERSION_STRING="0.1"
+CATK_BUILD_DATE="Fri 20 Sep 2024 23:10:31 PDT"

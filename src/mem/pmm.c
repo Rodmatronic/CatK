@@ -1,6 +1,4 @@
-#include <catk/printk.h>
 #include <catk/mem.h>
-#include <catk/debug.h>
 #include <catk/kernel.h>
 #include <catk/bitops.h>
 #include <catk/platform.h>
@@ -24,8 +22,8 @@ static uint32_t pmm_bitmap_len;
 
 /* 1 = used, 0 = free */
 
-void physmem_init(uintptr_t mbi) {
-  struct multiboot_tag_mmap * mmap = (struct multiboot_tag_mmap *)multiboot2_locate_tag(mbi, MULTIBOOT_TAG_TYPE_MMAP);
+void physmem_init(void) {
+  struct multiboot_tag_mmap * mmap = (struct multiboot_tag_mmap *)multiboot2_locate_tag(multiboot2_get_mbi(), MULTIBOOT_TAG_TYPE_MMAP);
   struct multiboot_header_tag * tag = (struct multiboot_header_tag *)mmap;
   struct multiboot_mmap_entry * mmap_entry = NULL;
   for(mmap_entry = mmap->entries; (uint8_t *)mmap_entry < (uint8_t *)tag + tag->size; mmap_entry = (multiboot_memory_map_t *)((uint32_t)mmap_entry + mmap->entry_size)) {
@@ -42,18 +40,8 @@ void physmem_init(uintptr_t mbi) {
       }
     }
   }
-  assert(pmm_bitmap_start != 0);
   /* all memory is unallocated */
   memset(pmm_bitmap, 0, pmm_max_blocks * sizeof(uint32_t));
-  for(int i = 0; i < (pmm_max_blocks * sizeof(uint32_t)) / 4096; ++i) {
-    uint32_t offset = i * PHYSMEM_BLOCK_SIZE;
-    platform_kmap((uint32_t)&pmm_bitmap[pmm_max_blocks] + i, (uint32_t)&pmm_bitmap[pmm_max_blocks] + i, 1);
-  }
-}
-
-/* gets first free bit, but doesn't set it */
-void * physmem_alloc_start(void) {
-  return &pmm_bitmap[pmm_max_blocks];
 }
 
 void * physmem_alloc_blocks(size_t sz) {

@@ -26,6 +26,9 @@
 #define PTE_GLOBAL_SHIFT    8
 #define PTE_IGNORED         PDE_IGNORED
 
+#define PAGE_ADDR_MASK      0xfffff000
+#define PAGE_COUNT          1024
+
 #ifndef ASM_FILE
 
 /* asm functions */
@@ -36,15 +39,15 @@ extern void native_enable_paging(void);
 /* c functions */
 
 static inline uint32_t pte_index(uint32_t virt_addr) {
-  return (uint32_t)((virt_addr << 12) & PAGE_SIZE - 1);
+  return (uint32_t)((virt_addr >> 12) & PAGE_SIZE - 1);
 }
 
 static inline uint32_t pde_index(uint32_t virt_addr) {
-  return (uint32_t)(virt_addr << 22);
+  return (uint32_t)(virt_addr >> 22);
 }
 
 static inline int pde_is_present(uint32_t pde) {
-  return (pde & 1 << PDE_PRESENT_SHIFT);
+  return (pde & (1 << PDE_PRESENT_SHIFT));
 }
 
 static inline int pte_is_present(uint32_t pte) {
@@ -59,11 +62,11 @@ static inline int pte_virt(int index) {
   return (index << 12);
 }
 
-static inline uint32_t extract_pte(uint32_t pde) {
-  return ((pde) & ~(PAGE_SIZE - 1));
+static inline uint32_t * extract_pte(uint32_t pde) {
+  return (uint32_t *)((pde) & PAGE_ADDR_MASK);
 }
 
-void setup_paging(void);
+void setup_paging(uint32_t mbi);
 
 #endif /* ASM_FILE */
 

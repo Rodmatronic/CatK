@@ -1,11 +1,19 @@
 #ifndef __CONSOLE_H
 #define __CONSOLE_H
 
-#include <stdint.h>
-#include <catk/limits.h>
-#include <catk/types.h>
+#include <catk/compiler.h>
+#include <catk/tty.h>
 #include <lib/common.h>
-#include <config.h>
+
+struct tty_struct;
+
+struct consw
+{
+  void (*clear)(void);
+  void (*print)(const char *);
+  void (*putc)(const char);
+  int (*output_intr)(struct tty_struct *, size_t);
+};
 
 struct console_font
 {
@@ -14,19 +22,19 @@ struct console_font
   uint8_t * data;
 };
 
-/* virtual console data */
-struct vc_data
-{
+struct vc_data {
   /* console */
   uint16_t vc_num;              /* console number */
   uint32_t vc_rows;             /* console rows */
   uint32_t vc_cols;             /* console columns */
+  uint32_t vc_bpp;              /* console bpp */
+  uint32_t vc_pitch;            /* console pitch */
   uint32_t vc_size_row;         /* bytes per row */
   uintptr_t vc_screenbuf;       /* address of buffer */
-  struct consw * vc_sw;
+  struct consw vc_sw;
   /* attributes */
   uint8_t vc_attr;              /* current attributes */
-  uint32_t vc_def_color;        /* default colors */
+  uint8_t vc_def_color;         /* default colors */
   /* fonts */
   struct console_font vc_font;  /* current vc font */
   /* cursor */
@@ -35,36 +43,20 @@ struct vc_data
   uint8_t vc_has_color : 1;
 };
 
-/* callbacks */
-struct consw
-{
-  char *(*con_startup)(void);
-  void  (*con_putc)(char);
-  void  (*con_clear)(void);
-  void  (*con_color_set)(uint8_t, uint8_t);
+struct console {
+  char name[32];
+  struct vc_data data;
 };
 
-/* console descriptor */
-struct console
-{
-  char name[NAME_MAX + 1];
-  void (*write)(const void * buf, size_t len);
-  void (*map)(void);
-  struct device * dev;
-  struct vc_data * data;
-};
-
-uint32_t console_get_cols(void);
-uint32_t console_get_rows(void);
-struct console * get_console(void);
-
-bool is_console_enabled(void);
-
-int console_init(uintptr_t addr);
-int console_puts(const char * buf);
+int console_register(struct console * c);
+struct console * console_get(void);
+int console_clear(void);
+int console_print(const char * str);
 int console_putc(const char c);
-int console_color_set(uint8_t fb, uint8_t bg);
-void console_disable(void);
-void console_map_virt(void);
+int console_init(void);
+
+/* kernel printing */
+int printk(const char * fmt, ...);
+void _cold_ _noreturn_ panic(const char * fmt, ...);
 
 #endif

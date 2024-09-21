@@ -1,9 +1,6 @@
 #ifndef __KERNEL_H
 #define __KERNEL_H
 
-/* kernel stack size */
-#define KERNEL_STACK_SIZE 4096 /* 4KiB of reserved memory */
-
 #ifndef ASM_FILE
 
 #include <stdint.h>
@@ -31,5 +28,8 @@ void bootstrap2(void);
 int start_init(const char * cmdline);
 
 #endif /* ASM_FILE */
+
+/* kernel stack size */
+#define KERNEL_STACK_SIZE 4096 /* 4KiB of reserved memory */
 
 #endif /* __KERNEL_H */

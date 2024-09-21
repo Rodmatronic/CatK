@@ -12,6 +12,7 @@
 .section .text;                                  \
   .global intr_stub_##NUMBER##;  \
 intr_stub_##NUMBER##:                            \
+  cli;  \
 	ERR;                                   \
 	pushl $NUMBER;                       \
   jmp intr_stub_start;                         \
@@ -40,8 +41,9 @@ intr_stub_end:
   movw %ax, %fs
   movw %ax, %gs
 
+  /* skip over error code and interrupt number */
   addl $0x8, %esp
-
+  sti
   iretl
 
 DEFINE_STUB(0, NO_ERR)

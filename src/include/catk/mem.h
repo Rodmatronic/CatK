@@ -6,9 +6,18 @@
 
 /* Physical memory */
 
-void physmem_init(uintptr_t mbi);
+void physmem_init(void);
+/* allocation */
 void * physmem_alloc_block(void);
-void * physmem_first_free(void);
-void * physmem_alloc_start(void);
+void * physmem_alloc_blocks(size_t sz);
+/* freeing */
+void physmem_free_block(void * addr);
+void physmem_free_blocks(void * addr, size_t sz);
+
+/* liballoc */
+void * malloc(size_t);
+void * realloc(void *, size_t);
+void * calloc(size_t, size_t);
+void free(void *);
 
 #endif

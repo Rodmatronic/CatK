@@ -24,8 +24,8 @@ kentry:
 
   call kmain
         
-loop:
-  jmp loop
+sys_halt:
+  jmp sys_halt
 
 .section .bss
   .comm kstack, KERNEL_STACK_SIZE

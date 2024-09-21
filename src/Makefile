@@ -28,7 +28,8 @@ CC_FLAGS = \
 	-nodefaultlibs \
 	-nostdlib \
 	-fstack-protector-strong \
-	-fno-pie
+	-fno-pie \
+	-O3
 
 ASM_FLAGS = \
 	$(ASM_INCLUDE)  \
@@ -36,7 +37,8 @@ ASM_FLAGS = \
 	--target=i686-pc-none-elf \
 	-march=i686 \
 	-nodefaultlibs \
-	-nostdlib
+	-nostdlib \
+	-fno-pie
 
 ifeq ($(DEBUG), 1)
 CC_FLAGS += -g
