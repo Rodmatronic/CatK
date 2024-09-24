@@ -15,12 +15,16 @@ bool is_devfs(const char * path)
 {
   if(path[0] == '/')
     path++;
-  return (strncmp(path, "dev", 3) == 0);
+  return (strncmp(path, "dev/", 3) == 0);
+}
+
+int vfs_exists(const char * path) {
+  return rootfs->fsops->exists(path);
 }
 
 int vfs_open(struct file * filp, const char * file)
 {
-  debug("VFS: Opening file %s\n", file);
+  debug("Opening file %s\n", file);
   int rc;
   if(is_devfs(file))
   {
@@ -33,6 +37,14 @@ int vfs_open(struct file * filp, const char * file)
   if(IS_ERR(rc))
     return rc;
   return 0;
+}
+
+void vfs_close(struct file * filp) {
+  if(is_devfs(filp->name)) {
+    get_filesystem("devfs")->fops->close(filp);
+  } else {
+    rootfs->fops->close(filp);
+  }
 }
 
 int vfs_read(struct file * filp, void * buf, size_t sz)
@@ -49,10 +61,7 @@ int vfs_write(struct file * filp, void * buf, size_t sz)
   return filp->ops->write(filp, buf, sz);
 }
 
-int vfs_init(void)
+void vfs_set_rootfs(struct filesystem * fs)
 {
-  rootfs = get_filesystem("ext2");
-  if(!rootfs)
-    return -ENXIO;
-  return 0;
+  rootfs = fs;
 }

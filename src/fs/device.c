@@ -5,58 +5,57 @@
 #include <catk/mem.h>
 #include <stdint.h>
 
-static struct device chrdevs[MAX_CHRDEV];
-static struct device blkdevs[MAX_BLKDEV];
+static struct device * chrdevs[MAX_CHRDEV];
+static struct device * blkdevs[MAX_BLKDEV];
 
-struct device * device_struct_alloc(void)
-{
+struct device * device_struct_alloc(void) {
   return (struct device *)malloc(sizeof(struct device));
 }
 
-int register_chrdev(const char * name, struct device * dev, struct file_operations * fops)
-{
-  if(MAJOR(dev->dev) != MEMDEV_MAJOR)
-    debug("Registering character device \"%s%d\" (major %d)\n", name, MINOR(dev->dev), MAJOR(dev->dev));
-  else
-    debug("Registering character device \"%s\" (major %d)\n", name, MAJOR(dev->dev));
+int chrdev_register(struct device * dev, struct file_operations * fops) {
+  debug("Registering character device \"%s\" (%d, %d)\n", dev->name, MAJOR(dev->dev), MINOR(dev->dev));
   if(MAJOR(dev->dev) >= MAX_CHRDEV)
     return -EINVAL;
-  if(chrdevs[MAJOR(dev->dev)].fops)
+  if(chrdevs[MAJOR(dev->dev)])
     return -EBUSY;
-  memcpy(&chrdevs[MAJOR(dev->dev)], dev, sizeof(struct device));
-  strncpy((char *)chrdevs[MAJOR(dev->dev)].name, name, NAME_MAX - 1);
-	chrdevs[MAJOR(dev->dev)].fops = fops;
+  chrdevs[MAJOR(dev->dev)] = dev;
+	chrdevs[MAJOR(dev->dev)]->fops = fops;
   return 0;
 }
 
-int register_blkdev(const char * name, struct device * dev, struct file_operations * fops)
-{
-  debug("Registering block device \"%s%d\" (major %d)\n", name, MINOR(dev->dev), MAJOR(dev->dev));
+int blkdev_register(struct device * dev, struct file_operations * fops) {
+  debug("Registering block device \"%s\" (%d, %d)\n", dev->name, MAJOR(dev->dev), MINOR(dev->dev));
 	if (MAJOR(dev->dev) >= MAX_BLKDEV)
 		return -EINVAL;
-	if (blkdevs[MAJOR(dev->dev)].fops)
+	if (blkdevs[MAJOR(dev->dev)])
 		return -EBUSY;
-  memcpy(&blkdevs[MAJOR(dev->dev)], dev, sizeof(struct device));
-  strcpy((char *)blkdevs[MAJOR(dev->dev)].name, name);
-	blkdevs[MAJOR(dev->dev)].fops = fops;
+  blkdevs[MAJOR(dev->dev)] = dev;
+	blkdevs[MAJOR(dev->dev)]->fops = fops;
 	return 0;
 }
 
-struct device * get_blkdev(uint8_t major)
-{
+struct device * blkdev_get(uint8_t major) {
 	if (major >= MAX_BLKDEV)
 		return NULL;
-  struct device * dev = &blkdevs[major];
+  struct device * dev = blkdevs[major];
   if(!MAJOR(dev->dev) && !MINOR(dev->dev))
     return NULL;
   return dev;
 }
 
-struct device * get_chrdev(uint8_t major)
-{
+struct device * blkdev_get_first(void) {
+  for(int i = 0; i < MAX_BLKDEV; i++) {
+    if(blkdevs[i] != NULL) {
+      return blkdevs[i];
+    }
+  }
+  return NULL;
+}
+
+struct device * chrdev_get(uint8_t major) {
   if(major >= MAX_CHRDEV)
     return NULL;
-  struct device * dev = &chrdevs[major];
+  struct device * dev = chrdevs[major];
   if(!MAJOR(dev->dev) && !MINOR(dev->dev))
     return NULL;
   return dev;
@@ -64,6 +63,6 @@ struct device * get_chrdev(uint8_t major)
 
 void device_init(void)
 {
-  memset((void *)chrdevs, 0, sizeof(struct device) * MAX_CHRDEV);
-  memset((void *)blkdevs, 0, sizeof(struct device) * MAX_BLKDEV);
+  memset(chrdevs, 0, sizeof(struct device) * MAX_CHRDEV);
+  memset(blkdevs, 0, sizeof(struct device) * MAX_BLKDEV);
 }

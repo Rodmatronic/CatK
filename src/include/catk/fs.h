@@ -13,21 +13,22 @@
 
 struct fs_mount
 {
-  char * mount_path;
+  char mount_path[NAME_MAX];
   struct device * blkdev;
   int flags;
 };
 
-#define FS_REQUIRES_DISK    BIT(0)  /* a real filesystem that needs to be mounted on a disk */
-#define FS_MOUNT_KERNEL     BIT(1)  /* psuedo-filesystem that's mounted by the kernel */
+#define FS_MOUNT_DISK    BIT(0)  /* a real filesystem that needs to be mounted on a disk */
+#define FS_MOUNT_RAM     BIT(1)  /* psuedo-filesystem that's mounted by the kernel */
 
 struct filesystem
 {
-  char name[NAME_MAX + 1];
+  char name[NAME_MAX];
   struct fs_operations * fsops;
   struct file_operations * fops;
   struct superblock * sb;
-  struct fs_mount * mount;
+  struct fs_mount mount;
+  bool root_fs;
   void * priv_data;
 };
 
@@ -35,6 +36,7 @@ struct file;
 
 struct file_operations
 {
+  int (*firstpart)(void); // <-- disk devices should have this. non-disk devices should never have this
   int (*lseek)(struct file *, size_t, int);
 	int (*read) (struct file *, void *, size_t);
 	int (*write) (struct file *, void *, size_t);
@@ -48,11 +50,10 @@ struct inode;
 
 struct fs_operations
 {
-  /* inode operations */
   struct inode * (*namei)(const char *);
+  int (*exists)(const char *);
 	int (*read_inode)(uint32_t, struct inode *);
 	int (*write_inode)(struct file *);
-  /* superblock operations */
   int (*read_block)(struct filesystem *, void *, uint32_t);
   int (*mount)(struct filesystem *, struct device *);
 };
@@ -66,9 +67,10 @@ struct superblock
 	} u;
 };
 
+
 struct file
 {
-  char name[NAME_MAX + 1];
+  char name[NAME_MAX];
   struct inode * inode;
   struct file_operations * ops;
 };

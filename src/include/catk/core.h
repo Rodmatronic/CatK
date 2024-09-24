@@ -173,6 +173,6 @@ extern int cpuidcheck(void);
 void cpu_dump_all_info(void);
 uint32_t get_eip(void);
 
-void cpu_init(uint32_t addr);
+void cpu_init(void);
 
 #endif

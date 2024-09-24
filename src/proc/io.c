@@ -6,7 +6,6 @@
 #include <catk/limits.h>
 #include <catk/errno.h>
 #include <catk/task.h>
-#include <catk/ramdisk.h>
 #include <catk/params.h>
 #include <catk/elf.h>
 #include <catk/core.h>
@@ -31,6 +30,7 @@ void stdin_close(struct file * fptr) {
 
 struct file_operations stdin_fops = {
   NULL,
+  NULL,
   stdin_read,
   stdin_write,
   NULL,
@@ -38,15 +38,3 @@ struct file_operations stdin_fops = {
   stdin_open,
   stdin_close
 };
-
-/*
-struct file_operations stdout_fops = {
-  NULL,
-  stdout_read,
-  stdout_write,
-  NULL,
-  NULL,
-  stdout_open,
-  stdout_close
-};
-*/

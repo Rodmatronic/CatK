@@ -131,6 +131,10 @@ loop:;
           printk("Detected SATA drive.\n");
           return;
         }
+        else
+        {
+          printk("Unknown drive signature: 0x%02x, 0x%02x\n", sig1, sig2);
+        }
       }
       return;
     }

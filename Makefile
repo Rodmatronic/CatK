@@ -13,15 +13,14 @@ override LD = ld.lld
 endif
 
 export CATK_ROOT = $(CURDIR)
-export TOOLS = $(CATK_ROOT)/tools
+export TOOLS = $(CATK_ROOT)/utils
 export USER = $(CATK_ROOT)/user
 export GZ = $(shell which gzip)
 export CONFIG = $(CATK_ROOT)/config
 export OUT = $(CATK_ROOT)/out
 export OBJ = $(CATK_ROOT)/obj
-export QEMU_SOUND = 0
 
-.PHONY: all
+.PHONY: all config
 
 $(shell $(MKDIR) $(OBJ) $(OUT))
 
@@ -31,6 +30,15 @@ $(shell $(MKDIR) $(OBJ) $(OUT))
 # would not update with the new configuration. A very simple workaround
 # is to recompile all files with the new configurations.
 all: clean
+	@sed -i.bak '/CATK_BUILD_DATE/d' $(CONFIG)/config.catk
+	@sed -i.bak '/CATK_COMPILED_WITH/d' $(CONFIG)/config.catk
+	@sed -i.bak '/CATK_VERSION_STRING/d' $(CONFIG)/config.catk
+	@echo 'CATK_COMPILED_WITH="$(CC)"' >> $(CONFIG)/config.catk
+	@echo 'CATK_VERSION_STRING="$(VERSION).$(PATCH_LEVEL)"' >> $(CONFIG)/config.catk
+	@echo -n 'CATK_BUILD_DATE="' >> $(CONFIG)/config.catk
+	@date +"%a %d %b %Y %T %Z" | tr -d '\n' >> $(CONFIG)/config.catk
+	@echo '"' >> $(CONFIG)/config.catk
+
 	@$(MAKE) -C $(TOOLS)/gen_config/ || { echo "Build failed"; exit 1; }
 # generate c header file
 	@$(TOOLS)/gen_config/gen_config $(CONFIG)/config.catk | tee $(CATK_ROOT)/src/include/config.h
@@ -43,6 +51,9 @@ all: clean
 
 init:
 	@$(MAKE) -C $(USER)/ || { echo "Build failed"; exit 1; }
+
+config:
+	bash $(TOOLS)/config.sh
 
 debug:
 	@qemu-system-x86_64 \
@@ -60,6 +71,8 @@ disk:
 
 run:
 	@qemu-system-x86_64 \
+		-debugcon stdio \
+		-icount 4,align=on \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G

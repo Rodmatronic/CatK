@@ -1,4 +1,5 @@
 #include <catk/console.h>
+#include <catk/debug.h>
 #include <catk/errno.h>
 #include <catk/spinlock.h>
 #include <lib/common.h>
@@ -7,74 +8,71 @@
 
 SPINLOCK_INIT(console_spinlock);
 
-struct console con;
+#define MAX_CONSOLES 3
 
+static struct console * consoles[MAX_CONSOLES];
 static bool console_enabled = false;
+static int current_console = 0;
 
-extern int vgacon_init(struct console * con);
-extern int fbcon_init(struct console * con, uint32_t addr);
+extern int fbcon_init(void);
+extern int vgacon_init(void);
 
-uint32_t console_get_rows(void)
-{
-  return con.data->vc_rows;
-}
-
-uint32_t console_get_cols(void)
-{
-  return con.data->vc_cols;
-}
-
-struct console * get_console(void)
-{
-  return &con;
-}
-
-inline bool is_console_enabled(void)
-{
+bool is_console_enabled(void) {
   return console_enabled;
 }
 
-inline int console_puts(char * buf)
-{
-  if(console_enabled)
-  {
-    if(!con.write)
-      return -EIO;
-    con.write(buf, strlen(buf));
+int console_register(struct console * c) {
+  if(!c) {
+    return -EINVAL;
   }
+  consoles[c->data.vc_num] = c;
+  debug("%s registered as console %d\n", c->name, c->data.vc_num);
   return 0;
 }
 
-inline int console_putc(char c)
+struct console * console_get(int num)
 {
-  if(console_enabled)
-  {
-    if(!con.data->vc_sw->con_putc)
-      return -EIO;
-    con.data->vc_sw->con_putc(c);
+  return consoles[num];
+}
+
+int console_clear(void) {
+  if(!consoles[current_console]->data.vc_sw.clear) {
+    /* how dare you.. you forgot to bind a clear function to the console!! */
+    return -ENXIO;
   }
+  consoles[current_console]->data.vc_sw.clear();
   return 0;
 }
 
-inline int console_color_set(uint8_t fb, uint8_t bg)
-{
-  if(!con.data->vc_sw->con_color_set)
-    return -EIO;
-  con.data->vc_sw->con_color_set(fb, bg);
+int console_print(const char * str) {
+  if(!consoles[current_console]->data.vc_sw.print) {
+    /* the dummy who registered the console didnt even bind a print function! */
+    return -ENXIO;
+  }
+  consoles[current_console]->data.vc_sw.print(str);
   return 0;
 }
 
-int console_init(uint32_t addr)
+int console_putc(const char c) {
+  if(!consoles[current_console]->data.vc_sw.putc) {
+    /* the dummy who registered the console didnt even bind a putc function! */
+    return -ENXIO;
+  }
+  consoles[current_console]->data.vc_sw.putc(c);
+  return 0;
+}
+
+int console_init(void)
 {
-#if CATK_VIDEO_GENERIC == 1
-  vgacon_init(&con);
-  console_enabled = true;
-#else
   int rc;
-  rc = fbcon_init(&con, addr);
-  if(IS_ERR(rc))
-    return rc;
-  console_enabled = true;
+#ifndef CATK_VIDEO_GENERIC
+  rc = fbcon_init();
+#else 
+  rc = vgacon_init();
 #endif
+  if(IS_ERR(rc)) {
+    return rc;
+  }
+  console_enabled = true;
   return 0;
 }

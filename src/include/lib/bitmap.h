@@ -1,9 +1,10 @@
 #ifndef __BITMAP_H
 #define __BITMAP_H
 
-#include <catk/bitops.h>
+#include <stdint.h>
 
-#define BITMAP(bits) \
-  BITS_TO_U32(bits)
+void bitmap_set(uint32_t * bitmap, int n);
+void bitmap_unset(uint32_t * bitmap, int n);
+int bitmap_test(uint32_t * bitmap, int n);
 
 #endif

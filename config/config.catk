@@ -1,48 +1,49 @@
-# CatK Configuration
+% CatK Configuration, press Q to quit
+# Please edit this file with the config shell script.
 # DO NOT DELETE!
 
 #
-# x86 Settings
+% Kernel Version / General config ⌄
 #
 
-CATK_64BIT=n
-CATK_APIC=n
+CATK_VERSION_CODENAME="Meow"
+CATK_DEBUG_BUILD=y
 
 #
-# Kernel Settings
+% CPU Settings ⌄
 #
 
-CATK_LOGO=y
-CATK_ACPI_EXPERIMENTAL=y
+CATK_ARCH_X86=y
 
 #
-# Filesystem Settings
+% Filesystem Settings ⌄
 #
 
-CATK_MOUNT_RETRIES=2
+CATK_MOUNT_RETRIES=5
+CATK_REMOUNT_DELAY=0
 CATK_EXT2=y
-CATK_FAT32=n
-
 CATK_DEVFS=y
 CATK_DEVFS_INODES_MAX=128
 
 #
-# Video Settings
+% Video Settings ⌄
 #
 
 CATK_VIDEO_GENERIC=n
+CATK_VGA_COLORS=n
+CATK_LOGO_MASCOT=y
 
 #
-# Kernel Security
+% Kernel Debugging ⌄
 #
 
-CATK_HEAP_FOREIGN=n
-
-#
-# Kernel Debugging
-#
-
-CATK_FORCE_VERBOSE=n
-CATK_DEBUG_SERIAL=y
+CATK_SHOW_DEBUG=n
 CATK_STACK_TRACE=y
 CATK_SYSCALL_TRACE=y
+
+#
+# Compiler (autofilled by Makefile)
+#
+CATK_COMPILED_WITH="clang"
+CATK_VERSION_STRING="."
+CATK_BUILD_DATE="Mon 23 Sep 2024 23:29:44 PDT"

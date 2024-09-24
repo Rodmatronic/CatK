@@ -5,7 +5,6 @@
 #include <stdarg.h>
 
 #define BIT(bit) (1 << bit)
-#define ALIGN(align, num) ((num + align - 1) & ~(align - 1))
 
 typedef enum
 {

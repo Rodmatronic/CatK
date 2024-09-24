@@ -56,7 +56,7 @@ int fat32_init(int partition_lba)
 {
 #if CATK_EXT2 == 1
   fat32_lba_start = partition_lba;
-  return register_filesystem("FAT32", &fat32_ops, &fat32_fops, FS_REQUIRES_DISK);
+  return register_filesystem("FAT32", &fat32_ops, &fat32_fops, FS_MOUNT_DISK);
 #else
   return -ENOSYS;
 #endif
@@ -67,10 +67,12 @@ struct fs_operations fat32_ops = {
   NULL,
   NULL,
   NULL,
+  NULL,
   fat32_mount
 };
 
 struct file_operations fat32_fops = {
+  NULL,
   NULL,
   NULL,
   NULL,

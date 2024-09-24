@@ -58,12 +58,11 @@ struct device
 };
 
 struct device * device_struct_alloc(void);
-int register_chrdev(const char * name, struct device * dev, struct file_operations * fops);
-int register_blkdev(const char * name, struct device * dev, struct file_operations * fops);
-struct device * get_blkdev(uint8_t major);
-struct device * get_chrdev(uint8_t major);
-int get_chrdevs_registered(void);
-int get_blkdevs_registered(void);
+int chrdev_register(struct device * dev, struct file_operations * fops);
+int blkdev_register(struct device * dev, struct file_operations * fops);
+struct device * blkdev_get(uint8_t major);
+struct device * blkdev_get_first(void);
+struct device * chrdev_get(uint8_t major);
 void device_init(void);
 int devfs_init(void);
 

@@ -9,7 +9,7 @@
 
 struct devfs_sb {
   uint16_t magic;
-#define DEVFS_SUPERBLOCK_MAGIC 0xca72
+#define DEVFS_SUPERBLOCK_MAGIC 'devfs'
   uint8_t flags;
 #define DEVFS_FLAGS_DIRTY BIT(0) // something was changed
   uint16_t total_inodes;

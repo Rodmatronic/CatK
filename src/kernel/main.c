@@ -14,70 +14,44 @@
 #include <catk/params.h>
 #include <catk/pci.h>
 #include <catk/vfs.h>
-#include <catk/ramdisk.h>
 #include <catk/trace.h>
 #include <catk/keyboard.h>
 #include <catk/rand.h>
+#include <catk/initrd.h>
+#include <catk/module.h>
 #include <lib/ctype.h>
 #include <config.h>
 
 #ifndef __GNUC__
-#error "GCC or Clang please! :)"
+#error "Compile with GCC or Clang please! :)"
 #endif
 
 static char * cmdline;
 
-static bool use_hd = false; /* determines if we use a hard-disk or not */
-bool kern_verbose = false;  /* set to false by default */
-
-static void show_boot_banner(void)
-{
+static void show_boot_banner(void) {
   printk("2023-2024 The CatKernel Project.\n");
-  printk("\tCreated locally in Canada, and California, bring tuques.\n");
-  /* now for the long ass gpl license */
+  printk("\tCreated locally in Canada, and California, bring tuques and cold drinks.\n");
   printk("\nThis software is licensed under the GNU General Public License v3.0.\n");
   printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
 }
 
-static void show_mem_info(uintptr_t addr)
-{
-  struct multiboot_tag_basic_meminfo * meminfo;
-  meminfo = multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
-  if(!meminfo)
-    return;
-  /* prints out memory info, just like unix :) */
-  size_t total_mem = meminfo->mem_upper + meminfo->mem_lower;
-  printk("real mem: %d kb\n", total_mem);
-  printk("avail mem: %d kb\n",  total_mem - heap_get_used());
-}
-
-void kmain(uint32_t magic, uintptr_t addr)
-{
-  if(!multiboot2_validate_args(magic, addr))
+void kmain(uint32_t magic, uintptr_t mbi) {
+  if(!multiboot2_validate_args(magic, mbi)) {
+    debug("Bootloader sent us with a bad multiboot2 information. Off to the kitty void, we go! :)\n");
     return; /* return into the infinite halt state */
-  cpu_init(addr);
-  heap_init();
-  serial_init();
-  debug(" kernel!\n");
+  }
+  multiboot2_set_mbi(mbi);
+  cpu_init();
+  physmem_init();
   device_init();
   beep(10);
-  int rc = console_init(addr);
+  int rc = console_init();
   if(IS_ERR(rc)) {
     debug("Failed to initialize console: %d\n", rc);
     return;
   }
-  cmdline = obtain_cmdline(addr);
-  char * verbose = get_cmdline_param_val(cmdline, "verbose");
-  if(verbose)
-  {
-    if(strcmp("true", verbose) == 0)
-    {
-      debug("Redirecting serial output to console...\n");
-      kern_verbose = true;
-    }
-  }
+  cmdline = obtain_cmdline(mbi);
   show_boot_banner();
-  show_mem_info(addr);
   if (!cpuidcheck()) {
     panic("Could not get CPUID for this hardware!");
   }
@@ -86,25 +60,21 @@ void kmain(uint32_t magic, uintptr_t addr)
   printk("Compatible CPUS are:\n\tAMD AuthenticAMD\n\tIntel GenuineIntel\n\tHygon HygonGenuine\n");
   /* Read the CPUID, once we know that it is supported.*/
   cpu_dump_all_info();
-  rc = tty_create(0, get_console()->dev);
+  rc = tty_create(0, console_get(0)->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
+  builtin_modules_init();
   keyboard_init();
-  rc = ramdisk_probe(addr);
-  if (IS_ERR(rc))
-  {
-    printk("No ramdisk loaded, defaulting to hard-disk...\n");
-    use_hd = true;
-  }
+  initrd_probe();
   tasking_init();
   /* it is impossible for tasking_init to return */
   panic("Failed to init tasks, kernel left in unreachable state");
+  unreachable;
 }
 
-#if CATK_LOGO == 1
+/*
 static void show_bootart(void)
 {
-  /* CatK splash screen */
   printk("\n\033[1;37m           __           __             \n");
   printk("          /  \\         /  \\        \n");
   printk("\033[36m         / /\\ \\       / /\\ \\       \n");
@@ -126,46 +96,37 @@ static void show_bootart(void)
   printk("               |CatK|              \n");
   printk("                \\__/               \033[1;0m\n");
   printk("\nCatK(mascot) was created by Rodmatronics\n");
-}
-#endif
+}*/
 
-extern int ata_find_first_partition(void);
-extern int ramdisk_find_first_partition(void);
-
-void bootstrap2(void)
-{
+void bootstrap2(void) {
   int rc;
-#if CATK_LOGO == 1
-  show_bootart();
-#endif
   pci_init();
   random_init();
   /* mount rootfs */
   struct device * dev;
-  dev = get_blkdev(use_hd ? DISKDEV_MAJOR : RAMDISK_MAJOR);
+  /* find first available block device */
+  dev = blkdev_get_first();
   if(!dev)
     panic("No drive to mount rootfs.\n");
-  int first_partition_lba = use_hd ? ata_find_first_partition() : ramdisk_find_first_partition();
-  rc = filesystems_init(first_partition_lba); // this will be set to a dummy value
+  int first_part = dev->fops->firstpart();
+  rc = filesystems_init(first_part); // this will be set to a dummy value
   if(IS_ERR(rc))
     panic("Could not initialize filesystems: %d\n", rc);
-  rc = vfs_init();
-  if(IS_ERR(rc))
-    panic("Could not initialize VFS: %d\n", rc);
-
   for (int i = 0; i < CATK_MOUNT_RETRIES; i++) {
-      rc = vfs_mount("/", dev);
+      struct filesystem * fs = (i % 2) == 0 ? get_filesystem("ext2") : get_filesystem("ustar");
+      rc = vfs_mount("/", dev, fs);
       if (!IS_ERR(rc)) {
+          vfs_set_rootfs(fs);
           break;
       }
 
-      if (!i) {
+      if (i == 0) {
           printk("Waiting on root device...\n");
       } else {
           printk("Still waiting on root device...\n");
       }
 
-      msleep(10000); // Wait for 10 seconds
+      msleep(CATK_REMOUNT_DELAY * 1000); // Wait for 10 seconds
   }
 
   if (IS_ERR(rc)) {
@@ -173,10 +134,11 @@ void bootstrap2(void)
   }
 
   printk("Successfully mounted rootfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
-  rc = vfs_mount("/dev", dev);
+  rc = vfs_mount("/dev", dev, get_filesystem("devfs"));
   if(IS_ERR(rc))
   {
-    panic("Could not mount devfs: %d\n", MAJOR(dev->dev), MINOR(dev->dev), rc);
+    printk("Could not mount devfs: %d\n", rc);
+    printk("Continuing without a mounted devfs..\n");
   }
   printk("Successfully mounted devfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   /* start init process */

@@ -17,7 +17,7 @@ static struct filesystem * e2fs = NULL;
 static struct ext2_priv_data priv_data;
 static struct device * blkdev = NULL;
 
-static int ext2_start_lba = 0;
+static int ext2_start_lba;
 
 static inline uint8_t * ext2_block_allocate(void)
 {
@@ -69,8 +69,8 @@ static int ext2_read_inode(struct ext2_inode * buf, uint32_t inode)
   
   uint8_t * block = ext2_block_allocate();
   if(!block)
-    return -ENOMEM;
-    
+  return -ENOMEM;
+
   struct ext2_bgdt * bgd = (struct ext2_bgdt *)ext2_read_block(priv_data.bgdt_starting_block, block);
   uint32_t inode_block = bgd[block_group].inode_table + ext2_get_block_inode(inode);
   struct ext2_inode * _inode = (struct ext2_inode *)ext2_read_block(inode_block, block);
@@ -211,7 +211,7 @@ static void ext2_inode2file(struct file * file, struct ext2_inode * inode, uint3
   file->inode->fsops                      = &ext2_fs_ops;
 }
 
-static void ext2_inode2vfs(struct inode * vfs, struct ext2_inode * inode, uint32_t inode_num) {
+static void ext2_inode2vnode(struct inode * vfs, struct ext2_inode * inode, uint32_t inode_num) {
   vfs->mode = inode->type;
   vfs->uid = inode->user_id;
   vfs->gid = inode->group_id;
@@ -230,8 +230,17 @@ struct inode * ext2_namei(const char * pathname) {
     return NULL;
   }
   struct inode * _inode = (struct inode *)malloc(sizeof(struct inode));
-  ext2_inode2vfs(_inode, inode, inode_num);
+  ext2_inode2vnode(_inode, inode, inode_num);
   return _inode;
+}
+
+static int ext2_exists(const char * path) {
+  struct inode * inode = ext2_namei(path);
+  if(!inode) {
+    return false;
+  }
+  free(inode);
+  return true;
 }
 
 int ext2_open(struct file * filp, const char * file)
@@ -245,7 +254,7 @@ int ext2_open(struct file * filp, const char * file)
     free(inode);
     return -ENOENT;
   }
-  strncpy(filp->name, file, NAME_MAX);
+  strncpy(filp->name, file, NAME_MAX - 1);
   ext2_inode2file(filp, inode, inode_num);
   free(inode);
   return 0;
@@ -332,9 +341,8 @@ int ext2_read(struct file * filp, void * buf, size_t unused)
 
 int ext2_mount_fs(struct filesystem * fs, struct device * dev)
 {
-  debug("Ext2: Mounting on block %d,%d\n", MAJOR(blkdev->dev), MINOR(blkdev->dev));
-  debug("First partition LBA: %d\n", ext2_start_lba);
   int rc;
+  debug("Ext2: Mounting on block %d,%d\n", MAJOR(dev->dev), MINOR(dev->dev));
   uint8_t * sector_data = (uint8_t *)calloc(1024, 1);
   rc = dev->fops->lseek(NULL, ext2_start_lba + 2, SEEK_SET);
   if(IS_ERR(rc))
@@ -345,7 +353,12 @@ int ext2_mount_fs(struct filesystem * fs, struct device * dev)
   sb = (struct ext2_superblock *)sector_data;
   if(sb->signature != EXT2_SUPER_MAGIC)
   {
-    debug("Ext2: Invalid or corrupt superblock! found 0x%04x instead of 0x%04x\n", sb->signature, EXT2_SUPER_MAGIC);
+    if (sb->signature == 0x0000) {
+      printk("Could not mount EXT-2! Found blank EXT-2 signature - 0x0000\n");
+    } else {
+      debug("Ext2: Invalid or corrupt superblock! found 0x%04x instead of 0x%04x\n", sb->signature, EXT2_SUPER_MAGIC);
+    }
+    debug("Hiss... the Ext2 signature was invalid!\n");
     return -EINVAL;
   }
   
@@ -379,7 +392,8 @@ int ext2_mount_fs(struct filesystem * fs, struct device * dev)
   priv_data.sectors_per_block = (priv_data.block_size / 512);
   fs->priv_data = &priv_data;
   blkdev = dev;
-  fs->mount->blkdev = blkdev;
+  fs->mount.blkdev = blkdev;
+  fs->root_fs = true;
   e2fs = fs;
   return 0;
 }
@@ -388,13 +402,14 @@ int ext2_init(int fp_lba)
 {
 #if CATK_EXT2 == 1
   ext2_start_lba = fp_lba;
-  return register_filesystem("ext2", &ext2_fs_ops, &ext2_file_ops, FS_REQUIRES_DISK);
+  return register_filesystem("ext2", &ext2_fs_ops, &ext2_file_ops, FS_MOUNT_DISK);
 #else
   return -ENOSYS;
 #endif
 }
 
 struct file_operations ext2_file_ops = {
+  NULL,
   NULL,
   ext2_read,
   NULL,
@@ -406,6 +421,7 @@ struct file_operations ext2_file_ops = {
 
 struct fs_operations ext2_fs_ops = {
   ext2_namei,
+  ext2_exists,
   NULL,
   NULL,
   NULL,

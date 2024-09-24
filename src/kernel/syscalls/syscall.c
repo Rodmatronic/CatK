@@ -42,7 +42,7 @@ static uint32_t do_system_call(struct intr_stack_frame * regs)
     }
     case 0x03:
     {
-      //rc = sys_write((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
+      rc = sys_write((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
       break;
     }
     case 0x04:

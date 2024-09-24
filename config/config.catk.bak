@@ -1,0 +1,47 @@
+% CatK Configuration, press Q to quit
+# Please edit this file with the config shell script.
+# DO NOT DELETE!
+
+#
+% Kernel Version / General config ⌄
+#
+
+CATK_VERSION_CODENAME="Meow"
+CATK_DEBUG_BUILD=y
+
+#
+% CPU Settings ⌄
+#
+
+CATK_ARCH_X86=y
+
+#
+% Filesystem Settings ⌄
+#
+
+CATK_MOUNT_RETRIES=5
+CATK_REMOUNT_DELAY=0
+CATK_EXT2=y
+CATK_DEVFS=y
+CATK_DEVFS_INODES_MAX=128
+
+#
+% Video Settings ⌄
+#
+
+CATK_VIDEO_GENERIC=n
+CATK_VGA_COLORS=n
+CATK_LOGO_MASCOT=y
+
+#
+% Kernel Debugging ⌄
+#
+
+CATK_SHOW_DEBUG=n
+CATK_STACK_TRACE=y
+CATK_SYSCALL_TRACE=y
+
+#
+# Compiler (autofilled by Makefile)
+#
+CATK_VERSION_STRING="."

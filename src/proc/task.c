@@ -179,7 +179,6 @@ struct task * create_kernel_task(char * name, void * addr, int priority)
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
   p->esp = (uint32_t)calloc(4096, 1);
-  p->cr3 = (uint32_t *)get_kernel_pgd();
   if (!(void *)p->esp)
   {
     free(p);
@@ -243,8 +242,6 @@ struct task * create_user_task(char * name, uint32_t addr, int priority)
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
 	p->esp = (uint32_t)calloc(4096, 1);
-  p->cr3 = create_new_pgd();
-  uvm_map((uint32_t)p->cr3, p->esp, p->esp);
   if(!(void *)p->esp)
   {
     free(p);

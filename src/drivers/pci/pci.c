@@ -14,8 +14,7 @@ int num_pci = 0;
 static struct pci_device devices[32];
 
 /* these are built in the kernel */
-static struct pci_driver * drivers[] =
-{
+static struct pci_driver * drivers[] = {
   &ide_driver,
   NULL
 };
@@ -137,7 +136,7 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
   devices[num_pci].bus = bus;
   devices[num_pci].slot = slot;
   devices[num_pci].functions = func;
-  debug("  PCI = %04x : %04x\n", __FUNCTION__, 
+  debug("  PCI = %04x : %04x\n", 
     devices[num_pci].ident.ven, devices[num_pci].ident.dev);
 
   // Print a message based on the type of PCI device
@@ -201,7 +200,8 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
 
 static void pci_enumerate(void)
 {
-  debug("pci_register_device:\n        VEN      DEV\n");
+  debug("pci_register_device:\n");
+  debug("        VEN     DEV\n");
   for (int bus = 0; bus < 256; bus++)
   {
     for (int slot = 0; slot < 32; slot++)
@@ -228,7 +228,7 @@ static int pci_driver_attach(struct pci_device * dev, struct pci_driver * drv)
   printk("Attaching driver \"%s\"...\n", drv->name);
   dev->driver = drv;
   rc = dev->driver->attach_driver(dev);
-  debug("  drv = %d\n  rc = %d\n", drv, rc);
+  //debug("  drv = %d\n  rc = %d\n", drv, rc);
   return rc;
 }
 

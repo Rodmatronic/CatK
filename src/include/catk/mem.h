@@ -4,26 +4,22 @@
 #include <stdint.h>
 #include <catk/types.h>
 
-/* Physical memory */
-
-int physmem_init(uint32_t mbi);
-void physmem_block_free(uint32_t addr);
-uint32_t physmem_block_alloc(void);
-
-/* Virtual memory */
-
-
 /*
- * The Jamix Portable Allocator => (JPalloc)
- * Made by Jamix from OSDev.org / deyzi-the-youtuber on GitHub :P
+ * We use liballoc now. :)
 */
 
-void heap_init(void);
-uintptr_t get_heap_start(void);
-uintptr_t get_heap_end(void);
-uintptr_t heap_get_used(void);
-void * malloc(size_t n);
-void * calloc(size_t num, size_t size);
-void free(void * ptr);
+void physmem_init(void);
+
+void * physmem_alloc_block(void);
+void * physmem_alloc_blocks(size_t sz);
+
+void physmem_free_block(void * addr);
+void physmem_free_blocks(void * addr, size_t sz);
+
+void * malloc(size_t);
+void * realloc(void *, size_t);
+void * calloc(size_t, size_t);
+
+void free(void *);
 
 #endif

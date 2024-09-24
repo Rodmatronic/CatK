@@ -3,47 +3,29 @@
 #include <catk/printk.h>
 #include <catk/device.h>
 #include <catk/errno.h>
+#include <catk/vfs.h>
 #include <lib/common.h>
 #include <stdint.h>
 
-struct filesystem * rootfs = NULL;
-
-static int do_ext2_mount(const char * path, struct device * blkdev)
+int vfs_mount(const char * path, struct device * blkdev, struct filesystem * fs)
 {
-  int rc;
-  rootfs = get_filesystem("ext2");
-  if(!rootfs)
-    return -EAGAIN;
-  strncpy(rootfs->mount->mount_path, path, DEVNAME_MAX);
-  rc = rootfs->fsops->mount(rootfs, blkdev);
-  if(IS_ERR(rc))
-    return rc;
-  return 0;
-}
-
-static int do_devfs_mount(const char * path, struct device * blkdev)
-{
-  int rc;
-  struct filesystem * devfs = NULL;
-  devfs = get_filesystem("devfs");
-  if(!devfs)
-    return -EAGAIN;
-  strncpy(devfs->mount->mount_path, path, DEVNAME_MAX);
-  rc = devfs->fsops->mount(devfs, blkdev);
-  if(IS_ERR(rc))
-    return rc;
-  return 0;
-}
-
-int vfs_mount(const char * path, struct device * blkdev)
-{
-  if(MAJOR(blkdev->dev) != DISKDEV_MAJOR && MAJOR(blkdev->dev) != RAMDISK_MAJOR)
-  {
+  if(MAJOR(blkdev->dev) != DISKDEV_MAJOR && MAJOR(blkdev->dev) != RAMDISK_MAJOR) {
     return -EINVAL;
   }
-  if(strncmp("/", path, strlen(path)) == 0)
-    return do_ext2_mount(path, blkdev);
-  else if(strncmp("/dev", path, strlen(path)) == 0)
-    return do_devfs_mount(path, blkdev);
+  if(!fs) {
+    return -EINVAL;
+  }
+  strncpy((char *)fs->mount.mount_path, path, NAME_MAX - 1);
+  if(strcmp(path, "/") != 0) {
+    if(vfs_exists(path) == false) {
+      debug("Oh no, you fucked up somewhere in your initrd or in the filesystem driver code!\n");
+      return -ENOENT;
+    }
+  }
+  debug("Mounting %s to \"%s\"..\n", fs->name, path);
+  int rc = fs->fsops->mount(fs, blkdev);
+  if(IS_ERR(rc)) {
+    return rc;
+  }
   return 0;
 }

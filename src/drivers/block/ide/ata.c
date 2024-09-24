@@ -6,6 +6,7 @@
 #include <catk/debug.h>
 #include <catk/mem.h>
 #include <catk/io.h>
+#include <catk/limits.h>
 #include <lib/common.h>
 
 #include "ide.h"
@@ -48,11 +49,12 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   if(!ata_devices[num_ata]) {
     return -ENOMEM;
   }
+  strncpy((char *)ata_devices[num_ata]->name, "hd", NAME_MAX - 1);
   ata_devices[num_ata]->removable   = false;
   ata_devices[num_ata]->dev         = MKDEV(DISKDEV_MAJOR, num_ata);
   ata_devices[num_ata]->priv_data   = drv;
   //partitions = ata_count_partitions();
-  rc = register_blkdev("hda", ata_devices[num_ata], &ata_fops);
+  rc = blkdev_register(ata_devices[num_ata], &ata_fops);
   if(IS_ERR(rc))
   {
     printk("Failed to register hard-disk: %d\n", rc);
@@ -185,6 +187,7 @@ int ata_dev_lseek(struct file * file, size_t offset, int whence)
 }
 
 struct file_operations ata_fops = {
+  ata_find_first_partition,
   ata_dev_lseek,        /* lseek */
   ata_dev_read,         /* read */
   ata_dev_write,        /* write */

@@ -3,6 +3,7 @@
 #include <catk/termios.h>
 #include <catk/printk.h>
 #include <catk/tty.h>
+#include <catk/limits.h>
 #include <catk/debug.h>
 #include <lib/common.h>
 #include <catk/types.h>
@@ -15,7 +16,7 @@ struct file_operations tty_fops;
 struct tty_struct * tty_lookup(int num)
 {
   if(!ttys[num])
-    return PTR_ERR(-ENODEV);
+    return NULL;
   return ttys[num];
 }
 
@@ -152,8 +153,8 @@ int tty_create(int num, struct device * dev)
   {
     goto ring_mem_err;
   }
-  tty->winsize.ws_row = console_get_rows();
-  tty->winsize.ws_col = console_get_cols();
+  tty->winsize.ws_row = console_get(0)->data.vc_rows;
+  tty->winsize.ws_col = console_get(0)->data.vc_cols;
   tty->winsize.ws_xpixel = 0;
   tty->winsize.ws_ypixel = 0;
   tty->ops->write = tty_write;
@@ -161,11 +162,12 @@ int tty_create(int num, struct device * dev)
   tty->dev = dev; /* console device */
   ttys[num] = tty;
   /* now create the character device */
+  strncpy((char *)tty_dev->name, "tty", NAME_MAX - 1);
   tty_dev->removable = true;
   tty_dev->dev       = MKDEV(TTYDEV_MAJOR, num);
   tty_dev->priv_data = tty;
-  register_chrdev("tty", tty_dev, &tty_fops);
-  debug("tty: tty%d created\n", num);
+  chrdev_register(tty_dev, &tty_fops);
+  debug("Created tty%d\n", num);
   return 0;
 
 ring_mem_err:
@@ -174,6 +176,7 @@ ring_mem_err:
 }
 
 struct file_operations tty_fops = {
+  NULL,
   NULL,
   tty_dev_read,
   tty_dev_write,

@@ -5,6 +5,7 @@
 #include <catk/rand.h>
 #include <catk/errno.h>
 #include <catk/printk.h>
+#include <catk/limits.h>
 #include <lib/common.h>
 #include <stdint.h>
 
@@ -35,10 +36,11 @@ int random_init(void) {
   if(!rand_dev) {
     return -ENOMEM;
   }
+  strncpy((char *)rand_dev->name, "random", NAME_MAX - 1);
   rand_dev->dev = MKDEV(MEMDEV_MAJOR, MEMDEV_RANDOM);
   rand_dev->removable = false;
   rand_dev->priv_data = NULL;
-  rc = register_chrdev("random", rand_dev, &random_fops);
+  rc = chrdev_register(rand_dev, &random_fops);
   if(IS_ERR(rc)) {
     printk("Failed to register random: %d\n", rc);
     return rc;
@@ -47,6 +49,7 @@ int random_init(void) {
 }
 
 static struct file_operations random_fops = {
+  NULL,
   random_lseek,
   random_read,
   random_write,

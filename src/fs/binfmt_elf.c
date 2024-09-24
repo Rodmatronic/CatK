@@ -48,13 +48,7 @@ int elf_exec(const char * name, const uint8_t * data)
       {
         debug("elf file load offest 0x%08x..\n", prghdr->p_offset);
         load_loc = (uint32_t)(data + prghdr->p_offset);
-        uint32_t p_addr = load_loc, size = ALIGN(PAGE_ALIGNMENT, prghdr->p_filesz);
-        p = create_user_task((char *)name, (load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
-        if(!p)
-          return -ENOMEM;
-        for(int i = 0; size > 0; p_addr += PAGE_ALIGNMENT, size -= PAGE_ALIGNMENT, i++) {
-          uvm_map((uint32_t)p->cr3, i * PAGE_SIZE, p_addr);
-        }
+        uint32_t p_addr = load_loc, size = prghdr->p_filesz;
         break;
       }
       default:
@@ -65,7 +59,6 @@ int elf_exec(const char * name, const uint8_t * data)
   }
   if(!load_loc)
     return -ENOEXEC;
-  task_add_queue(p);
-  //asm volatile ("jmp *%0" :: "r"(load_loc + header->e_entry) : "eax");
+  asm volatile ("jmp *%0" :: "r"(load_loc + header->e_entry) : "eax");
   return 0;
 }

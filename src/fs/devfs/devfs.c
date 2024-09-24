@@ -82,7 +82,7 @@ static int devfs_create_root_inode(void) {
 
 static int devfs_mount(struct filesystem * fs, struct device * dev) {
   int rc;
-  debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount->mount_path, MAJOR(dev->dev), MINOR(dev->dev));
+  debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount.mount_path, MAJOR(dev->dev), MINOR(dev->dev));
   devfs = fs;
   blkdev = dev;
   fs->sb->u.generic_sbp = ((void *)&superblock);
@@ -92,7 +92,7 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
     return rc;
   }
   for(int i = 0; i < MAX_BLKDEV; i++) {
-    struct device * dev = get_blkdev(i);
+    struct device * dev = blkdev_get(i);
     if(!dev) {
       continue;
     }
@@ -105,7 +105,7 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
     devfs_add_inode(inode);
   }
   for(int i = 0; i < MAX_CHRDEV; i++) {
-    struct device * dev = get_chrdev(i);
+    struct device * dev = chrdev_get(i);
     if(!dev) {
       continue;
     }
@@ -172,6 +172,15 @@ struct inode * devfs_namei(const char * pathname) {
   return inode;
 }
 
+static int devfs_exists(const char * path) {
+  struct inode * inode = devfs_namei(path);
+  if(!inode) {
+    return false;
+  }
+  free(inode);
+  return true;
+}
+
 static void dev2file(struct device * dev, struct file * file) {
   file->inode = NULL;
   strcpy(file->name, dev->name);
@@ -226,13 +235,14 @@ int devfs_readdir(struct file * filp, struct dirent * dirp, size_t count)
 int devfs_init(void)
 {
 #if CATK_DEVFS == 1
-  return register_filesystem("devfs", &devfs_ops, &devfs_file_ops, FS_MOUNT_KERNEL);
+  return register_filesystem("devfs", &devfs_ops, &devfs_file_ops, FS_MOUNT_RAM);
 #else
   return -ENOSYS;
 #endif
 }
 
 struct file_operations devfs_file_ops = {
+  NULL,
   NULL,
   devfs_read,
   devfs_write,
@@ -244,6 +254,7 @@ struct file_operations devfs_file_ops = {
 
 struct fs_operations devfs_ops = {
   devfs_namei,
+  devfs_exists,
   NULL,
   NULL,
   NULL,

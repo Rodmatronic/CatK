@@ -27,7 +27,6 @@ all: $(TARGET)
 
 $(TARGET): $(C_OBJ) $(ASM_OBJ)
 	@$(LD) $(LD_FLAGS) -o $(TARGET) $^
-	cp $(SRC)/init $(CATK_ROOT)/skeleton/
 
 %.o: %.asm
 	@printf "[ $< ]\n"

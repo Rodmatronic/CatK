@@ -30,7 +30,7 @@ int vprintf(const char format[], va_list arg)
 {
   char buf[256];
   int ret = vsprintf(buf, format, arg);
-  console_puts(buf);
+  console_print(buf);
   return ret;
 }
 

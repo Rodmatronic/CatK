@@ -8,6 +8,12 @@
 #include <catk/mem.h>
 #include <lib/common.h>
 
+static const char messages[4][128] = {
+  "The kernel is now in limbo. Kitty limbo!",
+  "CatKernel has spontaneously combusted, and has been halted to prevent further damage.",
+  "CatKernel is now trapped in the kitty void, please reboot."
+};
+
 static void _cold_ die()
 {
   critical_enter();
@@ -24,7 +30,14 @@ void _cold_ panic(const char format[], ...)
   trace_stack(8);
   va_list arg;
   va_start(arg, format);
-  vprintf(strcat("Panic!: ", format), arg); // combine both strings to make one
+  printk("Panic!: ");
+  printk(format, arg);
+  uint8_t random = rand() % 3;
+  if(random > 2) {
+    random = 1; // get over this stupid bug
+  }
+  debug("Hmmm... Im gonna pick number %d!\n", random);
+  printk("%s", messages[random]);
   va_end(arg);
   die();
   unreachable;
