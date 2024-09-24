@@ -8,10 +8,6 @@ SECTIONS
 	.text BLOCK(4K) : ALIGN(4K)
 	{
     ktext_start = .;
-<<<<<<< HEAD
-=======
-		*(.multiboot)
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 		*(.text)
     ktext_end = .;
 	}

@@ -29,6 +29,4 @@ struct tar_inode
   char typeflag[1];
 };
 
-int ustar_init(void);
-
 #endif

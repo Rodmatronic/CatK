@@ -5,7 +5,6 @@
 #include <catk/mem.h>
 #include <stdint.h>
 
-<<<<<<< HEAD
 static struct device * chrdevs[MAX_CHRDEV];
 static struct device * blkdevs[MAX_BLKDEV];
 
@@ -67,14 +66,3 @@ void device_init(void)
   memset(chrdevs, 0, sizeof(struct device) * MAX_CHRDEV);
   memset(blkdevs, 0, sizeof(struct device) * MAX_BLKDEV);
 }
-=======
-int register_chrdev(const char * name, struct device * dev, struct file_operations * fops)
-{
-  return 0;
-}
-
-int register_blkdev(const char * name, struct device * dev, struct file_operations * fops)
-{
-	return 0;
-}
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a

@@ -14,7 +14,7 @@ SRC = $(CATK_ROOT)/src
 C_INCLUDE_PATH = $(SRC)/include/
 C_INCLUDE = -I $(C_INCLUDE_PATH)
 
-ASM_INCLUDE = $(C_INCLUDE)
+NASM_INCLUDE = -I $(SRC)/include/asm/
 
 DEBUG = 1
 
@@ -31,14 +31,7 @@ CC_FLAGS = \
 	-fno-pie \
 	-O3
 
-ASM_FLAGS = \
-	$(ASM_INCLUDE)  \
-	-ffreestanding \
-	--target=i686-pc-none-elf \
-	-march=i686 \
-	-nodefaultlibs \
-	-nostdlib \
-	-fno-pie
+ASM_FLAGS = -f elf32 $(NASM_INCLUDE)
 
 ifeq ($(DEBUG), 1)
 CC_FLAGS += -g
@@ -49,10 +42,10 @@ LD_FLAGS = -m elf_i386 -T $(CONFIG)/link.ld -z noexecstack -nostdlib -static
 
 # source files
 C_SRC := $(shell find . -type f -name "*.c")
-ASM_SRC := $(shell find . -type f -name "*.S")
+ASM_SRC := $(shell find . -type f -name "*.asm")
 # object files
 C_OBJ := $(patsubst %.c, %.o, $(C_SRC))
-ASM_OBJ := $(patsubst %.S, %.o, $(ASM_SRC))
+ASM_OBJ := $(patsubst %.asm, %.o, $(ASM_SRC))
 
 all: $(TARGET_ISO)
 
@@ -62,19 +55,22 @@ ifneq ($(SKIP_ISO), 1)
 	@$(MKDIR) $(ISO_DIR)/boot/grub
 	@$(CP) $(TARGET) $(ISO_DIR)/boot/
 	@$(CP) $(CONFIG)/grub.cfg $(ISO_DIR)/boot/grub/
-<<<<<<< HEAD
 	@$(CP) $(CONFIG)/background.png $(ISO_DIR)/boot/grub
 	@$(CP) $(CATK_ROOT)/initrd.tar $(ISO_DIR)/boot/initrd.img
-=======
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 	@grub-mkrescue -o $(OUT)/$(TARGET_ISO) $(ISO_DIR)
 else
 	@printf "[ Build ISO skipped ]\n"
 endif
 
-$(TARGET): $(ASM_OBJ) $(C_OBJ)
+$(TARGET_TMP): $(ASM_OBJ) $(C_OBJ)
+	@$(LD) $(LD_FLAGS) -o $(TARGET_TMP) -r $^
+	@printf "[ Generating kernel symbols... ]\n"
+	@bash $(TOOLS)/gen_syms.sh $(TARGET_TMP) $(SRC)/symlist.c
+	@$(CC) -c symlist.c -o symlist.o $(CC_FLAGS)
+
+$(TARGET): $(TARGET_TMP)
 	@printf "[ Linking kernel.. ]\n"
-	@$(LD) $(LD_FLAGS) $^ -o $(TARGET)
+	@$(LD) $(LD_FLAGS) -o $(TARGET) $(TARGET_TMP) symlist.o
 	@printf "[ Validating Multiboot2 signature... ]\n"
 ifneq ($(SKIP_MB_CHECK), 1)
 	@grub-file --is-x86-multiboot2 $(TARGET)
@@ -82,9 +78,9 @@ else
 	@printf "[ Multiboot2 check skipped ]\n"
 endif
 
-%.o: %.S
+%.o: %.asm
 	@printf "[ $< ]\n"
-	@$(ASM) $(ASM_FLAGS) -c $< -o $@
+	@$(ASM) $(ASM_FLAGS) $< -o $@
 
 %.o: %.c
 	@printf "[ $< ]\n"

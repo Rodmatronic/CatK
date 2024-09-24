@@ -1,8 +1,6 @@
 #ifndef __KERNEL_H
 #define __KERNEL_H
 
-#ifndef ASM_FILE
-
 #include <stdint.h>
 #include <lib/common.h>
 
@@ -17,30 +15,17 @@ extern uintptr_t krodata_end;
 /* .data section */
 extern uintptr_t kdata_start;
 extern uintptr_t kdata_end;
-<<<<<<< HEAD
 /* .mod_entries section */
 extern uintptr_t kmod_start;
 extern uintptr_t kmod_end;
 /* .bss section */
 extern uintptr_t kbss_start;
 extern uintptr_t kbss_end;
-=======
-/* .bss section */
-extern uintptr_t kbss_start;
-extern uintptr_t kbss_end;
-
-extern bool kern_verbose;
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 char * obtain_cmdline(uint32_t addr);
 void bootstrap2(void);
 int start_init(const char * cmdline);
 
-<<<<<<< HEAD
-=======
-#endif /* ASM_FILE */
-
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 /* kernel stack size */
 #define KERNEL_STACK_SIZE 4096 /* 4KiB of reserved memory */
 

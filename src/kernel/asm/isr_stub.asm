@@ -3,7 +3,8 @@ section .text
 
 early_interrupt_handler:
   pushad
-  push ds
+  mov ax, ds
+  push eax
 
   mov ax, 0x10
   mov ds, ax

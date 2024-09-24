@@ -7,8 +7,7 @@
 #define CATK_DEBUG_BUILD 1
 #define CATK_ARCH_X86 1
 #define CATK_MOUNT_RETRIES 5
-<<<<<<< HEAD
-#define CATK_REMOUNT_DELAY 0
+#define CATK_REMOUNT_DELAY 3
 #define CATK_EXT2 1
 #define CATK_DEVFS 1
 #define CATK_DEVFS_INODES_MAX 128
@@ -16,17 +15,7 @@
 #define CATK_STACK_TRACE 1
 #define CATK_SYSCALL_TRACE 1
 #define CATK_COMPILED_WITH "clang"
-#define CATK_VERSION_STRING "."
-#define CATK_BUILD_DATE "Mon 23 Sep 2024 23:29:44 PDT"
-=======
-#define CATK_EXT2 1
-#define CATK_DEVFS 1
-#define CATK_DEVFS_INODES_MAX 128
-#define CATK_STACK_TRACE 1
-#define CATK_SYSCALL_TRACE 1
-#define CATK_COMPILED_WITH "clang"
 #define CATK_VERSION_STRING "0.1"
-#define CATK_BUILD_DATE "Sat 21 Sep 2024 16:17:47 PDT"
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
+#define CATK_BUILD_DATE "Tue 24 Sep 2024 01:12:06 PDT"
 
 #endif

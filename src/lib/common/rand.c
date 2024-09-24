@@ -1,7 +1,7 @@
-#include <catk/platform.h>
+#include <catk/core.h>
 #include <lib/common.h>
 
-int rand(int radix)
+int rand(void)
 {
-  return gen_random() % radix;
+  return gen_random();
 }

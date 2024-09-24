@@ -10,12 +10,6 @@
 
 */
 
-<<<<<<< HEAD
-#include <catk/console.h>
-#include <catk/device.h>
-#include <catk/debug.h>
-=======
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 #include <catk/compiler.h>
 #include <catk/console.h>
 #include <catk/debug.h>
@@ -23,11 +17,8 @@
 #include <catk/math.h>
 #include <catk/tty.h>
 #include <catk/mem.h>
-<<<<<<< HEAD
 #include <catk/errno.h>
-#include <catk/printk.h>
 #include <catk/spinlock.h>
-#include <catk/virt.h>
 #include <catk/math.h>
 #if defined CATK_LOGO_MASCOT
 #include <logo/catk.h>
@@ -39,12 +30,7 @@
 #error "Please choose a logo to be shown on boot!"
 #endif
 #include <font/term8x16.h>
-#include <multiboot2.h>
-=======
-#include <font/term8x16.h>
-#include <logo/catk.h>
 #include <lib/ring.h>
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 #include <lib/common.h>
 #include <lib/ctype.h>
 #include <multiboot2.h>
@@ -52,16 +38,13 @@
 
 #include "ansi.h"
 
-<<<<<<< HEAD
 static struct console fbcon_struct;
 struct multiboot_tag_framebuffer_common * grub_fb = NULL;
 
-static int fbcon_x;
-static int fbcon_y;
-=======
-struct console fbcon_struct;
-struct multiboot_tag_framebuffer_common * grub_fb = NULL;
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
+static int fbcon_bg = 0;
+static int fbcon_fg = 0;
+static int fbcon_x = 0;
+static int fbcon_y = 0;
 
 #ifndef CATK_VGA_COLORS
 static const uint32_t colors[16] = {
@@ -83,7 +66,6 @@ static const uint32_t colors[16] = {
   0x99f0f0,
   0xffffff
 };
-<<<<<<< HEAD
 #else
 static const uint32_t colors[16] = {
   0x000000,
@@ -105,13 +87,10 @@ static const uint32_t colors[16] = {
   0xffffff
 };
 #endif
-=======
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state */
 static int ansi_list_idx = 0;
 static struct ansi_list ansi_value[8];
-<<<<<<< HEAD
 
 struct file_operations fbcon_fops;
 
@@ -129,18 +108,6 @@ static void fbcon_putpx(int x, int y, uint32_t rgb)
 {
   uint32_t * buf = (uint32_t *)fbcon_struct.data.vc_screenbuf;
   uint32_t offset = y * (grub_fb->framebuffer_pitch / 4) + x;
-=======
-
-static int fbcon_bg = 0;
-static int fbcon_fg = 0;
-static int fbcon_x = 0;
-static int fbcon_y = 0;
-
-static void fbcon_putpx(int x, int y, uint32_t rgb)
-{
-  uint32_t * buf = (uint32_t *)fbcon_struct.data.vc_screenbuf;
-  uint32_t offset = y * fbcon_struct.data.vc_rows + x;
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   buf[offset] = rgb;
 }
 
@@ -164,16 +131,11 @@ static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 
 static void fbcon_scroll(void)
 {
-<<<<<<< HEAD
   if (fbcon_x > ((grub_fb->framebuffer_pitch / 4) / fbcon_struct.data.vc_font.width) - 1)
-=======
-  if (fbcon_x > ((grub_fb->framebuffer_width) / fbcon_struct.data.vc_font.width) - 1)
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   {
     fbcon_x = 0;
     fbcon_y++;
   }
-<<<<<<< HEAD
   if (fbcon_y > (fbcon_struct.data.vc_cols / fbcon_struct.data.vc_font.height) - 1) // Check if cursor is at last row
   {
       // Calculate the size of a single row in bytes
@@ -203,24 +165,6 @@ static void fbcon_scroll(void)
 
       // Move the cursor up by one row
       fbcon_y--;
-=======
-  if (fbcon_y > (fbcon_struct.data.vc_cols / fbcon_struct.data.vc_font.height) - 1) // Check if the cursor is at the last row
-  {
-    // Calculate the size of a single row in bytes
-    size_t row_size_bytes = grub_fb->framebuffer_pitch * fbcon_struct.data.vc_font.height;
-
-    // Calculate the size of all rows except the last one
-    size_t all_rows_except_last_size = (fbcon_struct.data.vc_cols / fbcon_struct.data.vc_font.height) * row_size_bytes;
-
-    // Move all rows up by one (excluding the first row)
-    memcpy32((uint8_t *)fbcon_struct.data.vc_screenbuf, (uint8_t *)fbcon_struct.data.vc_screenbuf + row_size_bytes, all_rows_except_last_size);
-
-    // Clear the last row
-    memset32((uint8_t *)fbcon_struct.data.vc_screenbuf + all_rows_except_last_size, colors[0], row_size_bytes);
-
-    // Move the cursor up by one row
-    fbcon_y--;
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   }
 }
 static inline void bs(void)
@@ -425,9 +369,6 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
   return 0;
 }
 
-<<<<<<< HEAD
-// static inline void _hot_ fbcon_putpx(int x, int y, uint32_t rgb)
-
 int fbcon_dev_write(struct file * file, void * buf, size_t sz)
 {
   memcpy((void *)fbcon_struct.data.vc_screenbuf, buf, sz);
@@ -448,12 +389,6 @@ void fbcon_clear(void)
 {
   /* thank you rodmatronics for the help! :) */
   memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], (grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height * 1.2);
-=======
-void fbcon_clear(void)
-{
-  /* thank you rodmatronics for the help! :) */
-  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_width) * grub_fb->framebuffer_height * 1.2));
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 }
 
 static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {
@@ -477,11 +412,6 @@ int fbcon_init(void)
   debug("Framebuffer bits per pixel: %d\n", grub_fb->framebuffer_bpp);
   strncpy(fbcon_struct.name, "fbcon", 31);
   fbcon_struct.data.vc_screenbuf = (uintptr_t)grub_fb->framebuffer_addr;
-<<<<<<< HEAD
-=======
-  fbcon_struct.data.vc_bpp = grub_fb->framebuffer_bpp;
-  fbcon_struct.data.vc_pitch = grub_fb->framebuffer_pitch;
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   fbcon_struct.data.vc_font = font_term8x16;
   fbcon_struct.data.vc_num = 0;
   fbcon_struct.data.vc_rows = grub_fb->framebuffer_width;
@@ -490,19 +420,12 @@ int fbcon_init(void)
   fbcon_struct.data.vc_sw.print = fbcon_print;
   fbcon_struct.data.vc_sw.putc = fbcon_putc;
   fbcon_struct.data.vc_sw.output_intr = fbcon_output_intr;
-<<<<<<< HEAD
-  fbcon_struct.dev = &fbcon_dev;
-=======
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   fbcon_x = 0;
   fbcon_y = DIV_ROUND_UP(height, fbcon_struct.data.vc_font.height);
   fbcon_fg = 7;
   fbcon_bg = 0;
   console_register(&fbcon_struct);
-<<<<<<< HEAD
   rc = chrdev_register(&fbcon_dev, &fbcon_fops);
-=======
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   fbcon_clear();
 
   uint8_t pixel[3];
@@ -514,7 +437,7 @@ int fbcon_init(void)
   }
   return 0;
 }
-<<<<<<< HEAD
+
 struct file_operations fbcon_fops = {
   NULL,               /* firstpart */
   NULL,               /* lseek */
@@ -525,5 +448,3 @@ struct file_operations fbcon_fops = {
   fbcon_dev_open,     /* open */
   fbcon_dev_close,    /* close */
 };
-=======
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a

@@ -1,6 +1,5 @@
 #include <catk/core.h>
 #include <catk/io.h>
-#include <catk/virt.h>
 #include <catk/syscall.h>
 #include <lib/common.h>
 #include <stdint.h>
@@ -34,7 +33,7 @@ static void segm_descriptors_init(void)
   gdt[2].limit = 0xffff;
   gdt[2].access = 0x92;
   gdt[2].flags = 0xcf;
-// user code segment
+  // user code segment
   gdt[3].base_low = 0;
   gdt[3].base_mid = 0;
   gdt[3].base_high = 0;
@@ -295,33 +294,6 @@ void tss_init(void)
   tss_install();
 }
 
-/* here lies my failed, but close attempts at implementing paging
-   you will NOT be missed.
-
-static uint32_t _aligned(4096) kernel_pte[1024];
-static uint32_t _aligned(4096) kernel_pde[1024];
-
-void setup_paging(void) {
-  uint32_t cr4, cr0;
-  memset(kernel_pte, 0, 4096);
-  memset(kernel_pde, 0, 4096);
-  for(int i = 0; i < 1024; i++) {
-    kernel_pte[i] = (i << 12) | 1 << 0 | 1 << 1;
-  }
-  kernel_pde[0] = (uint32_t)kernel_pte | 1 << 7 | 1 << 0 | 1 << 1;
-  asm volatile("mov %%cr4, %0" : "=a"(cr4));
-  cr4 |= 0x10;
-  asm volatile("mov %0, %%cr4" :: "a"(cr4));
-
-  asm volatile("mov %0, %%cr3" :: "a"((uint32_t)kernel_pde));
-
-  asm volatile("mov %%cr0, %0" : "=a"(cr0));
-  cr0 |= 1 << 31;
-  asm volatile("mov %0, %%cr0" :: "a"(cr0));
-}
-
-*/
-
 void cpu_init(void)
 {
   segm_descriptors_init();
@@ -329,6 +301,4 @@ void cpu_init(void)
   timer_init();
   tss_init();
   syscall_install();
-  //setup_paging();
-  //for(;;);
 }

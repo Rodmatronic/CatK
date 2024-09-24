@@ -1,5 +1,5 @@
 #include <catk/spinlock.h>
-#include <catk/platform.h>
+#include <catk/core.h>
 #include <stdatomic.h>
 
 void spinlock_acquire(struct spinlock * s)

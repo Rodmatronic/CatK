@@ -59,6 +59,6 @@ struct elf_symbol
 	uint16_t		st_shndx;
 };
 
-int elf_do_load(const char * name, const uint8_t * data);
+int elf_exec(const char * name, const uint8_t * data);
 
 #endif

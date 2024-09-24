@@ -5,10 +5,6 @@
 #include <stdarg.h>
 
 #define BIT(bit) (1 << bit)
-<<<<<<< HEAD
-=======
-#define ZEROBIT(bit) (0 << bit)
->>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 typedef enum
 {
@@ -57,6 +53,6 @@ int vprintf(const char format[], va_list arg);
 int sprintf(char * str, const char fmt[], ...);
 int snprintf(char * str, size_t len, const char fmt[], ...);
 /* random number generation */
-int rand(int radix);
+int rand(void);
 
 #endif

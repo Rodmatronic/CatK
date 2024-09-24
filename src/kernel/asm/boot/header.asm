@@ -22,7 +22,6 @@ multiboot2_header_start:
   dd HEADER_CHECKSUM
 %if CATK_VIDEO_GENERIC == 0
 multiboot2_fb_tag_start:
-  align 8
   ; Framebuffer tag
   dw 5
   ; Optional tag
@@ -30,7 +29,7 @@ multiboot2_fb_tag_start:
   ; Tag length
   dd multiboot2_fb_tag_end - multiboot2_fb_tag_start
   ; Width
-  dd 800 ; 640 to 600 might be the magic sigma number to set the resolution to the max.
+  dd 800
   ; Height
   dd 600
   ; Bits Per Pixel (BPP)
@@ -38,9 +37,8 @@ multiboot2_fb_tag_start:
 multiboot2_fb_tag_end:
 %endif
 multiboot2_header_tag_end:
-  align 8
   ; Header end
   dw 0
   dw 0
-  dd 8
+  dd 0
 multiboot2_header_end:
