@@ -5,8 +5,8 @@
 *.iso
 
 # kernel n stuff
-.elf
-.gz
+*.elf
+*.gz
 
 # vscode stuff
 .vscode/

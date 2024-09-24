@@ -27,6 +27,8 @@ struct vc_data {
   uint16_t vc_num;              /* console number */
   uint32_t vc_rows;             /* console rows */
   uint32_t vc_cols;             /* console columns */
+  uint32_t vc_bpp;              /* console bpp */
+  uint32_t vc_pitch;            /* console pitch */
   uint32_t vc_size_row;         /* bytes per row */
   uintptr_t vc_screenbuf;       /* address of buffer */
   struct consw vc_sw;

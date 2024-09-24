@@ -1,6 +1,8 @@
 #ifndef __KERNEL_H
 #define __KERNEL_H
 
+#ifndef ASM_FILE
+
 #include <stdint.h>
 #include <lib/common.h>
 

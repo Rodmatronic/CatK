@@ -1,16 +1,16 @@
+VERSION = 0
+PATCH_LEVEL = 1
+
 export MKDIR = mkdir -p
 export CP = cp -f
 export RM = rm
 export RM_FORCE = rm -rf
+export MOVE = mv
 
 # assembler
-export ASM = nasm
+export ASM = clang
 export CC = clang
 export LD = ld
-
-ifeq ($(UNAME_S), Darwin)
-override LD = ld.lld
-endif
 
 export CATK_ROOT = $(CURDIR)
 export TOOLS = $(CATK_ROOT)/utils
@@ -22,7 +22,7 @@ export OBJ = $(CATK_ROOT)/obj
 
 .PHONY: all config
 
-$(shell $(MKDIR) $(OBJ) $(OUT))
+.PHONY: all config
 
 # The reason as to why the directories should be cleaned
 # is because the configuration file could be changed any time..
@@ -58,13 +58,15 @@ config:
 debug:
 	@qemu-system-x86_64 \
 		-d int \
-		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G \
 		-no-reboot
 
 disk:
-	@bash $(TOOLS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
+	@bash $(UTILS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
+
+config:
+	@bash $(UTILS)/config.sh
 
 # use this for pulse-audio 	-audiodev pa,id=snd0 -machine pcspk-audiodev=snd0 \
 # use this for alsa 				-audiodev alsa,id=snd0 -machine pcspk-audiodev=snd0 \
@@ -72,13 +74,12 @@ disk:
 run:
 	@qemu-system-x86_64 \
 		-debugcon stdio \
-		-icount 4,align=on \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
-		-m 2G
+		-m 2G \
+		-debugcon stdio
 
 clean:
-	@$(RM_FORCE) $(OBJ)
 	@$(RM_FORCE) $(OUT)
 	@$(RM_FORCE) $(CATK_ROOT)/src/symlist.c
 	@$(RM_FORCE) $(shell find . -type f -name "*.o")

@@ -59,7 +59,6 @@ struct elf_symbol
 	uint16_t		st_shndx;
 };
 
-int elf_exec(const char * name, const uint8_t * data);
-char * elf_get_kernel_function_symbol(uint32_t kernel_start, uint32_t eip);
+int elf_do_load(const char * name, const uint8_t * data);
 
 #endif

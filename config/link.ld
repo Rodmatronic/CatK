@@ -1,4 +1,4 @@
-ENTRY(_start)
+ENTRY(kentry)
 
 SECTIONS
 {
@@ -18,8 +18,8 @@ SECTIONS
     krodata_start = .;
 		*(.rodata)
     krodata_end = .;
-    /* for built-in kernel modules, we just define a section for the module's entries */
 	}
+  /* for built-in kernel modules, we just define a section for the module's entries */
   .mod_entries BLOCK(4K) : ALIGN(4K) {
     kmod_start = .;
     KEEP(*(.mod_entries))

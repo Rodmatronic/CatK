@@ -1,11 +1,12 @@
 #include <stdarg.h>
 #include <catk/printk.h>
 #include <catk/compiler.h>
-#include <catk/core.h>
+#include <catk/platform.h>
 #include <catk/trace.h>
 #include <catk/debug.h>
 #include <catk/kernel.h>
 #include <catk/mem.h>
+#include <catk/console.h>
 #include <lib/common.h>
 
 static const char messages[4][128] = {
@@ -20,14 +21,8 @@ static void _cold_ die()
   halt();
 }
 
-void _cold_ panic(const char format[], ...)
+void _cold_ _noreturn_ panic(const char format[], ...)
 {
-  beep(50);
-  msleep(50);
-  beep(50);
-  msleep(50);
-  beep(50);
-  trace_stack(8);
   va_list arg;
   va_start(arg, format);
   printk("Panic!: ");

@@ -36,3 +36,7 @@ inline void outl(uint16_t port, uint32_t data)
 {
   asm volatile("outl %0, %w1" :: "a" (data), "Nd" (port) : "memory");
 }
+
+inline void iowait(void) {
+  outb(0x80, 0);
+}

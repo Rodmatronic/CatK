@@ -2,8 +2,6 @@
 #include "string.h"
 #include <stdint.h>
 
-#pragma GCC diagnostic ignored "-Wdeprecated-non-prototype"
-
 #define X_OK 1
 
 #define MAX_INPUT 1024

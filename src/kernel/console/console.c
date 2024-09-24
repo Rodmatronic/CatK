@@ -2,6 +2,9 @@
 #include <catk/debug.h>
 #include <catk/errno.h>
 #include <catk/spinlock.h>
+#include <catk/platform.h>
+#include <catk/math.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 #include <config.h>
 #include <stdint.h>

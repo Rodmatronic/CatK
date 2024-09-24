@@ -14,6 +14,10 @@
 #include <catk/device.h>
 #include <catk/debug.h>
 #include <catk/compiler.h>
+#include <catk/console.h>
+#include <catk/debug.h>
+#include <catk/errno.h>
+#include <catk/math.h>
 #include <catk/tty.h>
 #include <catk/mem.h>
 #include <catk/errno.h>
@@ -34,8 +38,8 @@
 #include <multiboot2.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
+#include <multiboot2.h>
 #include <stdint.h>
-#include <config.h>
 
 #include "ansi.h"
 
@@ -54,7 +58,7 @@ static const uint32_t colors[16] = {
   0x0000aa,
   0xaa00aa,
   0x87abab,
-  0xbbd3ff, // 0xaaaaaa is the true color
+  0xbbd3ff,
   /* high intensity colors */
   0x555555,
   0xff6a6a,
@@ -86,9 +90,6 @@ static const uint32_t colors[16] = {
   0xffffff
 };
 #endif
-
-static uint32_t fbcon_fg = 7;
-static uint32_t fbcon_bg = 0;
 
 static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state */
 static int ansi_list_idx = 0;
@@ -356,6 +357,7 @@ void fbcon_print(const char * str)
 
 int fbcon_output_intr(struct tty_struct * tty, size_t len)
 {
+  /*
   if(!tty)
     return -EINVAL;
   char * str = (char *)malloc(len);
@@ -366,6 +368,7 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
     fbcon_putc(str[i]);
   }
   free(str);
+  */
   return 0;
 }
 

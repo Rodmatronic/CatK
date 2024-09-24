@@ -33,8 +33,6 @@
 #define PTE_GLOBAL_SHIFT    8
 #define PTE_IGNORED         PDE_IGNORED
 
-#define FRAMEBUFFER_VIRT_ADDR 0xc00000
-
 static inline int pde_is_present(uint32_t pde) {
   return (pde & 1 << PDE_PRESENT_SHIFT);
 }
