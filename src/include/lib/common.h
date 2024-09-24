@@ -5,6 +5,10 @@
 #include <stdarg.h>
 
 #define BIT(bit) (1 << bit)
+<<<<<<< HEAD
+=======
+#define ZEROBIT(bit) (0 << bit)
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 typedef enum
 {

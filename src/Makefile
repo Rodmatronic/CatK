@@ -62,8 +62,11 @@ ifneq ($(SKIP_ISO), 1)
 	@$(MKDIR) $(ISO_DIR)/boot/grub
 	@$(CP) $(TARGET) $(ISO_DIR)/boot/
 	@$(CP) $(CONFIG)/grub.cfg $(ISO_DIR)/boot/grub/
+<<<<<<< HEAD
 	@$(CP) $(CONFIG)/background.png $(ISO_DIR)/boot/grub
 	@$(CP) $(CATK_ROOT)/initrd.tar $(ISO_DIR)/boot/initrd.img
+=======
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 	@grub-mkrescue -o $(OUT)/$(TARGET_ISO) $(ISO_DIR)
 else
 	@printf "[ Build ISO skipped ]\n"

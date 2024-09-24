@@ -21,7 +21,11 @@
 #define USE_CASE5
 
 #ifdef CATK_DEBUG_BUILD
+<<<<<<< HEAD
 //#define DEBUG 1
+=======
+#define DEBUG 1
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 #endif
 
 /** This macro will conveniently align our pointer upwards */

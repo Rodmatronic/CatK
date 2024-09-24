@@ -1,8 +1,12 @@
 #include <catk/mem.h>
 #include <catk/kernel.h>
 #include <catk/bitops.h>
+<<<<<<< HEAD
 #include <catk/debug.h>
 #include <catk/core.h>
+=======
+#include <catk/platform.h>
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 #include <multiboot2.h>
 #include <lib/common.h>
 #include <lib/bitmap.h>
@@ -41,7 +45,10 @@ void physmem_init(void) {
       }
     }
   }
+<<<<<<< HEAD
   assert(pmm_bitmap_start != 0);
+=======
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
   /* all memory is unallocated */
   memset(pmm_bitmap, 0, pmm_max_blocks * sizeof(uint32_t));
 }

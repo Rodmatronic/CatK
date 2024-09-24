@@ -1,11 +1,14 @@
 /*  GIMP header image file format (RGB): /home/sushi/catk/src/include/logo/silly.h  */
 
+<<<<<<< HEAD
 #ifdef __clang__
   #pragma clang diagnostic ignored "-Wtrigraphs"
 #else
   #pragma gcc diagnostic ignored "-Wtrigraphs"
 #endif
 
+=======
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 static unsigned int width = 120;
 static unsigned int height = 120;
 

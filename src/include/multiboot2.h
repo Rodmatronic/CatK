@@ -393,7 +393,11 @@ struct multiboot_tag_load_base_addr
 
 #include <stdint.h>
 
+<<<<<<< HEAD
 int multiboot2_validate_args(uint32_t magic, uint32_t addr);
+=======
+int multiboot2_validate(uint32_t magic, uint32_t addr);
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 void * multiboot2_locate_tag(uintptr_t addr, int type);
 uintptr_t multiboot2_get_mbi(void);
 void multiboot2_set_mbi(uintptr_t mbi);

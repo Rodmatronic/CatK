@@ -1,6 +1,7 @@
 #ifndef __MODULE_H
 #define __MODULE_H
 
+<<<<<<< HEAD
 #include <catk/compiler.h>
 
 struct module {
@@ -21,5 +22,9 @@ struct module {
 
 void _module_print(const char * mod_name, const char * fmt, ...);
 void builtin_modules_init(void);
+=======
+#define DEFINE_MODULE(name) static const char * __module_name__ = name
+#define MODULE_NAME __module_name__
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 #endif

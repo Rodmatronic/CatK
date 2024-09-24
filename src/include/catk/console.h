@@ -46,6 +46,7 @@ struct vc_data {
 struct console {
   char name[32];
   struct vc_data data;
+<<<<<<< HEAD
   struct device * dev;
 };
 
@@ -56,5 +57,19 @@ int console_print(const char * str);
 int console_putc(const char c);
 int console_init(void);
 bool is_console_enabled(void);
+=======
+};
+
+int console_register(struct console * c);
+struct console * console_get(int num);
+int console_clear(void);
+int console_print(const char * str);
+int console_putc(const char c);
+int console_init(void);
+
+/* kernel printing */
+int printk(const char * fmt, ...);
+void _cold_ _noreturn_ panic(const char * fmt, ...);
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 #endif

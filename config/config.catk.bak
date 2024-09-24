@@ -20,7 +20,10 @@ CATK_ARCH_X86=y
 #
 
 CATK_MOUNT_RETRIES=5
+<<<<<<< HEAD
 CATK_REMOUNT_DELAY=0
+=======
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 CATK_EXT2=y
 CATK_DEVFS=y
 CATK_DEVFS_INODES_MAX=128
@@ -30,18 +33,28 @@ CATK_DEVFS_INODES_MAX=128
 #
 
 CATK_VIDEO_GENERIC=n
+<<<<<<< HEAD
 CATK_VGA_COLORS=n
 CATK_LOGO_MASCOT=y
+=======
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 #
 % Kernel Debugging ⌄
 #
 
+<<<<<<< HEAD
 CATK_SHOW_DEBUG=n
+=======
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 CATK_STACK_TRACE=y
 CATK_SYSCALL_TRACE=y
 
 #
 # Compiler (autofilled by Makefile)
 #
+<<<<<<< HEAD
 CATK_VERSION_STRING="."
+=======
+CATK_VERSION_STRING="0.1"
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a

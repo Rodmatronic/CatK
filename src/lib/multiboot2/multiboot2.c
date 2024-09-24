@@ -6,7 +6,11 @@ uintptr_t info_ptr = 0;
 
 #define MBI_UNALIGNED(mbi) (mbi & 7)
 
+<<<<<<< HEAD
 int multiboot2_validate_args(uint32_t magic, uint32_t addr)
+=======
+int multiboot2_validate(uint32_t magic, uint32_t addr)
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 {
   return (magic == MULTIBOOT2_BOOTLOADER_MAGIC && !MBI_UNALIGNED(addr));
 }

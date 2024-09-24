@@ -13,6 +13,7 @@ export CC = clang
 export LD = ld
 
 export CATK_ROOT = $(CURDIR)
+<<<<<<< HEAD
 export TOOLS = $(CATK_ROOT)/utils
 export USER = $(CATK_ROOT)/user
 export GZ = $(shell which gzip)
@@ -21,6 +22,15 @@ export OUT = $(CATK_ROOT)/out
 export OBJ = $(CATK_ROOT)/obj
 
 .PHONY: all config
+=======
+export UTILS = $(CATK_ROOT)/utils
+export USER = $(CATK_ROOT)/user
+export GZ = $(shell which gzip)
+export CONFIG = $(CATK_ROOT)/config
+export OUT = $(CATK_ROOT)/target
+
+$(shell $(MKDIR) $(OUT))
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 
 .PHONY: all config
 
@@ -39,6 +49,7 @@ all: clean
 	@date +"%a %d %b %Y %T %Z" | tr -d '\n' >> $(CONFIG)/config.catk
 	@echo '"' >> $(CONFIG)/config.catk
 
+<<<<<<< HEAD
 	@$(MAKE) -C $(TOOLS)/gen_config/ || { echo "Build failed"; exit 1; }
 # generate c header file
 	@$(TOOLS)/gen_config/gen_config $(CONFIG)/config.catk | tee $(CATK_ROOT)/src/include/config.h
@@ -47,6 +58,13 @@ all: clean
 	@$(MAKE) -C $(CATK_ROOT)/src 	|| { echo "Build failed"; exit 1; }
 	@echo "Build successful"
 # 		-icount 6,align=on \
+=======
+	@$(MAKE) -C $(UTILS)/gen_config/ || { echo "Build failed"; exit 1; }
+	@$(UTILS)/gen_config/gen_config $(CONFIG)/config.catk | tee $(CATK_ROOT)/src/include/config.h
+	@$(MAKE) -C $(CATK_ROOT)/src     || { echo "Build failed"; exit 1; }
+	@printf "Build successful"
+#         -icount 6,align=on \
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 #       For debugging
 
 init:
@@ -73,8 +91,13 @@ config:
 
 run:
 	@qemu-system-x86_64 \
+<<<<<<< HEAD
 		-debugcon stdio \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
+=======
+		-cpu host \
+		-enable-kvm \
+>>>>>>> 6be3bbb619dded66460b24ba64e5925e2bee774a
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G \
 		-debugcon stdio
