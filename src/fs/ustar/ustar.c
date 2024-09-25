@@ -76,7 +76,6 @@ static struct inode * ustar_namei(const char * fn) {
     ptr += (((filesize + TAR_BLOCK_SIZE - 1) / TAR_BLOCK_SIZE) + 1) * TAR_BLOCK_SIZE;
     inode_num++;
   }
-  printk("total inodes searched: %d\n", inode_num);
   return NULL;
 }
 

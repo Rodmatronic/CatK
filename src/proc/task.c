@@ -26,7 +26,8 @@ void catk_idle(void)
 {
   is_tasking_enabled = true;
   bootstrap2();
-  for (;;);
+  while(is_pid_running(1));
+  panic("Init process is DEAD! Nothing to do now...\n");
 }
 
 bool tasking_enabled(void)
@@ -86,13 +87,13 @@ int is_pid_running(pid_t pid)
   {
     if (p->pid == pid)
     {
-      return 1;
+      return true;
     }
     p = p->next;
     if (p == orig)
       break;
   }
-  return 0;
+  return false;
 }
 
 void kill(struct task *p)
@@ -120,10 +121,6 @@ static inline void task_release(struct task *p)
     }
     free(p);
   }
-}
-
-static void setup_file_descriptors(struct task * p) {
-  return;
 }
 
 static int task_signal(int signal) {
@@ -159,23 +156,22 @@ struct task * create_kernel_task(char * name, void * addr, int priority)
   p->handle_signal = task_signal;
   switch (p->priority)
   {
-  case TASK_PRIORITY_HIGH:
-  {
-    p->time_quantum = 10;
-    break;
+    case TASK_PRIORITY_HIGH:
+    {
+      p->time_quantum = 10;
+      break;
+    }
+    case TASK_PRIORITY_NORMAL:
+    {
+      p->time_quantum = 5;
+      break;
+    }
+    case TASK_PRIORITY_LOW:
+    {
+      p->time_quantum = 1;
+      break;
+    }
   }
-  case TASK_PRIORITY_NORMAL:
-  {
-    p->time_quantum = 5;
-    break;
-  }
-  case TASK_PRIORITY_LOW:
-  {
-    p->time_quantum = 1;
-    break;
-  }
-  }
-  setup_file_descriptors(p);
   p->ticks_left = p->time_quantum;
   /* allocate stack for task */
   p->esp = (uint32_t)calloc(4096, 1);
@@ -202,70 +198,8 @@ struct task * create_kernel_task(char * name, void * addr, int priority)
   STACK_PUSH(0x10);
   STACK_PUSH(0x10);
   p->esp = (uint32_t)stack;
-  debug("scheduler: created kernel-task %s with eip: 0x%08x\n", name, addr);
-  printk("Started kernel-task %s (PID %d)\n", name, p->pid);
+  debug("scheduler: created task %s with eip: 0x%08x\n", name, addr);
   return p;
-}
-
-/* the moment we've all been waiting for.. */
-struct task * create_user_task(char * name, uint32_t addr, int priority)
-{
-	struct task * p = (struct task *)calloc(sizeof(struct task), 1);
-  if(!p)
-    return NULL;
-	p->name = name;
-	p->pid = get_free_pid();
-	p->state = TASK_CREATED;
-  p->priority = priority;
-  p->error_code = 0;
-  p->handle_signal = task_signal;
-  switch(p->priority)
-  {
-    case TASK_PRIORITY_HIGH:
-    {
-      p->time_quantum = 10;
-      break;
-    }
-    case TASK_PRIORITY_NORMAL:
-    {
-      p->time_quantum = 5;
-      break;
-    }
-    case TASK_PRIORITY_LOW:
-    {
-      p->time_quantum = 1;
-      break;
-    }
-  }
-  setup_file_descriptors(p);
-  memset(p->fd, 0, sizeof(struct file) * OPEN_MAX);
-  p->ticks_left = p->time_quantum;
-  /* allocate stack for task */
-	p->esp = (uint32_t)calloc(4096, 1);
-  if(!(void *)p->esp)
-  {
-    free(p);
-    return NULL;
-  }
-  /* the stack grows down, so we go to the top, which is also the bottom */
-  p->stack_top = (p->esp + 4096);
-	uint32_t * stack = (uint32_t *)p->stack_top;
-	STACK_PUSH(0);
-	STACK_PUSH(0);
-	STACK_PUSH(0);
-	STACK_PUSH(0);
-	STACK_PUSH(0);
-	STACK_PUSH(0);
-	STACK_PUSH(p->stack_top);
-	STACK_PUSH(0x23);
-	STACK_PUSH(0x23);
-	STACK_PUSH(0x23);
-	STACK_PUSH(0x23);
-	p->esp = (uint32_t)stack;
-  p->entry_point = addr;
-  debug("[tasking] created user-task %s with eip: 0x%08x\n", name, addr);
-  printk("Started user-task %s (PID %d)\n", name, p->pid);
-	return p;
 }
 
 #undef STACK_PUSH
@@ -273,6 +207,22 @@ struct task * create_user_task(char * name, uint32_t addr, int priority)
 int spawn_kernel_task(char *name, void *addr, int priority)
 {
   struct task *p = create_kernel_task(name, addr, priority);
+  if (!p)
+    return -ENOMEM;
+  task_add_queue(p);
+  return p->pid;
+}
+
+extern void _noreturn_ usermode_switch(uint32_t addr);
+
+static void enter_from_usermode(void) {
+  usermode_switch(current->entry);
+}
+
+/* this starts off as a kernel task, but it transitions to user-mode */
+int spawn_user_task(char * name, void * addr, int priority) {
+  struct task * p = create_kernel_task(name, enter_from_usermode, priority);
+  p->entry = (uint32_t)addr;
   if (!p)
     return -ENOMEM;
   task_add_queue(p);
@@ -308,7 +258,7 @@ pid_t task_add_queue(struct task * p)
 
 int wait_queue_add(struct task * p) {
   for(int i = 0; i < 4; i++) {
-    if (!wait_queue[i]) {
+    if (wait_queue[i] == NULL) {
       wait_queue[i] = p;
       return 0;
     }
@@ -345,24 +295,6 @@ static void exec_task(void)
   asm volatile("pop %ebx");
   asm volatile("pop %eax");
   asm volatile("iretl");
-}
-
-static void user_exec_task(void)
-{
-  current->state = TASK_ALIVE;
-	asm volatile("mov %%eax, %%esp" :: "a"(current->esp));
-	asm volatile("pop %gs");
-	asm volatile("pop %es");
-	asm volatile("pop %fs");
-	asm volatile("pop %ds");
-	asm volatile("pop %ebp");
-	asm volatile("pop %edi");
-	asm volatile("pop %esi");
-	asm volatile("pop %edx");
-	asm volatile("pop %ecx");
-	asm volatile("pop %ebx");
-	asm volatile("pop %eax");
-  //usermode_switch((void *)current->entry_point);
 }
 
 static struct task * find_next_task(void)
@@ -411,12 +343,8 @@ void schedule(void)
   asm volatile("push %ss");
   asm volatile("mov %%esp, %%eax" : "=a"(current->esp));
   current = find_next_task();
-  if (current->state == TASK_CREATED)
-  {
-    if(current->kernel_mode)
-      exec_task();
-    else
-      user_exec_task();
+  if (current->state == TASK_CREATED) {
+    exec_task();
   }
   asm volatile("mov %%eax, %%esp" ::"a"(current->esp));
   asm volatile("pop %ss");

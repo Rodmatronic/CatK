@@ -10,8 +10,9 @@ CC_FLAGS = \
 	-m32 \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
-	-no-pie \
-	-nostdlib
+	-fPIE \
+	-nostdlib \
+	-fno-stack-protector
 
 ASM_FLAGS = -f elf32
 LD_FLAGS = -m elf_i386 -T $(SRC)/link.ld -znoexecstack

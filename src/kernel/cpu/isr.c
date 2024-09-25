@@ -5,7 +5,7 @@
 #include <catk/task.h>
 #include <lib/common.h>
 
-static char * exceptions[32] = {
+static const char exceptions[][32] = {
   "Divide Error",
   "Debug",
   "NMI Interrupt",
@@ -40,7 +40,7 @@ static char * exceptions[32] = {
   "Reserved"
 };
 
-intr_handler int_handlers[256] = {NULL};
+intr_handler int_handlers[255];
 
 #define CALL_INT_HANDLER \
   intr_handler handler = int_handlers[frame->intr]; \
@@ -63,15 +63,14 @@ static int exception_handler(struct intr_stack_frame * frame)
   if(int_handlers[frame->intr])
   {
     CALL_INT_HANDLER;
-    goto exit;
+    return 0;
   }
   return -1;
-exit:
-  return 0;
 }
 
 static inline void register_dump(struct intr_stack_frame * reg)
 {
+  debug("Exception vector: 0x%02x\n", reg->intr);
   debug(" [+] error code: 0x%08x\n", reg->err_code);
   debug(" [+] eax: 0x%08x, ebx: 0x%08x, ecx: 0x%08x, edx: 0x%08x\n", reg->eax, reg->ebx, reg->ecx, reg->edx);
   debug(" [+] edi: 0x%08x, esi: 0x%08x, ebp: 0x%08x, esp: 0x%08x\n", reg->edi, reg->esi, reg->ebp, reg->esp);

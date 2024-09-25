@@ -212,7 +212,7 @@ static int devfs_open(struct file * filp, const char * path) {
   return 0;
 }
 
-static void _unused_ devfs_close(struct file * filp) {
+static void devfs_close(struct file * filp) {
   return;
 }
 
@@ -249,7 +249,7 @@ struct file_operations devfs_file_ops = {
   devfs_readdir,
   NULL,
   devfs_open,
-  NULL
+  devfs_close
 };
 
 struct fs_operations devfs_ops = {

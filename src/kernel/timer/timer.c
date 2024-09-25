@@ -5,7 +5,7 @@
 #include <catk/errno.h>
 #include <lib/common.h>
 
-volatile uint32_t jiffies;
+volatile static uint32_t jiffies;
 
 static void timer_configure_hz(uint16_t hz)
 { 

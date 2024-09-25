@@ -388,7 +388,7 @@ void fbcon_dev_close(struct file * file)
 void fbcon_clear(void)
 {
   /* thank you rodmatronics for the help! :) */
-  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], (grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height * 1.2);
+  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height) * 2);
 }
 
 static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {

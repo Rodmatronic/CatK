@@ -27,9 +27,7 @@ CC_FLAGS = \
 	-Werror=implicit-function-declaration \
 	-nodefaultlibs \
 	-nostdlib \
-	-fstack-protector-strong \
-	-fno-pie \
-	-O3
+	-fstack-protector-strong
 
 ASM_FLAGS = -f elf32 $(NASM_INCLUDE)
 

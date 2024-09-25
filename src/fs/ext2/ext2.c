@@ -206,7 +206,7 @@ static void ext2_inode2file(struct file * file, struct ext2_inode * inode, uint3
   file->inode->flags                      = inode->flags;
   file->inode->length                     = priv_data.filesize_qword ? (inode->size_lower << 8) | (inode->size_high) : inode->size_lower;
   file->inode->inode                      = inode_num;
-  file->inode->u.ext2_ino                 = *inode;
+  memcpy((void *)&file->inode->u.ext2_ino, inode, sizeof(struct ext2_inode));
   file->ops                               = &ext2_file_ops;
   file->inode->fsops                      = &ext2_fs_ops;
 }
@@ -243,7 +243,7 @@ static int ext2_exists(const char * path) {
   return true;
 }
 
-int ext2_open(struct file * filp, const char * file)
+static int ext2_open(struct file * filp, const char * file)
 {
   struct ext2_inode * inode = ext2_inode_allocate();
   if(!inode)
@@ -258,6 +258,10 @@ int ext2_open(struct file * filp, const char * file)
   ext2_inode2file(filp, inode, inode_num);
   free(inode);
   return 0;
+}
+
+static void ext2_close(struct file * filp) {
+  return;
 }
 
 static void ext2_read_slink(uint32_t block, uint8_t * buf)
@@ -416,7 +420,7 @@ struct file_operations ext2_file_ops = {
   NULL,
   NULL,
   ext2_open,
-  NULL
+  ext2_close,
 };
 
 struct fs_operations ext2_fs_ops = {

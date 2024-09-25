@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 int sys_fork(void) {
+  /*
   uint32_t eip = get_eip();
   struct task * p = create_user_task(get_current_task()->name, eip, TASK_PRIORITY_NORMAL);
   p->ppid = get_current_task()->pid;
@@ -15,5 +16,6 @@ int sys_fork(void) {
     return -1;
   }
   task_add_queue(p);
+  */
   return 0;
 }

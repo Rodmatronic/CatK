@@ -69,11 +69,12 @@ disk:
 # use this for alsa 				-audiodev alsa,id=snd0 -machine pcspk-audiodev=snd0 \
 
 run:
-	@qemu-system-x86_64 \
+	@qemu-system-i386 \
 		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G \
-		-debugcon stdio
+		-debugcon stdio \
+		-trace ata_*
 
 clean:
 	@$(RM_FORCE) $(OUT)

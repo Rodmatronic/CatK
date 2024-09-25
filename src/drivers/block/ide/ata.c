@@ -42,8 +42,8 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   ata_channels[ATA_SECONDARY].ctrl  = bar3;
   ata_channels[ATA_PRIMARY].bmide   = bar4;
   ata_channels[ATA_SECONDARY].bmide = bar4 + 8;
-  debug("ATA: Primary channel base: 0x%08x\n", ata_channels[ATA_PRIMARY].base);
-  debug("ATA: Secondary channel base: 0x%08x\n", ata_channels[ATA_SECONDARY].base);
+  debug("ATA: Primary channel base: 0x%04x\n", ata_channels[ATA_PRIMARY].base);
+  debug("ATA: Secondary channel base: 0x%04x\n", ata_channels[ATA_SECONDARY].base);
   /* ata device stuff */
   ata_devices[num_ata] = device_struct_alloc();
   if(!ata_devices[num_ata]) {
@@ -76,7 +76,7 @@ static void ata_do_400ns_delay(void)
 
 static void ata_prepare_pio(int disk, int lba)
 {
-	outb(ata_channels[disk].base + 1, 0x00); // <- slows down the CPU a lot
+  outb(ata_channels[disk].base + 1, 0x00); // <- slows down the CPU a lot
 	outb(ata_channels[disk].base + 2, 0x01); /* read only one sector */
   /* send lba 'n stuff */
 	outb(ata_channels[disk].base + 3, (uint8_t)lba);

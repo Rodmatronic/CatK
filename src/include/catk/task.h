@@ -3,6 +3,7 @@
 
 #include <catk/types.h>
 #include <catk/fs.h>
+#include <catk/core.h>
 #include <catk/limits.h>
 #include <lib/common.h>
 #include <stdint.h>
@@ -40,12 +41,12 @@ struct task
   uint8_t time_quantum;
   uint8_t ticks_left;
 	uint32_t stack_top; /* used only when freeing a task */
-  uint32_t entry_point;
   uint32_t error_code;
   uint32_t esp;
   bool kernel_mode;
   char * cwd;
   int (*handle_signal)(int); /* each task can handle a signal differently */
+  uint32_t entry;
   struct file * fd[OPEN_MAX];
 	struct task * next;
   struct task * prev;
@@ -58,10 +59,9 @@ void kill(struct task * p);
 struct task * get_current_task(void);
 bool tasking_enabled(void);
 int spawn_kernel_task(char * name, void * addr, int priority);
-int spawn_user_task(char * name, uint32_t addr, int priority);
+int spawn_user_task(char * name, void * addr, int priority);
 struct task * create_kernel_task(char * name, void * addr, int priority);
-struct task * create_user_task(char * name, uint32_t addr, int priority);
-void usermode_switch(void * addr);
+struct task * create_user_task(char * name, void * addr, int priority);
 pid_t task_add_queue(struct task * p);
 void tasking_init(void);
 bool task_has_children(void);

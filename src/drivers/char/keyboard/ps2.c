@@ -343,39 +343,54 @@ int keyboard_init(void)
   critical_enter();
   int rc;
   /* disable so that other ps/2 data ports cant interfere with another */
+  debug("Disabling first keyboard channel..\n");
   keyboard_first_disable();
+  debug("Disabling second keyboard channel..\n");
   keyboard_second_disable();
+  debug("Testing PS/2 controller..\n");
   rc = keyboard_ctrl_test();
   /* did it pass the test? */
   if(rc == KEYBOARD_CONTROLLER_TEST_FAIL)
   {
     /* not to be confused with the PlayStation 2 :) */
+    debug("PS/2 controller failed the test.\n");
     printk("PS2-Controller: Error: controller test failed\n");
     critical_exit();
     return -EIO;
   }
+  debug("Testing first keyboard port..\n");
   rc = keyboard_first_port_test();
   /* did it pass? */
   if(rc != KEYBOARD_FISRT_PORT_TEST_PASS)
   {
+    debug("Keyboard port test failed. View the kernel console for more info.\n");
     keyboard_test_print_err((uint8_t)rc);
     critical_exit();
     return -EIO;
   }
   keyboard_channel_test();
   /* enable both keyboards */
+  debug("Enabling first keyboard..\n");
   keyboard_first_enable();
-  if(is_dual_channel)
+  if(is_dual_channel) {
+    debug("Enabling second keyboard..\n");
     keyboard_second_enable();
+  }
   /* set interrupt flags on both keyboards */
+  debug("Setting interrupt flag on keyboard 1..\n");
   keyboard_first_intr_flag_set();
-  if(is_dual_channel)
+  if(is_dual_channel) {
+    debug("Setting interrupt flag on keyboard 2..\n");
     keyboard_second_intr_flag_set();
+  }
+  debug("Setting keyboard interrupt handlers..\n");
   interrupt_install(&keyboard_port1_irq, KEYBOARD_PORT1_IRQ);
   if(is_dual_channel)
     interrupt_install(&keyboard_port2_irq, KEYBOARD_PORT2_IRQ);
   /* by default, we use tty0 */
+  debug("Binding tty0 to keyboard output..\n");
   tty = tty_lookup(0);
   critical_exit();
+  debug("Keyboard successfully initialized.\n");
   return 0;
 }

@@ -22,6 +22,6 @@ int sys_chdir(const char * path) {
   /* we dont need the inode stuff anymore */
   if(!tmp->u.generic_ino)
     free(tmp);
-  strcpy(p->cwd, path);
+  strncpy(p->cwd, path, PATH_MAX);
   return 0;
 }

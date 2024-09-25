@@ -8,6 +8,7 @@
 /* file descriptor operations */
 int file_desc_alloc(void);
 void file_desc_free(int fd);
+struct file * fd_dup(struct file * file);
 /* basic vfs operations */
 struct inode * namei(const char * pathname);
 int vfs_mount(const char * path, struct device * blkdev, struct filesystem * fs);

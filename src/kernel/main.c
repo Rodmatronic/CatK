@@ -102,10 +102,8 @@ void bootstrap2(void) {
   int rc;
   pci_init();
   random_init();
-  /* mount rootfs */
-  struct device * dev;
   /* find first available block device */
-  dev = blkdev_get_first();
+  struct device * dev = blkdev_get_first();
   if(!dev)
     panic("No drive to mount rootfs.\n");
   int first_part = dev->fops->firstpart();
@@ -135,16 +133,16 @@ void bootstrap2(void) {
 
   printk("Successfully mounted rootfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   rc = vfs_mount("/dev", dev, get_filesystem("devfs"));
-  if(IS_ERR(rc))
-  {
+  if(IS_ERR(rc)) {
     printk("Could not mount devfs: %d\n", rc);
     printk("Continuing without a mounted devfs..\n");
+  } else {
+    printk("Successfully mounted devfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   }
-  printk("Successfully mounted devfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   /* start init process */
   rc = start_init(cmdline);
   if(IS_ERR(rc))
     panic("Failed when starting init process: %d\n", rc);
-  printk("Nothing left to do. Going idle...\n");
+  //printk("Nothing left to do. Going idle...\n");
   /* fall back to catk_idle (defined in proc/task.c:19)  */
 }
