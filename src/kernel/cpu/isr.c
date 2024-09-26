@@ -88,11 +88,10 @@ void interrupt_handler(struct intr_stack_frame * frame)
         register_dump(frame);
         if(get_current_task()->kernel_mode == false) {
           printk("Fatal trap %d: %s while in user mode\n", frame->intr, exceptions[frame->intr]);
+          kill(get_current_task());
         } else {
           panic("Fatal trap %d: %s while in kernel mode\n", frame->intr, exceptions[frame->intr]);
-        }
-        if(tasking_enabled())
-          kill(get_current_task());
+        } 
       }
     }
   }

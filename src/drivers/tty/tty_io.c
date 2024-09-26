@@ -8,6 +8,7 @@
 #include <lib/common.h>
 #include <catk/types.h>
 #include <catk/ipc.h>
+#include <catk/task.h>
 #include <lib/ctype.h>
 
 struct tty_struct * ttys[NR_CONSOLES] = {NULL};
@@ -67,7 +68,8 @@ static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t cou
 static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count)
 {
   /* TODO: add proper tty input reading */
-  return 0;
+  sleep();
+  return 5;
 }
 
 static int tty_dev_read(struct file * filp, void * buf, size_t sz)
@@ -123,6 +125,10 @@ void tty_handle_input(struct tty_struct * tty, int ch) {
     /* TODO: implement signals */
     dispatch_signal(SIGINT);
     return;
+  }
+  if(ch == '\n') {
+    ring_buffer_clear(tty->read_q);
+    wakeup(wait_queue_get_first()->pid);
   }
   tty_buf_putc(tty->read_q, tty, ch);
 }

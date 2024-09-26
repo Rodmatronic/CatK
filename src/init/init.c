@@ -53,7 +53,6 @@ int start_init(const char * cmdline)
   else
     strncpy(init_path, init_val, NAME_MAX - 1);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
-  /* before i continue fixing things, i want to test the kernel heap poisoning */
   try_init(init_path);
   return 0;
 }

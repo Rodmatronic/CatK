@@ -11,6 +11,10 @@ struct inode * namei(const char * pathname) {
     return NULL;
   }
   struct inode * inode = NULL;
-  inode = get_filesystem(is_devfs(pathname) ? "devfs" : "ext2")->fsops->namei(pathname);
+  if(is_devfs(pathname)) {
+    inode = get_filesystem("devfs")->fsops->namei(pathname);
+  } else {
+    inode = vfs_get_rootfs()->fsops->namei(pathname);
+  }
   return inode;
 }

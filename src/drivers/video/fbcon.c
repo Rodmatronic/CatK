@@ -354,7 +354,6 @@ void fbcon_print(const char * str)
 
 int fbcon_output_intr(struct tty_struct * tty, size_t len)
 {
-  /*
   if(!tty)
     return -EINVAL;
   char * str = (char *)malloc(len);
@@ -365,7 +364,6 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
     fbcon_putc(str[i]);
   }
   free(str);
-  */
   return 0;
 }
 
@@ -420,6 +418,7 @@ int fbcon_init(void)
   fbcon_struct.data.vc_sw.print = fbcon_print;
   fbcon_struct.data.vc_sw.putc = fbcon_putc;
   fbcon_struct.data.vc_sw.output_intr = fbcon_output_intr;
+  fbcon_struct.dev = &fbcon_dev;
   fbcon_x = 0;
   fbcon_y = DIV_ROUND_UP(height, fbcon_struct.data.vc_font.height);
   fbcon_fg = 7;

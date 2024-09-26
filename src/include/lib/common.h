@@ -38,6 +38,7 @@ int atoi(const char * str);
 
 /* memory stuff */
 void * memcpy(void * dest, const void * src, size_t count);
+void * memcpy_down(void * dest, const void * src, size_t count);
 void * memcpy16(void * dest, const void * src, size_t count);
 void * memcpy32(void * dest, const void * src, size_t count);
 void * memset(void * dest, char val, size_t count);

@@ -31,7 +31,6 @@ void _cold_ _noreturn_ panic(const char format[], ...)
   if(random > 2) {
     random = 1; // get over this stupid bug
   }
-  debug("Hmmm... Im gonna pick number %d!\n", random);
   printk("%s", messages[random]);
   va_end(arg);
   die();

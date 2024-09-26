@@ -43,7 +43,6 @@ void kmain(uint32_t magic, uintptr_t mbi) {
   multiboot2_set_mbi(mbi);
   cpu_init();
   physmem_init();
-  device_init();
   beep(10);
   int rc = console_init();
   if(IS_ERR(rc)) {

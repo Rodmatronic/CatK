@@ -52,6 +52,7 @@ struct task
   struct task * prev;
 };
 
+struct task * wait_queue_get_first(void);
 void print_tasks(void);
 void schedule(void);
 int is_pid_running(pid_t pid);
@@ -68,5 +69,6 @@ bool task_has_children(void);
 struct task * task_find_child(pid_t parent);
 struct task * get_task_from_pid(pid_t pid);
 pid_t sleep(void);
+void wakeup(pid_t pid);
 
 #endif

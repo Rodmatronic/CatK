@@ -19,5 +19,6 @@ void vfs_close(struct file * filp);
 int vfs_read(struct file * filp, void * buf, size_t sz);
 int vfs_write(struct file * filp, void * buf, size_t sz);
 void vfs_set_rootfs(struct filesystem * fs);
+struct filesystem * vfs_get_rootfs(void);
 
 #endif

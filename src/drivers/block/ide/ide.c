@@ -38,7 +38,7 @@ static int ide_driver_attach(struct pci_device * dev)
   if(!rc)
   {
     printk("Incorrect classes\n");
-    return -ENODEV;
+    return -EINVAL;
   }
 
   // If bit 0 and 2 are not set in PROG_IF, this means that the drive is in compatibility mode
@@ -175,8 +175,7 @@ static void ide_driver_init(void)
   ide_init();
 }
 
-struct pci_driver ide_driver =
-{
+struct pci_driver ide_driver = {
   .name = "IDE controller",
   .ident = (void *)&ata_ids,
   .attach_driver = ide_driver_attach,

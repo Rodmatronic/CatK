@@ -13,8 +13,8 @@
 
 void syscall_trace(struct intr_stack_frame * regs)
 {
-  printk("Syscall trace:\n");
-  printk("\tEAX: 0x%08x, EBX: 0x%08x, ECX: 0x%08x, EDX: 0x%08x\n",
+  debug("Syscall trace:\n");
+  debug("\tEAX: 0x%08x, EBX: 0x%08x, ECX: 0x%08x, EDX: 0x%08x\n",
       regs->eax, regs->ebx, regs->ecx, regs->edx);
 }
 
@@ -42,7 +42,6 @@ static uint32_t do_system_call(struct intr_stack_frame * regs)
     }
     case 0x03:
     {
-      printk((char *)regs->ecx);
       rc = sys_write((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
       break;
     }

@@ -65,3 +65,7 @@ void vfs_set_rootfs(struct filesystem * fs)
 {
   rootfs = fs;
 }
+
+struct filesystem * vfs_get_rootfs(void) {
+  return rootfs;
+}

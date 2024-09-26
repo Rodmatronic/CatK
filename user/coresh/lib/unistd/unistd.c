@@ -32,6 +32,12 @@ int read(int fd, void * buf, size_t count) {
   return ret;
 }
 
+int open(const char * pathname, int flags, uint16_t mode) {
+  int ret;
+  asm volatile("int $0x80" : "=a"(ret) : "a"(0x04), "b"(pathname), "c"(flags), "d"(mode));
+  return ret;
+}
+
 int fork(void) {
   int ret;
   asm volatile("int $0x80" : "=a"(ret) : "a"(0x05));

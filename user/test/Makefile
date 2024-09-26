@@ -1,6 +1,6 @@
 TARGET = init
 
-SRC = $(CATK_ROOT)/user
+SRC = $(CATK_ROOT)/user/test
 
 C_INCLUDE_PATH := $(SRC)/include
 

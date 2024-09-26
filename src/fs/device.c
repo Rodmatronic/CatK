@@ -60,9 +60,3 @@ struct device * chrdev_get(uint8_t major) {
     return NULL;
   return dev;
 }
-
-void device_init(void)
-{
-  memset(chrdevs, 0, sizeof(struct device) * MAX_CHRDEV);
-  memset(blkdevs, 0, sizeof(struct device) * MAX_BLKDEV);
-}

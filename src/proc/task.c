@@ -16,7 +16,7 @@
 struct task * current;
 struct task * catk_idle_task;
 
-struct task * wait_queue[4] = {NULL};
+struct task * wait_queue[4];
 
 static bool is_tasking_enabled = false;
 
@@ -69,12 +69,17 @@ static pid_t get_free_pid(void)
 
 struct task * get_task_from_pid(pid_t pid)
 {
-  struct task *current = current;
-  while (current != catk_idle_task)
+  struct task * p = catk_idle_task;
+  struct task * orig = catk_idle_task;
+  while (1)
   {
-    if (current->pid == pid)
-      return current;
-    current = current->next;
+    if (p->pid == pid)
+    {
+      return p;
+    }
+    p = p->next;
+    if (p == orig)
+      break;
   }
   return NULL;
 }
@@ -85,7 +90,7 @@ int is_pid_running(pid_t pid)
   struct task *orig = catk_idle_task;
   while (1)
   {
-    if (p->pid == pid)
+    if (p->pid == pid && p->state != TASK_DEAD)
     {
       return true;
     }
@@ -127,6 +132,7 @@ static int task_signal(int signal) {
   switch(signal) {
     case SIGINT: {
       debug("%s: received SIGINT!\n", current->name);
+      kill(current);
       break;
     }
     default: {
@@ -266,17 +272,31 @@ int wait_queue_add(struct task * p) {
   return -1;
 }
 
+// get most recent item in the wait queue
+struct task * wait_queue_get_first(void) {
+  for(int i = 0; i < 4; i++) {
+    if(wait_queue[i] != NULL) {
+      return wait_queue[i];
+    }
+  }
+  return NULL;
+}
+
 pid_t sleep(void) {
+  debug("Sending PID %d off to a deep sleep. Goodnight! :)\n", current->pid);
   if (wait_queue_add(current) < 0) {
     return -EAGAIN;
   }
   current->state = TASK_BLOCKED;
-  while(current->state == TASK_BLOCKED);
+  while(current->state == TASK_BLOCKED) asm("sti");
   return task_find_child(current->pid)->pid;
 }
 
 void wakeup(pid_t pid) {
+  critical_enter();
+  debug("Waking up PID %d. WAKE UP!!!\n", pid);
   get_task_from_pid(pid)->state = TASK_ALIVE;
+  critical_exit();
 }
 
 static void exec_task(void)
@@ -319,10 +339,8 @@ static struct task * find_next_task(void)
           }
         }
       }
-      default: {
-        p = p->next;
-      }
     }
+    p = p->next;
   }
 }
 

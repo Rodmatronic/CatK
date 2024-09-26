@@ -40,7 +40,7 @@ struct filesystem * get_filesystem(const char * name)
     if(!strncmp(filesystems[i].name, name, NAME_MAX - 1))
       return &filesystems[i];
   }
-  debug("What kind of filesystem are you looking for!?!?\n");
+  debug("Invalid filesystem: %s\n", name);
   return NULL;
 }
 
