@@ -49,8 +49,13 @@ all: clean
 # 		-icount 6,align=on \
 #		For debugging
 
-init:
-	@$(MAKE) -C $(USER)/ || { echo "Build failed"; exit 1; }
+test:
+	@$(MAKE) -C $(USER)/test || { echo "Build failed"; exit 1; }
+	bash $(TOOLS)/update_disk.sh $(USER)/test/init $(CATK_ROOT)/initrd.tar
+
+coresh:
+	@$(MAKE) -C $(USER)/coresh || { echo "Build failed"; exit 1; }
+	bash $(TOOLS)/update_disk.sh $(USER)/coresh/init $(CATK_ROOT)/initrd.tar
 
 config:
 	bash $(TOOLS)/config.sh

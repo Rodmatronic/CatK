@@ -59,7 +59,7 @@ int elf_exec(const char * name, const uint8_t * data)
   }
   if(!load_loc)
     return -ENOEXEC;
-  spawn_user_task((char *)name, (void *)(load_loc + header->e_entry), TASK_PRIORITY_NORMAL);
-  //asm volatile ("jmp *%0" :: "r"(load_loc + header->e_entry) : "eax");
+  char * argv[] = {(char *)name};
+  spawn_user_task((char *)name, (void *)(load_loc + header->e_entry), TASK_PRIORITY_NORMAL, 1, argv);
   return 0;
 }

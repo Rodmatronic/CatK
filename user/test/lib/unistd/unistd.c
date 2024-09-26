@@ -74,3 +74,21 @@ int execv(const char * pathname, char * argv[]) {
 void beep(int ms) {
   asm volatile("int $0x80" :: "a"(0x0a), "b"(ms));
 }
+
+uint32_t getpid(void) {
+  uint32_t ret;
+  asm volatile("int $0x80" : "=a"(ret): "a"(0x0b));
+  return ret;
+}
+
+int get_argc(void) {
+  int ret;
+  asm volatile("int $0x80" : "=a"(ret) : "a"(0x0c));
+  return ret;
+}
+
+int get_argv(char * argv[]) {
+  int ret;
+  asm volatile("int $0x80" : "=a"(ret) : "a"(0x0d), "b"(argv));
+  return ret;
+}

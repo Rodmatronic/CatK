@@ -44,6 +44,8 @@ struct task
   uint32_t error_code;
   uint32_t esp;
   bool kernel_mode;
+  int argc;
+  char **argv;
   char * cwd;
   int (*handle_signal)(int); /* each task can handle a signal differently */
   uint32_t entry;
@@ -60,9 +62,9 @@ void kill(struct task * p);
 struct task * get_current_task(void);
 bool tasking_enabled(void);
 int spawn_kernel_task(char * name, void * addr, int priority);
-int spawn_user_task(char * name, void * addr, int priority);
+int spawn_user_task(char * name, void * addr, int priority, int argc, char * argv[]);
 struct task * create_kernel_task(char * name, void * addr, int priority);
-struct task * create_user_task(char * name, void * addr, int priority);
+struct task * create_user_task(char * name, void * addr, int priority, int argc, char * argv[]);
 pid_t task_add_queue(struct task * p);
 void tasking_init(void);
 bool task_has_children(void);

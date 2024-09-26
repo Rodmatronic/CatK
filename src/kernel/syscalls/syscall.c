@@ -5,6 +5,7 @@
 #include <catk/printk.h>
 #include <catk/errno.h>
 #include <catk/tty.h>
+#include <catk/task.h>
 #include <lib/common.h>
 #include <config.h>
 #include <stdint.h>
@@ -75,6 +76,22 @@ static uint32_t do_system_call(struct intr_stack_frame * regs)
       rc = 0;
       break;
     }
+    case 0x0b: {
+      rc = sys_getpid();
+      break;
+    }
+    case 0x0c: {
+      rc = get_current_task()->argc;
+      break;
+    }
+    case 0x0d: {
+      struct task * p = get_current_task();
+      for(int i = 0; i < p->argc; i++) {
+        ((char **)regs->ebx)[i] = p->argv[i];
+      }
+      rc = 0;
+      break;
+    }
     default:
     {
       debug("Received bad or unsupported system call 0x%x\n", regs->eax);
@@ -94,5 +111,5 @@ void system_call(struct intr_stack_frame * regs)
 
 void syscall_install(void)
 {
-  interrupt_install(system_call, 128);
+  interrupt_install(system_call, 0x80);
 }

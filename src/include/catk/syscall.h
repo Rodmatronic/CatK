@@ -15,6 +15,7 @@ int sys_chdir(const char * path);
 int sys_fork(void);
 int sys_execve(const char * pathname, char * const argv[], char * const envp[]);
 void sys_beep(int ms);
+pid_t sys_getpid(void);
 
 void syscall_install(void);
 

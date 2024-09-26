@@ -160,6 +160,8 @@ struct task * create_kernel_task(char * name, void * addr, int priority)
   p->priority = priority;
   p->error_code = 0;
   p->handle_signal = task_signal;
+  p->argc = 0;
+  p->argv = NULL;
   switch (p->priority)
   {
     case TASK_PRIORITY_HIGH:
@@ -204,7 +206,72 @@ struct task * create_kernel_task(char * name, void * addr, int priority)
   STACK_PUSH(0x10);
   STACK_PUSH(0x10);
   p->esp = (uint32_t)stack;
-  debug("scheduler: created task %s with eip: 0x%08x\n", name, addr);
+  debug("scheduler: created kernel task %s with eip: 0x%08x\n", name, addr);
+  return p;
+}
+
+struct task * create_user_task(char * name, void * addr, int priority, int argc, char * argv[])
+{
+  struct task * p = (struct task *)calloc(sizeof(struct task), 1);
+  if (!p)
+    return NULL;
+  p->name = name;
+  p->pid = get_free_pid();
+  p->uid = 0;
+  p->gid = 0;
+  p->kernel_mode = true;
+  p->state = TASK_CREATED;
+  p->priority = priority;
+  p->error_code = 0;
+  p->handle_signal = task_signal;
+  p->argc = argc;
+  for(int i = 0; i < argc; i++)
+    p->argv[i] = argv[i];
+  switch (p->priority)
+  {
+    case TASK_PRIORITY_HIGH:
+    {
+      p->time_quantum = 10;
+      break;
+    }
+    case TASK_PRIORITY_NORMAL:
+    {
+      p->time_quantum = 5;
+      break;
+    }
+    case TASK_PRIORITY_LOW:
+    {
+      p->time_quantum = 1;
+      break;
+    }
+  }
+  p->ticks_left = p->time_quantum;
+  /* allocate stack for task */
+  p->esp = (uint32_t)calloc(4096, 1);
+  if (!(void *)p->esp)
+  {
+    free(p);
+    return NULL;
+  }
+  /* the stack grows down, so we go to the top, which is also the bottom */
+  p->stack_top = (p->esp + 4096);
+  uint32_t * stack = (uint32_t *)p->stack_top;
+  STACK_PUSH(0x200);
+  STACK_PUSH(0x08);
+  STACK_PUSH(addr);
+  STACK_PUSH(0);
+  STACK_PUSH(0);
+  STACK_PUSH(0);
+  STACK_PUSH(0);
+  STACK_PUSH(0);
+  STACK_PUSH(0);
+  STACK_PUSH(p->stack_top);
+  STACK_PUSH(0x10);
+  STACK_PUSH(0x10);
+  STACK_PUSH(0x10);
+  STACK_PUSH(0x10);
+  p->esp = (uint32_t)stack;
+  debug("scheduler: created user task %s with eip: 0x%08x\n", name, addr);
   return p;
 }
 
@@ -226,8 +293,8 @@ static void enter_from_usermode(void) {
 }
 
 /* this starts off as a kernel task, but it transitions to user-mode */
-int spawn_user_task(char * name, void * addr, int priority) {
-  struct task * p = create_kernel_task(name, enter_from_usermode, priority);
+int spawn_user_task(char * name, void * addr, int priority, int argc, char * argv[]) {
+  struct task * p = create_user_task(name, enter_from_usermode, priority, argc, argv);
   p->entry = (uint32_t)addr;
   if (!p)
     return -ENOMEM;
@@ -294,7 +361,7 @@ pid_t sleep(void) {
 
 void wakeup(pid_t pid) {
   critical_enter();
-  debug("Waking up PID %d. WAKE UP!!!\n", pid);
+  debug("Waking up PID %d. WAKE UP MR WEST!\n", pid);
   get_task_from_pid(pid)->state = TASK_ALIVE;
   critical_exit();
 }

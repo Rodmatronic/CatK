@@ -15,5 +15,8 @@ int wait(int * status);
 int chdir(const char * pathname);
 int execv(const char * pathname, char * argv[]);
 void beep(int ms);
+uint32_t getpid(void);
+int get_argc(void);
+int get_argv(char * argv[]);
 
 #endif

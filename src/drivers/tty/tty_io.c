@@ -69,7 +69,9 @@ static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count)
 {
   /* TODO: add proper tty input reading */
   sleep();
-  return 5;
+  int i = ring_buffer_read(tty->read_q, buf, count);
+  debug("Returning %s, %d..\n", buf, i);
+  return i;
 }
 
 static int tty_dev_read(struct file * filp, void * buf, size_t sz)
@@ -110,8 +112,7 @@ static void tty_release(struct tty_struct * tty)
 static inline void tty_buf_putc(struct ring_buffer * buf, struct tty_struct * tty, int ch) {
   ring_buffer_write(buf, ch);
   if(tty->termios.c_lflag & ECHO) {
-    int (*tty_output_intr)(struct tty_struct *, size_t) = tty->dev->priv_data;
-    tty_output_intr(tty, 1);
+    console_putc(ch);
   }
 }
 
@@ -126,9 +127,17 @@ void tty_handle_input(struct tty_struct * tty, int ch) {
     dispatch_signal(SIGINT);
     return;
   }
-  if(ch == '\n') {
-    ring_buffer_clear(tty->read_q);
-    wakeup(wait_queue_get_first()->pid);
+  switch(ch) {
+    case '\n': {
+      wakeup(wait_queue_get_first()->pid);
+      ring_buffer_clear(tty->read_q);
+      return;
+    }
+    case '\b': {
+      ring_buffer_erase(tty->read_q);
+      console_putc(ch);
+      return;
+    }
   }
   tty_buf_putc(tty->read_q, tty, ch);
 }

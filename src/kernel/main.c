@@ -19,6 +19,7 @@
 #include <catk/rand.h>
 #include <catk/initrd.h>
 #include <catk/module.h>
+#include <catk/utsname.h>
 #include <lib/ctype.h>
 #include <config.h>
 
@@ -36,6 +37,10 @@ static void show_boot_banner(void) {
 }
 
 void kmain(uint32_t magic, uintptr_t mbi) {
+  bool is_debug = false;
+#ifdef CATK_DEBUG_BUILD
+  is_debug = true;
+#endif
   if(!multiboot2_validate_args(magic, mbi)) {
     debug("Bootloader sent us with a bad multiboot2 information. Off to the kitty void, we go! :)\n");
     return; /* return into the infinite halt state */
@@ -49,8 +54,10 @@ void kmain(uint32_t magic, uintptr_t mbi) {
     debug("Failed to initialize console: %d\n", rc);
     return;
   }
+  console_print("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
   cmdline = obtain_cmdline(mbi);
   show_boot_banner();
+  printk("CatKernel Version %s %s%s(%s): %s\n", UTS_RELEASE, CATK_VERSION_CODENAME, is_debug ? " DEBUG!! " : " ", CATK_COMPILED_WITH, CATK_BUILD_DATE);
   if (!cpuidcheck()) {
     panic("Could not get CPUID for this hardware!");
   }

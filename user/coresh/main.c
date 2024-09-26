@@ -60,8 +60,7 @@ int main() {
         print("coresh$ ");
         int len = read(0, input, MAX_INPUT);
         if (len <= 0) {
-            print_err("invalid read\n");
-            break;
+            print_err("invalid read\n"); 
         }
         if (input[len - 1] == '\n') {
             input[len - 1] = '\0';
