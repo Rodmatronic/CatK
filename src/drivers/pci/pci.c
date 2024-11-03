@@ -11,11 +11,12 @@
 
 int num_pci = 0;
 
-static struct pci_device devices[32];
+static struct pci_device devices[64];
 
 /* these are built in the kernel */
 static struct pci_driver * drivers[] = {
   &ide_driver,
+  &ne2000_driver,
   NULL
 };
 
@@ -173,7 +174,7 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
     case 0x06: // Bridge Devices
     {
       switch (devices[num_pci].subclass) {
-        case 0x04: printk("  class 0x%02x subclass 0x%02x - PCI-to-PCI Bridge found\n"); break;
+        case 0x04: printk("  class 0x%02x subclass 0x%02x - PCI-to-PCI Bridge found\n", devices[num_pci].class, devices[num_pci].subclass); break;
         case 0x01: printk("  class 0x%02x subclass 0x%02x - ISA Bridge found\n", devices[num_pci].class, devices[num_pci].subclass); break;
         default: printk("  class 0x%02x subclass 0x%02x - Bridge Device found\n", devices[num_pci].class, devices[num_pci].subclass); break;
       }
@@ -252,8 +253,10 @@ static void pci_drivers_find(void) /* i hate this coding this damn function */
       while(ident->ven != PCI_VENDOR_INVALID)
       {
         ident = &drivers[j]->ident[k++];
-        if(pci_compare(d.ident, ident))
+        rc = pci_compare(d.ident, ident);
+        if(rc == 1)
         {
+          debug("Found PCI device driver \"%s\"\n", drivers[j]->name);
           rc = pci_driver_attach(&d, drivers[j]);
           if(rc < 0)
           {

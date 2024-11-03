@@ -39,6 +39,7 @@ struct pci_device
 
 /* built-in drivers */
 extern struct pci_driver ide_driver;
+extern struct pci_driver ne2000_driver;
 extern struct pci_driver sata_driver;
 
 void pci_enable_busmaster(struct pci_device * dev);

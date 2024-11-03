@@ -1,20 +1,8 @@
 section .text
-  global usermode_switch
+  global do_first_context_switch
+  extern isr_stub_end
 
-usermode_switch:
-  cli
-
-  mov ax, 0x23
-  mov ds, ax
-  mov es, ax
-  mov fs, ax
-  mov gs, ax
-
-  mov eax, esp
-  push dword 0x23  ; ds
-  push dword eax   ; esp
-  push dword 0x200 ; eflags
-  push dword 0x1b  ; cs
-  mov eax, [esp + 0x10]
-  push eax
-  iretd
+do_first_context_switch:
+  mov eax, [esp + 0x04]
+  mov esp, eax
+  jmp isr_stub_end

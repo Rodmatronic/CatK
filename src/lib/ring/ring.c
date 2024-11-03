@@ -49,25 +49,21 @@ int ring_buffer_read(struct ring_buffer * ring, uint8_t * buf, size_t len)
   return ring->head;
 }
 
-int ring_buffer_read_single(struct ring_buffer * ring, uint8_t data) {
+int ring_buffer_read_single(struct ring_buffer * ring, uint8_t * data) {
   if(ring->count == 0) {
-    return ring->head;
+    return -1;
   }
   if(ring->head > ring->size) {
     ring->head = 0;
   }
-  data = ring->buffer[ring->head++];
+  *data = ring->buffer[ring->head++];
   ring->count--;
   //debug("READ: ring->count: %d\n", ring->count);
   return ring->head;
 }
 
-void ring_buffer_erase(struct ring_buffer * ring) {
-  ring->tail--;
-  ring->count--;
-}
-
 void ring_buffer_clear(struct ring_buffer * ring) {
+  memset(ring->buffer, 0, ring->size);
   ring->head = 0;
   ring->tail = 0;
   ring->count = 0;

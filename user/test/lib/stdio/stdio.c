@@ -3,43 +3,139 @@
 #include "unistd.h"
 #include "sys/types.h"
 
-static void vprintf(char * fmt, va_list ap)
+#define BIT(n) (1 << n)
+
+#define FLAG_FILL_ZERO BIT(0)
+
+#define SET_FLAG(f) flags |= f
+#define UNSET_FLAG(f) flags &= ~f
+
+#define HAS_FLAG(f) (flags & f)
+
+#define PUTS(s) \
+  for(int i = 0; s[i]; i++) \
+  { \
+    str[str_i++] = s[i]; \
+    n++; \
+  }
+
+int vsnprintf(char * str, size_t len, const char format[], va_list arg)
 {
-  while(*fmt)
+  int flags = 0;
+  int n = 0;
+  int str_i = 0;
+  size_t width = 0;
+  for(int i = 0; format[i]; i++)
   {
-    if (*fmt == '%')
+    if(format[i] == '%')
     {
-      *fmt++;
-      switch (*fmt)
+      i++;
+next:
+      if(!format[i])
+        break;
+      switch(format[i])
       {
+        case '0'...'9':
+        {
+          if (format[i] == '0' && !width)
+            SET_FLAG(FLAG_FILL_ZERO);
+          width *= 10;
+          width += format[i] - '0';
+          i++;
+          goto next;
+        }
         case 's':
-          char * str = va_arg(ap, char *);
-          write(1, str, strlen(str));
+        {
+          char * s = va_arg(arg, char *);
+          if(!s)
+            s = "(null)";
+          PUTS(s);
           break;
+        }
         case 'd':
-          int num = va_arg(ap, int);
-          char s_num[3];
-          itoa(num, s_num, 10);
-          write(1, s_num, strlen(s_num));
+        {
+          int num = va_arg(arg, int);
+          char nums[32];
+          itoa(num, nums, 10); // haha num nums :-)
+          PUTS(nums);
           break;
-        default:
+        }
+        case 'x':
+        {
+          uint32_t x = va_arg(arg, uint32_t);
+          char xs[32];
+          itoa(x, xs, 16);
+          if(HAS_FLAG(FLAG_FILL_ZERO))
+          {
+            for(; width > strlen(xs); width--)
+            {
+              str[str_i++] = HAS_FLAG(FLAG_FILL_ZERO) ? '0' : ' ';
+              n++;
+            }
+            UNSET_FLAG(FLAG_FILL_ZERO);
+            width = 0; /* reset width */
+          }
+          PUTS(xs);
           break;
+        }
+        case 'c':
+        {
+          char c = va_arg(arg, int);
+          str[str_i++] = c;
+          n++;
+        }
+        break;
       }
     }
     else
     {
-      write(1, fmt, 1);
+      str[str_i++] = format[i];
+      n++;
     }
-    fmt++;
   }
+  str[str_i] = '\0';
+  return n;
 }
 
-void printf(char * fmt, ...)
+int vsprintf(char * str, const char format[], va_list arg)
 {
-  va_list ap;
-  va_start(ap, fmt);
-  vprintf(fmt, ap);
-  va_end(ap);
+  return vsnprintf(str, __INT_MAX__, format, arg);
+}
+
+int vprintf(const char format[], va_list arg)
+{
+  char buf[256];
+  int ret = vsprintf(buf, format, arg);
+  write(1, buf, 256);
+  return ret;
+}
+
+int snprintf(char * str, size_t len, const char fmt[], ...)
+{
+  int rc;
+  va_list arg;
+  va_start(arg, fmt);
+  rc = vsnprintf(str, len, fmt, arg);
+  va_end(arg);
+  return rc;
+}
+
+int sprintf(char * str, const char fmt[], ...)
+{
+  int rc;
+  va_list arg;
+  va_start(arg, fmt);
+  rc = vsprintf(str, fmt, arg);
+  va_end(arg);
+  return rc;
+}
+
+int printf(const char * fmt, ...) {
+  va_list arg;
+  va_start(arg, fmt);
+  int rc = vprintf(fmt, arg);
+  va_end(arg);
+  return rc;
 }
 
 void reverse(char * str[], int length)

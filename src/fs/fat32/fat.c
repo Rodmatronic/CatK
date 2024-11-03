@@ -54,7 +54,7 @@ int fat32_mount(struct filesystem * fs, struct device * blkdev)
 
 int fat32_init(int partition_lba)
 {
-#if CATK_EXT2 == 1
+#ifdef CATK_FAT32
   fat32_lba_start = partition_lba;
   return register_filesystem("FAT32", &fat32_ops, &fat32_fops, FS_MOUNT_DISK);
 #else

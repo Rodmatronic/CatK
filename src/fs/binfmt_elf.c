@@ -17,29 +17,13 @@ static bool elf_verify(const uint8_t * data)
   return (data[0] == 0x7f && data[1] == 0x45 && data[2] == 0x4c && data[3] == 0x46);
 }
 
-static void debug_print_info(struct elf_hdr * header)
-{
-	debug("elf header info:\n");
-	debug("\tformat: %s\n", header->e_ident[4] ? "32-bit" : "64-bit");
-	debug("\tendianness: %s\n", header->e_ident[5] ? "little endian" : "big endian");
-	debug("\telf version: %d\n", header->e_ident[6]);
-	debug("\tos abi: 0x%x\n", header->e_ident[7]);
-	debug("\tobject file type: 0x%x\n", header->e_type);
-	debug("\tmachine: 0x%x\n", header->e_machine);
-	debug("\tentry point: 0x%x\n", header->e_entry);
-}
-
 int elf_exec(const char * name, const uint8_t * data)
 {
   uint32_t load_loc = 0;
   if(!elf_verify(data))
     return -ENOEXEC;
-  debug("elf load start\n");
-  debug("elf data start: 0x%08x\n", data);
   struct elf_hdr * header = (struct elf_hdr *)data;
-  debug_print_info(header);
   struct elf_phdr * prghdr = (struct elf_phdr *)(data + header->e_phoff);
-  struct task * p = NULL;
   for(int i = 0; i < header->e_phnum; i++, prghdr++)
   {
     switch(prghdr->p_type)
@@ -48,7 +32,6 @@ int elf_exec(const char * name, const uint8_t * data)
       {
         debug("elf file load offest 0x%08x..\n", prghdr->p_offset);
         load_loc = (uint32_t)(data + prghdr->p_offset);
-        uint32_t p_addr = load_loc, size = prghdr->p_filesz;
         break;
       }
       default:

@@ -12,7 +12,7 @@ int vfs_mount(const char * path, struct device * blkdev, struct filesystem * fs)
   if(MAJOR(blkdev->dev) != DISKDEV_MAJOR && MAJOR(blkdev->dev) != RAMDISK_MAJOR) {
     return -EINVAL;
   }
-  if(!fs) {
+  if(fs == NULL) {
     return -EINVAL;
   }
   strncpy((char *)fs->mount.mount_path, path, NAME_MAX - 1);

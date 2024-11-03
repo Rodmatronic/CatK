@@ -3,6 +3,8 @@ section .text
   global idt_flush
   global tss_install
   global get_eip
+  global sse_setup
+  extern kernel_hang
 
 gdt_flush:
   mov eax, [esp + 4]
@@ -37,4 +39,30 @@ tss_install:
   ltr ax
 
   popa
+  ret
+
+
+sse_setup:
+  push ebp
+  mov ebp, esp
+
+  pushad
+
+  mov eax, 0x01
+  cpuid
+  test edx, 1 << 25
+  jz kernel_hang
+  ; muehehehe copy + paste from osdev.org coming in clutch
+  mov eax, cr0
+  and ax, ~(1 << 2)
+  or ax, 1 << 1
+  mov cr0, eax
+  mov eax, cr4
+  or ax, 3 << 9
+  mov cr4, eax
+
+  popad
+
+  mov esp, ebp
+  pop ebp
   ret

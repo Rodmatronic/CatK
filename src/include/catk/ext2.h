@@ -80,8 +80,8 @@ struct ext2_inode
 	uint32_t last_modification_time;
 	uint32_t deletion_time;
 	uint16_t group_id;
-	uint16_t hard_links; //Hard links to this node
-	uint32_t sectors_in_use; //Hard disk sectors, not ext2 blocks.
+	uint16_t links_count;
+	uint32_t blocks;
 	uint32_t flags;
 	uint32_t os_specific_1;
 	uint32_t block_pointers[12];

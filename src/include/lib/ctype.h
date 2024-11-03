@@ -27,7 +27,7 @@ static inline int isalpha(char c) {
 
 static inline int index_of(char c, char * str)
 {
-	char i = 0;
+	int i = 0;
 	while(str[i] != '\0')
 	{
 		if(str[i] == c)

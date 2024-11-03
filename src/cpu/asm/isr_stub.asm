@@ -1,7 +1,8 @@
 section .text
   extern interrupt_handler
+  global isr_stub_end
 
-early_interrupt_handler:
+isr_stub_start:
   pushad
   mov ax, ds
   push eax
@@ -16,6 +17,7 @@ early_interrupt_handler:
   call interrupt_handler
   pop esp
 
+isr_stub_end:
   pop eax
   mov ds, ax
   mov es, ax
@@ -39,7 +41,7 @@ interrupt_%1:
   push byte 0
 %endif
   push %1
-  jmp early_interrupt_handler
+  jmp isr_stub_start
 %endmacro
 
 DEFINE_INT_HANDLER 0, 1

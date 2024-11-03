@@ -1,31 +1,11 @@
 #include <catk/core.h>
-#include <catk/compiler.h>
-#include <catk/device.h>
-#include <catk/tty.h>
 #include <catk/printk.h>
-#include <catk/errno.h>
-#include <catk/console.h>
 #include <catk/io.h>
-#include <catk/debug.h>
-#include <lib/common.h>
+#include <catk/tty.h>
 
-#define KEYBOARD_PORT1_IRQ              33
-#define KEYBOARD_PORT2_IRQ              44
-
+/* IO */
 #define KEYBOARD_DATA_PORT              0x60
 #define KEYBOARD_COMMAND_REG            0x64
-
-#define KEYBOARD_STATUS_OUTPUT          BIT(0) /* must be set before attempting to read data from IO port */
-#define KEYBOARD_STATUS_INPUT           BIT(1) /* must be clear before attempting to write data to IO port 0x60 or IO port 0x64 */
-#define KEYBOARD_STATUS_SYSTEM          BIT(2) /* Meant to be cleared on reset and set by firmware if the system passes self tests (POST) */
-#define KEYBOARD_STATUS_COMMAND         BIT(3) /* 0 = data written to input buffer is data for PS/2 device, 1 = data written to input buffer is data for PS/2 controller command */
-#define KEYBOARD_STATUS_TIMEOUT         BIT(6) /* 0 = no error, 1 = time-out error */
-#define KEYBOARD_STATUS_PARITY          BIT(7) /* 0 = no error, 1 = parity error */
-
-#define KEYBOARD_CONFIG_BYTE_INTR1      BIT(0)
-#define KEYBOARD_CONFIG_BYTE_INTR2      BIT(1)
-#define KEYBOARD_CONFIG_BYTE_CLK2       BIT(5)
-
 #define SEND_CMD(cmd)                   outb(KEYBOARD_COMMAND_REG, cmd)
 #define READ_CMD                        inb(KEYBOARD_COMMAND_REG)
 #define READ_DATA                       inb(KEYBOARD_DATA_PORT)
@@ -35,33 +15,11 @@
 #define WAIT_FOR_INPUT_STATUS           while(!HAS_STATUS(KEYBOARD_STATUS_INPUT))
 #define WAIT_FOR_OUTPUT_STATUS          while(!HAS_STATUS(KEYBOARD_STATUS_OUTPUT))
 
-#define KEYBOARD_CMD_FIRST_ENABLE       0xae
-#define KEYBOARD_CMD_FIRST_DISABLE      0xad
+/* Status */
+#define KEYBOARD_STATUS_OUTPUT          BIT(0) /* must be set before attempting to read data from IO port */
+#define KEYBOARD_STATUS_INPUT           BIT(1) /* must be clear before attempting to write data to IO port 0x60 or IO port 0x64 */
 
-#define KEYBOARD_CMD_SECOND_ENABLE      0xa8
-#define KEYBOARD_CMD_SECOND_DISABLE     0xa7
-
-#define KEYBOARD_CMD_CONTROLLER_TEST    0xaa
-
-#define KEYBOARD_CMD_FIRST_PORT_TEST    0xab
-#define KEYBOARD_CMD_SECOND_PORT_TEST   0xa9
-
-#define KEYBOARD_CMD_CTRL_PORT_READ     0xd0
-
-#define KEYBOARD_CMD_CONFIG_BYTE_READ   0x20
-#define KEYBOARD_CMD_CONFIG_BYTE_WRITE  0x60
-
-/* PS/2 controller test results */
-#define KEYBOARD_CONTROLLER_TEST_PASS   0x55
-#define KEYBOARD_CONTROLLER_TEST_FAIL   0xfc
-/* PS/2 keyboard port test results */
-#define KEYBOARD_FISRT_PORT_TEST_PASS   0x00
-#define KEYBOARD_FIRST_PORT_TEST_CLK_LO 0x01
-#define KEYBOARD_FIRST_PORT_TEST_CLK_HI 0x02
-#define KEYBOARD_FIRST_PORT_TEST_DAT_LO 0x03
-#define KEYBOARD_FIRST_PORT_TEST_DAT_HI 0x04
-
-/* keyboard scancodes */
+/* Keyboard scancodes and flags */
 #define KEYBOARD_KEYPRESS_STOP  0x80 /* finger gets lifted off of key */
 #define KEYBOARD_KEY_CTRL       0x1d
 #define KEYBOARD_KEY_ALT        0x38
@@ -95,7 +53,7 @@ static uint8_t keyboard_map[256] = {
   [0xd2] = 0xe8,      [0xd3] = 0xe9
 };
 
-static uint8_t shift_map[256] = {
+static uint8_t keyboard_shift_map[256] = {
   0,  033,  '!',  '@',  '#',  '$',  '%',  '^',  // 0x00
   '&',  '*',  '(',  ')',  '_',  '+',  '\b', '\t',
   'Q',  'W',  'E',  'R',  'T',  'Y',  'U',  'I',  // 0x10
@@ -116,127 +74,8 @@ static uint8_t shift_map[256] = {
   [0xd2] = 0xe8,      [0xd3] = 0xe9
 };
 
-/* assume that the keyboard is single channel */
-static bool is_dual_channel = false;
-/* keep track of keyboard state (e.g. ctrl key held, alt key held, etc) */
-static uint8_t keyboard_flags;
-
-static struct tty_struct * tty = NULL;
-
-static inline void keyboard_first_enable(void)
-{
-  SEND_CMD(KEYBOARD_CMD_FIRST_ENABLE);
-}
-
-static inline void keyboard_first_disable(void)
-{
-  SEND_CMD(KEYBOARD_CMD_SECOND_DISABLE);
-}
-
-static inline void keyboard_second_enable(void)
-{
-  SEND_CMD(KEYBOARD_CMD_SECOND_ENABLE);
-}
-
-static inline void keyboard_second_disable(void)
-{
-  SEND_CMD(KEYBOARD_CMD_SECOND_DISABLE);
-}
-
-static inline uint8_t _unused_ keyboard_ctrl_read_out(void)
-{
-  SEND_CMD(KEYBOARD_CMD_CTRL_PORT_READ);
-  return READ_DATA;
-}
-
-static inline uint8_t keyboard_ctrl_test(void)
-{
-  SEND_CMD(KEYBOARD_CMD_CONTROLLER_TEST);
-  return READ_DATA;
-}
-
-static inline uint8_t keyboard_first_port_test(void)
-{
-  SEND_CMD(KEYBOARD_CMD_FIRST_PORT_TEST);
-  return READ_DATA;
-}
-
-static inline uint8_t _unused_ keyboard_second_port_test(void)
-{
-  SEND_CMD(KEYBOARD_CMD_SECOND_PORT_TEST);
-  return READ_DATA;
-}
-
-static inline uint8_t keyboard_ctrl_config_byte_read(void)
-{
-  SEND_CMD(KEYBOARD_CMD_CONFIG_BYTE_READ);
-  return READ_DATA;
-}
-
-static inline void keyboard_ctrl_config_byte_write(uint8_t byte)
-{
-  SEND_CMD(KEYBOARD_CMD_CONFIG_BYTE_WRITE);
-  SEND_CMD(byte);
-}
-
-static void keyboard_first_intr_flag_set(void)
-{
-  uint8_t cfg_byte = keyboard_ctrl_config_byte_read();
-  if(cfg_byte & KEYBOARD_CONFIG_BYTE_INTR1)
-    return;
-  cfg_byte |= KEYBOARD_CONFIG_BYTE_INTR1;
-  keyboard_ctrl_config_byte_write(cfg_byte);
-}
-
-static void keyboard_second_intr_flag_set(void)
-{
-  uint8_t cfg_byte = keyboard_ctrl_config_byte_read();
-  if(cfg_byte & KEYBOARD_CONFIG_BYTE_INTR2)
-    return;
-  cfg_byte |= KEYBOARD_CONFIG_BYTE_INTR2;
-  keyboard_ctrl_config_byte_write(cfg_byte);
-}
-
-static void keyboard_test_print_err(uint8_t err)
-{
-  switch(err)
-  {
-    case KEYBOARD_FIRST_PORT_TEST_CLK_LO:
-    {
-      printk("PS2-Port: Error: clock line stuck low\n");
-      break;
-    }
-    case KEYBOARD_FIRST_PORT_TEST_CLK_HI:
-    {
-      printk("PS2-Port: Error: clock line stuck high\n");
-      break;
-    }
-    case KEYBOARD_FIRST_PORT_TEST_DAT_LO:
-    {
-      printk("PS2-Port: Error: data line stuck low\n");
-      break;
-    }
-    case KEYBOARD_FIRST_PORT_TEST_DAT_HI:
-    {
-      printk("PS2-Port: Error: data line stuck high\n");
-      break;
-    }
-    default:
-    {
-      printk("PS2-Port: Error: received unknown error code: 0x%02x\n", err);
-      break;
-    }
-  }
-}
-
-static void keyboard_channel_test(void)
-{
-  uint8_t cfg_byte;
-  SEND_CMD(KEYBOARD_CMD_SECOND_ENABLE);
-  cfg_byte = keyboard_ctrl_config_byte_read();
-  is_dual_channel = !(cfg_byte & KEYBOARD_CONFIG_BYTE_CLK2);
-  printk("PS/2: Keyboard detected as %s\n", is_dual_channel ? "dual-channeled" : "single-channeled");
-}
+static struct tty_struct * connected_tty = NULL;
+static uint8_t keyboard_flags = 0;
 
 static uint8_t keyboard_get_scancode_flag(char scancode)
 {
@@ -305,92 +144,23 @@ static void _hot_ keyboard_port1_irq(struct intr_stack_frame * frame)
     }
     return;
   }
-  uint8_t * keymap = (keyboard_flags & KEYBOARD_FLAG_SHIFT) ? shift_map : keyboard_map;
+  uint8_t * keymap = (keyboard_flags & KEYBOARD_FLAG_SHIFT) ? keyboard_shift_map : keyboard_map;
   int ch = keymap[scancode & 0x7f];
   if(keyboard_flags & KEYBOARD_FLAG_CTRL) {
     for(int i = 1; i < 12; i++) {
-      if(ch == ((tty->termios.c_cc[i] + 32) & 0x7f)) {
-        ch = tty->termios.c_cc[i];
+      if(ch == ((connected_tty->termios.c_cc[i] + 32) & 0x7f)) {
+        ch = connected_tty->termios.c_cc[i];
       }
     }
   }
   if(!(scancode & KEYBOARD_KEYPRESS_STOP))
   {
-    tty_handle_input(tty, ch);
+    tty_handle_input(connected_tty, ch);
   }
 }
 
-void keyboard_port2_irq(struct intr_stack_frame * frame)
+void keyboard_init(void)
 {
-
-}
-
-int keyboard_assign_tty(struct tty_struct * tty_new)
-{
-  if(!tty_new)
-    return -EINVAL;
-  if(!tty_new->dev)
-    return -ENODEV;
-  if(!IS_VALID_TTY(tty_new))
-    return -EINVAL;
-  tty = tty_new;
-  return 0;
-}
-
-int keyboard_init(void)
-{
-  /* disable interrupts */
-  critical_enter();
-  int rc;
-  /* disable so that other ps/2 data ports cant interfere with another */
-  debug("Disabling first keyboard channel..\n");
-  keyboard_first_disable();
-  debug("Disabling second keyboard channel..\n");
-  keyboard_second_disable();
-  debug("Testing PS/2 controller..\n");
-  rc = keyboard_ctrl_test();
-  /* did it pass the test? */
-  if(rc == KEYBOARD_CONTROLLER_TEST_FAIL)
-  {
-    /* not to be confused with the PlayStation 2 :) */
-    debug("PS/2 controller failed the test.\n");
-    printk("PS2-Controller: Error: controller test failed\n");
-    critical_exit();
-    return -EIO;
-  }
-  debug("Testing first keyboard port..\n");
-  rc = keyboard_first_port_test();
-  /* did it pass? */
-  if(rc != KEYBOARD_FISRT_PORT_TEST_PASS)
-  {
-    debug("Keyboard port test failed. View the kernel console for more info.\n");
-    keyboard_test_print_err((uint8_t)rc);
-    critical_exit();
-    return -EIO;
-  }
-  keyboard_channel_test();
-  /* enable both keyboards */
-  debug("Enabling first keyboard..\n");
-  keyboard_first_enable();
-  if(is_dual_channel) {
-    debug("Enabling second keyboard..\n");
-    keyboard_second_enable();
-  }
-  /* set interrupt flags on both keyboards */
-  debug("Setting interrupt flag on keyboard 1..\n");
-  keyboard_first_intr_flag_set();
-  if(is_dual_channel) {
-    debug("Setting interrupt flag on keyboard 2..\n");
-    keyboard_second_intr_flag_set();
-  }
-  debug("Setting keyboard interrupt handlers..\n");
-  interrupt_install(&keyboard_port1_irq, KEYBOARD_PORT1_IRQ);
-  if(is_dual_channel)
-    interrupt_install(&keyboard_port2_irq, KEYBOARD_PORT2_IRQ);
-  /* by default, we use tty0 */
-  debug("Binding tty0 to keyboard output..\n");
-  tty = tty_lookup(0);
-  critical_exit();
-  debug("Keyboard successfully initialized.\n");
-  return 0;
+  connected_tty = tty_lookup(0);
+  interrupt_install(keyboard_port1_irq, IRQ(1));
 }

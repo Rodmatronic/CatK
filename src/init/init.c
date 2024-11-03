@@ -45,7 +45,6 @@ int try_init(const char * path)
 int start_init(const char * cmdline)
 {
   int rc;
-  set_tss_stack(get_current_task()->esp);
   printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
   char * init_val = get_cmdline_param_val((char *)cmdline, "init");
   if(!init_val)
@@ -53,6 +52,9 @@ int start_init(const char * cmdline)
   else
     strncpy(init_path, init_val, NAME_MAX - 1);
   printk("%s: trying %s...\n", __FUNCTION__, init_path);
-  try_init(init_path);
+  rc = try_init(init_path);
+  if(IS_ERR(rc)) {
+    return rc;
+  }
   return 0;
 }

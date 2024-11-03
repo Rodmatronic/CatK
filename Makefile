@@ -17,8 +17,7 @@ export TOOLS = $(CATK_ROOT)/utils
 export USER = $(CATK_ROOT)/user
 export GZ = $(shell which gzip)
 export CONFIG = $(CATK_ROOT)/config
-export OUT = $(CATK_ROOT)/out
-export OBJ = $(CATK_ROOT)/obj
+export OUT = $(CATK_ROOT)/target
 
 $(shell $(MKDIR) $(OUT))
 
@@ -51,11 +50,11 @@ all: clean
 
 test:
 	@$(MAKE) -C $(USER)/test || { echo "Build failed"; exit 1; }
-	bash $(TOOLS)/update_disk.sh $(USER)/test/init $(CATK_ROOT)/initrd.tar
+	bash $(TOOLS)/update_initrd.sh $(USER)/test/init $(CATK_ROOT)/initrd.tar
 
 coresh:
 	@$(MAKE) -C $(USER)/coresh || { echo "Build failed"; exit 1; }
-	bash $(TOOLS)/update_disk.sh $(USER)/coresh/init $(CATK_ROOT)/initrd.tar
+	bash $(TOOLS)/update_initrd.sh $(USER)/coresh/init $(CATK_ROOT)/initrd.tar
 
 config:
 	bash $(TOOLS)/config.sh
@@ -65,7 +64,8 @@ debug:
 		-d int \
 		-cdrom $(OUT)/catkernel.iso \
 		-m 2G \
-		-no-reboot
+		-no-reboot \
+		-debugcon stdio
 
 disk:
 	@bash $(TOOLS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
@@ -75,12 +75,16 @@ disk:
 
 run:
 	@qemu-system-x86_64 \
-		-cpu host \
-		-enable-kvm \
-		-drive format=raw,file=$(CATK_ROOT)/disk-ext2.img \
-		-cdrom $(OUT)/catkernel.iso \
+		-machine pc \
+		-hda $(OUT)/catkernel.iso \
 		-m 2G \
-		-debugcon stdio
+		-debugcon stdio \
+	  -netdev user,id=mynet0 \
+    -device rtl8139,netdev=mynet0 \
+		-vga std
+
+run_bochs:
+	@bochs -q
 
 clean:
 	@$(RM_FORCE) $(OUT)

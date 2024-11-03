@@ -18,21 +18,9 @@ static void timer_configure_hz(uint16_t hz)
 void timer_irq(struct intr_stack_frame * regs)
 {
   jiffies++;
-  if(tasking_enabled())
+  if(is_tasking_enabled())
   {
-    struct task * p = get_current_task();
-    /* the task still has a slice of cpu time left */
-    if(p->ticks_left)
-    {
-      p->ticks_left--;
-    }
-    else
-    {
-      /* reset the time slice and switch to a new task */
-      p->ticks_left = p->time_quantum;
-      pic_eoi(0x20);
-      schedule();
-    }
+    schedule(regs);
   }
 }
 
@@ -44,9 +32,5 @@ void timer_init(void)
 
 void msleep(uint32_t ms) {
     uint32_t end = jiffies + ms;
-    while (jiffies < end) {
-        if (tasking_enabled()) {
-            schedule(); // Let other tasks run
-        }
-    }
+    while (jiffies < end);
 }

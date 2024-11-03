@@ -184,7 +184,9 @@ static int devfs_exists(const char * path) {
 static void dev2file(struct device * dev, struct file * file) {
   file->inode = NULL;
   strcpy(file->name, dev->name);
-  file->ops = dev->fops;
+  file->ops   = dev->fops;
+  file->rdev  = dev->dev;
+  file->fpos  = 0;
 }
 
 static int devfs_open(struct file * filp, const char * path) {

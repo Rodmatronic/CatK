@@ -1,7 +1,7 @@
 #ifndef __STDIO_H
 #define __STDIO_H
 
-void printf(char * fmt, ...);
+int printf(const char * fmt, ...);
 int strlen(char * str);
 char * itoa(int value, char * str, int radix);
 void reverse(char * str[], int length);

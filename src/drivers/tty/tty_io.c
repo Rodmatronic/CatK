@@ -9,20 +9,19 @@
 #include <catk/types.h>
 #include <catk/ipc.h>
 #include <catk/task.h>
+#include <catk/spinlock.h>
 #include <lib/ctype.h>
 
-struct tty_struct * ttys[NR_CONSOLES] = {NULL};
+SPINLOCK_INIT(tty_spinlock);
+
+struct tty_struct * ttys[NR_CONSOLES];
 struct file_operations tty_fops;
 
-struct tty_struct * tty_lookup(int num)
-{
-  if(!ttys[num])
-    return NULL;
+struct tty_struct * tty_lookup(int num) {
   return ttys[num];
 }
 
-static void termios_init(struct termios * termios)
-{
+static void termios_init(struct termios * termios) {
   termios->c_iflag = BRKINT | ICRNL | IXON | IXANY;
   termios->c_oflag = OPOST | ONLCR;
   termios->c_cflag = CREAD | CS8 | HUPCL;
@@ -41,53 +40,77 @@ static void termios_init(struct termios * termios)
   termios->c_cc[VTIME] = 0;
 }
 
-static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t count)
-{
-  if(!tty->dev)
-  {
+static size_t tty_write(struct tty_struct * tty, const uint8_t * buf, size_t count) {
+  spinlock_acquire(&tty_spinlock);
+  if(!tty->dev) {
     debug("tty: writing to a non-existent tty struct\n");
+    spinlock_release(&tty_spinlock);
     return -ENODEV; 
   }
 
   char * str = (char *)malloc(count + 1);
   size_t i;
 
-  if(!str)
+  if(!str) {
+    spinlock_release(&tty_spinlock);
     return -ENOMEM;
+  }
   strncpy(str, (char *)buf, count);
 
-  for(i = 0; str[i]; i++)
+  for(i = 0; str[i]; i++) {
     ring_buffer_write(tty->write_q, str[i]);
+  }
 
   int (*tty_output_intr)(struct tty_struct *, size_t) = tty->dev->priv_data;
   tty_output_intr(tty, i);
   free(str);
-  return 0;
-}
-
-static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count)
-{
-  /* TODO: add proper tty input reading */
-  sleep();
-  int i = ring_buffer_read(tty->read_q, buf, count);
-  debug("Returning %s, %d..\n", buf, i);
+  spinlock_release(&tty_spinlock);
   return i;
 }
 
-static int tty_dev_read(struct file * filp, void * buf, size_t sz)
-{
-  struct tty_struct * tty = tty_lookup(0);
-  return tty_read(tty, (uint8_t *)buf, sz);
+static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count) {
+  spinlock_acquire(&tty_spinlock);
+  size_t cnt = count;
+  uint8_t ch = 0;
+  if(tty->read_q->count < count) {
+    while(count > 0) {
+      if (ring_buffer_read_single(tty->read_q, &ch) < 0) {
+        continue;
+      }
+      switch (ch) {
+        case '\n': {
+          ring_buffer_clear(tty->read_q);
+          spinlock_release(&tty_spinlock);
+          return cnt - count;
+        }
+        case '\b': {
+          *--buf = '\0';
+          continue;
+        }
+      }
+      *buf++ = ch;
+      count--;
+    }
+  }
+  spinlock_release(&tty_spinlock);
+  return cnt - count;
 }
 
-static int tty_dev_write(struct file * filp, void * buf, size_t sz)
-{
-  struct tty_struct * tty = tty_lookup(0);
-  return tty_write(tty, (const uint8_t *)buf, sz);
+static int tty_dev_read(struct file * filp, void * buf, size_t sz) {
+  assert(MAJOR(filp->rdev) == TTYDEV_MAJOR);
+  struct tty_struct * tty = tty_lookup(MINOR(filp->rdev));
+  int rc = tty_read(tty, (uint8_t *)buf, sz);
+  return rc;
 }
 
-static int tty_dev_open(struct file * filp, const char * file)
-{
+static int tty_dev_write(struct file * filp, void * buf, size_t sz) {
+  assert(MAJOR(filp->rdev) == TTYDEV_MAJOR);
+  struct tty_struct * tty = tty_lookup(MINOR(filp->rdev));
+  int rc = tty_write(tty, (const uint8_t *)buf, sz);
+  return rc;
+}
+
+static int tty_dev_open(struct file * filp, const char * file) {
   return 0;
 }
 
@@ -96,11 +119,8 @@ static void tty_dev_close(struct file * filp)
   return;
 }
 
-static void tty_release(struct tty_struct * tty)
-{
-  if(!tty)
-  {
-    debug("tty: releasing a tty struct that is null??\n");
+static void tty_release(struct tty_struct * tty) {
+  if(!tty) {
     return;
   }
   ring_buffer_release(tty->write_q);
@@ -123,50 +143,29 @@ void tty_handle_input(struct tty_struct * tty, int ch) {
       tty_buf_putc(tty->write_q, tty, '^');
       tty_buf_putc(tty->write_q, tty, tty->termios.c_cc[VINTR] + 32);
     }
-    /* TODO: implement signals */
     dispatch_signal(SIGINT);
     return;
-  }
-  switch(ch) {
-    case '\n': {
-      wakeup(wait_queue_get_first()->pid);
-      ring_buffer_clear(tty->read_q);
-      return;
-    }
-    case '\b': {
-      ring_buffer_erase(tty->read_q);
-      console_putc(ch);
-      return;
-    }
   }
   tty_buf_putc(tty->read_q, tty, ch);
 }
 
 /* creates a tty device and binds console device */
-int tty_create(int num, struct device * dev)
-{
+int tty_create(int num, struct device * dev) {
   struct device * tty_dev = (struct device *)malloc(sizeof(struct device));
   if(!tty_dev)
     return -ENOMEM;
-  if(ttys[num])
-  {
-    debug("tty: tty%d device already exists, and is in use\n", num);
+  if(ttys[num]) {
     return -EBUSY;
   }
   struct tty_struct * tty = (struct tty_struct *)malloc(sizeof(struct tty_struct));
-  if(!tty)
-  {
+  if(!tty) {
     tty_release(tty);
     return -ENOMEM;
   }
   termios_init(&tty->termios);
-  if (ring_buffer_init(tty->write_q, TTY_BUF_SIZE) < 0)
-  {
-    goto ring_mem_err;
-  }
-  if(ring_buffer_init(tty->read_q, TTY_BUF_SIZE) < 0)
-  {
-    goto ring_mem_err;
+  if (ring_buffer_init(tty->write_q, TTY_BUF_SIZE) < 0 || ring_buffer_init(tty->read_q, TTY_BUF_SIZE) < 0) {
+    tty_release(tty);
+    return -ENOMEM;
   }
   tty->winsize.ws_row = console_get(0)->data.vc_rows;
   tty->winsize.ws_col = console_get(0)->data.vc_cols;
@@ -182,12 +181,7 @@ int tty_create(int num, struct device * dev)
   tty_dev->dev       = MKDEV(TTYDEV_MAJOR, num);
   tty_dev->priv_data = tty;
   chrdev_register(tty_dev, &tty_fops);
-  debug("Created tty%d\n", num);
   return 0;
-
-ring_mem_err:
-  tty_release(tty);
-  return -ENOMEM;
 }
 
 struct file_operations tty_fops = {

@@ -6,7 +6,7 @@
 
 /* For more info about good old paging, download the Intel Software Developer Manual at https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html */
 
-/* We use 4MB page directory :) */
+/* 4MiB paging, I will get you!! */
 
 #define PDE_PRESENT_SHIFT   0
 #define PDE_RW_SHIFT        1
@@ -17,9 +17,10 @@
 #define PDE_DIRTY_SHIFT     6
 #define PDE_PAGESIZE_SHIFT  7
 #define PDE_GLOBAL_SHIFT    8
-#define PDE_IGNORED         (~BIT(9) | ~BIT(10) | ~BIT(11))
+#define PDE_IGNORED         (0 << 9 | 0 << 10 | 1 << 11)
 
-#define PAGE_ALIGNMENT      0x1000
+#define PAGE_TABLES         1024
+#define PAGE_ALIGNMENT      4096
 #define PAGE_SIZE           PAGE_ALIGNMENT
 
 #define PTE_PRESENT_SHIFT   0
@@ -32,6 +33,8 @@
 #define PTE_PAT_SHIFT       7
 #define PTE_GLOBAL_SHIFT    8
 #define PTE_IGNORED         PDE_IGNORED
+
+#define FBCON_VIRT_ADDR     0x10000000
 
 static inline int pde_is_present(uint32_t pde) {
   return (pde & 1 << PDE_PRESENT_SHIFT);
@@ -61,12 +64,6 @@ static inline uint32_t extract_pte(uint32_t pde) {
   return ((pde) & ~(PAGE_SIZE - 1));
 }
 
-/* page operations */
-uint32_t get_kernel_pd(void);
-void paging_init(uint32_t addr);
-void kvm_map(uint32_t phys_addr, uint32_t virt_addr);
-void uvm_map(uint32_t pd, uint32_t phys_addr, uint32_t virt_addr);
-uint32_t * create_new_pgd(void);
-uint32_t get_kernel_pgd(void);
+void mmu_setup(void);
 
 #endif

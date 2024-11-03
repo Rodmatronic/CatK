@@ -7,7 +7,7 @@
 struct spinlock
 {
   atomic_flag value;
-  //struct task * owner;
+  struct task * owner;
 };
 
 #define SPINLOCK_INIT(name) \

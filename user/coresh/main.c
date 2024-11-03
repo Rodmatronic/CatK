@@ -50,17 +50,17 @@ void execute_command(const char *cmd, char *args[]) {
             }
         }
     }
-    print_err("command not found\n");
+    print_err(cmd);
+    print_err(": command not found\n");
 }
 
 int main() {
     char input[MAX_INPUT];
-    beep(100);
     while (1) {
         print("coresh$ ");
         int len = read(0, input, MAX_INPUT);
         if (len <= 0) {
-            print_err("invalid read\n"); 
+            continue;
         }
         if (input[len - 1] == '\n') {
             input[len - 1] = '\0';
@@ -86,11 +86,18 @@ int main() {
                 } else {
                     print_err("cd: missing argument\n");
                 }
+            } else if(strcmp(args[0], "echo") == 0) {
+                for(int i = 1; args[i]; i++) {
+                  print(args[i]);
+                  print(" ");
+                }
+                print("\n");
             } else {
                 // Execute external commands
                 execute_command(args[0], args);
             }
         }
+        memset(input, 0, MAX_INPUT);
     }
     return 0;
 }

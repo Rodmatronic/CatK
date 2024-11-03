@@ -71,6 +71,8 @@ struct superblock
 struct file
 {
   char name[NAME_MAX];
+  dev_t rdev; // used for tty devices
+  off_t fpos;
   struct inode * inode;
   struct file_operations * ops;
 };

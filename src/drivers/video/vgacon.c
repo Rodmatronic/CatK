@@ -25,7 +25,7 @@
 
 #include "ansi.h"
 
-static struct console dummycon_struct;
+static struct console vgacon_struct;
 
 static int vgacon_x = 0;
 static int vgacon_y = 0;
@@ -57,31 +57,40 @@ static uint8_t ansi_state = ANSI_STATE_ESC; /* this is set as the default state 
 static int ansi_list_idx = 0;
 
 static struct ansi_list ansi_value[8];
-static struct file_operations _unused_ vgacon_fops;
+
+int vgacon_output_intr(struct tty_struct * tty, size_t len);
+
+static struct device vgacon_dev = {
+  .name             = "vga",
+  .dev              = MKDEV(FBDEV_MAJOR, 0),
+  .removable        = false,
+  .parent           = NULL,
+  .priv_data        = vgacon_output_intr
+};
 
 static inline void _hot_ vgacon_print_glyph(int x, int y, char glyph)
 {
   uint8_t color = (colors[vgacon_bg] << 4) | colors[vgacon_fg];
-  uint16_t position = y * dummycon_struct.data.vc_rows + x;
-  uint16_t * where = (uint16_t *)(dummycon_struct.data.vc_screenbuf + position * 2);
+  uint16_t position = y * vgacon_struct.data.vc_rows + x;
+  uint16_t * where = (uint16_t *)(vgacon_struct.data.vc_screenbuf + position * 2);
   *where = (uint16_t)glyph | (color << 8);
 }
 
 static inline void _hot_ vgacon_scroll(void)
 {
-  if (vgacon_x > (dummycon_struct.data.vc_rows - 1))
+  if (vgacon_x > (vgacon_struct.data.vc_rows - 1))
   {
     vgacon_x = 0;
     vgacon_y++;
   }
-  if (vgacon_y >= dummycon_struct.data.vc_cols)
+  if (vgacon_y >= vgacon_struct.data.vc_cols)
   {
-    for (int i = 1; i < dummycon_struct.data.vc_cols; i++)
+    for (int i = 1; i < vgacon_struct.data.vc_cols; i++)
     {
-      memcpy((void *)dummycon_struct.data.vc_screenbuf + (i - 1) * dummycon_struct.data.vc_rows * 2, (void *)dummycon_struct.data.vc_screenbuf + i * dummycon_struct.data.vc_rows * 2, dummycon_struct.data.vc_rows * 2);
+      memcpy((void *)vgacon_struct.data.vc_screenbuf + (i - 1) * vgacon_struct.data.vc_rows * 2, (void *)vgacon_struct.data.vc_screenbuf + i * vgacon_struct.data.vc_rows * 2, vgacon_struct.data.vc_rows * 2);
     }
-    uint16_t * last_row = (void *)dummycon_struct.data.vc_screenbuf + (dummycon_struct.data.vc_cols - 1) * dummycon_struct.data.vc_rows * 2;
-    memset(last_row, 0, dummycon_struct.data.vc_rows * 2);
+    uint16_t * last_row = (void *)vgacon_struct.data.vc_screenbuf + (vgacon_struct.data.vc_cols - 1) * vgacon_struct.data.vc_rows * 2;
+    memset(last_row, 0, vgacon_struct.data.vc_rows * 2);
 
     vgacon_y--;
   }
@@ -89,7 +98,7 @@ static inline void _hot_ vgacon_scroll(void)
 
 static void _hot_ vgacon_rebase_cursor(int x, int y)
 {
-  uint16_t pos = y * dummycon_struct.data.vc_rows + x;
+  uint16_t pos = y * vgacon_struct.data.vc_rows + x;
   outb(0x3d4, 0x0f);
   outb(0x3d5, (uint8_t)(pos & 0xff));
   outb(0x3d4, 0x0e);
@@ -289,12 +298,12 @@ static void vgacon_enable_cursor(void) {
 
 static inline void vgacon_clear(void)
 {
-  memset16((void *)dummycon_struct.data.vc_screenbuf, 0x0007, dummycon_struct.data.vc_rows * dummycon_struct.data.vc_cols);
+  memset16((void *)vgacon_struct.data.vc_screenbuf, 0x0007, vgacon_struct.data.vc_rows * vgacon_struct.data.vc_cols);
 }
 
 int vgacon_dev_write(struct file * file, void * buf, size_t sz)
 {
-  memcpy((void *)dummycon_struct.data.vc_screenbuf, buf, sz);
+  memcpy((void *)vgacon_struct.data.vc_screenbuf, buf, sz);
   return 0;
 }
 
@@ -310,22 +319,22 @@ void vgacon_dev_close(struct file * file)
 
 int vgacon_init(void)
 {
-  dummycon_struct.data.vc_rows = 80;
-  dummycon_struct.data.vc_cols = 25;
-  dummycon_struct.data.vc_screenbuf = (uintptr_t)0xb8000;
-  dummycon_struct.data.vc_num = 0;
-  dummycon_struct.data.vc_size_row = dummycon_struct.data.vc_rows * 16;
-  dummycon_struct.data.vc_def_color = 0x07;
-  dummycon_struct.data.vc_attr = dummycon_struct.data.vc_def_color;
-  dummycon_struct.data.vc_has_color = true;
-  dummycon_struct.data.vc_pos = 0x0000;                        /* sets cursor to (0, 0) */
-  dummycon_struct.data.vc_sw.putc = vgacon_putc;
-  dummycon_struct.data.vc_sw.clear = vgacon_clear;
-  dummycon_struct.data.vc_sw.print = vgacon_print;
-  dummycon_struct.dev = NULL;
-  strncpy(dummycon_struct.name, "dummycon", 31);
+  vgacon_struct.data.vc_rows = 80;
+  vgacon_struct.data.vc_cols = 25;
+  vgacon_struct.data.vc_screenbuf = (uintptr_t)0xb8000;
+  vgacon_struct.data.vc_num = 0;
+  vgacon_struct.data.vc_size_row = vgacon_struct.data.vc_rows * 16;
+  vgacon_struct.data.vc_def_color = 0x07;
+  vgacon_struct.data.vc_attr = vgacon_struct.data.vc_def_color;
+  vgacon_struct.data.vc_has_color = true;
+  vgacon_struct.data.vc_pos = 0x0000;                        /* sets cursor to (0, 0) */
+  vgacon_struct.data.vc_sw.putc = vgacon_putc;
+  vgacon_struct.data.vc_sw.clear = vgacon_clear;
+  vgacon_struct.data.vc_sw.print = vgacon_print;
+  vgacon_struct.dev = &vgacon_dev;
+  strncpy(vgacon_struct.name, "vgacon", 31);
   vgacon_enable_cursor();
   vgacon_clear();
-  console_register(&dummycon_struct);
+  console_register(&vgacon_struct);
   return 0;
 }

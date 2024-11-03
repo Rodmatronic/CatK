@@ -3,12 +3,12 @@
 
 #include <stdint.h>
 
-struct kern_syms
-{
-  uint32_t addr;
+struct kern_syms {
+  uintptr_t addr;
   char * name;
 };
 
-void trace_stack(int frames);
+void trace_stack(uint8_t frames);
+char * trace_ret_addr(uintptr_t ret_eip);
 
 #endif

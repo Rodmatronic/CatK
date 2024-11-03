@@ -1,53 +1,89 @@
 #include <catk/core.h>
 #include <catk/io.h>
 #include <catk/syscall.h>
+#include <catk/printk.h>
+#include <catk/virt.h>
+#include <catk/ipc.h>
 #include <lib/common.h>
 #include <stdint.h>
 
 /* GDT */
 
-static struct segm_descriptor gdt[GDT_NUM_DESCRIPTORS];
-
-static struct gdtr gdtr = {
-  .offset = (uint32_t)gdt,
-  .size = sizeof(gdt),
-};
-
 extern void gdt_flush(uint32_t gdtr);
 
-static void segm_descriptors_init(void)
-{
-  // null descriptor
-  memset((void *)&gdt[0], 0, sizeof(struct segm_descriptor));
-  // kernel code segment
-  gdt[1].base_low = 0;
-  gdt[1].base_mid = 0;
-  gdt[1].base_high = 0;
-  gdt[1].limit = 0xffff;
-  gdt[1].access = 0x9a;
-  gdt[1].flags = 0xcf;
-  // kernel data segment
-  gdt[2].base_low = 0;
-  gdt[2].base_mid = 0;
-  gdt[2].base_high = 0;
-  gdt[2].limit = 0xffff;
-  gdt[2].access = 0x92;
-  gdt[2].flags = 0xcf;
-  // user code segment
-  gdt[3].base_low = 0;
-  gdt[3].base_mid = 0;
-  gdt[3].base_high = 0;
-  gdt[3].limit = 0xffff;
-  gdt[3].access = 0xfa;
-  gdt[3].flags = 0xcf;
-  // user data segment 
-  gdt[4].base_low = 0;
-  gdt[4].base_mid = 0;
-  gdt[4].base_high = 0;
-  gdt[4].limit = 0xffff;
-  gdt[4].access = 0xf2;
-  gdt[4].flags = 0xcf;
+#define GDT_ACCESS_ACCESSED   BIT(0)
+#define GDT_ACCESS_READWRITE  BIT(1)
+#define GDT_ACCESS_DIRECTION  BIT(2)
+#define GDT_ACCESS_EXEC       BIT(3)
+#define GDT_ACCESS_SYSTEM     BIT(4)
+#define GDT_ACCESS_RING0      (0 << 5 | 0 << 6)
+#define GDT_ACCESS_RING3      (1 << 5 | 1 << 6)
+#define GDT_ACCESS_PRESENT    BIT(7)
 
+/* size flag should always be cleared if this is set */
+#define GDT_FLAGS_64BIT       BIT(1)
+/* set if we're using 32-bit bases */
+#define GDT_FLAGS_SIZE32      BIT(2)
+/* if set, the segment limit is in 4KiB blocks, otherwise, its in 1 byte blocks */
+#define GDT_FLAGS_GRAN        BIT(3)
+
+/* code segments are executable */
+#define GDT_KERNEL_CODE (GDT_ACCESS_READWRITE | GDT_ACCESS_EXEC | GDT_ACCESS_SYSTEM | GDT_ACCESS_RING0 | GDT_ACCESS_PRESENT)
+/* data segments are not executable, since they contain data */
+#define GDT_KERNEL_DATA (GDT_ACCESS_READWRITE | GDT_ACCESS_SYSTEM | GDT_ACCESS_RING0 | GDT_ACCESS_PRESENT)
+/* these are the same, except that the DPL values are 3 (for user-mode) */
+#define GDT_USER_CODE   (GDT_ACCESS_READWRITE | GDT_ACCESS_EXEC | GDT_ACCESS_SYSTEM | GDT_ACCESS_RING3 | GDT_ACCESS_PRESENT)
+#define GDT_USER_DATA   (GDT_ACCESS_READWRITE | GDT_ACCESS_SYSTEM | GDT_ACCESS_RING3 | GDT_ACCESS_PRESENT)
+/* segment descriptor flags used for 32-bit cpus */
+#define GDT_IA32_FLAGS  0xcf
+
+
+#define DEFINE_SEGM_DESC(base, limit, access, flags) \
+  (limit & 0xffff), \
+  (base & 0xffff), \
+  ((base >> 16) & 0xff), \
+  (access), \
+  flags, \
+  ((base >> 24) & 0xff)
+
+#define X86_KRNL_CODE_SEGM (1 << 3)
+#define X86_KRNL_DATA_SEGM (2 << 3)
+#define X86_USER_CODE_SEGM (3 << 3)
+#define X86_USER_DATA_SEGM (4 << 3)
+
+/* Linux does this, but better */
+struct segm_descriptor gdt[8] = {
+  // null segment descriptor
+  { DEFINE_SEGM_DESC(0, 0x0000, 0x00, 0x00) },
+  // kernel code segment descriptor (32-bit)
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_KERNEL_CODE, GDT_IA32_FLAGS) },
+  // kernel data segment descriptor (32-bit)
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_KERNEL_DATA, GDT_IA32_FLAGS) },
+  // user code segment descriptor (32-bit) 
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_USER_CODE, GDT_IA32_FLAGS) },
+  // user data segment descriptor (32-bit)
+  { DEFINE_SEGM_DESC(0, 0xffff, GDT_USER_DATA, GDT_IA32_FLAGS) }
+};
+
+struct gdtr gdtr = {
+  /* size of all of the segment descriptors */
+  sizeof(gdt) - 1,
+  /* address of all of the segment descriptors */
+  (uint32_t)&gdt
+};
+
+void segment_dump(uint16_t segm) {
+  uint16_t descriptor_num = segm >> 3;
+  struct segm_descriptor * descriptor = &gdt[descriptor_num];
+  if(!descriptor) {
+    printk("Segment descriptor does not exist for 0x%04x\n", segm);
+    return;
+  }
+  printk("DESCRIPTOR NUMBER  -  SEGMENT LIMIT  -  SEGMENT ACCESS  -  SEGMENT FLAGS\n");
+  printk("%d                     0x%04x            0x%02x               0x%02x\n", descriptor_num, descriptor->limit, descriptor->access, descriptor->flags);
+}
+
+void gdt_install(void) {
   gdt_flush((uint32_t)&gdtr);
 }
 
@@ -294,10 +330,50 @@ void tss_init(void)
   tss_install();
 }
 
+
+static inline char * gpf_tbltostr(const uint8_t tbl) {
+  switch(tbl) {
+    case 0b00: {
+      return "GDT";
+    }
+    case 0b01: {
+      return "IDT";
+    }
+    case 0b10: {
+      return "LDT";
+    }
+    case 0b11: {
+      return "IDT";
+    }
+  }
+  return NULL;
+}
+
+static void gpf_handler(struct intr_stack_frame * regs) {
+  printk("x86 Trap: General Protection Fault:\n");
+  /* bit 0 is set if it was caused by software */
+  printk("\tExternal: %s\n", (regs->err_code & BIT(0)) ? "true" : "false");
+  /* bits 1-2 are set to tell us what table it originated from */
+  uint8_t table = ((regs->err_code >> 1) & 0xf0) & 0b1100;
+  printk("\tTable: %s (0x%02x)\n", gpf_tbltostr(table), table);
+  /* bit 3-15 is the selector index in the table */
+  uint8_t idx = (regs->err_code >> 3) ;
+  printk("\tSelector index of origin: %d\n", idx);
+  /* bit 16-31 are zero-padded to form a uint32_t (we ignore those bits) */
+  if(regs->cs == 0x1b)
+    dispatch_signal(SIGILL);
+  panic("General protection fault in kernel mode\n");
+}
+
+void exceptions_install(void) {
+  interrupt_install(gpf_handler, X86_TRAP_GP);
+}
+
 void cpu_init(void)
 {
-  segm_descriptors_init();
+  gdt_install();
   idt_setup();
+  exceptions_install();
   timer_init();
   tss_init();
   syscall_install();

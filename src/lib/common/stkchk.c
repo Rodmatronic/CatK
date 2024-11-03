@@ -1,5 +1,6 @@
 #include <catk/printk.h>
 #include <catk/compiler.h>
+#include <catk/task.h>
 #include <stdint.h>
 
 #if UINT32_MAX == UINTPTR_MAX
@@ -12,11 +13,11 @@ uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
  
 void _cold_ _noreturn_ __stack_chk_fail(void)
 {
-	panic("Stack smashing detected. Report this to the CatK GitHub repository at https://github.com/Rodmatronic/CatK/issues\n");
-  for(;;);
+	panic("Stack smashing detected.\n");
+  unreachable;
 }
 
-void _cold_ __stack_chk_fail_local(void)
+void _cold_ _noreturn_ __stack_chk_fail_local(void)
 {
   __stack_chk_fail();
   unreachable;

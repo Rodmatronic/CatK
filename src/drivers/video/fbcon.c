@@ -20,15 +20,7 @@
 #include <catk/errno.h>
 #include <catk/spinlock.h>
 #include <catk/math.h>
-#if defined CATK_LOGO_MASCOT
-#include <logo/catk.h>
-#elif defined CATK_LOGO_SILLY
-#include <logo/silly.h>
-#elif defined CATK_LOGO_PLACEHOLDER
-#include <logo/placeholder.h>
-#else
-#error "Please choose a logo to be shown on boot!"
-#endif
+#include <catk/virt.h>
 #include <font/term8x16.h>
 #include <lib/ring.h>
 #include <lib/common.h>
@@ -348,7 +340,8 @@ void fbcon_putc(char ch)
 void fbcon_print(const char * str)
 {
   for(int i = 0; str[i]; i++) {
-    fbcon_putc(str[i]);
+    if(str[i] <= fbcon_struct.data.vc_font.char_count)
+      fbcon_putc(str[i]);
   }
 }
 
@@ -389,13 +382,6 @@ void fbcon_clear(void)
   memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height) * 2);
 }
 
-static inline uint32_t combine_to_uint32_t(uint8_t byte1, uint8_t byte2, uint8_t byte3, uint8_t byte4) {
-    return ((uint32_t)byte1 << 24) |
-        ((uint32_t)byte2 << 16) |
-        ((uint32_t)byte3 << 8)  |
-        (uint32_t)byte4;
-}
-
 int fbcon_init(void)
 {
   int rc;
@@ -420,20 +406,15 @@ int fbcon_init(void)
   fbcon_struct.data.vc_sw.output_intr = fbcon_output_intr;
   fbcon_struct.dev = &fbcon_dev;
   fbcon_x = 0;
-  fbcon_y = DIV_ROUND_UP(height, fbcon_struct.data.vc_font.height);
+  fbcon_y = 0;
   fbcon_fg = 7;
   fbcon_bg = 0;
   console_register(&fbcon_struct);
   rc = chrdev_register(&fbcon_dev, &fbcon_fops);
-  fbcon_clear();
-
-  uint8_t pixel[3];
-  for(int y = 0; y < height; y++) {
-    for(int x = 0; x < width; x++) {
-      HEADER_PIXEL(header_data, pixel);
-      fbcon_putpx(x, y, combine_to_uint32_t(0, pixel[0], pixel[1], pixel[2]));
-    }
+  if(IS_ERR(rc)) {
+    return rc;
   }
+  fbcon_clear();
   return 0;
 }
 

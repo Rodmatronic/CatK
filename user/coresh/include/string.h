@@ -8,6 +8,7 @@
 size_t strcspn(const char * s1, register const char * s2);
 char * strtok(char * str, const char * delimiters);
 int strcmp(const char *s1, const char *s2);
+void * memset(void * dest, char val, size_t count);
 size_t strlen(const char * str);
 
 #endif

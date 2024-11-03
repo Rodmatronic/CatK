@@ -1,6 +1,6 @@
 # Target files to create
-TARGET = catkernel.elf
-TARGET_TMP = catkernel.tmp.o
+TARGET = catk
+TARGET_TMP = catk.tmp.o
 TARGET_ISO = catkernel.iso
 
 ISO_DIR = $(OUT)/isodir
@@ -18,16 +18,36 @@ NASM_INCLUDE = -I $(SRC)/include/asm/
 
 DEBUG = 1
 
+# I stole most of this from Linux because we're evil >:)
 CC_FLAGS = \
 	$(C_INCLUDE)  \
 	-fno-exceptions \
 	-ffreestanding \
 	--target=i686-pc-none-elf \
 	-march=i686 \
-	-Werror=implicit-function-declaration \
+	-Wall \
+	-Werror \
 	-nodefaultlibs \
 	-nostdlib \
-	-fstack-protector-strong
+	-fPIE \
+	-fstack-protector-strong \
+	-fno-common \
+	-O2 \
+	-pipe \
+	-Wp,-D_FORTIFY_SOURCE=2 \
+	-Wp,-D_REENTRANT \
+	-fexceptions \
+	--param=ssp-buffer-size=32 \
+	-Wformat \
+	-Wformat-security \
+	-fasynchronous-unwind-tables \
+	-fno-semantic-interposition \
+	-ffat-lto-objects \
+	-msse2
+
+ifeq ($(DEBUG), 1)
+	CC_FLAGS += -feliminate-unused-debug-types
+endif
 
 ASM_FLAGS = -f elf32 $(NASM_INCLUDE)
 
@@ -36,7 +56,15 @@ CC_FLAGS += -g
 ASM_FLAGS += -g
 endif
 
-LD_FLAGS = -m elf_i386 -T $(CONFIG)/link.ld -z noexecstack -nostdlib -static
+LD_FLAGS = \
+	-m elf_i386 \
+	-z noexecstack \
+	-nostdlib \
+	-static \
+	--no-dynamic-linker \
+	-z text \
+	-z max-page-size=0x1000 \
+	-T $(CONFIG)/link.ld
 
 # source files
 C_SRC := $(shell find . -type f -name "*.c")

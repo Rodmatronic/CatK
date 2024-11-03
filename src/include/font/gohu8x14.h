@@ -4,7 +4,7 @@
 #include <catk/console.h>
 #include <stdint.h>
 
-static uint8_t fontdata_gohu8x14[] = {
+static const uint8_t fontdata_gohu8x14[] = {
 //  32 $20 'space'
 //	width 8, bbx 0, bby -3, bbw 8, bbh 14
 	0b00000000,

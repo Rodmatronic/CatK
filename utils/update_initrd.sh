@@ -2,10 +2,10 @@
 
 set -e
 
-echo "CatK INIT File Updater."
+echo "CatK Initrd Updater."
 
 usage() {
-  echo "usage: $0 [init] [initrd]"
+  echo "Usage: $0 <init> <initrd>"
   exit 1
 }
 

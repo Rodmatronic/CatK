@@ -14,45 +14,39 @@
 
 void syscall_trace(struct intr_stack_frame * regs)
 {
-  debug("Syscall trace:\n");
-  debug("\tEAX: 0x%08x, EBX: 0x%08x, ECX: 0x%08x, EDX: 0x%08x\n",
-      regs->eax, regs->ebx, regs->ecx, regs->edx);
+  debug("Received syscall from pid %d: EAX: 0x%08x, EBX: 0x%08x, ECX: 0x%08x, EDX: 0x%08x CS: 0x%04x, DS: 0x%04x\n",
+      get_current_task()->pid, regs->eax, regs->ebx, regs->ecx, regs->edx, regs->cs, regs->ds);
 }
 
 #endif
 
-static uint32_t do_system_call(struct intr_stack_frame * regs)
-{
+static uint32_t do_system_call(struct intr_stack_frame * regs) {
+  /* only user-space tasks need syscalls */
+  assert(get_current_task()->pid > 0);
   uint32_t rc = -ENOSYS;
-  switch(regs->eax)
-  {
-    case 0x00:
-    {
+  switch(regs->eax) {
+    case 0x00: {
       rc = 0;
       break;
     }
-    case 0x01:
-    {
+    case 0x01: {
       sys_exit((int)regs->ebx);
       break;
     }
-    case 0x02:
-    {
+    case 0x02: {
       rc = sys_read((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
       break;
     }
-    case 0x03:
-    {
+    case 0x03: {
       rc = sys_write((int)regs->ebx, (char *)regs->ecx, (size_t)regs->edx);
       break;
     }
-    case 0x04:
-    {
+    case 0x04: {
       rc = sys_open((const char *)regs->ebx, (int)regs->ecx, (uint16_t)regs->edx);
       break;
     }
     case 0x05: {
-      rc = sys_fork();
+      rc = sys_fork(regs->eip);
       break; 
     }
     case 0x06: {
@@ -92,8 +86,7 @@ static uint32_t do_system_call(struct intr_stack_frame * regs)
       rc = 0;
       break;
     }
-    default:
-    {
+    default: {
       debug("Received bad or unsupported system call 0x%x\n", regs->eax);
       break;
     }
@@ -103,7 +96,7 @@ static uint32_t do_system_call(struct intr_stack_frame * regs)
 
 void system_call(struct intr_stack_frame * regs)
 {
-#if CATK_SYSCALL_TRACE == 1
+#ifdef CATK_SYSCALL_TRACE
   syscall_trace(regs);
 #endif
   regs->eax = do_system_call(regs);

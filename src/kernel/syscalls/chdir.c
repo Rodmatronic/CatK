@@ -10,9 +10,9 @@
 #include <stdint.h>
 
 int sys_chdir(const char * path) {
+  debug("changing directory to %s..\n", path);
   struct task * p = get_current_task();
   struct inode * tmp = NULL;
-  char * newdir = NULL;
   tmp = namei(path);
   if(!tmp) {
     if(!tmp->u.generic_ino)

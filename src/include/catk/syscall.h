@@ -12,7 +12,7 @@ int sys_open(const char * filename, int flags, uint16_t mode);
 pid_t sys_wait(int * status);
 int sys_access(const char * path, int mode);
 int sys_chdir(const char * path);
-int sys_fork(void);
+int sys_fork(uintptr_t eip);
 int sys_execve(const char * pathname, char * const argv[], char * const envp[]);
 void sys_beep(int ms);
 pid_t sys_getpid(void);

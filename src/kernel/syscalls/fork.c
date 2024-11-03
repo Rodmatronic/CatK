@@ -7,15 +7,14 @@
 #include <catk/errno.h>
 #include <stdint.h>
 
-int sys_fork(void) {
+int sys_fork(uintptr_t _unused_ eip) {
   /*
-  uint32_t eip = get_eip();
-  struct task * p = create_user_task(get_current_task()->name, eip, TASK_PRIORITY_NORMAL);
+  struct task * p = create_user_task(get_current_task()->name, (void *)eip, TASK_PRIORITY_NORMAL, 0, NULL);
   p->ppid = get_current_task()->pid;
   if(!p) {
     return -1;
   }
   task_add_queue(p);
   */
-  return 0;
+  return -1;
 }

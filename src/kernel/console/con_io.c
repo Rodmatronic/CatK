@@ -39,29 +39,35 @@ struct console * console_get(int num)
 }
 
 int console_clear(void) {
+  spinlock_acquire(&console_spinlock);
   if(!consoles[current_console]->data.vc_sw.clear) {
     /* how dare you.. you forgot to bind a clear function to the console!! */
     return -ENXIO;
   }
   consoles[current_console]->data.vc_sw.clear();
+  spinlock_release(&console_spinlock);
   return 0;
 }
 
 int console_print(const char * str) {
+  spinlock_acquire(&console_spinlock);
   if(!consoles[current_console]->data.vc_sw.print) {
     /* the dummy who registered the console didnt even bind a print function! */
     return -ENXIO;
   }
   consoles[current_console]->data.vc_sw.print(str);
+  spinlock_release(&console_spinlock);
   return 0;
 }
 
 int console_putc(const char c) {
+  spinlock_acquire(&console_spinlock);
   if(!consoles[current_console]->data.vc_sw.putc) {
     /* the dummy who registered the console didnt even bind a putc function! */
     return -ENXIO;
   }
   consoles[current_console]->data.vc_sw.putc(c);
+  spinlock_release(&console_spinlock);
   return 0;
 }
 

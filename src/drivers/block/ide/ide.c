@@ -43,12 +43,13 @@ static int ide_driver_attach(struct pci_device * dev)
 
   // If bit 0 and 2 are not set in PROG_IF, this means that the drive is in compatibility mode
   // Because of that, we can use the default bar values.
-  if(dev->prog_if & ATA_PRIM_LEGACY)
+  bool compat_mode = ((dev->prog_if & ATA_PRIM_LEGACY) == 1);
+  if(compat_mode == true)
     printk("Drive is in compatibility mode. Setting defaults...\n");
-  bar0 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 0) & ~3) : ATA_BUS1_PRIMARY_IO_PORT;
-  bar1 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 1) & ~3) : ATA_BUS1_PRIMARY_CTRL_REG;
-  bar2 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 2) & ~3) : ATA_BUS1_SECOND_IO_PORT;
-  bar3 = (dev->prog_if & ATA_PRIM_LEGACY) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 3) & ~3) : ATA_BUS1_SECONDARY_CTRL_REG;
+  bar0 = (compat_mode == true) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 0) & ~3) : ATA_BUS1_PRIMARY_IO_PORT;
+  bar1 = (compat_mode == true) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 1) & ~3) : ATA_BUS1_PRIMARY_CTRL_REG;
+  bar2 = (compat_mode == true) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 2) & ~3) : ATA_BUS1_SECOND_IO_PORT;
+  bar3 = (compat_mode == true) ? (pci_get_bar(dev->bus, dev->slot, dev->functions, 3) & ~3) : ATA_BUS1_SECONDARY_CTRL_REG;
   bar4 = (pci_get_bar(dev->bus, dev->slot, dev->functions, 4) & ~3);
   pci_enable_busmaster(dev);
   pci_ide = dev;

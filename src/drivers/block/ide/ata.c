@@ -49,7 +49,7 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   if(!ata_devices[num_ata]) {
     return -ENOMEM;
   }
-  strncpy((char *)ata_devices[num_ata]->name, "hd", NAME_MAX - 1);
+  strncpy((char *)ata_devices[num_ata]->name, "ata", NAME_MAX - 1);
   ata_devices[num_ata]->removable   = false;
   ata_devices[num_ata]->dev         = MKDEV(DISKDEV_MAJOR, num_ata);
   ata_devices[num_ata]->priv_data   = drv;

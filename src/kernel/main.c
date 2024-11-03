@@ -27,8 +27,6 @@
 #error "Compile with GCC or Clang please! :)"
 #endif
 
-static char * cmdline;
-
 static void show_boot_banner(void) {
   printk("2023-2024 The CatKernel Project.\n");
   printk("\tCreated locally in Canada, and California, bring tuques and cold drinks.\n");
@@ -36,26 +34,20 @@ static void show_boot_banner(void) {
   printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
 }
 
-void kmain(uint32_t magic, uintptr_t mbi) {
+int kmain(int argc, char * argv[]) {
   bool is_debug = false;
 #ifdef CATK_DEBUG_BUILD
   is_debug = true;
 #endif
-  if(!multiboot2_validate_args(magic, mbi)) {
-    debug("Bootloader sent us with a bad multiboot2 information. Off to the kitty void, we go! :)\n");
-    return; /* return into the infinite halt state */
-  }
-  multiboot2_set_mbi(mbi);
   cpu_init();
   physmem_init();
   beep(10);
   int rc = console_init();
   if(IS_ERR(rc)) {
     debug("Failed to initialize console: %d\n", rc);
-    return;
+    return 1;
   }
   console_print("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
-  cmdline = obtain_cmdline(mbi);
   show_boot_banner();
   printk("CatKernel Version %s %s%s(%s): %s\n", UTS_RELEASE, CATK_VERSION_CODENAME, is_debug ? " DEBUG!! " : " ", CATK_COMPILED_WITH, CATK_BUILD_DATE);
   if (!cpuidcheck()) {
@@ -69,7 +61,7 @@ void kmain(uint32_t magic, uintptr_t mbi) {
   rc = tty_create(0, console_get(0)->dev);
   if(rc < 0)
     panic("Could not create TTY0: %d\n", rc);
-  builtin_modules_init();
+  builtin_modules_load();
   keyboard_init();
   initrd_probe();
   tasking_init();
@@ -145,8 +137,9 @@ void bootstrap2(void) {
   } else {
     printk("Successfully mounted devfs on block (%d,%d)\n", MAJOR(dev->dev), MINOR(dev->dev));
   }
+  set_tss_stack(get_current_task()->regs.esp);
   /* start init process */
-  rc = start_init(cmdline);
+  rc = start_init(obtain_cmdline(multiboot2_get_mbi()));
   if(IS_ERR(rc))
     panic("Failed when starting init process: %d\n", rc);
   //printk("Nothing left to do. Going idle...\n");

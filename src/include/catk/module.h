@@ -22,6 +22,6 @@ struct module {
 #define module_print(...) _module_print(__module_name__, __VA_ARGS__);
 
 void _module_print(const char * mod_name, const char * fmt, ...);
-void builtin_modules_init(void);
+void builtin_modules_load(void);
 
 #endif

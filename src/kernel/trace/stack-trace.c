@@ -7,33 +7,38 @@
 #include <config.h>
 #include <stdint.h>
 
-struct stack_frame
-{
-    struct stack_frame * bp;
-    uintptr_t ip;
+struct stack_frame {
+  struct stack_frame * bp;
+  uintptr_t ip;
 };
 
 extern struct kern_syms symlist[];
 
-static char * trace_ret_addr(uint32_t * offset, uint32_t eip)
-{
-    for(uint32_t i = 0;; i++)
-    {
-        if(i > eip)
-            break;
-        if(symlist[i].addr >= eip)
-        {
-            *offset = eip - symlist[i - 1].addr;
-            return symlist[i - 1].name;
-        }
+char * trace_ret_addr(uintptr_t ret_eip) {
+  for(uint32_t i = 0; i < ret_eip; i++) {
+    if(symlist[i].addr >= ret_eip) {
+      return symlist[i - 1].name;
     }
-    return NULL;
+  }
+  return NULL;
 }
 
-void trace_stack(int frames)
+#ifdef CATK_STACK_TRACE
+
+static char * trace_addr(uintptr_t * offset, uintptr_t ip) {
+  for(uint32_t i = 0; i < ip; i++) {
+    if(symlist[i].addr >= ip) {
+      *offset = ip - symlist[i - 1].addr;
+      return symlist[i - 1].name;
+    }
+  }
+  return "???";
+}
+
+void trace_stack(uint8_t frames)
 {
-#if CATK_STACK_TRACE == 1
-  printk("stack backtrace:\n");
+  printk("Stack backtrace:\n");
+  printk("\t\t\tEIP          EBP\n");
   struct stack_frame * stack;
   asm volatile("movl %%ebp, %0" : "=r"(stack));
   for(int i = 0; stack && i < frames; i++)
@@ -41,10 +46,11 @@ void trace_stack(int frames)
     uint32_t offset;
     printk("\t#%d: 0x%08x : [0x%08x] ", i, stack->ip, stack->bp);
     if(stack->ip)
-      printk("%s+0x%08x\n", trace_ret_addr(&offset, stack->ip), offset);
+      printk("%s+0x%08x\n", trace_addr(&offset, stack->ip), offset);
     else
       printk("\n");
     stack = stack->bp;
   }
-#endif
 }
+
+#endif

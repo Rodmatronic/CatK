@@ -2,15 +2,17 @@
 #define __LIST_H
 
 #include <catk/mem.h>
+#include <lib/common.h>
 
 struct list {
-  void * elem;
+  void * data;
   struct list * next;
+  struct list * prev;
 };
 
-static inline int list_count_elements(struct list * head) {
+static inline int list_count_elements(struct list * list) {
   int elems = 0;
-  struct list * _head = head;
+  struct list * _head = list;
   while(_head) {
     _head = _head->next;
     elems++;
@@ -18,7 +20,7 @@ static inline int list_count_elements(struct list * head) {
   return elems;
 }
 
-static inline struct list * list_node_create(void) {
+static inline struct list * list_elem_create(void) {
   return (struct list *)malloc(sizeof(struct list));
 }
 

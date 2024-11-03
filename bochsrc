@@ -1,0 +1,6 @@
+romimage: file=$BXSHARE/BIOS-bochs-latest 
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+megs: 1024
+ata0-master: type=disk, path="/home/sushi/CatK/target/catkernel.iso", mode=flat
+boot: disk
+port_e9_hack: enabled=1

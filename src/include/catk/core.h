@@ -24,7 +24,32 @@ struct gdtr
   uint32_t offset;
 }_packed_;
 
-/*IDT */
+/* IDT */
+
+#define X86_TRAP_DE		    0	  /* Divide-by-zero */
+#define X86_TRAP_DB		    1	  /* Debug */
+#define X86_TRAP_NMI	    2	  /* Non-maskable Interrupt */
+#define X86_TRAP_BP		    3	  /* Breakpoint */
+#define X86_TRAP_OF		    4	  /* Overflow */
+#define X86_TRAP_BR		    5	  /* Bound Range Exceeded */
+#define X86_TRAP_UD		    6	  /* Invalid Opcode */
+#define X86_TRAP_NM		    7	  /* Device Not Available */
+#define X86_TRAP_DF		    8	  /* Double Fault */
+#define X86_TRAP_TS		    10	/* Invalid TSS */
+#define X86_TRAP_NP		    11	/* Segment Not Present */
+#define X86_TRAP_SS		    12	/* Stack Segment Fault */
+#define X86_TRAP_GP		    13	/* General Protection Fault */
+#define X86_TRAP_PF		    14	/* Page Fault */
+#define X86_TRAP_SPURIOUS	15	/* Spurious Interrupt */
+#define X86_TRAP_MF		    16	/* x87 Floating-Point Exception */
+#define X86_TRAP_AC		    17	/* Alignment Check */
+#define X86_TRAP_MC		    18	/* Machine Check */
+#define X86_TRAP_XF		    19	/* SIMD Floating-Point Exception */
+#define X86_TRAP_VE		    20	/* Virtualization Exception */
+#define X86_TRAP_CP		    21	/* Control Protection Exception */
+#define X86_TRAP_VC		    29	/* VMM Communication Exception */
+
+#define IRQ(irq) (32 + (irq))
 
 struct idt_reg
 {
@@ -176,15 +201,42 @@ void set_tss_stack(uint32_t esp0);
 
 /* Common CPU related functions */
 
+void segment_dump(uint16_t segm);
 int gen_random(void);
-void critical_enter(void);
-void critical_exit(void);
-void halt(void);
+
+static inline void critical_enter(void)
+{
+  asm volatile("cli");
+}
+
+static inline void critical_exit(void)
+{
+  asm volatile("sti");
+}
+
+static inline void halt(void)
+{
+  asm volatile("hlt");
+}
+
+static inline void die(void)
+{
+  critical_enter();
+  halt();
+}
+
+static inline void cpuid(uint32_t code, uint32_t * a, uint32_t * b, uint32_t * c, uint32_t * d) 
+{
+  asm volatile("cpuid" : "=a"(*a), "=b"(*b), "=c"(*c), "=d"(*d) : "a"(code));
+}
 
 extern int cpuidcheck(void);
 void cpu_dump_all_info(void);
 uint32_t get_eip(void);
 
 void cpu_init(void);
+void setup_paging(void);
+void kvm_map(uint32_t phys_addr, uint32_t virt_addr);
+void uvm_map(uint32_t pgd, uint32_t phys_addr, uint32_t virt_addr);
 
 #endif

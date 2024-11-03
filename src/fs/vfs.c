@@ -24,7 +24,6 @@ int vfs_exists(const char * path) {
 
 int vfs_open(struct file * filp, const char * file)
 {
-  debug("Opening file %s\n", file);
   int rc;
   if(is_devfs(file))
   {

@@ -53,6 +53,14 @@ char * strtok(char * str, const char * delimiters)
   return tokenStart;
 }
 
+void * memset(void * dest, char val, size_t count)
+{
+  void * addr = dest;
+  asm volatile("cld");
+  asm volatile("rep stosb" : "+D"(dest), "+c"(count) : "a"(val) : "memory");
+  return addr;
+}
+
 int strcmp(const char *s1, const char *s2)
 {
 	while (*s1 == *s2++)

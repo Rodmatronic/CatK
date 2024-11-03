@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <config.h>
 
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #define QEMU_DEBUGCON_PORT 0xE9
 
 static inline void qemu_debugcon_putc(uint8_t data) {

@@ -206,9 +206,11 @@ static void ext2_inode2file(struct file * file, struct ext2_inode * inode, uint3
   file->inode->flags                      = inode->flags;
   file->inode->length                     = priv_data.filesize_qword ? (inode->size_lower << 8) | (inode->size_high) : inode->size_lower;
   file->inode->inode                      = inode_num;
-  memcpy((void *)&file->inode->u.ext2_ino, inode, sizeof(struct ext2_inode));
   file->ops                               = &ext2_file_ops;
   file->inode->fsops                      = &ext2_fs_ops;
+  file->fpos                              = 0;
+  file->rdev                              = 0;
+  memcpy((void *)&file->inode->u.ext2_ino, inode, sizeof(struct ext2_inode));
 }
 
 static void ext2_inode2vnode(struct inode * vfs, struct ext2_inode * inode, uint32_t inode_num) {
@@ -294,53 +296,59 @@ static void ext2_read_dlink(uint32_t block, uint8_t * buf)
 	}
 	ext2_block_release(bbuf);
 }
+/*
+static void ext2_read_tlink(uint32_t block, uint8_t * buf) {
+  uint8_t * bbuf = ext2_block_allocate();
+  ext2_read_block(block, buf);
+  
+}*/
 
 static int ext2_read_file(struct file * filp, uint8_t * buf) 
 {
-    if (!filp || !filp->inode->inode) 
-      return -EINVAL;
+  if (!filp || !filp->inode->inode) 
+    return -EINVAL;
     
-    struct ext2_inode * inode = (struct ext2_inode *)malloc(priv_data.block_size);
-    ext2_read_inode(inode, filp->inode->inode);
+  struct ext2_inode * inode = (struct ext2_inode *)malloc(priv_data.block_size);
+  ext2_read_inode(inode, filp->inode->inode);
 
-    // Calculate the total number of blocks required to read
-    uint32_t total_blocks = (inode->size_lower + priv_data.block_size - 1) / priv_data.block_size;
-    uint32_t blocks_read = 0;
+  // Calculate the total number of blocks required to read
+  uint32_t total_blocks = (inode->size_lower + priv_data.block_size - 1) / priv_data.block_size;
+  uint32_t blocks_read = 0;
 
-    for(int i = 0; i < 12 && blocks_read < total_blocks; i++)
-    {
-        uint32_t block = inode->block_pointers[i];
-        if (block == 0 || block > sb->total_blocks) 
-          break;
+  for(int i = 0; i < 12 && blocks_read < total_blocks; i++)
+  {
+    uint32_t block = inode->block_pointers[i];
+    if (block == 0 || block > sb->total_blocks) 
+      break;
         
-        ext2_read_block(block, buf + blocks_read * priv_data.block_size);
-        blocks_read++;
-    }
+    ext2_read_block(block, buf + blocks_read * priv_data.block_size);
+    blocks_read++;
+  }
 
-    if(inode->s_pointer && blocks_read < total_blocks)
-    {
-        debug("Ext2: Reading s-link\n");
-        ext2_read_slink(inode->s_pointer, buf + blocks_read * priv_data.block_size);
-        blocks_read += priv_data.block_size / sizeof(uint32_t);
-    }
-    if(inode->d_pointer && blocks_read < total_blocks)
-    {
-        debug("Ext2: Reading d-link\n");
-        ext2_read_dlink(inode->d_pointer, buf + blocks_read * priv_data.block_size);
-        blocks_read += (priv_data.block_size / sizeof(uint32_t)) * (priv_data.block_size / sizeof(uint32_t));
-    }
-    if(inode->t_pointer && blocks_read < total_blocks)
-    {
-      debug("Ext2: T-links are unsupported!\n");
-    }
-    free(inode);
-    return 0;
+  if(inode->s_pointer && blocks_read < total_blocks)
+  {
+    ext2_read_slink(inode->s_pointer, buf + blocks_read * priv_data.block_size);
+    blocks_read += priv_data.block_size / sizeof(uint32_t);
+  }
+  if(inode->d_pointer && blocks_read < total_blocks)
+  {
+    ext2_read_dlink(inode->d_pointer, buf + blocks_read * priv_data.block_size);
+    blocks_read += (priv_data.block_size / sizeof(uint32_t)) * (priv_data.block_size / sizeof(uint32_t));
+  }
+  /*
+  if(inode->t_pointer && blocks_read < total_blocks)
+  {
+    ext2_read_tlink(inode->t_pointer, buf + blocks_read * priv_data.block_size);
+    blocks_read += (priv_data.block_size / sizeof(uint32_t)) * (priv_data.block_size / sizeof(uint32_t)) * (priv_data.block_size / sizeof(uint32_t));
+  }
+    */
+  free(inode);
+  return 0;
 }
 
 int ext2_read(struct file * filp, void * buf, size_t unused)
 {
-  ext2_read_file(filp, (uint8_t *)buf);
-  return 0;
+  return ext2_read_file(filp, (uint8_t *)buf);
 }
 
 int ext2_mount_fs(struct filesystem * fs, struct device * dev)

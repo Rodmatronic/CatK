@@ -22,10 +22,6 @@ static struct device * blkdev = NULL;
 
 static uint8_t * tar = NULL;
 
-static inline uint8_t * ustar_alloc_block(void) {
-  return (uint8_t *)malloc(TAR_BLOCK_SIZE);
-}
-
 static int oct2bin(const uint8_t * str, int size) {
   int n = 0;
   for(int i = 0; size > 0; size--, i++) {
@@ -82,6 +78,8 @@ static struct inode * ustar_namei(const char * fn) {
 static void inode2file(struct inode * inode, struct file * file) {
   file->inode = inode;
   file->ops   = &ustar_file_ops;
+  file->rdev  = 0;
+  file->fpos  = 0;
 }
 
 static int ustar_exists(const char * path) {
@@ -126,7 +124,7 @@ static int ustar_mount(struct filesystem * fs, struct device * dev) {
     return rc;
   }
   if(memcmp((char *)(sb + 257), TAR_MAGIC, TAR_MAGIC_LEN) != 0) {
-    debug("Invalid USTAR signature.\n");
+    debug("Invalid USTAR signature: %s\n");
     return -EINVAL;
   }
   debug("USTAR signature is valid.\n");

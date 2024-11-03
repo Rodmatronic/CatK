@@ -46,7 +46,7 @@ struct filesystem * get_filesystem(const char * name)
 
 int filesystems_init(int first_partition_lba)
 {
-  memset((void *)filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
+  memset(&filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
 
   /* first up are the real filesystems */
   int rc = ext2_init(first_partition_lba);
