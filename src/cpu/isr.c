@@ -69,7 +69,7 @@ void interrupt_install(void (*handler)(struct intr_stack_frame *), uint8_t intr)
     return;
   if(int_handlers[intr])
   {
-    printk("interrupt_install: new interrupt handler conflicting with previous handler: 0x%02x\n", intr);
+    debug("Conflicting interrupt handlers. Original interrupt handler: 0x%08x - New interrupt handler: 0x%08x\n", handler, int_handlers[intr]);
     return;
   }
   int_handlers[intr] = handler;
@@ -102,12 +102,6 @@ static inline void register_dump(struct intr_stack_frame * reg)
          reg->esp, reg->ebp, reg->esi, reg->edi);
   debug("\tEIP: 0x%08x CS: 0x%04x EFLAGS: 0x%08x DS: 0x%04x\n", 
          reg->eip, reg->cs, reg->eflags, reg->ds);
-  /*
-  printk("Dumping code segment..\n");
-  segment_dump(reg->cs);
-  printk("Dumping data segment..\n");
-  segment_dump(reg->ds);
-  */
 }
 
 void interrupt_handler(struct intr_stack_frame * frame)

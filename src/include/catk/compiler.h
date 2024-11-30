@@ -1,6 +1,8 @@
 #ifndef __COMPILER_H
 #define __COMPILER_H
 
+#define func_return_addr __builtin_extract_return_addr(__builtin_return_address (0))
+
 #define _cold_        __attribute__((cold))         /* unlikely to be called */
 #define _hot_        __attribute__((hot))           /* likely to be called */
 #define _noreturn_    __attribute__((noreturn))     /* should not return */

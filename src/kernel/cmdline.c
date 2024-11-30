@@ -1,13 +1,13 @@
 #include <multiboot2.h>
-#include <catk/kernel.h>
+#include <catk/params.h>
 #include <catk/mem.h>
 #include <lib/common.h>
 #include <lib/ctype.h>
 #include <stdint.h>
 
-char * obtain_cmdline(uint32_t addr)
+char * obtain_cmdline(void)
 {
-  struct multiboot_tag_string * string_tag = (struct multiboot_tag_string *)multiboot2_locate_tag(addr, MULTIBOOT_TAG_TYPE_CMDLINE);
+  struct multiboot_tag_string * string_tag = (struct multiboot_tag_string *)multiboot2_locate_tag(multiboot2_get_mbi(), MULTIBOOT_TAG_TYPE_CMDLINE);
   return string_tag->string;
 }
 

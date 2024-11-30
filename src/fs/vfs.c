@@ -7,6 +7,7 @@
 #include <catk/mem.h>
 #include <catk/task.h>
 #include <lib/common.h>
+#include <lib/ctype.h>
 #include <stdint.h>
 
 static struct filesystem * rootfs = NULL;
@@ -15,7 +16,13 @@ bool is_devfs(const char * path)
 {
   if(path[0] == '/')
     path++;
-  return (strncmp(path, "dev/", 3) == 0);
+
+  struct filesystem * devfs = get_filesystem("devfs");
+  if(devfs == NULL) {
+    return false;
+  }
+
+  return (strncmp(path, devfs->mount.mount_path + 1, 3) == 0);
 }
 
 int vfs_exists(const char * path) {
@@ -48,7 +55,7 @@ void vfs_close(struct file * filp) {
 
 int vfs_read(struct file * filp, void * buf, size_t sz)
 {
-  if(!filp->ops->read)
+  if(filp->ops->read == NULL)
     return -ENXIO;
   return filp->ops->read(filp, buf, sz);
 }

@@ -34,7 +34,7 @@ static void show_boot_banner(void) {
   printk("Everyone is permitted to copy, distribute, and modify this software.\n\n");
 }
 
-int kmain(int argc, char * argv[]) {
+int kmain(int _unused_ argc, char _unused_ * argv[]) {
   bool is_debug = false;
 #ifdef CATK_DEBUG_BUILD
   is_debug = true;
@@ -47,10 +47,11 @@ int kmain(int argc, char * argv[]) {
     debug("Failed to initialize console: %d\n", rc);
     return 1;
   }
-  console_print("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mR\033[1;0m video console initialized :)\n");
+  debug("Successfully initialized console.\n");
+  console_print("\033[1;31mC\033[32mO\033[33mL\033[34mO\033[35mU\033[36mR\033[1;0m video console initialized :)\n");
   show_boot_banner();
   printk("CatKernel Version %s %s%s(%s): %s\n", UTS_RELEASE, CATK_VERSION_CODENAME, is_debug ? " DEBUG!! " : " ", CATK_COMPILED_WITH, CATK_BUILD_DATE);
-  if (!cpuidcheck()) {
+  if (cpuidcheck() == 0) {
     panic("Could not get CPUID for this hardware!");
   }
   /* Check to see if the CPU supports CPUID. If not, panic.*/
@@ -65,8 +66,7 @@ int kmain(int argc, char * argv[]) {
   keyboard_init();
   initrd_probe();
   tasking_init();
-  /* it is impossible for tasking_init to return */
-  panic("Failed to init tasks, kernel left in unreachable state");
+  panic("How do you fuck up this badly to end up in THIS part of the kernel??\n");
   unreachable;
 }
 
@@ -102,10 +102,9 @@ void bootstrap2(void) {
   random_init();
   /* find first available block device */
   struct device * dev = blkdev_get_first();
-  if(!dev)
+  if(dev == NULL)
     panic("No drive to mount rootfs.\n");
-  int first_part = dev->fops->firstpart();
-  rc = filesystems_init(first_part); // this will be set to a dummy value
+  rc = filesystems_init(); // this will be set to a dummy value
   if(IS_ERR(rc))
     panic("Could not initialize filesystems: %d\n", rc);
   for (int i = 0; i < CATK_MOUNT_RETRIES; i++) {
@@ -114,6 +113,8 @@ void bootstrap2(void) {
       if (!IS_ERR(rc)) {
           vfs_set_rootfs(fs);
           break;
+      } else {
+        printk("Failed to mount %s: %d\n", fs->name, rc);
       }
 
       if (i == 0) {
@@ -139,9 +140,9 @@ void bootstrap2(void) {
   }
   set_tss_stack(get_current_task()->regs.esp);
   /* start init process */
-  rc = start_init(obtain_cmdline(multiboot2_get_mbi()));
+  rc = start_init(obtain_cmdline());
   if(IS_ERR(rc))
     panic("Failed when starting init process: %d\n", rc);
-  //printk("Nothing left to do. Going idle...\n");
-  /* fall back to catk_idle (defined in proc/task.c:19)  */
+  debug("Going idle..\n");
+  /* fall back to catk_idle (defined in proc/task.c:471)  */
 }

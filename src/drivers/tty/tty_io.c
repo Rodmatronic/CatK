@@ -10,6 +10,7 @@
 #include <catk/ipc.h>
 #include <catk/task.h>
 #include <catk/spinlock.h>
+#include <catk/console.h>
 #include <lib/ctype.h>
 
 SPINLOCK_INIT(tty_spinlock);
@@ -84,7 +85,11 @@ static size_t tty_read(struct tty_struct * tty, uint8_t * buf, size_t count) {
           return cnt - count;
         }
         case '\b': {
-          *--buf = '\0';
+          if(count < cnt) {
+            *--buf = '\0';
+            console_putc('\b');
+            count++;
+          }
           continue;
         }
       }
@@ -110,11 +115,11 @@ static int tty_dev_write(struct file * filp, void * buf, size_t sz) {
   return rc;
 }
 
-static int tty_dev_open(struct file * filp, const char * file) {
+static int tty_dev_open(struct file _unused_ * filp, const char _unused_ * file) {
   return 0;
 }
 
-static void tty_dev_close(struct file * filp)
+static void tty_dev_close(struct file _unused_ * filp)
 {
   return;
 }
@@ -132,7 +137,9 @@ static void tty_release(struct tty_struct * tty) {
 static inline void tty_buf_putc(struct ring_buffer * buf, struct tty_struct * tty, int ch) {
   ring_buffer_write(buf, ch);
   if(tty->termios.c_lflag & ECHO) {
-    console_putc(ch);
+    if(ch != '\b') {
+      console_putc(ch);
+    }
   }
 }
 
@@ -154,29 +161,40 @@ int tty_create(int num, struct device * dev) {
   struct device * tty_dev = (struct device *)malloc(sizeof(struct device));
   if(!tty_dev)
     return -ENOMEM;
-  if(ttys[num]) {
+  if(ttys[num] != NULL) {
+    free(tty_dev);
     return -EBUSY;
   }
   struct tty_struct * tty = (struct tty_struct *)malloc(sizeof(struct tty_struct));
-  if(!tty) {
+  if(tty == NULL) {
+    free(tty_dev);
+    return -ENOMEM;
+  }
+  tty->write_q = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+  tty->read_q = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+  if(tty->write_q == NULL || tty->read_q == NULL) {
     tty_release(tty);
+    free(tty_dev);
     return -ENOMEM;
   }
   termios_init(&tty->termios);
   if (ring_buffer_init(tty->write_q, TTY_BUF_SIZE) < 0 || ring_buffer_init(tty->read_q, TTY_BUF_SIZE) < 0) {
     tty_release(tty);
+    free(tty_dev);
     return -ENOMEM;
   }
   tty->winsize.ws_row = console_get(0)->data.vc_rows;
   tty->winsize.ws_col = console_get(0)->data.vc_cols;
   tty->winsize.ws_xpixel = 0;
   tty->winsize.ws_ypixel = 0;
+  tty->ops = (struct tty_operations *)malloc(sizeof(struct tty_operations));
+  assert(tty->ops != NULL);
   tty->ops->write = tty_write;
   tty->ops->read = tty_read;
   tty->dev = dev; /* console device */
   ttys[num] = tty;
   /* now create the character device */
-  strncpy((char *)tty_dev->name, "tty", NAME_MAX - 1);
+  snprintf((char *)tty_dev->name, NAME_MAX - 1, "tty%d", num);
   tty_dev->removable = true;
   tty_dev->dev       = MKDEV(TTYDEV_MAJOR, num);
   tty_dev->priv_data = tty;

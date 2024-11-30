@@ -118,11 +118,11 @@ int liballoc_unlock() {
 }
 
 void * liballoc_alloc(size_t pages) {
-  return physmem_alloc_blocks(pages);
+  return vmm_alloc_pages(pages);
 }
 
 int liballoc_free(void * ptr, size_t pages) {
-  physmem_free_blocks(ptr, pages);
+  vmm_free_pages(ptr, pages);
   return 0;
 }
 

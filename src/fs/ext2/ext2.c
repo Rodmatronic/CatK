@@ -262,7 +262,7 @@ static int ext2_open(struct file * filp, const char * file)
   return 0;
 }
 
-static void ext2_close(struct file * filp) {
+static void ext2_close(struct file _unused_ * filp) {
   return;
 }
 
@@ -271,8 +271,8 @@ static void ext2_read_slink(uint32_t block, uint8_t * buf)
 	uint8_t * bbuf = ext2_block_allocate();
 	ext2_read_block(block, bbuf);
 	uint32_t * blocks = (uint32_t *)bbuf;
-	uint32_t numblocks = priv_data.block_size / sizeof(uint32_t);
-	for(int i = 0; i < numblocks; i++)
+	size_t numblocks = priv_data.block_size / sizeof(uint32_t);
+	for(size_t i = 0; i < numblocks; i++)
   {
 		if(!blocks[i])
       break;
@@ -286,9 +286,9 @@ static void ext2_read_dlink(uint32_t block, uint8_t * buf)
 	uint8_t * bbuf = ext2_block_allocate();
 	ext2_read_block(block, bbuf);
 	uint32_t * blocks = (uint32_t *)bbuf;
-	uint32_t numblocks = priv_data.block_size / sizeof(uint32_t);
-	uint32_t singsize = numblocks * priv_data.block_size;
-	for(int i = 0; i < numblocks; i++)
+	size_t numblocks = priv_data.block_size / sizeof(uint32_t);
+	size_t singsize = numblocks * priv_data.block_size;
+	for(size_t i = 0; i < numblocks; i++)
   {
 		if(!blocks[i]) 
       break;
@@ -346,7 +346,7 @@ static int ext2_read_file(struct file * filp, uint8_t * buf)
   return 0;
 }
 
-int ext2_read(struct file * filp, void * buf, size_t unused)
+int ext2_read(struct file * filp, void * buf, size_t _unused_ unused)
 {
   return ext2_read_file(filp, (uint8_t *)buf);
 }
@@ -354,14 +354,29 @@ int ext2_read(struct file * filp, void * buf, size_t unused)
 int ext2_mount_fs(struct filesystem * fs, struct device * dev)
 {
   int rc;
+  if(dev == NULL) {
+    return -ENODEV;
+  }
+  if(dev->fops->firstpart == NULL) {
+    return -EIO;
+  }
+  ext2_start_lba = dev->fops->firstpart();
   debug("Ext2: Mounting on block %d,%d\n", MAJOR(dev->dev), MINOR(dev->dev));
-  uint8_t * sector_data = (uint8_t *)calloc(1024, 1);
-  rc = dev->fops->lseek(NULL, ext2_start_lba + 2, SEEK_SET);
+  uint8_t * sector_data = (uint8_t *)calloc(1024, 1); 
+  struct file disk_file;
+  dev2file(dev, &disk_file);
+  rc = dev->fops->lseek(&disk_file, ext2_start_lba + 2, SEEK_SET);
   if(IS_ERR(rc))
     return rc;
-  rc = dev->fops->read(NULL, sector_data, 1);
+  rc = dev->fops->read(&disk_file, sector_data, 1);
   if(IS_ERR(rc))
     return rc;
+
+  fs->sb = (struct superblock *)malloc(sizeof(struct superblock));
+  if(fs->sb == NULL) {
+    return -ENOMEM;
+  }
+
   sb = (struct ext2_superblock *)sector_data;
   if(sb->signature != EXT2_SUPER_MAGIC)
   {
@@ -410,14 +425,9 @@ int ext2_mount_fs(struct filesystem * fs, struct device * dev)
   return 0;
 }
 
-int ext2_init(int fp_lba)
+int ext2_init(void)
 {
-#if CATK_EXT2 == 1
-  ext2_start_lba = fp_lba;
   return register_filesystem("ext2", &ext2_fs_ops, &ext2_file_ops, FS_MOUNT_DISK);
-#else
-  return -ENOSYS;
-#endif
 }
 
 struct file_operations ext2_file_ops = {

@@ -35,14 +35,17 @@ static inline int ustar_parse_size(const uint8_t * octal) {
   return oct2bin(octal, 11);
 }
 
-static int ustar_read_file(const char * name, uint8_t * buffer) {
+static int ustar_read_file(struct file * file, uint8_t * buffer, size_t sz) {
+  if(file == NULL || buffer == NULL) {
+    return -EFAULT;
+  }
   uint8_t * ptr = (uint8_t *)tar;
   uint8_t * buf = NULL;
   while (!memcmp(ptr + 257, TAR_MAGIC, TAR_MAGIC_LEN)) {
     int filesize = ustar_parse_size(ptr + 0x7c);
-    if(!strcmp(name, (const char *)ptr + 1)) {
+    if(!strcmp(file->name, (const char *)ptr + 1)) {
       buf = ptr + TAR_BLOCK_SIZE;
-      memcpy(buffer, buf, filesize);
+      memcpy(buffer, buf + file->fpos, sz);
       return 0;
     }
     ptr += (((filesize + TAR_BLOCK_SIZE - 1) / TAR_BLOCK_SIZE) + 1) * TAR_BLOCK_SIZE;
@@ -106,25 +109,59 @@ static void ustar_close(struct file * file) {
   free(file);
 }
 
-static int ustar_read(struct file * filp, void * buf, size_t unused) {
-  return ustar_read_file(filp->name, (uint8_t *)buf);
+static int ustar_read(struct file * filp, void * buf, size_t sz) {
+  return ustar_read_file(filp, (uint8_t *)buf, sz);
+}
+
+static int ustar_write(struct file _unused_ * filp, void  _unused_ * buf, size_t _unused_ sz) {
+  return -EROFS; /* Read-only filesystem */
+}
+
+static int ustar_lseek(struct file * file, size_t offset, int whence)
+{
+  if(file == NULL) {
+    return -EINVAL;
+  }
+  switch(whence)
+  {
+    case SEEK_SET:
+    {
+      file->fpos = offset;
+      break;
+    }
+    case SEEK_CUR:
+    {
+      file->fpos += offset;
+      break;
+    }
+    case SEEK_END:
+    {
+      return -ESPIPE; /* not implemented yet */
+      break;
+    }
+  }
+  return 0;
 }
 
 static int ustar_mount(struct filesystem * fs, struct device * dev) {
   int rc;
   debug("USTAR: Mounting on block %d,%d\n", MAJOR(dev->dev), MINOR(dev->dev));
   uint8_t * sb = (uint8_t *)malloc(TAR_BLOCK_SIZE);
-  /* reset seek */
-  rc = dev->fops->lseek(NULL, 0, SEEK_SET);
+  struct file disk_file;
+  dev2file(dev, &disk_file);
+  /* reset seek if not done already */
+  rc = dev->fops->lseek(&disk_file, 0, SEEK_SET);
   if(IS_ERR(rc)) {
+    free(sb);
     return rc;
   }
-  rc = dev->fops->read(NULL, sb, 1);
+  rc = dev->fops->read(&disk_file, sb, 1);
   if(IS_ERR(rc)) {
+    free(sb);
     return rc;
   }
   if(memcmp((char *)(sb + 257), TAR_MAGIC, TAR_MAGIC_LEN) != 0) {
-    debug("Invalid USTAR signature: %s\n");
+    free(sb);
     return -EINVAL;
   }
   debug("USTAR signature is valid.\n");
@@ -142,9 +179,9 @@ int ustar_init(void) {
 
 struct file_operations ustar_file_ops = {
   NULL,
-  NULL,
+  ustar_lseek,
   ustar_read,
-  NULL,
+  ustar_write,
   NULL,
   NULL,
   ustar_open,

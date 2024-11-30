@@ -1,6 +1,7 @@
-#include <catk/printk.h>
+#include <catk/debug.h>
 #include <catk/compiler.h>
 #include <catk/task.h>
+#include <catk/trace.h>
 #include <stdint.h>
 
 #if UINT32_MAX == UINTPTR_MAX
@@ -13,7 +14,8 @@ uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
  
 void _cold_ _noreturn_ __stack_chk_fail(void)
 {
-	panic("Stack smashing detected.\n");
+  debug("Stack smashing detected @ 0x%08x.\n", __builtin_return_address (0));
+	die();
   unreachable;
 }
 

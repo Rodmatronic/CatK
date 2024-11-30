@@ -7,6 +7,8 @@
 #include <lib/common.h>
 #include <stdint.h>
 
+#include "internal.h"
+
 /* GDT */
 
 extern void gdt_flush(uint32_t gdtr);
@@ -288,7 +290,7 @@ static void pic_remap_vectors(void)
 	pic_master_send_dat(a1);   // restore saved masks.
 	pic_slave_send_dat(a2);
   /* UEFI masks these interrupts. I don't know why. */
-  for(int i = 0; i < 42; i++)
+  for(int i = 0; i < 31; i++)
     pic_unmask(i);
 }
 
@@ -330,50 +332,12 @@ void tss_init(void)
   tss_install();
 }
 
-
-static inline char * gpf_tbltostr(const uint8_t tbl) {
-  switch(tbl) {
-    case 0b00: {
-      return "GDT";
-    }
-    case 0b01: {
-      return "IDT";
-    }
-    case 0b10: {
-      return "LDT";
-    }
-    case 0b11: {
-      return "IDT";
-    }
-  }
-  return NULL;
-}
-
-static void gpf_handler(struct intr_stack_frame * regs) {
-  printk("x86 Trap: General Protection Fault:\n");
-  /* bit 0 is set if it was caused by software */
-  printk("\tExternal: %s\n", (regs->err_code & BIT(0)) ? "true" : "false");
-  /* bits 1-2 are set to tell us what table it originated from */
-  uint8_t table = ((regs->err_code >> 1) & 0xf0) & 0b1100;
-  printk("\tTable: %s (0x%02x)\n", gpf_tbltostr(table), table);
-  /* bit 3-15 is the selector index in the table */
-  uint8_t idx = (regs->err_code >> 3) ;
-  printk("\tSelector index of origin: %d\n", idx);
-  /* bit 16-31 are zero-padded to form a uint32_t (we ignore those bits) */
-  if(regs->cs == 0x1b)
-    dispatch_signal(SIGILL);
-  panic("General protection fault in kernel mode\n");
-}
-
-void exceptions_install(void) {
-  interrupt_install(gpf_handler, X86_TRAP_GP);
-}
-
 void cpu_init(void)
 {
   gdt_install();
   idt_setup();
   exceptions_install();
+  paging_init();
   timer_init();
   tss_init();
   syscall_install();

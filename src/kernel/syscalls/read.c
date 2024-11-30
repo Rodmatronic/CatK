@@ -11,7 +11,7 @@ int sys_read(int fd, char * buf, size_t sz)
 {
   struct task * p = get_current_task();
   struct file * file = p->fd[fd];
-  if(!file->ops) {
+  if(file == NULL) {
     return -EBADF;
   }
   return vfs_read(file, (void *)buf, sz);

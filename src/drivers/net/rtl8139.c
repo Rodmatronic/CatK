@@ -29,7 +29,7 @@ static uint8_t * rx_buffer = NULL;
 
 static const struct pci_ident rtl8139_ids[] = 
 {
-  PCI_IDENT(0x10ec, 0x8139),
+  PCI_IDENT(REALTEK, 0x8139),
   PCI_IDENT(0xffff, 0xffff)
 };
 
@@ -73,7 +73,7 @@ static void rtl8139_init(void) {
 }
 
 struct pci_driver rtl8139_driver = {
-  .name = "Realtek 8139 Compatible Ethernet",
+  .name = "Realtek 8139 Ethernet",
   .ident = (void *)&rtl8139_ids,
   .attach_driver = rtl8139_attach,
   .init_driver   = rtl8139_init

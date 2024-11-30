@@ -20,12 +20,15 @@ char * trace_ret_addr(uintptr_t ret_eip) {
       return symlist[i - 1].name;
     }
   }
-  return NULL;
+  return "???";
 }
 
 #ifdef CATK_STACK_TRACE
 
 static char * trace_addr(uintptr_t * offset, uintptr_t ip) {
+  if(ip > (uintptr_t)&kend) {
+    return "???";
+  }
   for(uint32_t i = 0; i < ip; i++) {
     if(symlist[i].addr >= ip) {
       *offset = ip - symlist[i - 1].addr;
@@ -49,8 +52,14 @@ void trace_stack(uint8_t frames)
       printk("%s+0x%08x\n", trace_addr(&offset, stack->ip), offset);
     else
       printk("\n");
+    if((uintptr_t)stack->bp % sizeof(uintptr_t) != 0) {
+      /* align the stack frame */
+      stack = (struct stack_frame *)((uintptr_t)stack->bp + sizeof(uintptr_t) - (uintptr_t)stack->bp % sizeof(uintptr_t));
+      break;
+    }
     stack = stack->bp;
   }
+  printk("End of stack backtrace.\n");
 }
 
 #endif

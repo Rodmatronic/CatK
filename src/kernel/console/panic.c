@@ -18,15 +18,11 @@ static const char messages[4][128] = {
 void _cold_ _noreturn_ panic(const char format[], ...)
 {
 #ifdef CATK_STACK_TRACE
-  trace_stack(8);
+  trace_stack(16);
 #endif
   va_list arg;
   va_start(arg, format);
-#ifdef CATK_DEBUG_BUILD
-  printk("Panic at %s()!: ", trace_ret_addr((uintptr_t)__builtin_extract_return_addr(__builtin_return_address (0))));
-#else
   printk("Panic!: ");
-#endif
   vprintf(format, arg);
   uint8_t random = rand() % 3;
   if(random > 2) {

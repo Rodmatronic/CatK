@@ -38,6 +38,9 @@ struct device * blkdev_get(uint8_t major) {
 	if (major >= MAX_BLKDEV)
 		return NULL;
   struct device * dev = blkdevs[major];
+  if(dev == NULL) {
+    return NULL;
+  }
   if(!MAJOR(dev->dev) && !MINOR(dev->dev))
     return NULL;
   return dev;
@@ -56,7 +59,22 @@ struct device * chrdev_get(uint8_t major) {
   if(major >= MAX_CHRDEV)
     return NULL;
   struct device * dev = chrdevs[major];
+  if(dev == NULL) {
+    return NULL;
+  }
   if(!MAJOR(dev->dev) && !MINOR(dev->dev))
     return NULL;
   return dev;
+}
+
+void dev2file(struct device * dev, struct file * file) {
+  if(file == NULL) {
+    /* dont mess with null pointers */
+    return;
+  }
+  file->inode = NULL;
+  strcpy(file->name, dev->name);
+  file->ops   = dev->fops;
+  file->rdev  = dev->dev;
+  file->fpos  = 0;
 }

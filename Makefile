@@ -61,11 +61,16 @@ config:
 
 debug:
 	@qemu-system-x86_64 \
+		-machine pc \
+		-cpu qemu64 \
 		-d int \
 		-cdrom $(OUT)/catkernel.iso \
+		-drive format=raw,file=disk.img \
 		-m 2G \
-		-no-reboot \
-		-debugcon stdio
+	  -netdev user,id=mynet0 \
+    -device ne2k_pci,netdev=mynet0 \
+		-vga std \
+		-no-reboot
 
 disk:
 	@bash $(TOOLS)/make_ext2.sh $(CATK_ROOT)/skeleton disk-ext2.img
@@ -76,15 +81,15 @@ disk:
 run:
 	@qemu-system-x86_64 \
 		-machine pc \
-		-hda $(OUT)/catkernel.iso \
+		-cpu host \
+		-enable-kvm \
+		-cdrom $(OUT)/catkernel.iso \
+		-drive format=raw,file=disk.img \
 		-m 2G \
 		-debugcon stdio \
 	  -netdev user,id=mynet0 \
-    -device rtl8139,netdev=mynet0 \
+    -device ne2k_pci,netdev=mynet0 \
 		-vga std
-
-run_bochs:
-	@bochs -q
 
 clean:
 	@$(RM_FORCE) $(OUT)

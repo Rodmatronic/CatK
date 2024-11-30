@@ -25,6 +25,10 @@ static inline int isalpha(char c) {
   return (islower(c) || isupper(c));
 }
 
+static inline int isgraph(char c) {
+  return ((c >= 32) && (c <= 126));
+}
+
 static inline int index_of(char c, char * str)
 {
 	int i = 0;

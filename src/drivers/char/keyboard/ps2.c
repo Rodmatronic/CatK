@@ -110,7 +110,7 @@ static uint8_t keyboard_get_scancode_flag(char scancode)
   }
 }
 
-static void _hot_ keyboard_port1_irq(struct intr_stack_frame * frame)
+static void _hot_ keyboard_port1_irq(struct intr_stack_frame _unused_ * frame)
 {
   /* this is required to be set */
   if(!(READ_CMD & KEYBOARD_STATUS_OUTPUT))

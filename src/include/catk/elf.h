@@ -1,6 +1,7 @@
 #ifndef __ELF_H
 #define __ELF_H
 
+#include <catk/fs.h>
 #include <stdint.h>
 
 #define ELF_TYPE_LOAD 1
@@ -59,6 +60,6 @@ struct elf_symbol
 	uint16_t		st_shndx;
 };
 
-int elf_exec(const char * name, const uint8_t * data);
+int load_elf_binary(struct file * file, char * argv[]);
 
 #endif

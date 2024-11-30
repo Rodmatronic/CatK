@@ -5,12 +5,39 @@
 #include <catk/printk.h>
 #include <catk/errno.h>
 #include <catk/ustar.h>
+#include <catk/trace.h>
+#include <catk/compiler.h>
 #include <lib/common.h>
 #include <config.h>
 #include <stdint.h>
 
-struct filesystem filesystems[NR_FILESYSTEMS];
-int num_fs = 0;
+struct fs_init_entries {
+  const char * name;
+  void * init;
+};
+
+static struct fs_init_entries filesystem_init_funcs[NR_FILESYSTEMS] = {
+
+#ifdef CATK_EXT2
+  {"EXT2", ext2_init},
+#endif
+
+#ifdef CATK_FAT32
+  {"FAT32", fat32_init},
+#endif
+
+#ifdef CATK_DEVFS
+  {"devfs", devfs_init},
+#endif
+  
+  {"ustar", ustar_init},
+
+  {NULL, NULL}
+
+};
+
+static struct filesystem filesystems[NR_FILESYSTEMS];
+static int num_fs = 0;
 
 int register_filesystem(const char * name, struct fs_operations * fsops, struct file_operations * fops, int flags)
 {
@@ -25,7 +52,7 @@ int register_filesystem(const char * name, struct fs_operations * fsops, struct 
   filesystems[num_fs].fops          = fops;
   filesystems[num_fs].mount.flags  = flags;
   /* pro programmer here B^) */
-  printk("VFS: Registered filesystem \"%s\"\n", name);
+  debug("VFS: Registered filesystem \"%s\"\n", name);
   debug("Filesystem info:\n");
   debug("\tName: %s\n", filesystems[num_fs].name);
   debug("\tFlags: 0x%02x\n", flags);
@@ -40,29 +67,20 @@ struct filesystem * get_filesystem(const char * name)
     if(!strncmp(filesystems[i].name, name, NAME_MAX - 1))
       return &filesystems[i];
   }
-  debug("Invalid filesystem: %s\n", name);
   return NULL;
 }
 
-int filesystems_init(int first_partition_lba)
+int filesystems_init(void)
 {
   memset(&filesystems, 0, sizeof(struct filesystem) * NR_FILESYSTEMS);
-
-  /* first up are the real filesystems */
-  int rc = ext2_init(first_partition_lba);
-  if(IS_ERR(rc)) {
-    printk("VFS: Warning: Failed to initialize Ext2: %d\n", rc);
+  struct fs_init_entries * fs = &filesystem_init_funcs[0];
+  for(int i = 0; filesystem_init_funcs[i].init != NULL; i++, fs = &filesystem_init_funcs[i]) {
+    printk("VFS: Initializing filesystem %s...\n", fs->name);
+    int (*init_func)(void) = fs->init;
+    int rc = init_func();
+    if(IS_ERR(rc)) {
+      printk("Failed to initialize %s: %d\n", fs->name, rc);
+    }
   }
-
-  rc = ustar_init();
-  if(IS_ERR(rc)) {
-    printk("VFS: Warning: Failed to initialize USTAR: %d\n", rc);
-  }
-  /* now for the psuedo-filesystems :) */
-  rc = devfs_init();
-  if(IS_ERR(rc)) {
-    printk("VFS: Warning: Failed to initialize devfs: %d\n", rc);
-  }
-
   return 0;
 }

@@ -7,14 +7,15 @@
 #include <catk/ipc.h>
 #include <catk/kernel.h>
 #include <catk/vfs.h>
+#include <catk/virt.h>
 #include <lib/common.h>
-#include <lib/list.h>
 #include <stdint.h>
 
-static struct task * wait_queue[4]; // only used for sys_wait
-static struct task * catk_sys;
-static struct task * task_list;
-static struct task * current;
+static struct task * task_list[NPROC];
+static struct task * wait_queue[NPROC];
+static struct task * current = NULL;
+
+static size_t num_tasks = 0;
 
 static bool tasking_enabled = false;
 
@@ -22,28 +23,15 @@ inline bool is_tasking_enabled(void) {
   return tasking_enabled;
 }
 
-int is_pid_running(pid_t pid);
-
-static void catk_sys_init(void) {
-  tasking_enabled = true;
-  debug("Multitasking has been enabled :)\n");
-  bootstrap2();
-  while(1);
-}
-
 struct task * get_task_from_pid(pid_t pid)
 {
-  struct task * p = catk_sys;
-  struct task * orig = catk_sys;
-  while (1)
-  {
-    if (p->pid == pid)
-    {
-      return p;
+  for(int i = 0; i < NPROC; i++) {
+    if(task_list[i] == NULL) {
+      continue;
     }
-    p = p->next;
-    if (p == orig)
-      break;
+    if(task_list[i]->pid == pid)  {
+      return task_list[i];
+    }
   }
   return NULL;
 }
@@ -55,12 +43,10 @@ int is_pid_running(pid_t pid)
 }
 
 struct task * task_find_child(pid_t parent) {
-  struct task * p = current;
-  while(p != catk_sys) {
-    if(p->ppid == current->pid) {
-      return p;
+  for(int i = 0; i < NPROC; i++) {
+    if(task_list[i]->ppid == parent) {
+      return task_list[i];
     }
-    p = p->next;
   }
   return NULL;
 }
@@ -104,7 +90,7 @@ pid_t sleep(void) {
     debug("Sending PID %d off to a deep sleep. Goodnight! :)\n", current->pid);
     if (wait_queue_add(current) < 0) {
       return -EAGAIN;
-    }
+  }
     current->state = TASK_BLOCKED;
     critical_exit();
     asm volatile("int $0x20");
@@ -126,16 +112,9 @@ void wakeup(pid_t pid) {
 
 static inline pid_t pid_alloc(void)
 {
-  struct task *p = catk_sys;
-  for (pid_t pid = 0; pid < NPROC; pid++)
-  {
-    if (p->pid != pid)
-    {
-      return pid;
-   }
-    p = p->next;
-  }
-  return -1;
+  static pid_t pids = 0;
+  pid_t alloc_pid = pids++;
+  return (alloc_pid %= MAX_PID);
 }
 
 static int task_signal(int signal) {
@@ -150,6 +129,11 @@ static int task_signal(int signal) {
       kill(current);
       break;
     }
+    case SIGSEGV: {
+      debug("%s: received SIGSEGV!\n", current->name);
+      kill(current);
+      break;
+    }
     default: {
       debug("Who are you??\n");
       debug("\033[1;31mI am fizzbuzz..\033[1;0m\n");
@@ -159,19 +143,20 @@ static int task_signal(int signal) {
   return 0;
 }
 
-struct task * create_user_task(char * name, void * entry, uint8_t task_priority, int argc, char * argv[]) {
+struct task * create_user_task(char * name, void * entry, uint8_t task_priority, int _unused_ argc, char _unused_ * argv[]) {
   /* since this starts off as a kernel task, i wont change utask to utask  */
   struct task * utask = (struct task *)malloc(sizeof(struct task));
-  if(!utask) {
-    return NULL;
-  }
+  assert(utask != NULL);
   utask->name = name;
   utask->pid = pid_alloc();
+  /* This should never happen */
+  assert(utask->pid > 0);
   utask->uid = 0;
   utask->gid = 0;
   utask->ppid = 0;
   utask->state = TASK_CREATED;
   utask->priority = task_priority % 6;
+
   switch (utask->priority)
   {
     case TASK_PRIORITY_HIGH:
@@ -195,19 +180,32 @@ struct task * create_user_task(char * name, void * entry, uint8_t task_priority,
       return NULL;
     }
   }
+  /* currently it isnt page aligned */
+  utask->pgd = create_new_pgd();
+  assert((uint32_t *)utask->pgd != NULL);
   utask->ticks_left = utask->time_quantum;
   utask->stack = (uintptr_t)malloc(4096);
   if(!utask->stack) {
     free(utask);
+    free((uintptr_t *)utask->pgd);
     return NULL;
   }
   utask->error_code = -1;
-  utask->argc = argc;
-  vfs_open(utask->fd[0], "/dev/tty");
+  utask->fd[0] = (struct file *)malloc(sizeof(struct file));
+  if(utask->fd[0] == NULL) {
+    free(utask);
+    free((uintptr_t *)utask->pgd);
+    return NULL;
+  }
+  int rc = vfs_open(utask->fd[0], "/dev/tty0");
+  if(IS_ERR(rc)) {
+    free(utask->fd[0]);
+    free(utask);
+    free((uintptr_t *)utask->pgd);
+    return NULL;
+  }
   utask->fd[1] = utask->fd[0];
   utask->fd[2] = utask->fd[1];
-  for(int i = 0; i < argc; i++)
-    utask->argv[i] = strdup(argv[i]);
   utask->cwd = NULL;
   utask->handle_signal = task_signal;
   /* set registers */
@@ -224,7 +222,7 @@ struct task * create_user_task(char * name, void * entry, uint8_t task_priority,
   utask->regs.cs = 0x1b;
   utask->regs.esp = (utask->stack + 4096);
   utask->regs.esp -= sizeof(struct intr_stack_frame);
-  utask->regs.ebp = utask->regs.esp;
+  utask->regs.ebp = 0;
   utask->regs.useresp = utask->regs.esp;
   memcpy((void *)utask->regs.esp, &utask->regs, sizeof(struct intr_stack_frame));
   debug("Created user-mode task with PID %d starting at 0x%08x\n", utask->pid, utask->regs.eip);
@@ -243,7 +241,7 @@ struct task * create_kernel_task(char * name, void * entry, uint8_t task_priorit
   ktask->ppid = 0;
   ktask->state = TASK_CREATED;
   ktask->priority = task_priority % 6;
-  switch (ktask->priority)
+  switch (task_priority)
   {
     case TASK_PRIORITY_HIGH:
     {
@@ -272,6 +270,7 @@ struct task * create_kernel_task(char * name, void * entry, uint8_t task_priorit
     free(ktask);
     return NULL;
   }
+  ktask->pgd = get_kernel_pgd();
   ktask->error_code = -1;
   ktask->argc = 0;
   ktask->argv = NULL;
@@ -287,7 +286,7 @@ struct task * create_kernel_task(char * name, void * entry, uint8_t task_priorit
   ktask->regs.ebx = 0;
   ktask->regs.esp = (ktask->stack + 4096);
   ktask->regs.esp -= sizeof(struct intr_stack_frame);
-  ktask->regs.ebp = ktask->regs.esp;
+  ktask->regs.ebp = 0; /* <-- helps with stack unwinding/tracing */
   ktask->regs.esi = 0;
   ktask->regs.edi = 0;
   ktask->regs.ds = 0x0010;
@@ -298,29 +297,67 @@ struct task * create_kernel_task(char * name, void * entry, uint8_t task_priorit
   return ktask;
 }
 
-pid_t task_add_queue(struct task * p)
+void task_queue_sort(void) {
+  struct task * current;
+  for(int i = 0; i < NPROC; i++) {
+    current = task_list[i];
+    if(current == NULL) {
+      int j;
+      for(j = i; j < NPROC && task_list[j] == NULL; j++);
+      current = task_list[j];
+    } else {
+      continue;
+    }
+  }
+}
+
+void task_add_queue(struct task * p)
 {
-  tasking_enabled = false;
-  p->next = current->next;
-  p->next->prev = p;
-  p->prev = current;
-  current->next = p;
-  tasking_enabled = true;
-  debug("scheduler: added pid %d to queue\n", p->pid);
-  return p->pid;
+  for(int i = 0; i < NPROC; i++) {
+    if(task_list[i] == NULL) {
+      task_list[i] = p;
+      debug("scheduler: added pid %d to queue in slot %d\n", p->pid, i);
+      num_tasks++;
+      if(num_tasks == 1) {
+        current = p;
+      }
+      return;
+    }
+  }
+  panic("Could not add pid %d to task queue!\n", p->pid);
 }
 
 void task_remove_queue(struct task * p) {
+  if(p == NULL) {
+    return;
+  }
+  tasking_enabled = false;
   /* skip over the 'p' task */
-  p->prev->next = p->next;
-  p->next->prev = p->prev;
+  for(int i = 0; i < NPROC; i++) {
+    if(p == task_list[i]) {
+      task_list[i] = NULL;
+    }
+  }
+  /* just in case if it isn't already */
+  task_queue_sort();
+  tasking_enabled = true;
+  num_tasks--;
+}
+
+int task_get_task_queue_index(struct task * p) {
+  for(int i = 0; i < NPROC; i++) {
+    if(task_list[i] == p) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 int spawn_kernel_task(char * name, void * addr, int priority)
 {
   struct task * p = create_kernel_task(name, addr, priority);
   if (!p)
-    return -ENOMEM;
+    return -EAGAIN;
   task_add_queue(p);
   return p->pid;
 }
@@ -328,7 +365,7 @@ int spawn_kernel_task(char * name, void * addr, int priority)
 int spawn_user_task(char * name, void * addr, int priority, int argc, char * argv[]) {
   struct task * p = create_user_task(name, addr, priority, argc, argv);
   if (!p)
-    return -ENOMEM;
+    return -EAGAIN;
   task_add_queue(p);
   return p->pid;
 }
@@ -355,7 +392,7 @@ extern void do_first_context_switch(uintptr_t esp);
 static void _noreturn_ first_context_switch(struct intr_stack_frame * regs) {
   current->state = TASK_ALIVE;
   do_first_context_switch((uint32_t)regs->esp);
-  for(;;);
+  unreachable;
 }
 
 inline struct task * get_current_task(void) {
@@ -364,10 +401,15 @@ inline struct task * get_current_task(void) {
 
 static struct task * find_next_task(void)
 {
-  struct task * p = current->next;
-  int i = 0; /* cant reach the amount of NPROC */
-  for(; i < NPROC; i++)
+  struct task * p;
+  for(int i = 0; i < NPROC; i++)
   {
+    if(task_list[i] == NULL) {
+      i++;
+      continue;
+    }
+    assert(task_list[i] != NULL);
+    p = task_list[i];
     switch(p->state) {
       case TASK_ALIVE: /* fall through */
       case TASK_CREATED: {
@@ -382,9 +424,12 @@ static struct task * find_next_task(void)
           }
         }
       }
-    }
-    p = p->next;
+    } 
   }
+  if(num_tasks == 1) {
+    return current;
+  }
+  debug("Number of tasks: %d\n", num_tasks);
   panic("No free tasks left to schedule!\n");
   unreachable;
 }
@@ -407,28 +452,35 @@ void schedule(struct intr_stack_frame * regs) {
   struct task * next = find_next_task();
   current = next;
   /* no bad tasks, only good ones */
-  if(current->regs.esp == current->stack) {
+  if(current->regs.esp <= current->stack) {
     panic("No stack memory left for pid %d!\n", current->pid);
     unreachable;
   }
   if(next->state == TASK_CREATED) {
     first_context_switch(&next->regs);
   }
+  load_page_directory(next->pgd);
   memcpy(regs, &current->regs, sizeof(struct intr_stack_frame));
   critical_exit();
 }
 
-void tasking_init(void) {
-  /* clear the wait queue */
-  memset(wait_queue, 0, sizeof(struct task) * 4);
-  catk_sys = create_kernel_task("system", catk_sys_init, TASK_PRIORITY_HIGH);
-  if(!catk_sys) {
-    return;
-  }
-  task_list = catk_sys;
-  task_list->next = catk_sys;
-  task_list->prev = catk_sys;
-  current = catk_sys;
-  first_context_switch(&task_list->regs);
+static void catk_sys_init(void) {
+  tasking_enabled = true;
+  debug("Multitasking has been enabled :)\n");
+  bootstrap2();
+  while(is_pid_running(1) == true);
+  /* in this case, it hasnt really died, it hasnt been created yet */
+  for(;;);
   unreachable;
+}
+
+void tasking_init(void) {
+  /* using memset is bad practice */
+  for(int i = 0; i < NPROC; i++) {
+    task_list[i] = NULL;
+    wait_queue[i] = NULL;
+  }
+  struct task * p = create_kernel_task("sys", catk_sys_init, TASK_PRIORITY_LOW);
+  task_add_queue(p);
+  first_context_switch(&p->regs);
 }

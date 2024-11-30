@@ -12,18 +12,24 @@
 #include <catk/trace.h>
 #include <lib/common.h>
 
-char init_path[NAME_MAX]; /* either set by cmdline or set by the kernel */
-
-const char possible_inits[][128] = {
-  // /init is already tried, no point in trying it again
-  "/bin/init", "/etc/init", "/etc/initrc", "/sbin/init", "/boot/init", "/usr/bin/init", "/usr/sbin/init", "/usr/local/bin/init"
+static const char possible_inits[][128] = {
+  "/init", "/bin/init", "/etc/init", "/etc/initrc", "/sbin/init", "/boot/init", "/usr/bin/init", "/usr/sbin/init", "/usr/local/bin/init"
 };
 
-int try_init(const char * path)
+static char ** generate_argv(const char * exec_path) {
+  char **argv = (char **)calloc(ARG_MAX, sizeof(char *));
+  assert(argv != NULL);
+  argv[0] = strdup(exec_path);
+  argv[1] = NULL;
+  return argv;
+};
+
+static int try_init(const char * path)
 {
   int rc;
   struct file * file = (struct file *)malloc(sizeof(struct file));
-  rc = vfs_open(file, init_path);
+  assert(file != NULL);
+  rc = vfs_open(file, path);
   if(IS_ERR(rc)) {
     debug("open failed: %d\n", rc);
     return rc;
@@ -34,7 +40,11 @@ int try_init(const char * path)
     debug("read failed: %d\n", rc);
     return rc;
   }
-  rc = elf_exec((const char *)init_path, program_buffer);
+  debug("found file: %s\n", path);
+  char **argv = generate_argv(path);
+
+  /* TODO: pass argc to the function below */
+  rc = load_elf_binary(file, argv);
   if(IS_ERR(rc)) {
     printk("exec failed: %d\n", rc);
   }
@@ -44,17 +54,37 @@ int try_init(const char * path)
 
 int start_init(const char * cmdline)
 {
-  int rc;
-  printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
-  char * init_val = get_cmdline_param_val((char *)cmdline, "init");
-  if(!init_val)
-    strncpy(init_path, "/init", NAME_MAX - 1);
-  else
-    strncpy(init_path, init_val, NAME_MAX - 1);
-  printk("%s: trying %s...\n", __FUNCTION__, init_path);
-  rc = try_init(init_path);
+  /*
+  printk("Reading file '/CONTENT'\n\n");
+  struct file * file = (struct file *)malloc(sizeof(struct file));
+  assert(file != NULL);
+  int rc = vfs_open(file, "/CONTENT");
   if(IS_ERR(rc)) {
     return rc;
   }
+  uint8_t * file_data = (uint8_t *)malloc(file->inode->length);
+  rc = vfs_read(file, file_data, file->inode->length);
+  if(IS_ERR(rc)) {
+    return rc;
+  }
+  printk((const char *)file_data);
   return 0;
+  */
+  int rc;
+  printk("Getting ready for init process.. Everybody, put on your safety helmets.\n");
+  char * init_path = get_cmdline_param_val((char *)cmdline, "init");
+  if(init_path != NULL) {
+    rc = try_init(init_path);
+    if(!IS_ERR(rc)) {
+      return 0;
+    }
+  }
+  for(int i = 0; i < 9; i++) {
+    rc = try_init(possible_inits[i]);
+    if(IS_ERR(rc) == false) {
+      return 0;
+    }
+  }
+  panic("No init executable found. Please repack your initramfs with a valid init executable.\n");
+  unreachable;
 }

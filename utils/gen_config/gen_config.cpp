@@ -6,8 +6,6 @@
 #include <sys/stat.h>
 #include <parser.hpp>
 
-#define CATK_GEN_CONFIG 1
-
 bool nasm_file = false;
 
 void show_usage(void)
@@ -24,13 +22,13 @@ bool file_exists(const char * path)
 
 int parser::parse_config_line(const char * line, std::vector<struct cfg_option>&list)
 {
-#ifdef CATK_GEN_CONFIG
+#ifdef IS_CATK
     if(strncmp(line, "CATK", 4))
     {
         return 0;
     }
 #else
-    if(strncmp(line, "CONFIG", 4))
+    if(strncmp(line, "CONFIG", 6))
     {
         return 0;
     }

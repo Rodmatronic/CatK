@@ -140,6 +140,6 @@ struct filesystem;
 struct file;
 struct inode;
 
-int ext2_init(int fp_lba);
+int ext2_init(void);
 
 #endif

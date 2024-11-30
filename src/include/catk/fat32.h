@@ -74,7 +74,6 @@ struct fat32_priv_data
 struct device;
 struct filesystem;
 
-int fat32_init(int partition_lba);
-int fat32_mount(struct filesystem * fs, struct device * blkdev);
+int fat32_init(void);
 
 #endif

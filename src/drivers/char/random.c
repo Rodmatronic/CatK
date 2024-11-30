@@ -11,22 +11,22 @@
 
 static struct file_operations random_fops;
 
-static int random_lseek(struct file * filp, size_t offset, int whence) {
+static int random_lseek(struct file _unused_ * filp, size_t _unused_ offset, int _unused_ whence) {
   return 0;
 }
 
-static int random_read(struct file * filp, void * buf, size_t sz) {
-  for(int i = 0; i < sz; i++) {
+static int random_read(struct file _unused_ * filp, void * buf, size_t sz) {
+  for(size_t i = 0; i < sz; i++) {
     ((uint8_t *)buf)[i] = gen_random() % UINT8_MAX;
   }
+  return sz;
+}
+
+static int random_write(struct file _unused_ * filp, void _unused_ * buf, size_t _unused_ sz) {
   return 0;
 }
 
-static int random_write(struct file * filp, void * buf, size_t sz) {
-  return 0;
-}
-
-static int random_open(struct file * filp, const char * path) {
+static int random_open(struct file _unused_ * filp, const char _unused_ * path) {
   return 0;
 }
 

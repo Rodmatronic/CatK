@@ -8,10 +8,8 @@
 #include <multiboot2.h>
 #include <lib/common.h>
 
-uintptr_t * initrd_start, * initrd_end;
+static uintptr_t * initrd_start, * initrd_end;
 struct file_operations initrd_fops;
-
-int lseek = 0;
 
 static void initrd_read_single_sector(uint8_t * buf, int lba);
 
@@ -28,11 +26,12 @@ int initrd_probe(void)
   debug("Initrd info:\n");
   debug("\tAddress\t[0x%08x - 0x%08x]\n", initrd_start, initrd_end);
   debug("\tSize:  \t%d MiB\n", DIV_ROUND_UP(((uint32_t)initrd_end - (uint32_t)initrd_start), 1048576));
+  /* setup device */
   struct device * initrd = device_struct_alloc();
   if(!initrd) {
     return -ENOMEM;
   }
-  strncpy((char *)initrd->name, "initrd", NAME_MAX - 1);
+  snprintf((char *)initrd->name, NAME_MAX - 1, "initrd");
   initrd->dev        = MKDEV(RAMDISK_MAJOR, 0);
   initrd->removable  = true;
   initrd->priv_data  = (void *)mod;
@@ -42,13 +41,12 @@ int initrd_probe(void)
 static void initrd_read_single_sector(uint8_t * buf, int lba)
 {
   uint32_t offset = lba * 512;
-  uint8_t * mem = (uint8_t *)(initrd_start + offset);
-  memcpy(buf, mem, 512);
+  memcpy(buf, (uint8_t *)(initrd_start + offset), 512);
 }
 
 static void initrd_read_sectors(uint8_t * buf, int lba, size_t sectors)
 {
-	for(int i = 0; i < sectors; i++)
+	for(size_t i = 0; i < sectors; i++)
 	{
 		initrd_read_single_sector(buf + i * 512, lba + i);
 	}
@@ -61,42 +59,48 @@ int initrd_find_first_partition(void)
 
 int initrd_dev_read(struct file * file, void * buf, size_t sz)
 {
-  initrd_read_sectors((uint8_t *)buf, lseek, sz);
+  if(file == NULL) {
+    return -EFAULT;
+  }
+  initrd_read_sectors((uint8_t *)buf, file->fpos, sz);
   return 0;
 }
 
-int initrd_dev_write(struct file * file, void * buf, size_t sz)
+int initrd_dev_write(struct file _unused_ * file, void _unused_ * buf, size_t _unused_ sz)
 {
   return -EIO;
 }
 
-int initrd_dev_open(struct file * file, const char * unused)
+int initrd_dev_open(struct file _unused_ * file, const char _unused_ * unused)
 {
   return 0;
 }
 
-void initrd_dev_close(struct file * file)
+void initrd_dev_close(struct file _unused_ * file)
 {
   return;
 }
 
 int initrd_dev_lseek(struct file * file, size_t offset, int whence)
 {
+  if(file == NULL) {
+    return -EINVAL;
+  }
   switch(whence)
   {
     case SEEK_SET:
     {
-      lseek = offset;
+      file->fpos = offset;
       break;
     }
     case SEEK_CUR:
     {
-      lseek += offset;
+      file->fpos += offset;
       break;
     }
     case SEEK_END:
     {
-      return -ENOSYS; /* not implemented yet */
+      return -ESPIPE; /* not implemented yet */
       break;
     }
   }

@@ -21,8 +21,7 @@ int ring_buffer_write(struct ring_buffer * ring, uint8_t ch)
   if(ring->count == ring->size) {
     return -1;
   }
-  if(ring->tail > ring->size)
-    ring->tail = 0; 
+  ring->tail %= ring->size;
   ring->buffer[ring->tail++] = ch;
   ring->count++;
   //debug("WRITE: ring->count: %d\n", ring->count);
@@ -34,9 +33,8 @@ int ring_buffer_read(struct ring_buffer * ring, uint8_t * buf, size_t len)
   if(ring->count == 0) {
     return -1;
   }
-  if(ring->head > ring->size)
-    ring->head = 0;
-  for(int i = 0; i < len; i++)
+  ring->head %= ring->size;
+  for(size_t i = 0; i < len; i++)
   {
     if(!ring->count) {
       break;
@@ -53,12 +51,9 @@ int ring_buffer_read_single(struct ring_buffer * ring, uint8_t * data) {
   if(ring->count == 0) {
     return -1;
   }
-  if(ring->head > ring->size) {
-    ring->head = 0;
-  }
+  ring->head %= ring->size;
   *data = ring->buffer[ring->head++];
   ring->count--;
-  //debug("READ: ring->count: %d\n", ring->count);
   return ring->head;
 }
 

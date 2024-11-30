@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 /* flags and mode are unused */
-int sys_open(const char * filename, int flags, uint16_t mode)
+int sys_open(const char * filename, int _unused_ flags, uint16_t _unused_ mode)
 {
   struct task * p = get_current_task();
   int rc = 0;

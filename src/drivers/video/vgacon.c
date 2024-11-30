@@ -27,8 +27,8 @@
 
 static struct console vgacon_struct;
 
-static int vgacon_x = 0;
-static int vgacon_y = 0;
+static uint32_t vgacon_x = 0;
+static uint32_t vgacon_y = 0;
 
 static const uint8_t colors[16] = {
   0x00,
@@ -85,13 +85,12 @@ static inline void _hot_ vgacon_scroll(void)
   }
   if (vgacon_y >= vgacon_struct.data.vc_cols)
   {
-    for (int i = 1; i < vgacon_struct.data.vc_cols; i++)
+    for (uint32_t i = 1; i < vgacon_struct.data.vc_cols; i++)
     {
       memcpy((void *)vgacon_struct.data.vc_screenbuf + (i - 1) * vgacon_struct.data.vc_rows * 2, (void *)vgacon_struct.data.vc_screenbuf + i * vgacon_struct.data.vc_rows * 2, vgacon_struct.data.vc_rows * 2);
     }
     uint16_t * last_row = (void *)vgacon_struct.data.vc_screenbuf + (vgacon_struct.data.vc_cols - 1) * vgacon_struct.data.vc_rows * 2;
-    memset(last_row, 0, vgacon_struct.data.vc_rows * 2);
-
+    memset(last_row, 0x07, vgacon_struct.data.vc_rows * 4);
     vgacon_y--;
   }
 }
@@ -148,7 +147,7 @@ static void process_ansi_sgr(size_t elem)
   static bool fg_hi = false;
   static bool bg_hi = false;
   struct ansi_list * list = &ansi_value[0];
-  for(int i = 0; i < elem; i++)
+  for(size_t i = 0; i < elem; i++)
   {
     if (list[i].empty || list[i].value == 0)
     {
@@ -282,7 +281,7 @@ int vgacon_output_intr(struct tty_struct * tty, size_t len)
   if(!str)
     return -ENOMEM;
   ring_buffer_read(tty->write_q, (uint8_t *)str, len);
-  for(int i = 0; i < len; i++) {
+  for(size_t i = 0; i < len; i++) {
     vgacon_putc(str[i]);
   }
   free(str);
@@ -298,21 +297,23 @@ static void vgacon_enable_cursor(void) {
 
 static inline void vgacon_clear(void)
 {
-  memset16((void *)vgacon_struct.data.vc_screenbuf, 0x0007, vgacon_struct.data.vc_rows * vgacon_struct.data.vc_cols);
+  size_t count = vgacon_struct.data.vc_rows * vgacon_struct.data.vc_cols;
+  uint16_t * temp = (uint16_t *)vgacon_struct.data.vc_screenbuf;
+  for(; count; count--) *temp++ = 0x0007;
 }
 
-int vgacon_dev_write(struct file * file, void * buf, size_t sz)
+int vgacon_dev_write(struct file _unused_ * file, void * buf, size_t sz)
 {
   memcpy((void *)vgacon_struct.data.vc_screenbuf, buf, sz);
   return 0;
 }
 
-int vgacon_dev_open(struct file * file, const char * unused)
+int vgacon_dev_open(struct file _unused_ * file, const char _unused_ * unused)
 {
   return 0;
 }
 
-void vgacon_dev_close(struct file * file)
+void vgacon_dev_close(struct file _unused_ * file)
 {
   return;
 }

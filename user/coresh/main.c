@@ -55,6 +55,9 @@ void execute_command(const char *cmd, char *args[]) {
 }
 
 int main() {
+    print("\033[2J");
+    print("\033[0;0f");
+    print("\033[1;31mI am fizzbuzz..\033[1;0m\n");
     char input[MAX_INPUT];
     while (1) {
         print("coresh$ ");

@@ -1,22 +1,24 @@
 #include <multiboot2.h>
 #include <catk/params.h>
 #include <catk/debug.h>
+#include <catk/virt.h>
 #include <lib/common.h>
 #include <stdint.h>
 
 extern int kmain(int argc, char * argv[]);
 
-void kernel_crt0(uint32_t magic, uintptr_t mbi) {
+void kernel_crt0(uintptr_t mbi) {
   int rc = 0;
-  if(!multiboot2_validate_args(magic, mbi)) {
-    debug("Bootloader sent us with a bad multiboot2 information. Off to the kitty void, we go! :)\n");
+  debug("Bootloader information pointer: 0x%08x\n", mbi);
+  if(!multiboot2_validate_mbi(mbi)) {
+    debug("Bootloader sent us with a bad multiboot2 information.\n");
     return; /* return into the infinite halt state */
   }
   multiboot2_set_mbi(mbi);
   /* turn cmdline into a bunch of arguments */
   char * args[512];
   int arg_count = 0;
-  char * token = strtok(obtain_cmdline(mbi), " ");
+  char * token = strtok(obtain_cmdline(), " ");
   while (token != NULL) {
     if(arg_count >= 511)
       break;

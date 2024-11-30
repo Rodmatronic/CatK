@@ -1,6 +1,7 @@
 #ifndef __FS_H
 #define __FS_H
 
+#include <catk/compiler.h>
 #include <catk/limits.h>
 #include <catk/dirent.h>
 #include <catk/types.h>
@@ -9,7 +10,7 @@
 #include <catk/ext2.h>
 #include <stdint.h>
 
-#define NR_FILESYSTEMS 4 /* we support only 4 for now. im not sure what those 4 will be.. */
+#define NR_FILESYSTEMS 5 /* we support only 4 for now. im not sure what those 4 will be.. */
 
 struct fs_mount
 {
@@ -99,7 +100,7 @@ struct inode
 
 int register_filesystem(const char * name, struct fs_operations * fsops, struct file_operations * fops, int flags);
 struct filesystem * get_filesystem(const char * name);
-int filesystems_init(int first_partition_lba);
+int filesystems_init(void);
 bool is_devfs(const char * path);
 void devfs_ls(void);
 

@@ -3,7 +3,6 @@
 #include <catk/debug.h>
 #include <catk/kernel.h>
 #include <catk/errno.h>
-#include <lib/list.h>
 
 static struct module * module_list[32];
 static int modules_loaded = 0;
@@ -27,7 +26,7 @@ void module_load(const char * mod_name) {
 static void modules_load(void) {
   for(int i = 0; i < modules_loaded; i++) {
     struct module * mod = module_list[i];
-    debug("Initializing module %s..\n", mod->name);
+    debug("Initializing module %s created by \"%s\"..\n", mod->name, mod->author);
     int rc = mod->init();
     if(IS_ERR(rc)) {
       debug("Module %s failed to initialize: %d\n", mod->name, rc);

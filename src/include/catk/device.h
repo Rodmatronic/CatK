@@ -63,7 +63,8 @@ int blkdev_register(struct device * dev, struct file_operations * fops);
 struct device * blkdev_get(uint8_t major);
 struct device * blkdev_get_first(void);
 struct device * chrdev_get(uint8_t major);
-void device_init(void);
+struct file;
+void dev2file(struct device * dev, struct file * file);
 int devfs_init(void);
 
 #endif

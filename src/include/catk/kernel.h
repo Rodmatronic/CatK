@@ -22,7 +22,6 @@ extern uintptr_t kmod_end;
 extern uintptr_t kbss_start;
 extern uintptr_t kbss_end;
 
-char * obtain_cmdline(uint32_t addr);
 void bootstrap2(void);
 int start_init(const char * cmdline);
 

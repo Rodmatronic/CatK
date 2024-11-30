@@ -1,3 +1,4 @@
+#include <catk/compiler.h>
 #include <catk/io.h>
 #include <catk/kernel.h>
 #include <catk/console.h>
@@ -7,6 +8,7 @@
 #include <config.h>
 
 #pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #define QEMU_DEBUGCON_PORT 0xE9
 
@@ -29,13 +31,8 @@ void qemu_debugcon_printf(const char fmt[], ...) {
   char buffer[256];
   va_list arg;
   va_start(arg, fmt);
-#ifndef CATK_SHOW_DEBUG
   vsnprintf(buffer, 255, fmt, arg); /* leave out a character for null byte */
   qemu_debugcon_puts(buffer);
-#else
-  if(is_console_enabled())
-    vprintf(fmt, arg);
-#endif
   va_end(arg);
 #endif
 }

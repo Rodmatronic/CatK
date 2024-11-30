@@ -25,7 +25,7 @@ bool is_console_enabled(void) {
 }
 
 int console_register(struct console * c) {
-  if(!c) {
+  if(c == NULL) {
     return -EINVAL;
   }
   consoles[c->data.vc_num] = c;
@@ -39,6 +39,9 @@ struct console * console_get(int num)
 }
 
 int console_clear(void) {
+  if(consoles[current_console] == NULL) {
+    return -ENODEV;
+  }
   spinlock_acquire(&console_spinlock);
   if(!consoles[current_console]->data.vc_sw.clear) {
     /* how dare you.. you forgot to bind a clear function to the console!! */
@@ -50,6 +53,9 @@ int console_clear(void) {
 }
 
 int console_print(const char * str) {
+  if(consoles[current_console] == NULL) {
+    return -ENODEV;
+  }
   spinlock_acquire(&console_spinlock);
   if(!consoles[current_console]->data.vc_sw.print) {
     /* the dummy who registered the console didnt even bind a print function! */
@@ -61,6 +67,9 @@ int console_print(const char * str) {
 }
 
 int console_putc(const char c) {
+  if(consoles[current_console] == NULL) {
+    return -ENODEV;
+  }
   spinlock_acquire(&console_spinlock);
   if(!consoles[current_console]->data.vc_sw.putc) {
     /* the dummy who registered the console didnt even bind a putc function! */
@@ -80,5 +89,6 @@ int console_init(void)
   rc = vgacon_init();
 #endif
   console_enabled = true;
+  console_clear();
   return rc;
 }

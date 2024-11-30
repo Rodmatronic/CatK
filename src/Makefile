@@ -26,10 +26,10 @@ CC_FLAGS = \
 	--target=i686-pc-none-elf \
 	-march=i686 \
 	-Wall \
+	-Wextra \
 	-Werror \
 	-nodefaultlibs \
 	-nostdlib \
-	-fPIE \
 	-fstack-protector-strong \
 	-fno-common \
 	-O2 \
@@ -43,7 +43,7 @@ CC_FLAGS = \
 	-fasynchronous-unwind-tables \
 	-fno-semantic-interposition \
 	-ffat-lto-objects \
-	-msse2
+	-msse4
 
 ifeq ($(DEBUG), 1)
 	CC_FLAGS += -feliminate-unused-debug-types
@@ -67,7 +67,7 @@ LD_FLAGS = \
 	-T $(CONFIG)/link.ld
 
 # source files
-C_SRC := $(shell find . -type f -name "*.c")
+C_SRC := $(shell find . -type f -name "*.c" ! -name "liballoc.c -printf "%P\n"")
 ASM_SRC := $(shell find . -type f -name "*.asm")
 # object files
 C_OBJ := $(patsubst %.c, %.o, $(C_SRC))
@@ -104,10 +104,14 @@ else
 	@printf "[ Multiboot2 check skipped ]\n"
 endif
 
-%.o: %.asm
-	@printf "[ $< ]\n"
-	@$(ASM) $(ASM_FLAGS) $< -o $@
+#mem/liballoc.o: mem/liballoc.c
+#	@$(CC) -c $< -o $@ $(CC_FLAGS) -DDEBUG=1
 
 %.o: %.c
 	@printf "[ $< ]\n"
 	@$(CC) -c $< -o $@ $(CC_FLAGS)
+
+%.o: %.asm
+	@printf "[ $< ]\n"
+	@$(ASM) $(ASM_FLAGS) $< -o $@
+

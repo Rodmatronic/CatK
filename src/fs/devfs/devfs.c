@@ -85,11 +85,18 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
   debug("devfs: Mounting devfs to %s on block %d,%d\n", fs->mount.mount_path, MAJOR(dev->dev), MINOR(dev->dev));
   devfs = fs;
   blkdev = dev;
+  fs->sb = (struct superblock *)malloc(sizeof(struct superblock));
+  if(fs->sb == NULL) {
+    return -ENOMEM;
+  }
   fs->sb->u.generic_sbp = ((void *)&superblock);
   /* create root inode */
   rc = devfs_create_root_inode();
   if(IS_ERR(rc)) {
     return rc;
+  }
+  for(int i = 0; i < CATK_DEVFS_INODES_MAX; i++) {
+    inodes[i] = NULL;
   }
   for(int i = 0; i < MAX_BLKDEV; i++) {
     struct device * dev = blkdev_get(i);
@@ -119,13 +126,19 @@ static int devfs_mount(struct filesystem * fs, struct device * dev) {
   }
   return 0;
 }
- struct device * devfs_find_node_by_name(const char * name) {
+
+struct device * devfs_find_node_by_name(const char * name) {
   for(int i = 0; i < CATK_DEVFS_INODES_MAX; i++) {
     struct devfs_inode * dnode = ((struct devfs_inode *)inodes[i]->u.generic_ino);
-    if(!strncmp(dnode->dev->name, name, strlen(name))) {
+    if(inodes[i] == NULL) {
+      continue;
+    }
+    debug("%s vs %s\n", dnode->dev->name, name);
+    if(strcmp(name, dnode->dev->name) == 0) {
       return dnode->dev;
     }
   }
+  debug("aw man ;-;\n");
   return NULL;
 }
 
@@ -181,31 +194,26 @@ static int devfs_exists(const char * path) {
   return true;
 }
 
-static void dev2file(struct device * dev, struct file * file) {
-  file->inode = NULL;
-  strcpy(file->name, dev->name);
-  file->ops   = dev->fops;
-  file->rdev  = dev->dev;
-  file->fpos  = 0;
-}
-
 static int devfs_open(struct file * filp, const char * path) {
+  if(filp == NULL) {
+    return -EINVAL;
+  }
   char * fn = strdup(path);
   struct device * dev = NULL;
   if(fn[0] == '/') {
     fn++;
   }
   fn = strchr(fn, '/');
-  while(fn) {
+  while(fn != NULL) {
     if(fn[0] == '/') {
       fn++;
     }
     dev = devfs_find_node_by_name(fn);
-    if(dev) {
-      break;
-    } else {
+    if(dev == NULL) {
       free(fn);
       return -ENOENT;
+    } else {
+      break;
     }
     fn = strchr(fn + 1, '/');
   }
@@ -214,7 +222,7 @@ static int devfs_open(struct file * filp, const char * path) {
   return 0;
 }
 
-static void devfs_close(struct file * filp) {
+static void devfs_close(struct file _unused_ * filp) {
   return;
 }
 
@@ -228,19 +236,14 @@ int devfs_write(struct file * filp, void * buf, size_t sz)
   return filp->ops->write(filp, buf, sz);
 }
 
-int devfs_readdir(struct file * filp, struct dirent * dirp, size_t count)
+int devfs_readdir(struct file _unused_ * filp, struct dirent _unused_ * dirp, size_t _unused_ count)
 {
-  for(;;);
   return 0;
 }
 
 int devfs_init(void)
 {
-#if CATK_DEVFS == 1
   return register_filesystem("devfs", &devfs_ops, &devfs_file_ops, FS_MOUNT_RAM);
-#else
-  return -ENOSYS;
-#endif
 }
 
 struct file_operations devfs_file_ops = {

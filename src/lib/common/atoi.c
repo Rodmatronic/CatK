@@ -5,7 +5,7 @@
 int atoi(const char * str)
 {
   int ret = 0;
-  for(int i = 0; i < strlen(str); i++)
+  for(int i = 0; str[i] != '\0'; i++)
   {
     if(!isdigit(str[i]))
       return -1;

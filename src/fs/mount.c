@@ -23,6 +23,9 @@ int vfs_mount(const char * path, struct device * blkdev, struct filesystem * fs)
     }
   }
   debug("Mounting %s to \"%s\"..\n", fs->name, path);
+  if(fs->fsops->mount == NULL) {
+    return -EFAULT;
+  }
   int rc = fs->fsops->mount(fs, blkdev);
   if(IS_ERR(rc)) {
     return rc;

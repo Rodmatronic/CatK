@@ -5,6 +5,10 @@
 #include <catk/tty.h>
 #include <lib/common.h>
 
+#define CONSOLE_ENCODE_POS(x, y) ((((x) << 8) & 0xff) | ((y) & 0xff))
+#define CONSOLE_EXTRACT_X(pos) (((pos) >> 8) & 0xff)
+#define CONSOLE_EXTRACT_Y(pos) ((pos) & 0xff)
+
 struct tty_struct;
 
 struct consw

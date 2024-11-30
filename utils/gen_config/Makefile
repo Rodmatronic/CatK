@@ -8,4 +8,4 @@ export cc = g++
 c_src := $(shell find . -type f -name "*.cpp")
 
 all: $(c_src)
-	@$(cc) $(cc_flags) -o $(objout) $^
+	@$(cc) $(cc_flags) -D IS_CATK -o $(objout) $^

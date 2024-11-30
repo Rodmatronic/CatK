@@ -1,6 +1,7 @@
 #ifndef __CORE_H
 #define __CORE_H
 
+#include <catk/types.h>
 #include <catk/compiler.h>
 #include <stdint.h>
 
@@ -230,13 +231,28 @@ static inline void cpuid(uint32_t code, uint32_t * a, uint32_t * b, uint32_t * c
   asm volatile("cpuid" : "=a"(*a), "=b"(*b), "=c"(*c), "=d"(*d) : "a"(code));
 }
 
+static inline void load_page_directory(uint32_t pd)
+{
+  asm volatile("mov %0, %%cr3" :: "r"(pd));
+}
+
+static inline void * platform_memcpy(void * dest, const void * src, size_t count) {
+  asm volatile("cld");
+  asm volatile("rep movsb" :: "D" (dest), "S" (src), "c" (count) :);
+  return dest;
+}
+
+static inline void * platform_memset(void * dest, const uint8_t val, size_t count) {
+  asm volatile("cld");
+  asm volatile("rep stosb" : "+D"(dest), "+c"(count) : "a"(val) : "memory");
+  return dest;
+}
+
 extern int cpuidcheck(void);
 void cpu_dump_all_info(void);
 uint32_t get_eip(void);
 
 void cpu_init(void);
 void setup_paging(void);
-void kvm_map(uint32_t phys_addr, uint32_t virt_addr);
-void uvm_map(uint32_t pgd, uint32_t phys_addr, uint32_t virt_addr);
 
 #endif

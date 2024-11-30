@@ -15,7 +15,7 @@ static uint32_t bar0;
 
 static const struct pci_ident ne2000_ids[] = 
 {
-  PCI_IDENT(0x10EC, 0x8029),
+  PCI_IDENT(REALTEK, 0x8029),
   PCI_IDENT(0xffff, 0xffff)
 };
 

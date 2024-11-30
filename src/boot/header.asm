@@ -22,6 +22,7 @@ multiboot2_header_start:
   dd HEADER_CHECKSUM
 %if CATK_VIDEO_GENERIC == 0
 multiboot2_fb_tag_start:
+  align 8
   ; Framebuffer tag
   dw 5
   ; Optional tag
@@ -38,7 +39,8 @@ multiboot2_fb_tag_end:
 %endif
 multiboot2_header_tag_end:
   ; Header end
+  align 8
   dw 0
   dw 0
-  dd 0
+  dd 8
 multiboot2_header_end:

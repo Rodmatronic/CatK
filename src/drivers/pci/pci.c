@@ -152,9 +152,18 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
       }
       break;
     }
+    case 0x02: // Network Controllers
+    {
+      if (devices[num_pci].subclass == 0x00) {
+        printk("  class 0x%02x subclass 0x%02x - Ethernet Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
+      } else {
+        printk("  class 0x%02x subclass 0x%02x - Network Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
+      }
+      break;
+    }
     case 0x03: // Display Controllers
     {
-      printk("  class 0x%02x subclass NONE - Graphics Card found\n", devices[num_pci].subclass);
+      printk("  class 0x%02x subclass 0x%02x - Graphics Card found\n", devices[num_pci].class, devices[num_pci].subclass);
       break;
     }
     case 0x04: // Multimedia Devices
@@ -168,7 +177,7 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
     }
     case 0x05: // Memory Controllers
     {
-      printk("  class 0x%02x subclass NONE - Memory Controller found\n", devices[num_pci].class);
+      printk("  class 0x%02x subclass NONE - Memory Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
       break;
     }
     case 0x06: // Bridge Devices
@@ -180,18 +189,31 @@ static void pci_register_device(uint8_t bus, uint8_t slot, uint8_t func)
       }
       break;
     }
-    case 0x02: // Network Controllers
+    case 0x07: // Communication Devices
     {
-      if (devices[num_pci].subclass == 0x00) {
-        printk("  class 0x%02x subclass 0x%02x - Ethernet Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
-      } else {
-        printk("  class 0x%02x subclass 0x%02x - Network Controller found\n", devices[num_pci].class, devices[num_pci].subclass);
+      switch (devices[num_pci].subclass) {
+        case 0x00: printk("  class 0x%02x subclass 0x%02x - Serial controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x01: printk("  class 0x%02x subclass 0x%02x - Parallel controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x02: printk("  class 0x%02x subclass 0x%02x - Multiport serial controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x03: printk("  class 0x%02x subclass 0x%02x - Modem interface found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        default: printk("  class 0x%02x subclass 0x%02x - Communication device found\n", devices[num_pci].class, devices[num_pci].subclass); break;
       }
       break;
     }
+    case 0x0c:
+    {
+      switch (devices[num_pci].subclass) {
+        case 0x00: printk("  class 0x%02x subclass 0x%02x - Firewire controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x01: printk("  class 0x%02x subclass 0x%02x - ACCESS bus controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x03: printk("  class 0x%02x subclass 0x%02x - USB controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x04: printk("  class 0x%02x subclass 0x%02x - Fibre channel interface found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        case 0x05: printk("  class 0x%02x subclass 0x%02x - SMBus controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+        default: printk("  class 0x%02x subclass 0x%02x - Serial Bus controller found\n", devices[num_pci].class, devices[num_pci].subclass); break;
+      }
+    }
     default:
     {
-      printk("  class 0x%02x subclass NONE - Unknown PCI device found\n", devices[num_pci].class);
+      printk("  class 0x%02x subclass 0x%02x - Unknown PCI device found\n", devices[num_pci].class, devices[num_pci].subclass);
       break;
     }
   }
@@ -240,8 +262,8 @@ static inline void pci_driver_init(struct pci_device * dev)
 
 static void pci_drivers_find(void) /* i hate this coding this damn function */
 {
-  printk("Finding PCI drivers..\n");
   int rc;
+  printk("Finding PCI drivers..\n");
   debug("pci_compare:\n");
   for(int i = 0; i < num_pci; i++)
   {
@@ -250,9 +272,13 @@ static void pci_drivers_find(void) /* i hate this coding this damn function */
     {
       int k = 0;
       struct pci_ident * ident = &drivers[j]->ident[k];
-      while(ident->ven != PCI_VENDOR_INVALID)
+      /* we dont wanna waste performance by comparing invalid pci device */
+      while(1)
       {
         ident = &drivers[j]->ident[k++];
+        if(ident->ven == PCI_VENDOR_INVALID) {
+          break;
+        }
         rc = pci_compare(d.ident, ident);
         if(rc == 1)
         {
@@ -273,7 +299,7 @@ static void pci_drivers_find(void) /* i hate this coding this damn function */
 
 void pci_init(void)
 {
-  memset(devices, 0, sizeof(struct pci_device) * 32);
+  memset(devices, 0, sizeof(struct pci_device) * 64);
   pci_enumerate();
   pci_drivers_find();
 }

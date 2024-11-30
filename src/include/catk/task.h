@@ -38,19 +38,18 @@ struct task
   uid_t uid;
   gid_t gid;
   struct intr_stack_frame regs;
+  uintptr_t pgd;
   uint8_t state;
   uint8_t priority;
   uint8_t time_quantum;
   uint8_t ticks_left;
-	uint32_t stack; /* used only when freeing a task */
+	uintptr_t stack; /* used only when freeing a task */
   uint32_t error_code;
   int argc;
   char **argv;
   char * cwd;
   int (*handle_signal)(int); /* each task can handle a signal differently */
   struct file * fd[OPEN_MAX];
-	struct task * next;
-  struct task * prev;
 };
 
 struct task * wait_queue_get_first(void);
@@ -66,7 +65,7 @@ int spawn_user_task(char * name, void * addr, int priority, int argc, char * arg
 struct task * create_kernel_task(char * name, void * entry, uint8_t task_priority);
 struct task * create_user_task(char * name, void * entry, uint8_t task_priority, int argc, char * argv[]);
 
-pid_t task_add_queue(struct task * p);
+void task_add_queue(struct task * p);
 void tasking_init(void);
 bool task_has_children(void);
 struct task * task_find_child(pid_t parent);

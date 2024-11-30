@@ -9,6 +9,7 @@
   {ven, dev}
 
 #define INTEL 0x8086
+#define REALTEK 0x10ec
 
 struct pci_device;
 

@@ -11,8 +11,8 @@
 
 #include "ide.h"
 
-#define ATA_PRIMARY     0x00
-#define ATA_SECONDARY   ATA_PRIMARY + 1
+#define ATA_PRIMARY     0
+#define ATA_SECONDARY   1
 
 static int num_ata = 0;
 static struct device * ata_devices[4];
@@ -20,14 +20,12 @@ static struct ide_channel ata_channels[2];
 
 struct file_operations ata_fops;
 
-static int lseek = 0;
-
-static void ata_primary_irq(struct intr_stack_frame * frame)
+static void ata_primary_irq(struct intr_stack_frame _unused_ * frame)
 {
   printk("ATA PRIMARY INTERRUPT!\n");
 }
 
-static void ata_secondary_irq(struct intr_stack_frame * frame)
+static void ata_secondary_irq(struct intr_stack_frame _unused_ * frame)
 {
   printk("ATA SECONDARY INTERRUPT!\n");
 }
@@ -49,11 +47,10 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   if(!ata_devices[num_ata]) {
     return -ENOMEM;
   }
-  strncpy((char *)ata_devices[num_ata]->name, "ata", NAME_MAX - 1);
+  snprintf((char *)ata_devices[num_ata]->name, NAME_MAX - 1, "ata%d", num_ata);
   ata_devices[num_ata]->removable   = false;
   ata_devices[num_ata]->dev         = MKDEV(DISKDEV_MAJOR, num_ata);
   ata_devices[num_ata]->priv_data   = drv;
-  //partitions = ata_count_partitions();
   rc = blkdev_register(ata_devices[num_ata], &ata_fops);
   if(IS_ERR(rc))
   {
@@ -62,8 +59,9 @@ int ata_finalize_init(struct ide_drive * drv, const uint32_t bar0, const uint32_
   }
   num_ata++;
   debug("ATA: Installing interrupt handlers..\n");
-  interrupt_install(ata_primary_irq, 14);
-  interrupt_install(ata_secondary_irq, 15);
+  /* i forgot to make them irqs before :P */
+  interrupt_install(ata_primary_irq, IRQ(14));
+  interrupt_install(ata_secondary_irq, IRQ(15));
   return 0;
 }
 
@@ -112,7 +110,7 @@ static void ata_read_single_sector_pio(int disk, uint8_t * buf, int lba)
 
 static void ata_read_sectors_pio(int disk, uint8_t * buf, int lba, size_t sectors)
 {
-	for(int i = 0; i < sectors; i++)
+	for(size_t i = 0; i < sectors; i++)
 	{
 		ata_read_single_sector_pio(disk, buf + i * 512, lba + i);
 	}
@@ -120,7 +118,7 @@ static void ata_read_sectors_pio(int disk, uint8_t * buf, int lba, size_t sector
 
 static void ata_write_sectors_pio(int disk, uint8_t * buf, int lba, size_t sectors)
 {
-	for(int i = 0; i < sectors; i++)
+	for(size_t i = 0; i < sectors; i++)
 	{
 		ata_write_single_sector_pio(disk, buf + i * 512, lba + i);
 	}
@@ -143,22 +141,22 @@ int ata_find_first_partition(void)
 
 int ata_dev_read(struct file * file, void * buf, size_t sz)
 {
-  ata_read_sectors_pio(0, (uint8_t *)buf, lseek, sz);
+  ata_read_sectors_pio(0, (uint8_t *)buf, file->fpos, sz);
   return 0;
 }
 
 int ata_dev_write(struct file * file, void * buf, size_t sz)
 {
-  ata_write_sectors_pio(0, (uint8_t *)buf, lseek, sz);
+  ata_write_sectors_pio(0, (uint8_t *)buf, file->fpos, sz);
   return 0;
 }
 
-int ata_dev_open(struct file * file, const char * unused)
+int ata_dev_open(struct file _unused_ * file, const char _unused_  * unused)
 {
   return 0;
 }
 
-void ata_dev_close(struct file * file)
+void ata_dev_close(struct file _unused_ * file)
 {
   return;
 }
@@ -169,17 +167,17 @@ int ata_dev_lseek(struct file * file, size_t offset, int whence)
   {
     case SEEK_SET:
     {
-      lseek = offset;
+      file->fpos = offset;
       break;
     }
     case SEEK_CUR:
     {
-      lseek += offset;
+      file->fpos += offset;
       break;
     }
     case SEEK_END:
     {
-      return -ENOSYS; /* not implemented yet */
+      return -ESPIPE; /* not implemented yet */
       break;
     }
   }

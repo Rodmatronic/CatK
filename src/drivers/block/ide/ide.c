@@ -6,6 +6,7 @@
 #include <catk/printk.h>
 #include <catk/mem.h>
 #include <catk/io.h>
+#include <catk/debug.h>
 #include <lib/common.h>
 
 #include "ide.h"
@@ -143,8 +144,9 @@ loop:;
   if(!(rc & ATA_STATUS_DRQ))
     goto loop;
   void * init_data = (void *)malloc(512);
+  assert(init_data != NULL);
   for(int i = 0; i < 256; i++)
-    *(uint16_t *)(init_data + i * 2) = inw(bar);
+    *(uint16_t *)(init_data + (i * 2)) = inw(bar);
   // get drive info
   drives[num_drives].used = true;
   drives[num_drives].signature = *((uint16_t *)(init_data + ATA_IDENT_DEVICETYPE));
@@ -164,9 +166,14 @@ loop:;
     drives[num_drives].name[k] = *(uint16_t *)(init_data + ATA_IDENT_MODEL + k + 1);
     drives[num_drives].name[k + 1] = *(uint16_t *)(init_data + ATA_IDENT_MODEL + k);
   }
+  drives[num_drives].name[40] = '\0';
   rc = ata_finalize_init(&drives[num_drives], bar0, bar1, bar2, bar3, bar4);
-  if(!IS_ERR(rc))
+  if(!IS_ERR(rc)) {
     printk("Successfully initialized drive: %s\n", drives[num_drives].name);
+    debug("ATA drive properties:\n");
+    debug("\tSize: %d MiB\n", drives[num_drives].size / 1024 / 2);
+    debug("\tSignature: 0x%04x\n", drives[num_drives].signature);
+  }
   num_drives++;
   free(init_data);
 }

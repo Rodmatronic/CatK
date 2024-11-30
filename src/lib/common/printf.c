@@ -59,8 +59,11 @@ int vsnprintf(char * str, size_t len, const char format[], va_list arg)
   int n = 0;
   int str_i = 0;
   size_t width = 0;
-  for(int i = 0; format[i]; i++)
+  for(size_t i = 0; i < len; i++)
   {
+    if(!format[i]) {
+      break;
+    }
     if(format[i] == '%')
     {
       i++;

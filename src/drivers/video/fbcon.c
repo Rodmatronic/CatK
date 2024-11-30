@@ -30,13 +30,15 @@
 
 #include "ansi.h"
 
+SPINLOCK_INIT(fbcon_spinlock);
+
 static struct console fbcon_struct;
 struct multiboot_tag_framebuffer_common * grub_fb = NULL;
 
-static int fbcon_bg = 0;
-static int fbcon_fg = 0;
-static int fbcon_x = 0;
-static int fbcon_y = 0;
+static uint8_t fbcon_bg = 0;
+static uint8_t fbcon_fg = 0;
+static uint32_t fbcon_x = 0;
+static uint32_t fbcon_y = 0;
 
 #ifndef CATK_VGA_COLORS
 static const uint32_t colors[16] = {
@@ -89,7 +91,6 @@ struct file_operations fbcon_fops;
 int fbcon_output_intr(struct tty_struct * tty, size_t len);
 
 static struct device fbcon_dev = {
-  .name             = "fb",
   .dev              = MKDEV(FBDEV_MAJOR, 0), // in a devfs environment, this would be /dev/fb0
   .removable        = false,
   .parent           = NULL,
@@ -107,9 +108,9 @@ static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 {
   int x = con_x * fbcon_struct.data.vc_font.width;
   int y = con_y * fbcon_struct.data.vc_font.height;
-  for (int dy = 0; dy < fbcon_struct.data.vc_font.height; dy++) 
+  for (uint32_t dy = 0; dy < fbcon_struct.data.vc_font.height; dy++) 
   {
-    for (int dx = 0; dx < fbcon_struct.data.vc_font.width; dx++)
+    for (uint32_t dx = 0; dx < fbcon_struct.data.vc_font.width; dx++)
     {
 #ifndef FONT_ENDIANNESS_MISMATCH
       int color = (glyph[dy] >> (7 - dx)) & 1;
@@ -123,6 +124,7 @@ static void fbcon_print_glyph(int con_x, int con_y, uint8_t * glyph)
 
 static void fbcon_scroll(void)
 {
+  spinlock_acquire(&fbcon_spinlock);
   if (fbcon_x > ((grub_fb->framebuffer_pitch / 4) / fbcon_struct.data.vc_font.width) - 1)
   {
     fbcon_x = 0;
@@ -135,7 +137,6 @@ static void fbcon_scroll(void)
 
       // Calculate the size of all rows except the last one
       size_t all_rows_except_last_size = (fbcon_struct.data.vc_cols / fbcon_struct.data.vc_font.height) * row_size_bytes;
-
       // Perform the move using MMX registers
       asm volatile (
           "mov %2, %%ecx;"           // Set the loop counter (all_rows_except_last_size / 8)
@@ -158,7 +159,10 @@ static void fbcon_scroll(void)
       // Move the cursor up by one row
       fbcon_y--;
   }
+  fbcon_struct.data.vc_pos = CONSOLE_ENCODE_POS(fbcon_x, fbcon_y);
+  spinlock_release(&fbcon_spinlock);
 }
+
 static inline void bs(void)
 {
   if(fbcon_x)
@@ -166,6 +170,7 @@ static inline void bs(void)
     fbcon_x--;
     uint8_t * glyph = &fbcon_struct.data.vc_font.data[' ' * fbcon_struct.data.vc_font.height];
     fbcon_print_glyph(fbcon_x, fbcon_y, glyph);
+    fbcon_struct.data.vc_pos = CONSOLE_ENCODE_POS(fbcon_x, fbcon_y);
   }
 }
 
@@ -202,6 +207,16 @@ static void process_ascii(char ch)
       break;
     }
   }
+  fbcon_struct.data.vc_pos = CONSOLE_ENCODE_POS(fbcon_x, fbcon_y);
+}
+
+static void process_ansi_csi(size_t elem) {
+  struct ansi_list * list = &ansi_value[0];
+  int new_x = list[elem - 1].value;
+  int new_y = list[elem].value;
+  fbcon_x = new_x;
+  fbcon_y = new_y;
+  fbcon_struct.data.vc_pos = CONSOLE_ENCODE_POS(fbcon_x, fbcon_y);
 }
 
 static void process_ansi_sgr(size_t elem)
@@ -209,7 +224,7 @@ static void process_ansi_sgr(size_t elem)
   static bool fg_hi = false;
   static bool bg_hi = false;
   struct ansi_list * list = &ansi_value[0];
-  for(int i = 0; i < elem; i++)
+  for(size_t i = 0; i < elem; i++)
   {
     if (list[i].empty || list[i].value == 0)
     {
@@ -312,9 +327,22 @@ static void _hot_ process_ansi(char ch)
     }
     else
     {
-      if(ch == 'm')
-      {
-        process_ansi_sgr(ansi_list_idx);
+      switch (ch) {
+        case 'm': {
+          process_ansi_sgr(ansi_list_idx);
+          break;
+        }
+        case 'f': {
+          process_ansi_csi(ansi_list_idx);
+          break;
+        }
+        case 'J': {
+          //process_ansi_csi(ansi_list_idx);
+          break;
+        }
+        default: {
+          break;
+        }
       }
       ansi_state = ANSI_STATE_ESC;
     }
@@ -322,7 +350,7 @@ static void _hot_ process_ansi(char ch)
   fbcon_scroll();
 }
 
-static void fbcon_rebase_cursor(int x, int y, int old_x, int old_y)
+static void fbcon_rebase_cursor(int x, int y)
 {
   uint8_t * glyph = &fbcon_struct.data.vc_font.data[219 * fbcon_struct.data.vc_font.height];
   fbcon_print_glyph(x, y, glyph);
@@ -333,15 +361,17 @@ void fbcon_putc(char ch)
   int prev_x = fbcon_x, prev_y = fbcon_y; 
   uint8_t * glyph = &fbcon_struct.data.vc_font.data[' ' * fbcon_struct.data.vc_font.height];
   fbcon_print_glyph(prev_x, prev_y, glyph);
+  if(ch < (char)fbcon_struct.data.vc_font.char_count) {
+    return;
+  }
   process_ansi(ch);
-  fbcon_rebase_cursor(fbcon_x, fbcon_y, prev_x, prev_y);
+  fbcon_rebase_cursor(fbcon_x, fbcon_y);
 }
 
 void fbcon_print(const char * str)
 {
   for(int i = 0; str[i]; i++) {
-    if(str[i] <= fbcon_struct.data.vc_font.char_count)
-      fbcon_putc(str[i]);
+    fbcon_putc(str[i]);
   }
 }
 
@@ -353,25 +383,25 @@ int fbcon_output_intr(struct tty_struct * tty, size_t len)
   if(!str)
     return -ENOMEM;
   ring_buffer_read(tty->write_q, (uint8_t *)str, len);
-  for(int i = 0; i < len; i++) {
+  for(size_t i = 0; i < len; i++) {
     fbcon_putc(str[i]);
   }
   free(str);
   return 0;
 }
 
-int fbcon_dev_write(struct file * file, void * buf, size_t sz)
+int fbcon_dev_write(struct file _unused_ * file, void * buf, size_t sz)
 {
   memcpy((void *)fbcon_struct.data.vc_screenbuf, buf, sz);
   return 0;
 }
 
-int fbcon_dev_open(struct file * file, const char * unused)
+int fbcon_dev_open(struct file _unused_ * file, const char _unused_ * unused)
 {
   return 0;
 }
 
-void fbcon_dev_close(struct file * file)
+void fbcon_dev_close(struct file _unused_ * file)
 {
   return;
 }
@@ -379,7 +409,9 @@ void fbcon_dev_close(struct file * file)
 void fbcon_clear(void)
 {
   /* thank you rodmatronics for the help! :) */
-  memset32((void *)fbcon_struct.data.vc_screenbuf, colors[0], ((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height) * 2);
+  size_t count = ((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height) * 2;
+  uint32_t * temp = (uint32_t *)FRAMEBUFFER_VIRT_ADDR;
+  for(; count; count--) *temp++ = colors[0];
 }
 
 int fbcon_init(void)
@@ -391,29 +423,35 @@ int fbcon_init(void)
   debug("Framebuffer properties:\n");
   debug("Width: %d\n", grub_fb->framebuffer_width);
   debug("Height: %d\n", grub_fb->framebuffer_height);
-  debug("Framebuffer address: 0x%016x\n", grub_fb->framebuffer_addr);
+  debug("Framebuffer physical address: 0x%08x\n", grub_fb->framebuffer_addr);
+  debug("Framebuffer virtual address: 0x%08x\n", FRAMEBUFFER_VIRT_ADDR);
   debug("Framebuffer pitch: %d\n", grub_fb->framebuffer_pitch);
   debug("Framebuffer bits per pixel: %d\n", grub_fb->framebuffer_bpp);
   strncpy(fbcon_struct.name, "fbcon", 31);
-  fbcon_struct.data.vc_screenbuf = (uintptr_t)grub_fb->framebuffer_addr;
+  snprintf((char *)fbcon_dev.name, NAME_MAX - 1, "fb0");
+  fbcon_struct.data.vc_screenbuf = (uintptr_t)FRAMEBUFFER_VIRT_ADDR;
   fbcon_struct.data.vc_font = font_term8x16;
   fbcon_struct.data.vc_num = 0;
   fbcon_struct.data.vc_rows = grub_fb->framebuffer_width;
   fbcon_struct.data.vc_cols = grub_fb->framebuffer_height;
+  fbcon_struct.data.vc_pos = 0x0000;
+  fbcon_struct.data.vc_def_color = 0x07;
   fbcon_struct.data.vc_sw.clear = fbcon_clear;
   fbcon_struct.data.vc_sw.print = fbcon_print;
   fbcon_struct.data.vc_sw.putc = fbcon_putc;
   fbcon_struct.data.vc_sw.output_intr = fbcon_output_intr;
   fbcon_struct.dev = &fbcon_dev;
-  fbcon_x = 0;
-  fbcon_y = 0;
-  fbcon_fg = 7;
-  fbcon_bg = 0;
+  fbcon_x = CONSOLE_EXTRACT_X(fbcon_struct.data.vc_pos);
+  fbcon_y = CONSOLE_EXTRACT_Y(fbcon_struct.data.vc_pos);
+  fbcon_fg = ((fbcon_struct.data.vc_def_color) & 0x0f);
+  fbcon_bg = ((fbcon_struct.data.vc_def_color >> 4));
   console_register(&fbcon_struct);
   rc = chrdev_register(&fbcon_dev, &fbcon_fops);
   if(IS_ERR(rc)) {
     return rc;
   }
+  size_t fb_size = (((grub_fb->framebuffer_pitch / 4) * grub_fb->framebuffer_height) * grub_fb->framebuffer_bpp);
+  vmm_map_kernel_region(grub_fb->framebuffer_addr, FRAMEBUFFER_VIRT_ADDR, fb_size); 
   fbcon_clear();
   return 0;
 }
