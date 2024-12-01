@@ -4,8 +4,7 @@
 
 ---
 
-![image](https://github.com/Rodmatronic/CatK/assets/105672808/99de1f7c-605c-4046-911b-1ffed514f28c)
-![image](https://github.com/Rodmatronic/CatK/assets/105672808/c450e29f-178b-4603-a13f-307997a3046b)
+![catk](https://github.com/user-attachments/assets/81b9d344-7dbb-4ebe-8590-51d72adbbd8e)
 
 **Table of Contents**
 - [What is CatK?](#what-is-catk)
